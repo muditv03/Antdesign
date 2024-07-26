@@ -1,0 +1,46 @@
+.layout {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .content {
+    width: 100%;
+    max-width: 900px;
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .login-container {
+    display: flex;
+    width: 100%;
+  }
+  
+  .welcome-section {
+    flex: 1;
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .welcome-title {
+    color: #fff;
+    text-align: center;
+  }
+  
+  .login-section {
+    flex: 1;
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
