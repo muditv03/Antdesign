@@ -1,12 +1,21 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import ForgotPassword from './ForgotPassword.js';
+import Login from './Login.js';
+import SignUp from './SignUp.js';
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      Helllooo
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route exact path="/" element={<Login />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
