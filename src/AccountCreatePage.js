@@ -1,14 +1,18 @@
+//AccountCreatePage.js
 import React from 'react';
 import { Form, Input, Button, Checkbox, Layout, Typography } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const onFinish = (values) => {
     console.log('Success:', values);
+    navigate('/home'); // Navigate to the home page upon successful login
   };
 
   const onFinishFailed = (errorInfo) => {
