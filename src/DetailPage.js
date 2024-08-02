@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Row, Col, Collapse, Typography, Avatar, Checkbox } from 'antd';
+import { Form, Input, Button, Row, Col, Collapse, Typography, Avatar, Checkbox, Select } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
 
 const { Panel } = Collapse;
 const { Link } = Typography;
+const { TextArea } = Input;
+const { Option } = Select;
 
 const DetailPage = () => {
   const [form] = Form.useForm();
@@ -26,7 +28,7 @@ const DetailPage = () => {
     setIsEditable(false);
   };
 
-  const renderFieldWithEdit = (fieldName, placeholder) => {
+  const renderFieldWithEdit = (fieldName, placeholder, isPicklist = false, options = [], isTextArea = false) => {
     return (
       <div
         style={{
@@ -41,7 +43,19 @@ const DetailPage = () => {
       >
         {isEditable ? (
           <Form.Item name={fieldName} noStyle>
-            <Input placeholder={placeholder} />
+            {isPicklist ? (
+              <Select placeholder={placeholder}>
+                {options.map((option) => (
+                  <Option key={option} value={option}>
+                    {option}
+                  </Option>
+                ))}
+              </Select>
+            ) : isTextArea ? (
+              <TextArea placeholder={placeholder} />
+            ) : (
+              <Input placeholder={placeholder} />
+            )}
           </Form.Item>
         ) : (
           <span style={{ flex: 1 }}>{form.getFieldValue(fieldName)}</span>
@@ -89,10 +103,10 @@ const DetailPage = () => {
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item label="Type" style={{ marginBottom: 8 }}>
-                {renderFieldWithEdit('type', 'Type')}
+                {renderFieldWithEdit('type', 'Type', true, ['Customer', 'Partner', 'Supplier'])}
               </Form.Item>
               <Form.Item label="Industry" style={{ marginBottom: 8 }}>
-                {renderFieldWithEdit('industry', 'Industry')}
+                {renderFieldWithEdit('industry', 'Industry', true, ['Technology', 'Finance', 'Healthcare'])}
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -113,12 +127,12 @@ const DetailPage = () => {
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item label="Billing Address" style={{ marginBottom: 8 }}>
-                {renderFieldWithEdit('billingAddress', 'Billing Address')}
+                {renderFieldWithEdit('billingAddress', 'Billing Address', false, [], true)}
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item label="Shipping Address" style={{ marginBottom: 8 }}>
-                {renderFieldWithEdit('shippingAddress', 'Shipping Address')}
+                {renderFieldWithEdit('shippingAddress', 'Shipping Address', false, [], true)}
               </Form.Item>
             </Col>
           </Row>
@@ -140,32 +154,6 @@ const DetailPage = () => {
                 {renderFieldWithEdit('renewalModel', 'Renewal Model')}
               </Form.Item>
             </Col>
-            {/* <Col span={12}>
-              <Form.Item label="Price Hold End" style={{ marginBottom: 8 }}>
-                {renderFieldWithEdit('priceHoldEnd', 'Price Hold End')}
-              </Form.Item>
-              <Form.Item name="combineAssetQuantities" valuePropName="checked" style={{ marginBottom: 8 }}>
-                {isEditable ? (
-                  <Checkbox>Combine Asset Quantities</Checkbox>
-                ) : (
-                  <span>{form.getFieldValue('combineAssetQuantities') ? 'Yes' : 'No'}</span>
-                )}
-              </Form.Item>
-              <Form.Item name="combineCoTermedContracts" valuePropName="checked" style={{ marginBottom: 8 }}>
-                {isEditable ? (
-                  <Checkbox>Combine Co-Termed Contracts</Checkbox>
-                ) : (
-                  <span>{form.getFieldValue('combineCoTermedContracts') ? 'Yes' : 'No'}</span>
-                )}
-              </Form.Item>
-              <Form.Item name="preserveBundleStructure" valuePropName="checked" style={{ marginBottom: 8 }}>
-                {isEditable ? (
-                  <Checkbox>Preserve Bundle Structure</Checkbox>
-                ) : (
-                  <span>{form.getFieldValue('preserveBundleStructure') ? 'Yes' : 'No'}</span>
-                )}
-              </Form.Item>
-            </Col> */}
           </Row>
         </Panel>
       </Collapse>
