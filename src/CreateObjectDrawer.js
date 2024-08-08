@@ -1,7 +1,9 @@
 import React from 'react';
-import { Drawer, Form, Input, Button, message, Card } from 'antd';
-import { CloseOutlined } from '@ant-design/icons';
+import { Drawer, Form, Input, Button, message, Card, Checkbox, Select } from 'antd';
 import axios from 'axios';
+import * as Icons from '@ant-design/icons';
+
+const { Option } = Select;
 
 const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
   const [form] = Form.useForm();
@@ -12,7 +14,9 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
     const formData = { 
       label: values.label,
       name: values.name,
-      pluralLabel: values.plurallabel, // Ensure this matches the field name in Form.Item
+      pluralLabel: values.plurallabel,
+     // addObjectTab: values.addObjectTab,
+     // icon: values.icon,
     };
 
     try {
@@ -25,45 +29,84 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
         key: Date.now(),
         label: values.label,
         name: values.name,
-        plurallabel: values.plurallabel, // Ensure consistency with Form.Item name
+        plurallabel: values.plurallabel,
+       // addObjectTab: values.addObjectTab,
+       // icon: values.icon,
       });
 
       message.success('Object created successfully');
-      form.resetFields();
       onClose();
+      form.resetFields();
     } catch (error) {
       console.error('Error creating object:', error);
       message.error('Failed to create object');
     }
   };
 
-  const handleSave = () => {
-    form.validateFields()
-      .then(values => {
-        handleFinish(values);
-      })
-      .catch(info => {
-        console.log('Validate Failed:', info);
-      });
-  };
+  // Generate options for all Ant Design icons
+  const iconOptions = Object.keys(Icons).map((iconName) => {
+    const IconComponent = Icons[iconName];
+    return (
+      <Option key={iconName} value={iconName} label={iconName}>
+        <IconComponent /> {iconName}
+      </Option>
+    );
+  });
 
   return (
     <Drawer
-      title={
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'lightseagreen', padding: '10px 24px' }}>
-          <span>Create a new property</span>
-          <Button type="text" icon={<CloseOutlined />} onClick={onClose} />
-        </div>
-      }
+      title={<div style={{ fontSize: '20px', fontWeight: 'bold' }}>Create New Object</div>}
       width="40%"
       onClose={onClose}
       visible={visible}
-      bodyStyle={{ paddingBottom: 0, paddingTop: 20, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
-      headerStyle={{ backgroundColor: 'lightseagreen' }}
-      closable={false}
+      bodyStyle={{ paddingBottom: 80 }}
+      headerStyle={{
+        padding: '20px 16px',
+        background: '#20b2aa',
+        borderBottom: '1px solid #e8e8e8',
+      }}
+      footer={
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '16px 16px',
+            background: '#f0f2f5',
+            borderTop: '1px solid #e8e8e8',
+          }}
+        >
+          <Button onClick={onClose} style={{ height: '47px', width: '120px', fontSize: '18px' }}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={() => form.submit()} 
+            type="primary" 
+            style={{ 
+              height: '47px', 
+              width: '120px', 
+              fontSize: '18px', 
+              backgroundColor: 'white', 
+              color: '#1890ff', 
+              border: '1px solid #1890ff' 
+            }}
+          >
+            Save
+          </Button>
+        </div>
+      }
+      footerStyle={{ textAlign: 'right', padding: '0' }}
     >
-      <Form form={form} layout="vertical" hideRequiredMark style={{ flex: 1, overflowY: 'auto' }}>
-        <Card style={{ flex: 1 }}>
+      <Card
+        style={{ margin: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          hideRequiredMark
+          onFinish={handleFinish}
+          style={{ fontSize: '16px' }}
+        >
           <Form.Item
             name="label"
             label="Label"
@@ -85,16 +128,30 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
           >
             <Input placeholder="Please enter the plural label" />
           </Form.Item>
-        </Card>
-      </Form>
-      <div style={{ backgroundColor: 'lightseagreen', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Button type="primary" onClick={handleSave} style={{ flex: 1 }}>
-          Save
-        </Button>
-        <Button onClick={onClose} style={{ flex: 1, marginLeft: 16 }}>
-          Cancel
-        </Button>
-      </div>
+          <Form.Item
+            name="addObjectTab"
+            valuePropName="checked"
+          >
+            <Checkbox>Add Object Tab</Checkbox>
+          </Form.Item>
+          <Form.Item
+            name="icon"
+            label="Icon"
+          //  rules={[{ required: true, message: 'Please select an icon' }]}
+          >
+            <Select 
+              placeholder="Select an icon" 
+              optionLabelProp="label" 
+              showSearch 
+              filterOption={(input, option) =>
+                option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {iconOptions}
+            </Select>
+          </Form.Item>
+        </Form>
+      </Card>
     </Drawer>
   );
 };
