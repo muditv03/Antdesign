@@ -2,20 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Table, Typography, Button, Row, Col, Dropdown, Menu } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import CreateObjectDrawer from './CreateObjectDrawer';
 
 const { Title } = Typography;
- 
+
 const DataTable = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [data, setData] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get('http://localhost:3000/mt_objects');
-        setData(response.data.map((item, index) => ({
-          key: index,
+        setData(response.data.map((item) => ({
+          key: item._id,  // Ensure item.id exists and is the unique identifier
           label: item.label,
           name: item.name,
           plurallabel: item.pluralLabel,
@@ -44,6 +46,15 @@ const DataTable = () => {
     setData((prevData) => [...prevData, newObject]);
   };
 
+  const handleLabelClick = (record) => {
+    console.log("Record ID:", record.key); // Debugging: Check if record.key is correct
+    if (record.key) {
+      navigate(`/object-setup/${record.key}`);
+    } else {
+      console.error("Record ID is undefined");
+    }
+  };
+
   const menu = (
     <Menu onClick={handleMenuClick}>
       <Menu.Item key="1">Edit</Menu.Item>
@@ -58,6 +69,9 @@ const DataTable = () => {
       dataIndex: 'label',
       key: 'label',
       fixed: 'left',
+      render: (text, record) => (
+        <a onClick={() => handleLabelClick(record)}>{text}</a>
+      ),
     },
     {
       title: 'Name',
