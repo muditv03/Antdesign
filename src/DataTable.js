@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Typography, Button, Row, Col, Dropdown, Menu, Drawer, Form, Input, message } from 'antd';
+import { Table, Typography, Button, Row, Col, Dropdown, Menu } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import CreateObjectDrawer from './CreateObjectDrawer';
 
 const { Title } = Typography;
-
+ 
 const DataTable = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [form] = Form.useForm();
   const [data, setData] = useState([]);
 
-  // Fetch existing records when the component mounts
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -37,44 +36,12 @@ const DataTable = () => {
     setDrawerVisible(true);
   };
 
-  const onClose = () => {
+  const onCloseDrawer = () => {
     setDrawerVisible(false);
-    form.resetFields();
   };
 
-  const handleFinish = async (values) => {
-    console.log('Form Values:', values);
-
-    // Prepare data for API callout
-    const formData = {
-      label: values.label,
-      name: values.name,
-      pluralLabel: values.plurallabel,
-    };
-
-    try {
-      const response = await axios.post('http://localhost:3000/mt_objects', {
-        mt_object: formData,
-      });
-      console.log('response is ', response);
-
-      // Add the new data to the table
-      setData((prevData) => [
-        ...prevData,
-        {
-          key: prevData.length,
-          label: values.label,
-          name: values.name,
-          plurallabel: values.plurallabel,
-        },
-      ]);
-
-      message.success('Object created successfully');
-      setDrawerVisible(false);
-      form.resetFields();
-    } catch (error) {
-      console.error('Error creating object:', error);
-    }
+  const handleAddObject = (newObject) => {
+    setData((prevData) => [...prevData, newObject]);
   };
 
   const menu = (
@@ -103,13 +70,13 @@ const DataTable = () => {
       title: 'Plural Label',
       dataIndex: 'plurallabel',
       key: 'plurallabel',
-      width: 150,
+      width: 100,
     },
     {
       title: 'Action',
       key: 'operation',
       fixed: 'right',
-      width: 20,
+      width: 50,
       render: () => (
         <Dropdown overlay={menu} trigger={['click']}>
           <a onClick={(e) => e.preventDefault()}>
@@ -139,50 +106,11 @@ const DataTable = () => {
           style={{ width: '100%' }}
         />
       </div>
-      <Drawer
-        title="Create New Object"
-        width="30%"
-        onClose={onClose}
+      <CreateObjectDrawer
         visible={drawerVisible}
-        bodyStyle={{ paddingBottom: 80 }}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          hideRequiredMark
-          onFinish={handleFinish}
-        >
-          <Form.Item
-            name="label"
-            label="Label"
-            rules={[{ required: true, message: 'Please enter the label' }]}
-          >
-            <Input placeholder="Please enter the label" />
-          </Form.Item>
-          <Form.Item
-            name="name"
-            label="Name"
-            rules={[{ required: true, message: 'Please enter the name' }]}
-          >
-            <Input placeholder="Please enter the name" />
-          </Form.Item>
-          <Form.Item
-            name="plurallabel"
-            label="Plural Label"
-            rules={[{ required: true, message: 'Please enter the plural label' }]}
-          >
-            <Input placeholder="Please enter the plural label" />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
-              Save
-            </Button>
-            <Button onClick={onClose}>
-              Cancel
-            </Button>
-          </Form.Item>
-        </Form>
-      </Drawer>
+        onClose={onCloseDrawer}
+        onAddObject={handleAddObject}
+      />
     </div>
   );
 };
