@@ -1,77 +1,63 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Typography, Tabs, Table, Button, Modal, Form, Input, Row, Col } from 'antd';
-import CreateObjectDrawer from './CreateObjectDrawer'; // Import the CreateObjectDrawer component
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import { Table, Typography } from 'antd';
 
 const { Title } = Typography;
-const { TabPane } = Tabs;
 
 const ObjectSetupDetail = () => {
-  const location = useLocation();
-  const { record } = location.state || {}; // Access the passed record
+  const { objectName, id } = useParams(); // Get objectName and id from the URL
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const [fieldsData, setFieldsData] = useState([
-    { key: '1', fieldName: 'Field 1', fieldType: 'String' },
-    { key: '2', fieldName: 'Field 2', fieldType: 'Number' },
-  ]);
+  useEffect(() => {
+    const fetchRecords = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/fetch_records`, {
+          params: { object_name: objectName }
+        });
+        setRecords(response.data);
+      } catch (err) {
+        setError(err.response.data.error || 'Error fetching records');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const [drawerVisible, setDrawerVisible] = useState(false); // Manage drawer visibility
+    if (objectName) {
+      fetchRecords();
+    }
+  }, [objectName]);
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
 
   const columns = [
     {
-      title: 'Field Name',
-      dataIndex: 'fieldName',
-      key: 'fieldName',
+      title: 'ID',
+      dataIndex: '_id',
+      key: '_id',
     },
     {
-      title: 'Field Type',
-      dataIndex: 'fieldType',
-      key: 'fieldType',
+      title: 'Name',
+      dataIndex: 'name',  // Adjust this field according to your object structure
+      key: 'name',
     },
+    // Add more columns as needed
   ];
-
-  const showDrawer = () => {
-    setDrawerVisible(true);
-  };
-
-  const closeDrawer = () => {
-    setDrawerVisible(false);
-  };
-
-  const handleAddObject = (newObject) => {
-    // Handle adding the new object (e.g., updating state, making API calls)
-    setFieldsData([...fieldsData, newObject]); // Example of updating state with the new object
-  };
 
   return (
     <div>
-      <Title level={3}>{record?.label || 'Object Details'}</Title>
-
-      <Tabs defaultActiveKey="1">
-        <TabPane tab="Fields" key="1">
-          <Row justify="end" style={{ marginBottom: '16px' }}>
-            <Col>
-              <Button type="primary" onClick={showDrawer}>
-                Create +
-              </Button>
-            </Col>
-          </Row>
-
-          <Table columns={columns} dataSource={fieldsData} pagination={false} />
-
-          <CreateObjectDrawer
-            visible={drawerVisible}
-            onClose={closeDrawer}
-            onAddObject={handleAddObject}
-          />
-        </TabPane>
-        <TabPane tab="Properties" key="2">
-          <p>Properties content goes here...</p>
-        </TabPane>
-      </Tabs>
+      <Title level={3}>Records for {objectName}</Title>
+      <Table columns={columns} dataSource={records} rowKey="_id" />
     </div>
   );
 };
 
 export default ObjectSetupDetail;
-    
