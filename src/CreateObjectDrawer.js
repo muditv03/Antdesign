@@ -10,30 +10,48 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
 
   const handleFinish = async (values) => {
     console.log('Form Values:', values);
-
+  
     const formData = { 
       label: values.label,
       name: values.name,
       pluralLabel: values.plurallabel,
-     // addObjectTab: values.addObjectTab,
-     // icon: values.icon,
+      addObjectTab: values.addObjectTab,  // Include checkbox value
+      icon: values.icon,
     };
-
+  
     try {
       const response = await axios.post('http://localhost:3000/mt_objects', {
         mt_object: formData,
       });
-      console.log('response is ', response);
-
+      console.log('Response:', response.data);
+  
+      const newTab = {
+        label: values.label,
+        name: values.name,
+        description: "All Accounts",
+        mt_object_id: response.data._id,
+        icon: values.icon,
+        addObjectTab: values.addObjectTab,  // Include checkbox value
+      };
+  
+      console.log(newTab);
+      // Check if icon is not null and addObjectTab is true
+      if (newTab.icon && newTab.addObjectTab) {
+        const response1 = await axios.post('http://localhost:3000/mt_tabs', {
+          mt_tab: newTab,
+        });
+        console.log('Tab created response:', response1);
+      }
+  
       onAddObject({
         key: Date.now(),
         label: values.label,
         name: values.name,
         plurallabel: values.plurallabel,
-       // addObjectTab: values.addObjectTab,
-       // icon: values.icon,
+        addObjectTab: values.addObjectTab,  // Include checkbox value
+        icon: values.icon,
       });
-
+  
       message.success('Object created successfully');
       onClose();
       form.resetFields();
@@ -42,6 +60,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
       message.error('Failed to create object');
     }
   };
+  
 
   // Generate options for all Ant Design icons
   const iconOptions = Object.keys(Icons).map((iconName) => {
