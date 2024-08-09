@@ -4,7 +4,8 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import AppHeader from './Header';
 import AppSidebar from './Sidebar';
 import DataTable from './DataTable';
-import ObjectSetupDetail from './ObjectSetupDetail'; // Import the new component
+import ObjectSetupDetail from './ObjectSetupDetail';
+import ObjectFieldDetail from './ObjectFieldDetail'; // Import the new component
 import RecordComponent from  './Components/recordComponent';
 const { Content } = Layout;
 
@@ -17,6 +18,7 @@ const App = () => (
         <Content style={{ padding: '24px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <Routes>
             <Route path="/object-setup" element={<DataTable />} />
+            <Route path="/object-setup/:id" element={<ObjectFieldDetail />} />
             <Route path="/record/:objectid/:objectName/:id" element={<RecordComponent />} />
             <Route path="/object/:id" element={<ObjectSetupDetail />} /> {/* Add route for ObjectSetupDetail */}
             {/* Add more routes as needed */}

@@ -4,8 +4,8 @@ import { DownOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CreateObjectDrawer from './CreateObjectDrawer';
-
-const { Title } = Typography;
+ 
+const { Title } = Typography; 
 
 const DataTable = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);

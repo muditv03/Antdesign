@@ -79,3 +79,4 @@ const ObjectSetupDetail = () => {
 };
 
 export default ObjectSetupDetail;
+
