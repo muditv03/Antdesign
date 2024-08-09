@@ -28,7 +28,7 @@ const AppSidebar = () => {
             console.log('Mapping Item:', item);  // Log each item
   
             return {
-              key: item._id,
+              key: item.mt_object_id,
               label: item.label,
               icon: IconComponent ? <IconComponent /> : null,
               objectName: item.object_name || item.label.toLowerCase(),  // Use item.object_name if available, fallback to lowercased label
@@ -53,7 +53,7 @@ const AppSidebar = () => {
     console.log('Clicked Item:', clickedItem);  // Log to ensure the objectName is correct
   
     if (clickedItem && clickedItem.objectName) {
-      navigate(`/object-setup/${clickedItem.objectName}/${e.key}`);
+      navigate(`/object/${e.key}`);
     } else {
       console.error('Object name is missing for the selected item');
     }
