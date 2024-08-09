@@ -11,7 +11,7 @@ const DataTable = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [data, setData] = useState([]);
   const navigate = useNavigate();
-
+ 
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -49,7 +49,7 @@ const DataTable = () => {
   const handleLabelClick = (record) => {
     console.log("Record ID:", record.key); // Debugging: Check if record.key is correct
     if (record.key) {
-      navigate(`/object-setup/${record.key}`);
+      navigate(`/object-setup/${record.key}`, { state: { record } });
     } else {
       console.error("Record ID is undefined");
     }

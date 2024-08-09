@@ -9,8 +9,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
   const [form] = Form.useForm();
 
   const handleFinish = async (values) => {
-    console.log('Form Values:', values);
-  
+    console.log('Form Values:', values)
     const formData = { 
       label: values.label,
       name: values.name,
