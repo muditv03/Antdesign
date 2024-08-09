@@ -5,7 +5,7 @@ import AppHeader from './Header';
 import AppSidebar from './Sidebar';
 import DataTable from './DataTable';
 import ObjectSetupDetail from './ObjectSetupDetail'; // Import the new component
-
+ 
 const { Content } = Layout;
 
 const App = () => (

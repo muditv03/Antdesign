@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Typography, Tabs, Table, Button, Modal, Form, Input, Row, Col } from 'antd';
-import CreateObjectDrawer from './CreateObjectDrawer'; // Import the CreateObjectDrawer component
+import { Typography, Tabs, Table, Button, Row, Col } from 'antd';
+import axios from 'axios';
+import CreateFieldDrawer from './CreateFieldDrawer'; // Import the CreateFieldDrawer component
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -10,23 +11,50 @@ const ObjectSetupDetail = () => {
   const location = useLocation();
   const { record } = location.state || {}; // Access the passed record
 
-  const [fieldsData, setFieldsData] = useState([
-    { key: '1', fieldName: 'Field 1', fieldType: 'String' },
-    { key: '2', fieldName: 'Field 2', fieldType: 'Number' },
-  ]);
-
+  const [fieldsData, setFieldsData] = useState([]); // Initialize with an empty array
   const [drawerVisible, setDrawerVisible] = useState(false); // Manage drawer visibility
+
+  useEffect(() => {
+    if (record?.key) {
+      // Fetch all fields related to the current object_id
+      axios
+        .get(`http://localhost:3000/mt_fields/object/${record.key}`)
+        .then((response) => {
+          setFieldsData(response.data); // Set the fetched data to the fieldsData state
+        })
+        .catch((error) => {
+          console.error('Error fetching fields:', error);
+        });
+    }
+  }, [record?.key]); // Run the effect whenever the record key (object_id) changes
 
   const columns = [
     {
-      title: 'Field Name',
-      dataIndex: 'fieldName',
-      key: 'fieldName',
+      title: 'Label',
+      dataIndex: 'label',
+      key: 'label',
     },
     {
-      title: 'Field Type',
-      dataIndex: 'fieldType',
-      key: 'fieldType',
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+    },
+    {
+      title: 'Is Editable',
+      dataIndex: 'iseditable',
+      key: 'iseditable',
+      render: (value) => (value ? 'Yes' : 'No'),
+    },
+    {
+      title: 'Is Writeable',
+      dataIndex: 'iswriteable',
+      key: 'iswriteable',
+      render: (value) => (value ? 'Yes' : 'No'),
     },
   ];
 
@@ -38,9 +66,9 @@ const ObjectSetupDetail = () => {
     setDrawerVisible(false);
   };
 
-  const handleAddObject = (newObject) => {
-    // Handle adding the new object (e.g., updating state, making API calls)
-    setFieldsData([...fieldsData, newObject]); // Example of updating state with the new object
+  const handleAddField = (newField) => {
+    // Handle adding the new field to the table data
+    setFieldsData([...fieldsData, newField]);
   };
 
   return (
@@ -48,7 +76,7 @@ const ObjectSetupDetail = () => {
       <Title level={3}>{record?.label || 'Object Details'}</Title>
 
       <Tabs defaultActiveKey="1">
-        <TabPane tab="Fields" key="1">
+        <TabPane tab="Details" key="1">
           <Row justify="end" style={{ marginBottom: '16px' }}>
             <Col>
               <Button type="primary" onClick={showDrawer}>
@@ -59,10 +87,11 @@ const ObjectSetupDetail = () => {
 
           <Table columns={columns} dataSource={fieldsData} pagination={false} />
 
-          <CreateObjectDrawer
+          <CreateFieldDrawer
             visible={drawerVisible}
             onClose={closeDrawer}
-            onAddObject={handleAddObject}
+            onAddField={handleAddField}
+            mtObjectId={record?.key} // Pass mt_object_id to CreateFieldDrawer
           />
         </TabPane>
         <TabPane tab="Properties" key="2">
@@ -74,4 +103,3 @@ const ObjectSetupDetail = () => {
 };
 
 export default ObjectSetupDetail;
-    
