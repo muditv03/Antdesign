@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import AppHeader from './Header';
 import AppSidebar from './Sidebar';
 import DataTable from './DataTable';
+import ObjectPage from './ObjectPage';
 
 const { Content } = Layout;
 
@@ -16,6 +17,7 @@ const App = () => (
         <Content style={{ padding: '24px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <Routes>
             <Route path="/object-setup" element={<DataTable />} />
+            <Route path="/object/:id" element={<ObjectPage />} />
             {/* Add more routes as needed */}
           </Routes>
         </Content>

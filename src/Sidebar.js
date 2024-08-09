@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, Drawer, Grid, Button } from 'antd';
 import { MenuOutlined } from '@ant-design/icons';
-import * as Icons from '@ant-design/icons'; // Import all icons
+import * as Icons from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const { useBreakpoint } = Grid;
@@ -10,8 +11,9 @@ const AppSidebar = () => {
   const [collapsed, setCollapsed] = useState(true);
   const [visible, setVisible] = useState(false);
   const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true); // Loading state
+  const [loading, setLoading] = useState(true);
   const screens = useBreakpoint();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,24 +21,21 @@ const AppSidebar = () => {
         const response = await axios.get('http://localhost:3000/mt_tabs');
 
         const filteredItems = response.data
-          .filter(item => item.icon !== null) // Only include items with a non-null icon
+          .filter(item => item.icon !== null)
           .map(item => {
-            const IconComponent = Icons[item.icon]; // Get the actual icon component
+            const IconComponent = Icons[item.icon];
             return {
-              key: item._id, // Use unique id as the key
+              key: item._id, // Use the object's ID as the key
               label: item.label,
-              icon: IconComponent ? <IconComponent /> : null, // Render the icon component
-              // Add other properties if needed, such as "children" for nested menus
+              icon: IconComponent ? <IconComponent /> : null,
             };
           });
-
-        console.log(filteredItems); // Debugging: log the filtered items
 
         setItems(filteredItems);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
-        setLoading(false); // Set loading to false when done
+        setLoading(false);
       }
     };
 
@@ -60,7 +59,10 @@ const AppSidebar = () => {
   };
 
   const onClick = (e) => {
-    console.log('click', e);
+    console.log(e);
+    //const response = axios.get('http://localhost:3000/mt_tabs');
+    //console.log(response.data);
+    //navigate(`/object/${e.key}`); // Navigate to the ObjectPage route
   };
 
   return (
@@ -76,22 +78,22 @@ const AppSidebar = () => {
             marginTop: '64px',
             position: 'fixed',
             zIndex: 1001,
-            backgroundColor: '#1F4B8F',  // Ensure background color is set here
+            backgroundColor: '#1F4B8F',
           }}
         >
           {loading ? (
-            <p style={{ color: '#fff' }}>Loading...</p> // Display a loading indicator
+            <p style={{ color: '#fff' }}>Loading...</p>
           ) : (
             <div
               style={{
                 height: '100%',
-                overflowY: 'auto', // Enable vertical scrolling
-                backgroundColor: '#1F4B8F', // Apply background color to the scroll area
+                overflowY: 'auto',
+                backgroundColor: '#1F4B8F',
               }}
             >
               <Menu
                 onClick={onClick}
-                style={{ width: '100%', height: '100%'}} // Apply background color to the Menu
+                style={{ width: '100%', height: '100%' }}
                 mode="vertical"
                 inlineCollapsed={collapsed}
                 items={items}
@@ -117,21 +119,21 @@ const AppSidebar = () => {
             placement="left"
             onClose={onClose}
             visible={visible}
-            bodyStyle={{ backgroundColor: '#1F4B8F', color: '#fff' }} // Ensure Drawer body has the correct background
+            bodyStyle={{ backgroundColor: '#1F4B8F', color: '#fff' }}
           >
             {loading ? (
-              <p style={{ color: '#fff' }}>Loading...</p> // Display a loading indicator
+              <p style={{ color: '#fff' }}>Loading...</p>
             ) : (
               <div
                 style={{
                   height: '100%',
-                  overflowY: 'auto', // Enable vertical scrolling
-                  backgroundColor: '#1F4B8F', // Apply background color to the scroll area
+                  overflowY: 'auto',
+                  backgroundColor: '#1F4B8F',
                 }}
               >
                 <Menu
                   onClick={onClick}
-                  style={{ width: '100%', height: '100%', backgroundColor: '#1F4B8F' }} // Apply background color to the Menu
+                  style={{ width: '100%', height: '100%', backgroundColor: '#1F4B8F' }}
                   mode="vertical"
                   items={items}
                   theme="dark"

@@ -15,8 +15,8 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
       label: values.label,
       name: values.name,
       pluralLabel: values.plurallabel,
-      addObjectTab: values.addObjectTab,  // Include checkbox value
-      icon: values.icon,
+      //addObjectTab: values.addObjectTab,  // Include checkbox value
+      //icon: values.icon,
     };
   
     try {
@@ -48,7 +48,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
         label: values.label,
         name: values.name,
         plurallabel: values.plurallabel,
-        addObjectTab: values.addObjectTab,  // Include checkbox value
+        //addObjectTab: values.addObjectTab,  // Include checkbox value
         icon: values.icon,
       });
   
