@@ -125,10 +125,10 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
           >
             <Select placeholder="Select the field type">
               <Option value="String">String</Option>
-              <Option value="Number">Number</Option>
+              <Option value="Integer">Integer</Option>
               <Option value="Boolean">Boolean</Option>
-              <Option value="Date">Date</Option>
-              <Option value="Currency">Currency</Option>
+              {/* <Option value="Date">Date</Option>
+              <Option value="Currency">Currency</Option> */}
             </Select>
           </Form.Item>
         

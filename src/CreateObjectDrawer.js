@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Drawer, Form, Input, Button, message, Card, Checkbox, Select } from 'antd';
 import axios from 'axios';
 import * as Icons from '@ant-design/icons';
@@ -7,8 +7,11 @@ const { Option } = Select;
  
 const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+
 
   const handleFinish = async (values) => {
+    setLoading(true);
     console.log('Form Values:', values)
     const formData = { 
       label: values.label,
@@ -16,7 +19,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
       pluralLabel: values.plurallabel,
       addObjectTab: values.addObjectTab,  // Include checkbox value
       icon: values.icon,
-    };
+    }; 
   
     try {
       const response = await axios.post('http://localhost:3000/mt_objects', {
@@ -39,6 +42,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
         const response1 = await axios.post('http://localhost:3000/mt_tabs', {
           mt_tab: newTab,
         });
+        window.location.reload();
         console.log('Tab created response:', response1);
       }
   
@@ -54,7 +58,9 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
       message.success('Object created successfully');
       onClose();
       form.resetFields();
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       console.error('Error creating object:', error);
       message.error('Failed to create object');
     }
@@ -99,6 +105,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
           </Button>
           <Button 
             onClick={() => form.submit()} 
+            disabled={loading}
             type="primary" 
             style={{ 
               height: '47px', 
