@@ -1,23 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Typography, Button, Row, Col, Dropdown, Menu } from 'antd';
+import { Table, Typography, Button, Row, Col, Dropdown, Menu, message } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CreateObjectDrawer from './CreateObjectDrawer';
- 
-const { Title } = Typography; 
+    
+const { Title } = Typography;
 
 const DataTable = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [data, setData] = useState([]);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [editingRecord, setEditingRecord] = useState(null);
   const navigate = useNavigate();
- 
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get('http://localhost:3000/mt_objects');
         setData(response.data.map((item) => ({
-          key: item._id,  // Ensure item.id exists and is the unique identifier
+          key: item._id,  // Ensure item._id exists and is the unique identifier
           label: item.label,
           name: item.name,
           plurallabel: item.pluralLabel,
@@ -31,27 +33,65 @@ const DataTable = () => {
   }, []);
 
   const handleMenuClick = (e) => {
-    console.log('click', e);
+    if (e.key === '1') {  // Assuming 'Edit' is key '1'
+
+      setEditingRecord(selectedRecord);
+
+      setDrawerVisible(true);
+    } else if (e.key === '2') {  // Assuming 'Delete' is key '2'
+      //gettabid(selectedRecord);
+      deleteRecord(selectedRecord);
+    }
   };
 
   const showDrawer = () => {
+    setEditingRecord(null);  // Clear editingRecord for a fresh new form
     setDrawerVisible(true);
   };
 
   const onCloseDrawer = () => {
     setDrawerVisible(false);
+    setEditingRecord(null);
   };
 
-  const handleAddObject = (newObject) => {
-    setData((prevData) => [...prevData, newObject]);
+  const handleAddOrEditObject = (updatedObject) => {
+    setData((prevData) =>
+      prevData.map((item) => (item.key === updatedObject.key ? updatedObject : item))
+    );
   };
 
   const handleLabelClick = (record) => {
-    console.log("Record ID:", record.key); // Debugging: Check if record.key is correct
     if (record.key) {
       navigate(`/object-setup/${record.key}`, { state: { record } });
     } else {
       console.error("Record ID is undefined");
+    }
+  };
+
+  const confirmDelete = (record) => {
+    setSelectedRecord(record);
+  };
+
+  const gettabid = async (record) =>{
+    console.log(record);
+    try{
+      const response=await axios.post('http://localhost:3000/mt_tabs', { mt_tab: record });
+      console.log(response.id);
+
+    }catch(error){
+
+    }
+  }
+
+  const deleteRecord = async (record) => {
+    try {
+
+      await axios.delete(`http://localhost:3000/mt_objects/${record.key}`);
+      setData((prevData) => prevData.filter((item) => item.key !== record.key));
+      message.success('Record deleted successfully.');
+    } catch (error) {
+      message.error('Failed to delete record.');
+      console.error('Error deleting record:', error);
     }
   };
 
@@ -91,8 +131,12 @@ const DataTable = () => {
       key: 'operation',
       fixed: 'right',
       width: 50,
-      render: () => (
-        <Dropdown overlay={menu} trigger={['click']}>
+      render: (_, record) => (
+        <Dropdown
+          overlay={menu}
+          trigger={['click']}
+          onVisibleChange={() => setSelectedRecord(record)}
+        >
           <a onClick={(e) => e.preventDefault()}>
             <DownOutlined />
           </a>
@@ -123,7 +167,8 @@ const DataTable = () => {
       <CreateObjectDrawer
         visible={drawerVisible}
         onClose={onCloseDrawer}
-        onAddObject={handleAddObject}
+        onAddOrEditObject={handleAddOrEditObject}
+        editingRecord={editingRecord}
       />
     </div>
   );

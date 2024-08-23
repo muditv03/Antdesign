@@ -4,7 +4,7 @@ import { MenuOutlined } from '@ant-design/icons';
 import * as Icons from '@ant-design/icons'; // Import all icons
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-
+ 
 const { useBreakpoint } = Grid;
 
 const AppSidebar = () => {
@@ -26,7 +26,7 @@ const AppSidebar = () => {
             const IconComponent = Icons[item.icon];
   
             console.log('Mapping Item:', item);  // Log each item
-  
+    
             return {
               key: item.mt_object_id,
               label: item.label,

@@ -1,14 +1,14 @@
 import React from 'react';
 import { Drawer, Form, Input, Button,message, Select, Checkbox, Card } from 'antd';
 import axios from 'axios';
- 
+  
 const { Option } = Select;
 
 const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
   const [form] = Form.useForm();
-
+  
   console.log('mtObjectId in CreateFieldDrawer:', mtObjectId);
-
+ 
   const handleFinish = async (values) => {
     console.log('Form Values:', values);
 

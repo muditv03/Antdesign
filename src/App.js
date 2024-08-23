@@ -8,7 +8,7 @@ import ObjectSetupDetail from './ObjectSetupDetail';
 import ObjectFieldDetail from './ObjectFieldDetail'; // Import the new component
 import RecordComponent from  './Components/recordComponent';
 const { Content } = Layout;
-
+  
 const App = () => (
   <Router>
     <Layout style={{ minHeight: '100vh', overflow: 'hidden' }}>

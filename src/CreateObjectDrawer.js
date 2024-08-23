@@ -1,73 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Input, Button, message, Card, Checkbox, Select } from 'antd';
 import axios from 'axios';
 import * as Icons from '@ant-design/icons';
-  
+   
 const { Option } = Select;
- 
-const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
+   
+const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-
+ 
+  useEffect(() => {
+    if (editingRecord) {
+      form.setFieldsValue(editingRecord); // Pre-fill form with existing data if editing
+    } else {
+      form.resetFields(); // Reset form for new object creation
+    }
+  }, [editingRecord, form]);
 
   const handleFinish = async (values) => {
     setLoading(true);
-    console.log('Form Values:', values)
-    const formData = { 
+    const formData = {
       label: values.label,
       name: values.name,
       pluralLabel: values.plurallabel,
-      addObjectTab: values.addObjectTab,  // Include checkbox value
+      addObjectTab: values.addObjectTab,
       icon: values.icon,
-    }; 
-  
+    };
+
     try {
-      const response = await axios.post('http://localhost:3000/mt_objects', {
-        mt_object: formData,
-      });
-      console.log('Response:', response.data);
-  
+      let response;
+      if (editingRecord) {
+        // Update existing record
+        response = await axios.put(`http://localhost:3000/mt_objects/${editingRecord.key}`, {
+          mt_object: formData,
+        });
+                window.location.reload();
+
+        message.success('Object updated successfully');
+      } else {
+        // Create new record
+        response = await axios.post('http://localhost:3000/mt_objects', {
+          mt_object: formData,
+        });
+        window.location.reload();
+
+        message.success('Object created successfully');
+      }
+
       const newTab = {
         label: values.label,
         name: values.name,
         description: "All Accounts",
-        mt_object_id: response.data._id,
+        mt_object_id: editingRecord ? editingRecord.key : response.data._id,
         icon: values.icon,
-        addObjectTab: values.addObjectTab,  // Include checkbox value
+        addObjectTab: values.addObjectTab,
       };
-  
-      console.log(newTab);
-      // Check if icon is not null and addObjectTab is true
+
       if (newTab.icon && newTab.addObjectTab) {
-        const response1 = await axios.post('http://localhost:3000/mt_tabs', {
-          mt_tab: newTab,
-        });
-        window.location.reload();
-        console.log('Tab created response:', response1);
+        await axios.post('http://localhost:3000/mt_tabs', { mt_tab: newTab });
       }
-  
-      onAddObject({
-        key: Date.now(),
+
+      onAddOrEditObject({
+        key: editingRecord ? editingRecord.key : response.data._id,
         label: values.label,
         name: values.name,
         plurallabel: values.plurallabel,
-        addObjectTab: values.addObjectTab,  // Include checkbox value
+        addObjectTab: values.addObjectTab,
         icon: values.icon,
       });
-  
-      message.success('Object created successfully');
+
       onClose();
       form.resetFields();
-      setLoading(false);
     } catch (error) {
+      console.error('Error creating/updating object:', error);
+      message.error(`Failed to ${editingRecord ? 'update' : 'create'} object`);
+    } finally {
       setLoading(false);
-      console.error('Error creating object:', error);
-      message.error('Failed to create object');
     }
   };
-  
 
-  // Generate options for all Ant Design icons
   const iconOptions = Object.keys(Icons).map((iconName) => {
     const IconComponent = Icons[iconName];
     return (
@@ -79,7 +90,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
 
   return (
     <Drawer
-      title={<div style={{ fontSize: '20px', fontWeight: 'bold' }}>Create New Object</div>}
+      title={<div style={{ fontSize: '20px', fontWeight: 'bold' }}>{editingRecord ? 'Edit Object' : 'Create New Object'}</div>}
       width="40%"
       onClose={onClose}
       visible={visible}
@@ -103,20 +114,20 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
           <Button onClick={onClose} style={{ height: '47px', width: '120px', fontSize: '18px' }}>
             Cancel
           </Button>
-          <Button 
-            onClick={() => form.submit()} 
+          <Button
+            onClick={() => form.submit()}
             disabled={loading}
-            type="primary" 
-            style={{ 
-              height: '47px', 
-              width: '120px', 
-              fontSize: '18px', 
-              backgroundColor: 'white', 
-              color: '#1890ff', 
-              border: '1px solid #1890ff' 
+            type="primary"
+            style={{
+              height: '47px',
+              width: '120px',
+              fontSize: '18px',
+              backgroundColor: 'white',
+              color: '#1890ff',
+              border: '1px solid #1890ff',
             }}
           >
-            Save
+            {editingRecord ? 'Save Changes' : 'Save'}
           </Button>
         </div>
       }
@@ -162,12 +173,11 @@ const CreateObjectDrawer = ({ visible, onClose, onAddObject }) => {
           <Form.Item
             name="icon"
             label="Icon"
-          //  rules={[{ required: true, message: 'Please select an icon' }]}
           >
-            <Select 
-              placeholder="Select an icon" 
-              optionLabelProp="label" 
-              showSearch 
+            <Select
+              placeholder="Select an icon"
+              optionLabelProp="label"
+              showSearch
               filterOption={(input, option) =>
                 option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
               }

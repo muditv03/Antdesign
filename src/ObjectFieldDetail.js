@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Typography, Tabs,Table, Button, Row, Col } from 'antd';
+import { Table, Typography, Button, Row, Col, Drawer, Form, Input, DatePicker, message, Card, Flex, Checkbox,Dropdown, Menu,Tabs } from 'antd';
 import axios from 'axios';
 import CreateFieldDrawer from './CreateFieldDrawer'; // Import the CreateFieldDrawer component
+import { DownOutlined } from '@ant-design/icons';
+   
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -13,7 +15,7 @@ const ObjectFieldDetail = () => {
 
   const [fieldsData, setFieldsData] = useState([]); // Initialize with an empty array
   const [drawerVisible, setDrawerVisible] = useState(false); // Manage drawer visibility
-
+ 
   useEffect(() => {
     if (record?.key) {
       // Fetch all fields related to the current object_id
@@ -21,12 +23,35 @@ const ObjectFieldDetail = () => {
         .get(`http://localhost:3000/mt_fields/object/${record.key}`)
         .then((response) => {
           setFieldsData(response.data); // Set the fetched data to the fieldsData state
+          console.log('fields are ' + JSON.stringify(response));
         })
         .catch((error) => {
           console.error('Error fetching fields:', error);
         });
     }
   }, [record?.key]); // Run the effect whenever the record key (object_id) changes
+
+
+  const handleMenuClick = (e,record) => {
+    if (e.key === '1') {  // Assuming 'Edit' is key '1'
+      console.log('record id is  '+JSON.stringify(record._id));
+    } else if (e.key === '2') {  // Assuming 'Delete' is key '2'
+      deletefield(record);
+
+
+    }
+  };
+
+  const deletefield = async (record) => {
+    try {
+      await axios.delete(`http://localhost:3000/mt_fields/${record._id}`);
+      message.success('Record deleted successfully.');
+      window.location.reload();
+    } catch (error) {
+      message.error('Failed to delete record.');
+      console.error('Error deleting record:', error);
+    }
+  };
 
   const columns = [
     {
@@ -56,6 +81,30 @@ const ObjectFieldDetail = () => {
       key: 'iswriteable',
       render: (value) => (value ? 'Yes' : 'No'),
     },
+    {
+      title: 'Action',
+      key: 'operation',
+      fixed: 'right',
+      width: 50,
+      render: (_, record) => (
+        <Dropdown
+        overlay={
+          <Menu onClick={(e) => handleMenuClick(e, record)}>
+            <Menu.Item key="1">Edit</Menu.Item>
+            <Menu.Item key="2">Delete</Menu.Item>
+          </Menu>
+        }
+        trigger={['click']}
+
+
+        >
+          <a onClick={(e) => e.preventDefault()}>
+            <DownOutlined />
+          </a>
+        </Dropdown>
+      ),
+    },
+    
   ];
 
   const showDrawer = () => {
