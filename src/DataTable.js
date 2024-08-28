@@ -62,6 +62,7 @@ const DataTable = () => {
   };
 
   const handleLabelClick = (record) => {
+
     if (record.key) {
       navigate(`/object-setup/${record.key}`, { state: { record } });
     } else {
@@ -163,5 +164,16 @@ const DataTable = () => {
     </Spin>
   );
 };
-
 export default DataTable;
+
+
+
+
+
+
+
+
+
+
+
+

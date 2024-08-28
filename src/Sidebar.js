@@ -1,18 +1,24 @@
+
 import React, { useState, useEffect } from 'react';
-import { Menu, Drawer, Grid, Button } from 'antd';
-import { MenuOutlined } from '@ant-design/icons';
-import * as Icons from '@ant-design/icons'; // Import all icons
+import { Menu, Drawer, Grid, Button, Tooltip } from 'antd';
+import { MenuOutlined, PushpinOutlined } from '@ant-design/icons';
+import * as Icons from '@ant-design/icons';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
 const { useBreakpoint } = Grid;
- 
-const AppSidebar = () => {
+
+
+const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
+
   const [collapsed, setCollapsed] = useState(true);
+  const [fixed, setFixed] = useState(false);
   const [visible, setVisible] = useState(false);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [selectedKey, setSelectedKey] = useState(null); // Initialize as null
+
   const screens = useBreakpoint();
   const navigate = useNavigate();
 
@@ -28,10 +34,9 @@ const AppSidebar = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get('http://localhost:3000/mt_tabs');
-  
         const filteredItems = response.data
-          .filter(item => item.icon !== null)
-          .map(item => {
+          .filter((item) => item.icon !== null)
+          .map((item) => {
             const IconComponent = Icons[item.icon];
             return {
               key: item.mt_object_id,
@@ -53,8 +58,10 @@ const AppSidebar = () => {
   }, []);
 
   const handleClick = (e) => {
+
     const clickedItem = items.find(item => item.key === e.key);
   
+
     if (clickedItem && clickedItem.objectName) {
       setSelectedKey(e.key); // Update selected key in state
       localStorage.setItem('selectedKey', e.key); // Store selected key in localStorage
@@ -63,11 +70,20 @@ const AppSidebar = () => {
   };
 
   const handleMouseEnter = () => {
-    setCollapsed(false);
+    if (!fixed) {
+      setCollapsed(false);
+    }
   };
 
   const handleMouseLeave = () => {
-    setCollapsed(true);
+    if (!fixed) {
+      setCollapsed(true);
+    }
+  };
+
+  const toggleFixed = () => {
+    setFixed(!fixed);
+    setCollapsed(!fixed ? false : true);
   };
 
   const showDrawer = () => {
@@ -78,7 +94,14 @@ const AppSidebar = () => {
     setVisible(false);
   };
 
-  // Add handleLogout function
+
+  // Notify parent component about sidebar width changes
+  useEffect(() => {
+    if (onSidebarToggle) {
+      onSidebarToggle(collapsed ? collapsedWidth : expandedWidth);
+    }
+  }, [collapsed, collapsedWidth, expandedWidth, onSidebarToggle]);
+
   const handleLogout = () => {
     // Clear the selected key from localStorage on logout
     localStorage.removeItem('selectedKey');
@@ -86,20 +109,24 @@ const AppSidebar = () => {
     // Implement the rest of your logout logic here (e.g., clearing tokens, redirecting to login page)
   };
 
+
   return (
-    <>
+    <div style={{ display: 'flex' }}>
       {screens.md ? (
         <div
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           style={{
-            width: collapsed ? '80px' : '256px',
+            width: collapsed ? collapsedWidth : expandedWidth,
             transition: 'width 0.2s',
             height: 'calc(100vh - 64px)',
             marginTop: '64px',
             position: 'fixed',
             zIndex: 1001,
             backgroundColor: '#1F4B8F',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
           }}
         >
           {loading ? (
@@ -114,7 +141,9 @@ const AppSidebar = () => {
             >
               <Menu
                 onClick={handleClick}
+
                 selectedKeys={[selectedKey]} // Highlight the selected key
+
                 style={{ width: '100%', height: '100%' }}
                 mode="vertical"
                 inlineCollapsed={collapsed}
@@ -123,6 +152,17 @@ const AppSidebar = () => {
               />
             </div>
           )}
+          <Tooltip title={fixed ? 'Keep navigation closed' : 'Keep navigation opened'}>
+            <Button
+              onClick={toggleFixed}
+              icon={<PushpinOutlined />}
+              style={{
+                margin: '10px',
+                backgroundColor: fixed ? '#ff4d4f' : '#fff',
+                borderRadius: '50%',
+              }}
+            />
+          </Tooltip>
         </div>
       ) : (
         <>
@@ -155,7 +195,9 @@ const AppSidebar = () => {
               >
                 <Menu
                   onClick={handleClick}
+
                   selectedKeys={[selectedKey]} // Highlight the selected key
+
                   style={{ width: '100%', height: '100%', backgroundColor: '#1F4B8F' }}
                   mode="vertical"
                   items={items}
@@ -166,8 +208,11 @@ const AppSidebar = () => {
           </Drawer>
         </>
       )}
-    </>
+      <div style={{ flexGrow: 1 }}></div>
+    </div>
   );
 };
 
 export default AppSidebar;
+
+
