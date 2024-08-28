@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Descriptions, Typography } from 'antd';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-
+ 
 const { Title } = Typography;
 
 const RecordComponent = () => {
   const { id, objectid, objectName } = useParams(); 
   const [record, setRecord] = useState(null);
   const [fields, setFields] = useState([]);
-  
+   
   useEffect(() => {
     const fetchRecords = async () => {
       try {
