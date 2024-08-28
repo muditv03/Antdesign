@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Table, Typography, Button, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message,Select,DatePicker,Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DownOutlined } from '@ant-design/icons';
-    
+
 const { Title } = Typography;
 
 const ObjectSetupDetail = () => {

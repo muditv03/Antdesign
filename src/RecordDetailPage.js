@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+
 import { Form, Input, Button, Row, Col, Typography, Avatar, Select, Tabs, Checkbox, Spin } from 'antd';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { EditOutlined } from '@ant-design/icons';
 import RelatedRecords from './RelatedRecords';
+
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -11,6 +13,7 @@ const { Title } = Typography;
 const { TabPane } = Tabs;
 
 const RecordDetail = () => {
+
   const { id, objectid, objectName } = useParams();
   const [form] = Form.useForm();
   const [record, setRecord] = useState(null);
@@ -20,24 +23,31 @@ const RecordDetail = () => {
   const [lookupField, setLookupField] = useState({ objectName: '', recordId: '' });
   const [loading, setLoading] = useState(true); // Loading state for spinner
 
+
+
   useEffect(() => {
     const fetchRecords = async () => {
       try {
         const response = await axios.get(`http://localhost:3000/fetch_single_record/${objectName}/${id}`);
+
         console.log('data of record is ' + JSON.stringify(response));
         setRecord(response.data);
         form.setFieldsValue(response.data);
+     
 
         const fieldsResponse = await axios.get(`http://localhost:3000/mt_fields/object/${objectid}`);
         setFields(fieldsResponse.data);
       } catch (err) {
         console.error('Error fetching records', err);
+
       } finally {
         setLoading(false); // Stop loading after data is fetched
+
       }
     };
 
     fetchRecords();
+
   }, [id, objectid, objectName, form]);
 
   const onFinish = async (values) => {
@@ -51,6 +61,10 @@ const RecordDetail = () => {
       };
 
       await axios.post('http://localhost:3000/insert_or_update_records', body);
+
+      console.log('API call with updated body:', body);
+
+
       setInitialValues(values);
       setIsEditable(false);
     } catch (err) {
@@ -68,12 +82,14 @@ const RecordDetail = () => {
     setIsEditable(false);
   };
 
+
   const handleLookupChange = (fieldName, value) => {
     setLookupField({
       objectName: fieldName,
       recordId: value,
     });
   };
+
 
   const renderFieldWithEdit = (fieldName, placeholder, isPicklist = false, options = [], isTextArea = false, isBoolean = false) => {
     return (
@@ -83,6 +99,7 @@ const RecordDetail = () => {
           alignItems: 'center',
           justifyContent: 'space-between',
           borderBottom: !isEditable ? '1px solid #ddd' : 'none',
+
           paddingBottom: 8,
           marginBottom: 16,
         }}
@@ -93,6 +110,7 @@ const RecordDetail = () => {
               <Checkbox>{placeholder}</Checkbox>
             ) : isPicklist ? (
               <Select placeholder={placeholder} onChange={(value) => handleLookupChange(fieldName, value)}>
+
                 {options.map((option) => (
                   <Option key={option} value={option}>
                     {option}
@@ -107,7 +125,11 @@ const RecordDetail = () => {
           </Form.Item>
         ) : (
           <span style={{ flex: 1 }}>
+
             {isBoolean ? (form.getFieldValue(fieldName) ? 'True' : 'False') : form.getFieldValue(fieldName)}
+
+            {isBoolean ? (form.getFieldValue(fieldName) ? "True" : "False") : form.getFieldValue(fieldName)}
+
           </span>
         )}
         {!isEditable && (
@@ -121,6 +143,7 @@ const RecordDetail = () => {
       </div>
     );
   };
+
 
   if (loading) {
     return (
@@ -179,6 +202,7 @@ const RecordDetail = () => {
         </Tabs>
       </div>
     </Spin>
+
   );
 };
 

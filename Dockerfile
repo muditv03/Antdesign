@@ -8,6 +8,8 @@ COPY package.json .
 
 # Install dependencies
 RUN npm install
+RUN npm install axios
+RUN npm install jsonwebtoken
 
 
 # Copy the rest of the application code

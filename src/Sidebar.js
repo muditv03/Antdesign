@@ -4,18 +4,27 @@ import { MenuOutlined } from '@ant-design/icons';
 import * as Icons from '@ant-design/icons'; // Import all icons
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
- 
+
 const { useBreakpoint } = Grid;
  
 const AppSidebar = () => {
   const [collapsed, setCollapsed] = useState(true);
   const [visible, setVisible] = useState(false);
   const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true); // Loading state
+  const [loading, setLoading] = useState(true);
+  const [selectedKey, setSelectedKey] = useState(null); // Initialize as null
   const screens = useBreakpoint();
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const clearSelectionOnLogin = () => {
+      // Clear the selected key from localStorage when the component mounts
+      localStorage.removeItem('selectedKey');
+      setSelectedKey(null); // Ensure no tab is selected initially
+    };
+
+    clearSelectionOnLogin(); // Call the function when component mounts
+
     const fetchData = async () => {
       try {
         const response = await axios.get('http://localhost:3000/mt_tabs');
@@ -24,17 +33,14 @@ const AppSidebar = () => {
           .filter(item => item.icon !== null)
           .map(item => {
             const IconComponent = Icons[item.icon];
-  
-            console.log('Mapping Item:', item);  // Log each item
-    
             return {
               key: item.mt_object_id,
               label: item.label,
               icon: IconComponent ? <IconComponent /> : null,
-              objectName: item.object_name || item.label.toLowerCase(),  // Use item.object_name if available, fallback to lowercased label
+              objectName: item.object_name || item.label.toLowerCase(),
             };
           });
-  
+
         setItems(filteredItems);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -42,23 +48,19 @@ const AppSidebar = () => {
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, []);
-  
-   
+
   const handleClick = (e) => {
     const clickedItem = items.find(item => item.key === e.key);
   
-    console.log('Clicked Item:', clickedItem);  // Log to ensure the objectName is correct
-  
     if (clickedItem && clickedItem.objectName) {
+      setSelectedKey(e.key); // Update selected key in state
+      localStorage.setItem('selectedKey', e.key); // Store selected key in localStorage
       navigate(`/object/${e.key}`);
-    } else {
-      console.error('Object name is missing for the selected item');
     }
   };
-  
 
   const handleMouseEnter = () => {
     setCollapsed(false);
@@ -74,6 +76,14 @@ const AppSidebar = () => {
 
   const onClose = () => {
     setVisible(false);
+  };
+
+  // Add handleLogout function
+  const handleLogout = () => {
+    // Clear the selected key from localStorage on logout
+    localStorage.removeItem('selectedKey');
+    
+    // Implement the rest of your logout logic here (e.g., clearing tokens, redirecting to login page)
   };
 
   return (
@@ -103,7 +113,8 @@ const AppSidebar = () => {
               }}
             >
               <Menu
-                onClick={handleClick} // Attach handleClick function here
+                onClick={handleClick}
+                selectedKeys={[selectedKey]} // Highlight the selected key
                 style={{ width: '100%', height: '100%' }}
                 mode="vertical"
                 inlineCollapsed={collapsed}
@@ -143,7 +154,8 @@ const AppSidebar = () => {
                 }}
               >
                 <Menu
-                  onClick={handleClick} // Attach handleClick function here
+                  onClick={handleClick}
+                  selectedKeys={[selectedKey]} // Highlight the selected key
                   style={{ width: '100%', height: '100%', backgroundColor: '#1F4B8F' }}
                   mode="vertical"
                   items={items}
