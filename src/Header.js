@@ -132,7 +132,7 @@
 import React, { useState } from 'react';
 import { Layout, Menu, Avatar, Input, Drawer, Button, Grid, Dropdown } from 'antd';
 import { UserOutlined, SearchOutlined, MenuOutlined, SettingOutlined, DownOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 import logo from './CompanyLogo.png'; // Import your logo file
 import Cookies from 'js-cookie';
 
@@ -213,7 +213,7 @@ const AppHeader = () => {
         )}
 
         <Link to="/">
-        <img src={logo} alt="Company Logo" style={{ height: '40px', margin: '0px 16px 0 0' }} />
+        <img src={logo} alt="Company Logo" style={{ height: '40px', margin: '28px 16px 0 0' }} />
         </Link>
         
 

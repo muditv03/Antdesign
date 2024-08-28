@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Input, Button, message, Select, Checkbox, Card, Spin } from 'antd';
 import axios from 'axios';
-
+  
 const { Option } = Select;
 
 const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {

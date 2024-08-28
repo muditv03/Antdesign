@@ -4,7 +4,7 @@ import { DownOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CreateObjectDrawer from './CreateObjectDrawer';
-
+  
 const { Title } = Typography;
 
 const DataTable = () => {
@@ -38,10 +38,10 @@ const DataTable = () => {
 
   const handleMenuClick = (e) => {
     if (e.key === '1') {  // Assuming 'Edit' is key '1'
-      setEditingRecord(selectedRecord);
-      setDrawerVisible(true);
+      //setEditingRecord(selectedRecord);
+      //setDrawerVisible(true);
     } else if (e.key === '2') {  // Assuming 'Delete' is key '2'
-      deleteRecord(selectedRecord);
+      //deleteRecord(selectedRecord);
     }
   };
 
