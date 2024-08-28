@@ -5,7 +5,7 @@ const ScrollableContent = () => {
   // Sample data to fill the scrollable areas
   const sampleItems = Array.from({ length: 10 }, (_, i) => `Item ${i + 1}`);
 
-  return (
+  return  (
     <div style={{ display: 'flex', width: '100%', height: 'calc(100vh - 128px)' }}> {/* Adjust height to fit within layout */}
       {/* Left scrollable section */}
       <div

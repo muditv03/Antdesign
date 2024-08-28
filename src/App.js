@@ -8,8 +8,10 @@ import AppHeader from './Header';
 import AppSidebar from './Sidebar';
 import DataTable from './DataTable';
 import ObjectSetupDetail from './ObjectSetupDetail';
-import ObjectFieldDetail from './ObjectFieldDetail'; 
-import RecordDetail from './RecordDetailPage';
+
+import ObjectFieldDetail from './ObjectFieldDetail'; // Import the new component
+import RecordComponent from  './Components/recordComponent';
+import RecordDetail from  './RecordDetailPage';
 
 const { Content } = Layout;
 
@@ -32,7 +34,9 @@ const App = () => {
             <Route path="/object-setup" element={<DataTable />} />
             <Route path="/object-setup/:id" element={<ObjectFieldDetail />} />
             <Route path="/record/:objectid/:objectName/:id" element={<RecordDetail />} />
-            <Route path="/object/:id" element={<ObjectSetupDetail />} />
+
+            <Route path="/object/:id" element={<ObjectSetupDetail />} /> {/* Add route for ObjectSetupDetail */}
+
             {/* Add more routes as needed */}
           </Routes>
         </Content>

@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Table, Typography, Button, Row, Col, Drawer, Form, Input, DatePicker, message, Card, Flex, Checkbox,Dropdown, Menu,Tabs } from 'antd';
+import { Table, Typography, Button, Row, Col, Drawer, message, Dropdown, Menu, Tabs, Spin } from 'antd';
 import axios from 'axios';
 import CreateFieldDrawer from './CreateFieldDrawer'; // Import the CreateFieldDrawer component
 import { DownOutlined } from '@ant-design/icons';
-   
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -15,7 +14,8 @@ const ObjectFieldDetail = () => {
 
   const [fieldsData, setFieldsData] = useState([]); // Initialize with an empty array
   const [drawerVisible, setDrawerVisible] = useState(false); // Manage drawer visibility
- 
+  const [loading, setLoading] = useState(true); // Add loading state for spinner
+
   useEffect(() => {
     if (record?.key) {
       // Fetch all fields related to the current object_id
@@ -23,22 +23,18 @@ const ObjectFieldDetail = () => {
         .get(`http://localhost:3000/mt_fields/object/${record.key}`)
         .then((response) => {
           setFieldsData(response.data); // Set the fetched data to the fieldsData state
-          console.log('fields are ' + JSON.stringify(response));
+          setLoading(false); // Set loading to false after data is fetched
         })
         .catch((error) => {
           console.error('Error fetching fields:', error);
+          setLoading(false); // Set loading to false even if there's an error
         });
     }
   }, [record?.key]); // Run the effect whenever the record key (object_id) changes
 
-
-  const handleMenuClick = (e,record) => {
-    if (e.key === '1') {  // Assuming 'Edit' is key '1'
-      console.log('record id is  '+JSON.stringify(record._id));
-    } else if (e.key === '2') {  // Assuming 'Delete' is key '2'
+  const handleMenuClick = (e, record) => {
+    if (e.key === '1') {
       deletefield(record);
-
-
     }
   };
 
@@ -88,15 +84,12 @@ const ObjectFieldDetail = () => {
       width: 50,
       render: (_, record) => (
         <Dropdown
-        overlay={
-          <Menu onClick={(e) => handleMenuClick(e, record)}>
-            <Menu.Item key="1">Edit</Menu.Item>
-            <Menu.Item key="2">Delete</Menu.Item>
-          </Menu>
-        }
-        trigger={['click']}
-
-
+          overlay={
+            <Menu onClick={(e) => handleMenuClick(e, record)}>
+              <Menu.Item key="1">Delete</Menu.Item>
+            </Menu>
+          }
+          trigger={['click']}
         >
           <a onClick={(e) => e.preventDefault()}>
             <DownOutlined />
@@ -104,7 +97,6 @@ const ObjectFieldDetail = () => {
         </Dropdown>
       ),
     },
-    
   ];
 
   const showDrawer = () => {
@@ -134,7 +126,9 @@ const ObjectFieldDetail = () => {
             </Col>
           </Row>
 
-          <Table columns={columns} dataSource={fieldsData} pagination={false} />
+          <Spin spinning={loading}> {/* Wrap the table with Spin for loading state */}
+            <Table columns={columns} dataSource={fieldsData} pagination={false} />
+          </Spin>
 
           <CreateFieldDrawer
             visible={drawerVisible}
@@ -152,4 +146,3 @@ const ObjectFieldDetail = () => {
 };
 
 export default ObjectFieldDetail;
-
