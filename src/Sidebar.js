@@ -1,13 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { Menu, Drawer, Grid, Button, Tooltip } from 'antd';
+import { Menu, Drawer, Grid, Button, Tooltip,Spin } from 'antd';
 import { MenuOutlined, PushpinOutlined } from '@ant-design/icons';
 import * as Icons from '@ant-design/icons';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const { useBreakpoint } = Grid;
-
 
 const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
 
@@ -33,6 +32,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
 
     const fetchData = async () => {
       try {
+        setLoading(true);
         const response = await axios.get('http://localhost:3000/mt_tabs');
         const filteredItems = response.data
           .filter((item) => item.icon !== null)
@@ -48,10 +48,14 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
 
         setItems(filteredItems);
       } catch (error) {
+        setLoading(false);
         console.error('Error fetching data:', error);
       } finally {
+
         setLoading(false);
       }
+      setLoading(false);
+
     };
 
     fetchData();
@@ -123,7 +127,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
             marginTop: '64px',
             position: 'fixed',
             zIndex: 1001,
-            backgroundColor: '#1F4B8F',
+            backgroundColor: '#001529',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
@@ -136,7 +140,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
               style={{
                 height: '100%',
                 overflowY: 'auto',
-                backgroundColor: '#1F4B8F',
+                backgroundColor: '#001529',
               }}
             >
               <Menu
@@ -152,7 +156,8 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
               />
             </div>
           )}
-          <Tooltip title={fixed ? 'Keep navigation closed' : 'Keep navigation opened'}>
+          <Tooltip title={fixed ? 'Keep navigation closed' : 'Keep navigation opened'}
+            >
             <Button
               onClick={toggleFixed}
               icon={<PushpinOutlined />}
@@ -181,7 +186,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
             placement="left"
             onClose={onClose}
             visible={visible}
-            bodyStyle={{ backgroundColor: '#1F4B8F', color: '#fff' }}
+            bodyStyle={{ backgroundColor: '#001529', color: '#001529' }}
           >
             {loading ? (
               <p style={{ color: '#fff' }}>Loading...</p>
