@@ -3,6 +3,7 @@ import { Layout, Menu, Avatar, Input, Drawer, Button, Grid, Dropdown } from 'ant
 import { UserOutlined, SearchOutlined, MenuOutlined, SettingOutlined, DownOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from './CompanyLogo.png'; // Import your logo file
+import Cookies from 'js-cookie';
 
 const { Header } = Layout;
 const { Search } = Input;
@@ -12,6 +13,9 @@ const AppHeader = () => {
   const [visible, setVisible] = useState(false);
   const screens = useBreakpoint();
   const navigate = useNavigate(); // Use navigate hook for programmatic navigation
+
+  const username = Cookies.get('username') || 'Aptclouds';
+  console.log('Retrieved username from cookie:', username);
 
   const showDrawer = () => {
     setVisible(true);
@@ -25,11 +29,17 @@ const AppHeader = () => {
     console.log(value);
   };
 
+  const handleLogout = () => {
+    // Perform any logout-related tasks here (e.g., clearing tokens, session storage, etc.)
+    Cookies.remove('username');
+    navigate('/login'); // Redirect to the login page
+  };
+
   const profileMenu = (
     <Menu>
       <Menu.Item key="1">Profile</Menu.Item>
       <Menu.Item key="2">Settings</Menu.Item>
-      <Menu.Item key="3">Logout</Menu.Item>
+      <Menu.Item key="3" onClick={handleLogout}>Logout</Menu.Item>
     </Menu>
   );
 
@@ -68,7 +78,10 @@ const AppHeader = () => {
             }}
           />
         )}
-        <img src={logo} alt="Aptclouds Logo" style={{ height: '40px', margin: '0 16px 0 0' }} />
+        <Link to="/">
+        <img src={logo} alt="Aptclouds Logo" style={{ height: '40px', margin: '28px 16px 0 0' }} />
+        </Link>
+        
         {screens.md && (
           <Search
             placeholder="Search..."
@@ -117,7 +130,7 @@ const AppHeader = () => {
               size="small" // Reduced size
               style={{ backgroundColor: '#1890ff', color: '#fff', marginRight: '8px' }}
             />
-            Aptclouds
+            {username} {/* Display the dynamic username */}
             <DownOutlined style={{ marginLeft: '8px' }} />
           </Button>
         </Dropdown>

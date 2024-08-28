@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Table, Typography, Button, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DownOutlined } from '@ant-design/icons';
- 
+  
 const { Title } = Typography;
 
 const ObjectSetupDetail = () => {
@@ -75,7 +75,7 @@ const ObjectSetupDetail = () => {
       message.success(selectedRecord ? 'Record updated successfully' : 'Record created successfully');
       setDrawerVisible(false);
       form.resetFields();
-      window.location.reload();
+      //window.location.reload();
     } catch (error) {
       console.error('Error saving record:', error);
       message.error('Failed to save record');
@@ -83,7 +83,11 @@ const ObjectSetupDetail = () => {
   };
 
   const handleLabelClick = (record) => {
-    handleEditClick(record);
+    if (record._id) {
+      navigate(`/record/${id}/${objectName}/${record._id}`, { state: { record } });
+    } else {
+      console.error("Record ID is undefined");
+    }
   };
 
   const handleMenuClick = (e) => {
@@ -142,6 +146,7 @@ const ObjectSetupDetail = () => {
             key={field.name}
             name={field.name}
             valuePropName="checked"
+            initialValue={false}
             rules={[{ required: field.required, message: `Please select ${field.label}` }]}
           >
             <Checkbox>{field.label}</Checkbox>

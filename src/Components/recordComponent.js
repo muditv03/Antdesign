@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Descriptions, Typography } from 'antd';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-
+ 
 const { Title } = Typography;
 
 const RecordComponent = () => {
