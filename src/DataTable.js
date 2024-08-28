@@ -47,7 +47,7 @@ const DataTable = () => {
   };
 
   const handleLabelClick = (record) => {
-    console.log("Record ID:", record.key); // Debugging: Check if record.key is correct
+    console.log("Record ID:", record.key); // Debugging: Check if record.key is correct 
     if (record.key) {
       navigate(`/object-setup/${record.key}`, { state: { record } });
     } else {
@@ -128,5 +128,16 @@ const DataTable = () => {
     </div>
   );
 };
-
 export default DataTable;
+
+
+
+
+
+
+
+
+
+
+
+
