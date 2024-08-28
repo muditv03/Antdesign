@@ -1,33 +1,57 @@
-import React from 'react';
-import { Drawer, Form, Input, Button,message, Select, Checkbox, Card } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Drawer, Form, Input, Button, message, Select, Checkbox, Card, Spin } from 'antd';
 import axios from 'axios';
-  
+
 const { Option } = Select;
 
 const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
   const [form] = Form.useForm();
-  
-  console.log('mtObjectId in CreateFieldDrawer:', mtObjectId);
- 
+  const [fieldType, setFieldType] = useState('');
+  const [picklistValues, setPicklistValues] = useState([]);
+  const [availableObjects, setAvailableObjects] = useState([]);
+  const [loading, setLoading] = useState(false); // Spinner state
+
+  useEffect(() => {
+    if (fieldType === 'lookup') {
+      axios.get('http://localhost:3000/mt_objects')
+        .then(response => {
+          setAvailableObjects(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching objects:', error);
+          message.error('Failed to fetch objects');
+        });
+    } else {
+      setAvailableObjects([]);
+    }
+  }, [fieldType]);
+
+  const handlePicklistChange = (event) => {
+    const values = event.target.value.split(',').map(value => value.trim());
+    setPicklistValues(values);
+  };
+
   const handleFinish = async (values) => {
-    console.log('Form Values:', values);
+    setLoading(true); // Show spinner
+    const adjustedFieldType = values.type === 'textarea' || values.type === 'longtextarea' ? 'String' : values.type;
 
     const newField = {
       label: values.label,
       name: values.name,
-      type: values.type,
+      type: adjustedFieldType,
       mt_object_id: mtObjectId,
       iseditable: values.iseditable || false,
-      iswriteable: values.iswriteable || false ,
+      iswriteable: values.iswriteable || false,
     };
 
-    console.log(newField);
+    if (values.type === 'Picklist') {
+      newField.picklist_values = picklistValues;
+    }
 
     try {
       const response = await axios.post('http://localhost:3000/mt_fields', {
         mt_field: newField,
       });
-      console.log('response is ', response);
 
       onAddField({
         key: Date.now(),
@@ -36,16 +60,18 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
         type: values.type,
         iseditable: values.iseditable,
         iswriteable: values.iswriteable,
+        ...(values.type === 'Picklist' && { picklist_values: picklistValues }),
       });
 
-      message.success('Object created successfully');
+      message.success('Field created successfully');
       onClose();
       form.resetFields();
     } catch (error) {
       console.error('Error creating field:', error);
       message.error('Failed to create field');
+    } finally {
+      setLoading(false); // Hide spinner
     }
-
   };
 
   return (
@@ -92,61 +118,111 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
       }
       footerStyle={{ textAlign: 'right', padding: '0' }}
     >
-      <Card
-        style={{ margin: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          hideRequiredMark
-          onFinish={handleFinish}
-          style={{ fontSize: '16px' }}
+      <Spin spinning={loading}> {/* Spinner */}
+        <Card
+          style={{ margin: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
         >
-          <Form.Item
-            name="label"
-            label="Label"
-            rules={[{ required: true, message: 'Please enter the label' }]}
+          <Form
+            form={form}
+            layout="vertical"
+            hideRequiredMark
+            onFinish={handleFinish}
+            style={{ fontSize: '16px' }}
           >
-            <Input placeholder="Please enter the field name" />
-          </Form.Item>
+            <Form.Item
+              name="type"
+              label="Type"
+              rules={[{ required: true, message: 'Please select the type' }]}
+            >
+              <Select 
+                placeholder="Select the field type" 
+                onChange={(value) => setFieldType(value)}
+              >
+                <Option value="String">Text</Option>
+                <Option value="Integer">Number</Option>
+                <Option value="decimal">Decimal</Option>
+                <Option value="Date">Date</Option>
+                <Option value="boolean">Boolean</Option>
+                <Option value="Picklist">Picklist</Option> 
+                <Option value="currency">Currency</Option>
+                <Option value="lookup">Lookup</Option>
+                <Option value="textarea">Text Area</Option>
+                <Option value="longtextarea">Long Text Area</Option>  
+              </Select>
+            </Form.Item>
 
-          <Form.Item
-            name="name"
-            label="Name"
-            rules={[{ required: true, message: 'Please enter the name' }]}
-          >
-            <Input placeholder="Please enter the name" />
-          </Form.Item>
+            <Form.Item
+              name="name"
+              label="Name"
+              rules={[{ required: true, message: 'Please enter the name' }]}
+            >
+              {fieldType === 'lookup' ? (
+                <Select placeholder="Select an object">
+                  {availableObjects.map((object) => (
+                    <Option key={object.id} value={object.name}>
+                      {object.name}
+                    </Option>
+                  ))}
+                </Select>
+              ) : (
+                <Input placeholder="Please enter the name" />
+              )}
+            </Form.Item>
 
-          <Form.Item
-            name="type"
-            label="Type"
-            rules={[{ required: true, message: 'Please select the type' }]}
-          >
-            <Select placeholder="Select the field type">
-              <Option value="String">String</Option>
-              <Option value="Integer">Integer</Option>
-              <Option value="Boolean">Boolean</Option>
-              {/* <Option value="Date">Date</Option>
-              <Option value="Currency">Currency</Option> */}
-            </Select>
-          </Form.Item>
-        
-          <Form.Item
-            name="iseditable"
-            valuePropName="checked"
-          >
-            <Checkbox>Is Editable</Checkbox>
-          </Form.Item>
+            <Form.Item
+              name="label"
+              label="Label"
+              rules={[{ required: true, message: 'Please enter the label' }]}
+            >
+              <Input placeholder="Please enter the field label" />
+            </Form.Item>
 
-          <Form.Item
-            name="iswriteable"
-            valuePropName="checked"
-          >
-            <Checkbox>Is Writeable</Checkbox>
-          </Form.Item>
-        </Form>
-      </Card>
+            {fieldType === 'Picklist' && (
+              <Form.Item
+                name="picklist_values"
+                label="Picklist Values (comma separated)"
+                rules={[{ required: true, message: 'Please enter picklist values' }]}
+              >
+                <Input placeholder="Enter values separated by commas" onChange={handlePicklistChange} />
+              </Form.Item>
+            )}
+
+            {fieldType === 'decimal' && (
+              <>
+                <Form.Item
+                  name="length"
+                  label="Length"
+                  rules={[{ required: true, message: 'Please enter the length' }]}
+                >
+                  <Input placeholder="Enter length" />
+                </Form.Item>
+
+                <Form.Item
+                  name="decimal_places"
+                  label="Decimal Places"
+                  rules={[{ required: true, message: 'Please enter decimal places' }]}
+                >
+                  <Input placeholder="Enter decimal places" />
+                </Form.Item>
+              </>
+            )}
+
+            <Form.Item
+              name="iseditable"
+              valuePropName="checked"
+            >
+              <Checkbox>Is Editable</Checkbox>
+            </Form.Item>
+
+            <Form.Item
+              name="iswriteable"
+              valuePropName="checked"
+            >
+              <Checkbox>Is Writeable</Checkbox>
+            </Form.Item>
+          </Form>
+        </Card>
+      </Spin>
     </Drawer>
   );
 };

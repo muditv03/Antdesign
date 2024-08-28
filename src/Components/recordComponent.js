@@ -9,7 +9,7 @@ const RecordComponent = () => {
   const { id, objectid, objectName } = useParams(); 
   const [record, setRecord] = useState(null);
   const [fields, setFields] = useState([]);
-  
+   
   useEffect(() => {
     const fetchRecords = async () => {
       try {

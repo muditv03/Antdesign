@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Drawer, Form, Input, Button, message, Card, Checkbox, Select } from 'antd';
+import { Drawer, Form, Input, Button, message, Card, Checkbox, Select, Spin } from 'antd';
 import axios from 'axios';
 import * as Icons from '@ant-design/icons';
-   
+
 const { Option } = Select;
-   
+
 const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
- 
+
   useEffect(() => {
     if (editingRecord) {
       form.setFieldsValue(editingRecord); // Pre-fill form with existing data if editing
@@ -18,7 +18,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
   }, [editingRecord, form]);
 
   const handleFinish = async (values) => {
-    setLoading(true);
+    setLoading(true); // Start the spinner
     const formData = {
       label: values.label,
       name: values.name,
@@ -34,16 +34,12 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
         response = await axios.put(`http://localhost:3000/mt_objects/${editingRecord.key}`, {
           mt_object: formData,
         });
-                window.location.reload();
-
         message.success('Object updated successfully');
       } else {
         // Create new record
         response = await axios.post('http://localhost:3000/mt_objects', {
           mt_object: formData,
         });
-        window.location.reload();
-
         message.success('Object created successfully');
       }
 
@@ -75,7 +71,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       console.error('Error creating/updating object:', error);
       message.error(`Failed to ${editingRecord ? 'update' : 'create'} object`);
     } finally {
-      setLoading(false);
+      setLoading(false); // Stop the spinner
     }
   };
 
@@ -133,60 +129,62 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       }
       footerStyle={{ textAlign: 'right', padding: '0' }}
     >
-      <Card
-        style={{ margin: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          hideRequiredMark
-          onFinish={handleFinish}
-          style={{ fontSize: '16px' }}
+      <Spin spinning={loading} tip="Loading...">
+        <Card
+          style={{ margin: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
         >
-          <Form.Item
-            name="label"
-            label="Label"
-            rules={[{ required: true, message: 'Please enter the label' }]}
+          <Form
+            form={form}
+            layout="vertical"
+            hideRequiredMark
+            onFinish={handleFinish}
+            style={{ fontSize: '16px' }}
           >
-            <Input placeholder="Please enter the label" />
-          </Form.Item>
-          <Form.Item
-            name="name"
-            label="Name"
-            rules={[{ required: true, message: 'Please enter the name' }]}
-          >
-            <Input placeholder="Please enter the name" />
-          </Form.Item>
-          <Form.Item
-            name="plurallabel"
-            label="Plural Label"
-            rules={[{ required: true, message: 'Please enter the plural label' }]}
-          >
-            <Input placeholder="Please enter the plural label" />
-          </Form.Item>
-          <Form.Item
-            name="addObjectTab"
-            valuePropName="checked"
-          >
-            <Checkbox>Add Object Tab</Checkbox>
-          </Form.Item>
-          <Form.Item
-            name="icon"
-            label="Icon"
-          >
-            <Select
-              placeholder="Select an icon"
-              optionLabelProp="label"
-              showSearch
-              filterOption={(input, option) =>
-                option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
-              }
+            <Form.Item
+              name="label"
+              label="Label"
+              rules={[{ required: true, message: 'Please enter the label' }]}
             >
-              {iconOptions}
-            </Select>
-          </Form.Item>
-        </Form>
-      </Card>
+              <Input placeholder="Please enter the label" />
+            </Form.Item>
+            <Form.Item
+              name="name"
+              label="Name"
+              rules={[{ required: true, message: 'Please enter the name' }]}
+            >
+              <Input placeholder="Please enter the name" />
+            </Form.Item>
+            <Form.Item
+              name="plurallabel"
+              label="Plural Label"
+              rules={[{ required: true, message: 'Please enter the plural label' }]}
+            >
+              <Input placeholder="Please enter the plural label" />
+            </Form.Item>
+            <Form.Item
+              name="addObjectTab"
+              valuePropName="checked"
+            >
+              <Checkbox>Add Object Tab</Checkbox>
+            </Form.Item>
+            <Form.Item
+              name="icon"
+              label="Icon"
+            >
+              <Select
+                placeholder="Select an icon"
+                optionLabelProp="label"
+                showSearch
+                filterOption={(input, option) =>
+                  option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                }
+              >
+                {iconOptions}
+              </Select>
+            </Form.Item>
+          </Form>
+        </Card>
+      </Spin>
     </Drawer>
   );
 };
