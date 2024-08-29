@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Table, Typography, Button, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message,Select,DatePicker,Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DownOutlined } from '@ant-design/icons';
-  
+   
 const { Title } = Typography;
 
 const ObjectSetupDetail = () => {
@@ -300,6 +300,32 @@ const ObjectSetupDetail = () => {
             </Select>
           </Form.Item>
         );
+        case 'decimal':
+      const decimalPlacesBefore = field.decimal_places_before || 9; // Default to 9 if not provided
+      const decimalPlacesAfter = field.decimal_places_after || 2;   // Default to 2 if not provided
+
+      // Construct a regex pattern based on decimalPlacesBefore and decimalPlacesAfter
+      const decimalPattern = new RegExp(`^\\d{1,${decimalPlacesBefore}}(\\.\\d{0,${decimalPlacesAfter}})?$`);
+
+      return (
+        <Form.Item
+          key={field.name}
+          name={field.name}
+          label={field.label}
+          rules={[
+            { required: field.required, message: `Please enter ${field.label}` },
+            {
+              pattern: decimalPattern,
+              message: `Enter a valid number with up to ${decimalPlacesBefore} digits before the decimal and ${decimalPlacesAfter} digits after the decimal.`,
+            },
+          ]}
+        >
+          <Input
+            placeholder={`Enter ${field.label}`}
+            maxLength={decimalPlacesBefore + decimalPlacesAfter + 1} // +1 for the decimal point
+          />
+        </Form.Item>
+      );
 
       default:
         return null;

@@ -1,55 +1,56 @@
-// RelatedRecords.js
 import React, { useState, useEffect } from 'react';
-import { List, Typography, Spin } from 'antd';
 import axios from 'axios';
+import { Card, List, Typography } from 'antd';
 
 const { Title } = Typography;
 
-const RelatedRecords = ({ lookupField }) => {
-  const [relatedRecords, setRelatedRecords] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  console.log('lookup field name is '+JSON.stringify(lookupField.objectName));
-  console.log('lookup field name is '+JSON.stringify(lookupField.recordId));
-
+const RelatedRecord = ({ objectName, recordId }) => {
+  const [relatedData, setRelatedData] = useState(null);
 
   useEffect(() => {
     const fetchRelatedRecords = async () => {
-
       try {
-        setLoading(true);
-        const response = await axios.get(`http://localhost:3000/fetch_single_record/${lookupField.objectName}/${lookupField.recordId}`);
-        setRelatedRecords(response.data);
+        const response = await axios.get(`http://localhost:3000/related_lists/get_all_children/${objectName}/${recordId}`);
+        setRelatedData(response.data);
       } catch (err) {
         console.error('Error fetching related records', err);
-      } finally {
-        setLoading(false);
       }
     };
 
-    if (lookupField.objectName && lookupField.recordId) {
-      fetchRelatedRecords();
-    }
-  }, [lookupField]);
+    fetchRelatedRecords();
+  }, [objectName, recordId]);
+
+  if (!relatedData) {
+    return <p>Loading...</p>;
+  }
+
+  const { child_records: childRecords } = relatedData;
 
   return (
-    <div>
-      <Title level={3}>Related Records</Title>
-      {loading ? (
-        <Spin tip="Loading..." />
-      ) : (
-        <List
-          bordered
-          dataSource={relatedRecords}
-          renderItem={item => (
-            <List.Item>
-              <div>{item.name}</div> {/* Customize as needed */}
-            </List.Item>
-          )}
-        />
-      )}
+    <div style={{ padding: '20px', maxHeight: '600px', overflowY: 'auto',overflowX:'auto' }}>
+      {Object.keys(childRecords).map((childObjectName) => (
+        <Card
+          key={childObjectName}
+          title={<Title level={4}>{childObjectName}</Title>}
+          bordered={false}
+          style={{ marginBottom: '20px' }}
+        >
+          <List
+            itemLayout="horizontal"
+            dataSource={childRecords[childObjectName]}
+            renderItem={(item) => (
+              <List.Item>
+                <List.Item.Meta
+                  title={item.Name}
+                  description={`ID: ${item._id}`}
+                />
+              </List.Item>
+            )}
+          />
+        </Card>
+      ))}
     </div>
   );
 };
 
-export default RelatedRecords;
+export default RelatedRecord;
