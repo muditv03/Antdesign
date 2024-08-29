@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Menu, Drawer, Grid, Button, Tooltip,Spin } from 'antd';
 import { MenuOutlined, PushpinOutlined } from '@ant-design/icons';
 import * as Icons from '@ant-design/icons';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate, useLocation } from 'react-router-dom';
+ 
 const { useBreakpoint } = Grid;
 
 const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
@@ -20,15 +19,12 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
 
   const screens = useBreakpoint();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    const clearSelectionOnLogin = () => {
-      // Clear the selected key from localStorage when the component mounts
-      localStorage.removeItem('selectedKey');
-      setSelectedKey(null); // Ensure no tab is selected initially
-    };
-
-    clearSelectionOnLogin(); // Call the function when component mounts
+     // Retrieve selected tab from localStorage on component mount
+     const savedSelectedKey = localStorage.getItem('selectedKey');
+     setSelectedKey(savedSelectedKey);
 
     const fetchData = async () => {
       try {
@@ -60,6 +56,12 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    // Update selectedKey based on the current location
+    const matchedItem = items.find(item => location.pathname === `/object/${item.key}`);
+    setSelectedKey(matchedItem ? matchedItem.key : null);  // Only select tab if exact match
+  }, [location.pathname, items]);
 
   const handleClick = (e) => {
 
