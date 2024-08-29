@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from 'antd';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import Login from './Login';
@@ -13,8 +13,17 @@ import RecordComponent from './Components/recordComponent';
 import AppFooter from './Footer';  // Import the footer component
 import Profile from './Profile';  // Import the Profile component
 import RecordDetail from './RecordDetailPage';
- 
+  
 const { Content } = Layout;
+
+// Define the sidebar routes
+const sidebarRoutes = [
+  '/object-setup',
+  '/object-setup/:id',
+  '/record/:objectid/:objectName/:id',
+  '/object/:id',
+  '/object-profile',
+];
 
 const App = () => {
   const location = useLocation();
@@ -22,6 +31,17 @@ const App = () => {
   // Check if the current path is login, signup, or forgot-password
   const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(location.pathname.toLowerCase());
   const [sidebarWidth, setSidebarWidth] = useState('80px'); // Default to collapsed width
+ 
+
+  useEffect(() => {
+    // Deselect the tab if the current route is not in the sidebarRoutes array
+    const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
+    
+    if (!isSidebarRoute) {
+      localStorage.removeItem('selectedKey');
+    }
+  }, [location.pathname]);
+
   const handleSidebarToggle = (width) => {
     setSidebarWidth(width);
   };
