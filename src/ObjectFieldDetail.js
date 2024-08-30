@@ -4,10 +4,10 @@ import { Table, Typography, Button, Row, Col, Drawer, message, Dropdown, Menu, T
 import axios from 'axios';
 import CreateFieldDrawer from './CreateFieldDrawer'; // Import the CreateFieldDrawer component
 import { DownOutlined } from '@ant-design/icons';
- 
+  
 const { Title } = Typography;
 const { TabPane } = Tabs;
-
+ 
 const ObjectFieldDetail = () => {
   const location = useLocation();
   const { record } = location.state || {}; // Access the passed record
@@ -16,21 +16,25 @@ const ObjectFieldDetail = () => {
   const [drawerVisible, setDrawerVisible] = useState(false); // Manage drawer visibility
   const [loading, setLoading] = useState(true); // Add loading state for spinner
 
-  useEffect(() => {
+  const fetchFieldsData = () => {
     if (record?.key) {
-      // Fetch all fields related to the current object_id
+      setLoading(true); // Set loading state before making the API call
       axios
         .get(`http://localhost:3000/mt_fields/object/${record.key}`)
         .then((response) => {
-          setFieldsData(response.data); // Set the fetched data to the fieldsData state
-          setLoading(false); // Set loading to false after data is fetched
+          setFieldsData(response.data);
+          setLoading(false);
         })
         .catch((error) => {
           console.error('Error fetching fields:', error);
-          setLoading(false); // Set loading to false even if there's an error
+          setLoading(false);
         });
     }
-  }, [record?.key]); // Run the effect whenever the record key (object_id) changes
+  };
+
+  useEffect(() => {
+    fetchFieldsData();
+  }, [record?.key]);
 
   const handleMenuClick = (e, record) => {
     if (e.key === '1') {
@@ -42,7 +46,6 @@ const ObjectFieldDetail = () => {
     try {
       await axios.delete(`http://localhost:3000/mt_fields/${record._id}`);
       message.success('Record deleted successfully.');
-      window.location.reload();
     } catch (error) {
       message.error('Failed to delete record.');
       console.error('Error deleting record:', error);
@@ -105,6 +108,7 @@ const ObjectFieldDetail = () => {
 
   const closeDrawer = () => {
     setDrawerVisible(false);
+    fetchFieldsData();
   };
 
   const handleAddField = (newField) => {
