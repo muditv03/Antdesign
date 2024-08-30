@@ -4,7 +4,7 @@ import { MenuOutlined, PushpinOutlined } from '@ant-design/icons';
 import * as Icons from '@ant-design/icons';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
- 
+  
 const { useBreakpoint } = Grid;
 
 const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {

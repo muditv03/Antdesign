@@ -4,7 +4,7 @@ import { DownOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CreateObjectDrawer from './CreateObjectDrawer';
-  
+   
 const { Title } = Typography;
 
 const DataTable = () => {
@@ -15,24 +15,24 @@ const DataTable = () => {
   const [loading, setLoading] = useState(false);  // Loading state
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);  // Start spinner
-      try {
-        const response = await axios.get('http://localhost:3000/mt_objects');
-        setData(response.data.map((item) => ({
-          key: item._id,
-          label: item.label,
-          name: item.name,
-          plurallabel: item.pluralLabel,
-        })));
-      } catch (error) {
-        console.error('Error fetching object list:', error);
-      } finally {
-        setLoading(false);  // Stop spinner
-      }
-    };
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('http://localhost:3000/mt_objects');
+      setData(response.data.map((item) => ({
+        key: item._id,
+        label: item.label,
+        name: item.name,
+        plurallabel: item.pluralLabel,
+      })));
+    } catch (error) {
+      console.error('Error fetching object list:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -53,6 +53,7 @@ const DataTable = () => {
   const onCloseDrawer = () => {
     setDrawerVisible(false);
     setEditingRecord(null);
+    fetchData();
   };
 
   const handleAddOrEditObject = (updatedObject) => {

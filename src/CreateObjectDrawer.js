@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Input, Button, message, Card, Checkbox, Select, Spin } from 'antd';
 import axios from 'axios';
 import * as Icons from '@ant-design/icons';
- 
+  
 const { Option } = Select;
 
 const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord }) => {

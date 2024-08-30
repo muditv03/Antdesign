@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Table, Typography, Button, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message,Select,DatePicker,Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DownOutlined } from '@ant-design/icons';
-   
+     
 const { Title } = Typography;
 
 const ObjectSetupDetail = () => {
@@ -22,36 +22,33 @@ const ObjectSetupDetail = () => {
   const [lookupOptions, setLookupOptions] = useState([]);
   const [lookupFieldName, setLookupFieldName] = useState('');
 
-  useEffect(() => {
-    const fetchRecords = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`http://localhost:3000/mt_objects/${id}`);
-        const objName = response.data.name;
-        const recordsResponse = await axios.get(`http://localhost:3000/fetch_records/${objName}`);
-        setRecords(recordsResponse.data);
-        setObjectName(response.data.label);
+  
+  const fetchRecords = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`http://localhost:3000/mt_objects/${id}`);
+      const objName = response.data.name;
+      const recordsResponse = await axios.get(`http://localhost:3000/fetch_records/${objName}`);
+      setRecords(recordsResponse.data);
+      setObjectName(response.data.label);
 
-        const fieldsResponse = await axios.get(`http://localhost:3000/mt_fields/object/${id}`);
-        setFieldsData(fieldsResponse.data.slice(0, 5)); // Get the first 5 fields
+      const fieldsResponse = await axios.get(`http://localhost:3000/mt_fields/object/${id}`);
+      setFieldsData(fieldsResponse.data.slice(0, 5)); // Get the first 5 fields
 
-        // Identify and set the lookup field name
-        const lookupField = fieldsResponse.data.find(field => field.type === 'lookup');
-        if (lookupField) {
-          setLookupFieldName(lookupField.name);
-        }
-      } catch (err) {
-        setLoading(false);
-        setError(err.response.data.error || 'Error fetching records');
-      } finally {
-        setLoading(false);
+      // Identify and set the lookup field name
+      const lookupField = fieldsResponse.data.find(field => field.type === 'lookup');
+      if (lookupField) {
+        setLookupFieldName(lookupField.name);
       }
-
+    } catch (err) {
       setLoading(false);
+      setError(err.response.data.error || 'Error fetching records');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-
-    };
-
+  useEffect(() => {
     fetchRecords();
   }, [id]);
 
@@ -140,8 +137,8 @@ const ObjectSetupDetail = () => {
 
       message.success(selectedRecord?._id && !selectedRecord?.isClone ? 'Record updated successfully' : 'Record created successfully');
       setDrawerVisible(false);
+      fetchRecords();
       form.resetFields();
-      //window.location.reload();
     } catch (error) {
       setLoading(false);
 
@@ -184,7 +181,7 @@ const ObjectSetupDetail = () => {
     try {
       await axios.delete(`http://localhost:3000/delete_record/${objectName}/${record._id}`);
       message.success('Record deleted successfully.');
-      window.location.reload();
+      fetchRecords();
     } catch (error) {
       message.error('Failed to delete record.');
       console.error('Error deleting record:', error);
