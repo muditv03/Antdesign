@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Table, Typography, Button, Row, Col, Drawer, message, Dropdown, Menu, Tabs, Spin } from 'antd';
+import { Table, Typography, Button, Row, Col, Drawer, message, Dropdown, Menu, Tabs, Spin, Modal } from 'antd';
 import axios from 'axios';
 import CreateFieldDrawer from './CreateFieldDrawer'; // Import the CreateFieldDrawer component
 import { DownOutlined } from '@ant-design/icons';
-  
+
 const { Title } = Typography;
 const { TabPane } = Tabs;
- 
+
 const ObjectFieldDetail = () => {
   const location = useLocation();
   const { record } = location.state || {}; // Access the passed record
@@ -15,6 +15,8 @@ const ObjectFieldDetail = () => {
   const [fieldsData, setFieldsData] = useState([]); // Initialize with an empty array
   const [drawerVisible, setDrawerVisible] = useState(false); // Manage drawer visibility
   const [loading, setLoading] = useState(true); // Add loading state for spinner
+  const [modalVisible, setModalVisible] = useState(false); // Manage modal visibility
+  const [selectedField, setSelectedField] = useState(null); // Store the selected field to delete
 
   const fetchFieldsData = () => {
     if (record?.key) {
@@ -38,17 +40,21 @@ const ObjectFieldDetail = () => {
 
   const handleMenuClick = (e, record) => {
     if (e.key === '1') {
-      deletefield(record);
+      setSelectedField(record); // Set the selected field
+      setModalVisible(true); // Show the delete confirmation modal
     }
   };
 
-  const deletefield = async (record) => {
+  const deleteField = async () => {
     try {
-      await axios.delete(`http://localhost:3000/mt_fields/${record._id}`);
-      message.success('Record deleted successfully.');
+      await axios.delete(`http://localhost:3000/mt_fields/${selectedField._id}`);
+      message.success('Field deleted successfully.');
+      setFieldsData(fieldsData.filter((field) => field._id !== selectedField._id));
     } catch (error) {
-      message.error('Failed to delete record.');
-      console.error('Error deleting record:', error);
+      message.error('Failed to delete field.');
+      console.error('Error deleting field:', error);
+    } finally {
+      setModalVisible(false); // Hide the modal after the operation
     }
   };
 
@@ -145,9 +151,20 @@ const ObjectFieldDetail = () => {
           <p>Properties content goes here...</p>
         </TabPane>
       </Tabs>
+
+      <Modal
+        title="Confirm Delete"
+        visible={modalVisible}
+        onOk={deleteField}
+        onCancel={() => setModalVisible(false)}
+        okText="Yes"
+        cancelText="No"
+        centered
+      >
+        <p>Do you want to delete this field?</p>
+      </Modal>
     </div>
   );
 };
 
 export default ObjectFieldDetail;
-
