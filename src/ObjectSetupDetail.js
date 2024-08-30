@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Table, Typography, Button, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message,Select,DatePicker,Spin } from 'antd';
+import { Table, Typography, Button, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message,Select,DatePicker,Spin, Modal } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DownOutlined } from '@ant-design/icons';
      
@@ -21,6 +21,7 @@ const ObjectSetupDetail = () => {
 
   const [lookupOptions, setLookupOptions] = useState([]);
   const [lookupFieldName, setLookupFieldName] = useState('');
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
   
   const fetchRecords = async () => {
@@ -162,7 +163,7 @@ const ObjectSetupDetail = () => {
     if (e.key === '1') {
       handleEditClick(selectedRecord);
     } else if (e.key === '2') {
-      deleteRecord(selectedRecord);
+      setIsDeleteModalVisible(true);
     }else if (e.key === '3') {
       handleCloneClick(selectedRecord);
     }
@@ -178,6 +179,7 @@ const ObjectSetupDetail = () => {
   );
 
   const deleteRecord = async (record) => {
+
     try {
       await axios.delete(`http://localhost:3000/delete_record/${objectName}/${record._id}`);
       message.success('Record deleted successfully.');
@@ -186,6 +188,13 @@ const ObjectSetupDetail = () => {
       message.error('Failed to delete record.');
       console.error('Error deleting record:', error);
     }
+  };
+
+  const confirmDelete = async () => {
+    deleteRecord(selectedRecord);
+
+    setIsDeleteModalVisible(false);
+
   };
 
   const renderFormItem = (field) => {
@@ -451,8 +460,20 @@ const ObjectSetupDetail = () => {
             {fieldsData?.map((field) => renderFormItem(field))}
           </Form>
         </Card>
-        </Spin>
+        </Spin> 
       </Drawer>
+
+      <Modal
+        title="Confirm Deletion"
+        visible={isDeleteModalVisible}
+        onOk={confirmDelete}
+        onCancel={() => setIsDeleteModalVisible(false)}
+        okText="Delete"
+        cancelText="Cancel"
+        centered
+      >
+        <p>Are you sure you want to delete this record?</p>
+      </Modal>
     </div>
   );
 };

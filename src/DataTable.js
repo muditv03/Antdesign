@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Typography, Button, Row, Col, Dropdown, Menu, message, Spin } from 'antd';
+import { Table, Typography, Button, Row, Col, Dropdown, Menu, message, Spin, Modal } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CreateObjectDrawer from './CreateObjectDrawer';
-   
+
 const { Title } = Typography;
 
 const DataTable = () => {
@@ -12,7 +12,9 @@ const DataTable = () => {
   const [data, setData] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [editingRecord, setEditingRecord] = useState(null);
-  const [loading, setLoading] = useState(false);  // Loading state
+  const [loading, setLoading] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState(null);
   const navigate = useNavigate();
 
   const fetchData = async () => {
@@ -37,16 +39,15 @@ const DataTable = () => {
   }, []);
 
   const handleMenuClick = (e) => {
-    if (e.key === '1') {  // Assuming 'Edit' is key '1'
-      //setEditingRecord(selectedRecord);
-      //setDrawerVisible(true);
-    } else if (e.key === '2') {  // Assuming 'Delete' is key '2'
+    if (e.key === '1') {
+      // Handle edit
+    } else if (e.key === '2') {
       deleteRecord(selectedRecord);
     }
   };
 
   const showDrawer = () => {
-    setEditingRecord(null);  // Clear editingRecord for a fresh new form
+    setEditingRecord(null);
     setDrawerVisible(true);
   };
 
@@ -63,7 +64,6 @@ const DataTable = () => {
   };
 
   const handleLabelClick = (record) => {
-
     if (record.key) {
       navigate(`/object-setup/${record.key}`, { state: { record } });
     } else {
@@ -71,24 +71,39 @@ const DataTable = () => {
     }
   };
 
-  const deleteRecord = async (record) => {
-    setLoading(true);  // Start spinner
+  const showDeleteModal = (record) => {
+    setRecordToDelete(record);
+    setIsDeleteModalVisible(true);
+  };
+
+  const handleDelete = async () => {
+    setLoading(true);
     try {
-      await axios.delete(`http://localhost:3000/mt_objects/${record.key}`);
-      setData((prevData) => prevData.filter((item) => item.key !== record.key));
+      await axios.delete(`http://localhost:3000/mt_objects/${recordToDelete.key}`);
+      setData((prevData) => prevData.filter((item) => item.key !== recordToDelete.key));
       message.success('Record deleted successfully.');
+      setIsDeleteModalVisible(false);
     } catch (error) {
       message.error('Failed to delete record.');
       console.error('Error deleting record:', error);
     } finally {
-      setLoading(false);  // Stop spinner
+      setLoading(false);
     }
+  };
+
+  const handleCancel = () => {
+    setIsDeleteModalVisible(false);
+    setRecordToDelete(null);
+  };
+
+  const deleteRecord = (record) => {
+    showDeleteModal(record);
   };
 
   const menu = (
     <Menu onClick={handleMenuClick}>
       <Menu.Item key="1">Edit</Menu.Item>
-      <Menu.Item key="2">Delete</Menu.Item>
+      <Menu.Item key="2" onClick={() => deleteRecord(selectedRecord)}>Delete</Menu.Item>
     </Menu>
   );
 
@@ -136,7 +151,7 @@ const DataTable = () => {
   ];
 
   return (
-    <Spin spinning={loading}> {/* Spinner */}
+    <Spin spinning={loading}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
         <Row justify="space-between" align="middle" style={{ marginBottom: '16px' }}>
           <Col>
@@ -162,19 +177,20 @@ const DataTable = () => {
           editingRecord={editingRecord}
         />
       </div>
+
+      <Modal
+        title="Delete Confirmation"
+        visible={isDeleteModalVisible}
+        onOk={handleDelete}
+        onCancel={handleCancel}
+        okText="Yes"
+        cancelText="No"
+        centered
+      >
+        <p>Are you sure you want to delete this record?</p>
+      </Modal>
     </Spin>
   );
 };
+
 export default DataTable;
-
-
-
-
-
-
-
-
-
-
-
-

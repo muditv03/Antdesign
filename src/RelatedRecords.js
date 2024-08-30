@@ -42,7 +42,7 @@ const RelatedRecord = ({ objectName, recordId }) => {
               <List.Item>
                 <List.Item.Meta
                   title={item.Name}
-                  description={`ID: ${item._id}`}
+                  // description={`ID: ${item._id}`}
                 />
               </List.Item>
             )}
