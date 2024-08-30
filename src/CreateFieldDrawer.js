@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Input, Button, message, Select, Checkbox, Card, Spin } from 'antd';
 import axios from 'axios';
-  
+
 const { Option } = Select;
 
 const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
@@ -48,6 +48,11 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
       newField.picklist_values = picklistValues;
     }
 
+    if (values.type === 'decimal') {
+      newField.decimal_places_before = values.length;
+      newField.decimal_places_after = values.decimal_places;
+    }
+
     try {
       const response = await axios.post('http://localhost:3000/mt_fields', {
         mt_field: newField,
@@ -61,6 +66,10 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
         iseditable: values.iseditable,
         iswriteable: values.iswriteable,
         ...(values.type === 'Picklist' && { picklist_values: picklistValues }),
+        ...(values.type === 'decimal' && { 
+          decimal_places_before: values.length,
+          decimal_places_after: values.decimal_places 
+        }),
       });
 
       message.success('Field created successfully');
@@ -194,7 +203,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
                   label="Length"
                   rules={[{ required: true, message: 'Please enter the length' }]}
                 >
-                  <Input placeholder="Enter length" />
+                  <Input type='Number' placeholder="Enter length" />
                 </Form.Item>
 
                 <Form.Item
@@ -202,7 +211,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
                   label="Decimal Places"
                   rules={[{ required: true, message: 'Please enter decimal places' }]}
                 >
-                  <Input placeholder="Enter decimal places" />
+                  <Input type='Number' placeholder="Enter decimal places" />
                 </Form.Item>
               </>
             )}

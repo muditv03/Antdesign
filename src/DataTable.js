@@ -41,7 +41,7 @@ const DataTable = () => {
       //setEditingRecord(selectedRecord);
       //setDrawerVisible(true);
     } else if (e.key === '2') {  // Assuming 'Delete' is key '2'
-      //deleteRecord(selectedRecord);
+      deleteRecord(selectedRecord);
     }
   };
 

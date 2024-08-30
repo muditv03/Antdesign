@@ -3,12 +3,12 @@ import { Form, Input, Button, Row, Col, Typography, Avatar, Select, Tabs, Checkb
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { EditOutlined } from '@ant-design/icons';
-
+import RelatedRecord from './RelatedRecords';
 const { TextArea } = Input;
 const { Option } = Select;
 const { Title } = Typography;
 const { TabPane } = Tabs;
-
+ 
 const RecordDetail = () => {
   const { id, objectid, objectName } = useParams(); 
   const [form] = Form.useForm();
@@ -156,7 +156,7 @@ const RecordDetail = () => {
           </Form>
         </TabPane>
         <TabPane tab="Related" key="2">
-          <p>Related records or content can be shown here.</p>
+        <RelatedRecord objectName={objectName} recordId={id} />
         </TabPane>
       </Tabs>
     </div>
