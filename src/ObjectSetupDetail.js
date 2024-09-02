@@ -13,6 +13,8 @@ const ObjectSetupDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [objectName, setObjectName] = useState(null);
+  const [objectPluralName, setobjectPluralName] = useState(null);
+
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [fieldsData, setFieldsData] = useState([]);
@@ -32,6 +34,7 @@ const ObjectSetupDetail = () => {
       const recordsResponse = await axios.get(`http://localhost:3000/fetch_records/${objName}`);
       setRecords(recordsResponse.data);
       setObjectName(response.data.label);
+      setobjectPluralName(response.data.pluralLabel)
 
       const fieldsResponse = await axios.get(`http://localhost:3000/mt_fields/object/${id}`);
       setFieldsData(fieldsResponse.data.slice(0, 5)); // Get the first 5 fields
@@ -389,7 +392,7 @@ const ObjectSetupDetail = () => {
     <div>
       <Row justify="space-between" align="middle">
         <Col>
-          <Title level={3}>Records for {objectName}</Title>
+          <Title level={3}>Records for {objectPluralName}</Title>
         </Col>
         <Col>
           <Button type="primary" onClick={handleCreateClick}>
