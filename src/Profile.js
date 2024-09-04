@@ -5,14 +5,13 @@ import Cookies from 'js-cookie';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
-
+ 
 const ProfilePage = () => {
   const [form] = Form.useForm();
   const [profile, setProfile] = useState({
     username: '',
     email: '',
-    firstName: '',
-    lastName: '',
+    name: '',
     address: '',
     phone: '',
   });
@@ -22,8 +21,7 @@ const ProfilePage = () => {
     const storedProfile = {
       username: Cookies.get('username') || 'Aptclouds',
       email: Cookies.get('email') || 'user@example.com',
-      firstName: Cookies.get('firstName') || '',
-      lastName: Cookies.get('lastName') || '',
+      name: Cookies.get('name') || '',
       address: Cookies.get('address') || '',
       phone: Cookies.get('phone') || '',
     };
@@ -114,7 +112,7 @@ const ProfilePage = () => {
               initialValues={{
                 username: profile.username,
                 email: profile.email,
-                fullName: `${profile.firstName} ${profile.lastName}`,
+                name: profile.name,
                 phone: profile.phone,
                 address: profile.address,
               }}
@@ -130,7 +128,7 @@ const ProfilePage = () => {
 
               <Form.Item
                 label={<span style={labelStyle}>Full Name</span>}
-                name="fullName"
+                name="name"
               >
                 <Input placeholder="Full Name" style={inputStyle} />
               </Form.Item>
