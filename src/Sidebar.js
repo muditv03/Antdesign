@@ -59,8 +59,12 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
 
   useEffect(() => {
     // Update selectedKey based on the current location
-    const matchedItem = items.find(item => location.pathname === `/object/${item.key}`);
-    setSelectedKey(matchedItem ? matchedItem.key : null);  // Only select tab if exact match
+    const matchedItem = items.find(item => {
+      const isObjectPath = location.pathname.startsWith(`/object/${item.key}`);
+      const isRecordPath = location.pathname.startsWith(`/record/${item.key}`);
+      return isObjectPath || isRecordPath;
+    });
+    setSelectedKey(matchedItem ? matchedItem.key : null);  // Only select tab if match found
   }, [location.pathname, items]);
 
   const handleClick = (e) => {
@@ -111,8 +115,6 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
   const handleLogout = () => {
     // Clear the selected key from localStorage on logout
     localStorage.removeItem('selectedKey');
-    
-    // Implement the rest of your logout logic here (e.g., clearing tokens, redirecting to login page)
   };
 
 

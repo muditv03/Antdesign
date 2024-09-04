@@ -82,7 +82,7 @@ const App = () => {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/object-setup" element={<DataTable />} />
             <Route path="/object-setup/:id" element={<ObjectFieldDetail />} />
-            <Route path="/record/:objectid/:objectName/:id" element={<RecordDetail />} />
+            <Route path="/record/:objectName/:id" element={<RecordDetail />} />
             <Route path="/object/:id" element={<ObjectSetupDetail />} />
             <Route path="/object-profile" element={<Profile />} />
             {/* Add more routes as needed */}

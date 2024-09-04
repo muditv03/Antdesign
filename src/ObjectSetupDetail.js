@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Table, Typography, Button, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message,Select,DatePicker,Spin, Modal } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DownOutlined } from '@ant-design/icons';
-     
+      
 const { Title } = Typography;
 
 const ObjectSetupDetail = () => {
@@ -36,7 +36,7 @@ const ObjectSetupDetail = () => {
       setObjectName(response.data.label);
       setobjectPluralName(response.data.pluralLabel)
 
-      const fieldsResponse = await axios.get(`http://localhost:3000/mt_fields/object/${id}`);
+      const fieldsResponse = await axios.get(`http://localhost:3000/mt_fields/object/${objName}`);
       setFieldsData(fieldsResponse.data.slice(0, 5)); // Get the first 5 fields
 
       // Identify and set the lookup field name
@@ -156,7 +156,7 @@ const ObjectSetupDetail = () => {
 
   const handleLabelClick = (record) => {
     if (record._id) {
-      navigate(`/record/${id}/${objectName}/${record._id}`, { state: { record } });
+      navigate(`/record/${objectName}/${record._id}`, { state: { record } });
     } else {
       console.error("Record ID is undefined");
     }
