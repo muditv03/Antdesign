@@ -4,6 +4,7 @@ import { MenuOutlined, PushpinOutlined } from '@ant-design/icons';
 import * as Icons from '@ant-design/icons';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { BASE_URL } from './Constant';
   
 const { useBreakpoint } = Grid;
 
@@ -29,7 +30,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:3000/mt_tabs');
+        const response = await axios.get(`${BASE_URL}/mt_tabs`);
         const filteredItems = response.data
           .filter((item) => item.icon !== null)
           .map((item) => {

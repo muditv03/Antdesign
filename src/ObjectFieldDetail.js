@@ -4,6 +4,7 @@ import { Table, Typography, Button, Row, Col, Drawer, message, Dropdown, Menu, T
 import axios from 'axios';
 import CreateFieldDrawer from './CreateFieldDrawer'; // Import the CreateFieldDrawer component
 import { DownOutlined } from '@ant-design/icons';
+import { BASE_URL } from './Constant';
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -22,7 +23,7 @@ const ObjectFieldDetail = () => {
     if (record?.name) {
       setLoading(true); // Set loading state before making the API call
       axios
-        .get(`http://localhost:3000/mt_fields/object/${record.name}`)
+        .get(`${BASE_URL}/mt_fields/object/${record.name}`)
         .then((response) => {
           setFieldsData(response.data);
           setLoading(false);
@@ -47,7 +48,7 @@ const ObjectFieldDetail = () => {
 
   const deleteField = async () => {
     try {
-      await axios.delete(`http://localhost:3000/mt_fields/${selectedField._id}`);
+      await axios.delete(`${BASE_URL}/mt_fields/${selectedField._id}`);
       message.success('Field deleted successfully.');
       setFieldsData(fieldsData.filter((field) => field._id !== selectedField._id));
     } catch (error) {

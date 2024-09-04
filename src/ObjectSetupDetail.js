@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Table, Typography, Button, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message,Select,DatePicker,Spin, Modal } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DownOutlined } from '@ant-design/icons';
+import { BASE_URL } from './Constant';
       
 const { Title } = Typography;
 
@@ -29,14 +30,14 @@ const ObjectSetupDetail = () => {
   const fetchRecords = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3000/mt_objects/${id}`);
+      const response = await axios.get(`${BASE_URL}/mt_objects/${id}`);
       const objName = response.data.name;
-      const recordsResponse = await axios.get(`http://localhost:3000/fetch_records/${objName}`);
+      const recordsResponse = await axios.get(`${BASE_URL}/fetch_records/${objName}`);
       setRecords(recordsResponse.data);
       setObjectName(response.data.label);
       setobjectPluralName(response.data.pluralLabel)
 
-      const fieldsResponse = await axios.get(`http://localhost:3000/mt_fields/object/${objName}`);
+      const fieldsResponse = await axios.get(`${BASE_URL}/mt_fields/object/${objName}`);
       setFieldsData(fieldsResponse.data.slice(0, 5)); // Get the first 5 fields
 
       // Identify and set the lookup field name
@@ -60,7 +61,7 @@ const ObjectSetupDetail = () => {
     if (lookupFieldName) {
       const fetchLookupOptions = async () => {
         try {
-          const response = await axios.get(`http://localhost:3000/fetch_records/${lookupFieldName}`);
+          const response = await axios.get(`${BASE_URL}/fetch_records/${lookupFieldName}`);
           setLookupOptions(response.data);
         } catch (error) {
           console.error(`Error fetching lookup options for ${lookupFieldName}:`, error);
@@ -77,7 +78,7 @@ const ObjectSetupDetail = () => {
     setDrawerVisible(true);
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3000/mt_fields/object/${id}`);
+      const response = await axios.get(`${BASE_URL}/mt_fields/object/${id}`);
       setFieldsData(response.data);
     } catch (error) {
       setLoading(false);
@@ -94,7 +95,7 @@ const ObjectSetupDetail = () => {
     setDrawerVisible(true);
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3000/mt_fields/object/${id}`);
+      const response = await axios.get(`${BASE_URL}/mt_fields/object/${id}`);
       setFieldsData(response.data);
     } catch (error) {
       setLoading(false);
@@ -137,7 +138,7 @@ const ObjectSetupDetail = () => {
       setLoading(true);
 
       console.log('body while updating is ' + JSON.stringify(body));
-      await axios.post('http://localhost:3000/insert_or_update_records', body);
+      await axios.post(`${BASE_URL}/insert_or_update_records`, body);
 
       message.success(selectedRecord?._id && !selectedRecord?.isClone ? 'Record updated successfully' : 'Record created successfully');
       setDrawerVisible(false);
@@ -184,7 +185,7 @@ const ObjectSetupDetail = () => {
   const deleteRecord = async (record) => {
 
     try {
-      await axios.delete(`http://localhost:3000/delete_record/${objectName}/${record._id}`);
+      await axios.delete(`${BASE_URL}/delete_record/${objectName}/${record._id}`);
       message.success('Record deleted successfully.');
       fetchRecords();
     } catch (error) {

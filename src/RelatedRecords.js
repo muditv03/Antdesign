@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, List, Typography } from 'antd';
 import { Link } from 'react-router-dom';
+import { BASE_URL } from './Constant';
 
 const { Title } = Typography;
 
@@ -11,7 +12,7 @@ const RelatedRecord = ({ objectName, recordId }) => {
   useEffect(() => {
     const fetchRelatedRecords = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/related_lists/get_all_children/${objectName}/${recordId}`);
+        const response = await axios.get(`${BASE_URL}/related_lists/get_all_children/${objectName}/${recordId}`);
         setRelatedData(response.data);
       } catch (err) {
         console.error('Error fetching related records', err);

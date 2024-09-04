@@ -4,6 +4,7 @@ import { useParams, Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { EditOutlined } from '@ant-design/icons';
 import RelatedRecord from './RelatedRecords';
+import { BASE_URL } from './Constant';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -23,12 +24,12 @@ const RecordDetail = () => {
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/fetch_single_record/${objectName}/${id}`);
+        const response = await axios.get(`${BASE_URL}/fetch_single_record/${objectName}/${id}`);
         setRecord(response.data);
         form.setFieldsValue(response.data);
         console.log('record data is ' + JSON.stringify(response.data));
 
-        const fieldsResponse = await axios.get(`http://localhost:3000/mt_fields/object/${objectName}`);
+        const fieldsResponse = await axios.get(`${BASE_URL}/mt_fields/object/${objectName}`);
         setFields(fieldsResponse.data);
         console.log('recordresponse data is ' + JSON.stringify(fieldsResponse.data));
       } catch (err) {
@@ -60,7 +61,7 @@ const RecordDetail = () => {
         },
       };
 
-      await axios.post('http://localhost:3000/insert_or_update_records', body);
+      await axios.post('${BASE_URL}/insert_or_update_records', body);
       console.log('API call with updated body:', body);
 
       setInitialValues(values);

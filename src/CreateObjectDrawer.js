@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Input, Button, message, Card, Checkbox, Select, Spin } from 'antd';
 import axios from 'axios';
 import * as Icons from '@ant-design/icons';
+import { BASE_URL } from './Constant';
   
 const { Option } = Select;
 
@@ -31,13 +32,13 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       let response;
       if (editingRecord) {
         // Update existing record
-        response = await axios.put(`http://localhost:3000/mt_objects/${editingRecord.key}`, {
+        response = await axios.put(`${BASE_URL}/mt_objects/${editingRecord.key}`, {
           mt_object: formData,
         });
         message.success('Object updated successfully');
       } else {
         // Create new record
-        response = await axios.post('http://localhost:3000/mt_objects', {
+        response = await axios.post(`${BASE_URL}/mt_objects`, {
           mt_object: formData,
         });
         message.success('Object created successfully');
@@ -53,7 +54,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       };
 
       if (newTab.icon && newTab.addObjectTab) {
-        await axios.post('http://localhost:3000/mt_tabs', { mt_tab: newTab });
+        await axios.post(`${BASE_URL}/mt_tabs`, { mt_tab: newTab });
       }
 
       onAddOrEditObject({

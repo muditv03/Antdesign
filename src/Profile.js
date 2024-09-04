@@ -27,8 +27,11 @@ const ProfilePage = () => {
       address: Cookies.get('address') || '',
       phone: Cookies.get('phone') || '',
     };
+    console.log('cookie is '+Cookies);
+
 
     setProfile(storedProfile);
+    console.log(profile);
 
     // Set initial values in the form
     form.setFieldsValue(storedProfile);

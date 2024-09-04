@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Input, Button, message, Select, Checkbox, Card, Spin } from 'antd';
 import axios from 'axios';
+import { BASE_URL } from './Constant';
 
 const { Option } = Select;
  
@@ -13,7 +14,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
 
   useEffect(() => {
     if (fieldType === 'lookup') {
-      axios.get('http://localhost:3000/mt_objects')
+      axios.get(`${BASE_URL}/mt_objects`)
         .then(response => {
           setAvailableObjects(response.data);
         })
@@ -54,7 +55,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/mt_fields', {
+      const response = await axios.post(`${BASE_URL}/mt_fields`, {
         mt_field: newField,
       });
 
