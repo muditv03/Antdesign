@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, List, Typography } from 'antd';
+import { Link } from 'react-router-dom';
 
 const { Title } = Typography;
 
@@ -27,7 +28,7 @@ const RelatedRecord = ({ objectName, recordId }) => {
   const { child_records: childRecords } = relatedData;
 
   return (
-    <div style={{ padding: '20px', maxHeight: '600px', overflowY: 'auto',overflowX:'auto' }}>
+    <div style={{ padding: '20px', maxHeight: '600px', overflowY: 'auto', overflowX: 'auto' }}>
       {Object.keys(childRecords).map((childObjectName) => (
         <Card
           key={childObjectName}
@@ -41,7 +42,11 @@ const RelatedRecord = ({ objectName, recordId }) => {
             renderItem={(item) => (
               <List.Item>
                 <List.Item.Meta
-                  title={item.Name}
+                  title={
+                    <Link to={`/record/${childObjectName}/${item._id}`} style={{ color: '#0096FF' }}>
+                      {item.Name}
+                    </Link>
+                  }
                   // description={`ID: ${item._id}`}
                 />
               </List.Item>

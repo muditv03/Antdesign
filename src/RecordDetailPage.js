@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Row, Col, Typography, Avatar, Select, Tabs, Checkbox } from 'antd';
-import { useParams } from 'react-router-dom';
+import { Form, Input, Button, Row, Col, Typography, Avatar, Select, Tabs, Checkbox, Spin, List } from 'antd';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { EditOutlined } from '@ant-design/icons';
 import RelatedRecord from './RelatedRecords';
+
 const { TextArea } = Input;
 const { Option } = Select;
 const { Title } = Typography;
 const { TabPane } = Tabs;
- 
+
 const RecordDetail = () => {
-  const { id, objectid, objectName } = useParams(); 
+  const { id, objectName } = useParams();
+  const location = useLocation(); // Get the current location object from the router
   const [form] = Form.useForm();
   const [record, setRecord] = useState(null);
-  const [fields, setFields] = useState([]); 
-  const [isEditable, setIsEditable] = useState(false); 
+  const [fields, setFields] = useState([]);
+  const [isEditable, setIsEditable] = useState(false);
   const [initialValues, setInitialValues] = useState({});
+  const [activeTabKey, setActiveTabKey] = useState("1"); // Manage the active tab key
 
   useEffect(() => {
     const fetchRecords = async () => {
@@ -25,15 +28,25 @@ const RecordDetail = () => {
         form.setFieldsValue(response.data);
         console.log('record data is ' + JSON.stringify(response.data));
 
-        const fieldsResponse = await axios.get(`http://localhost:3000/mt_fields/object/${objectid}`);
+        const fieldsResponse = await axios.get(`http://localhost:3000/mt_fields/object/${objectName}`);
         setFields(fieldsResponse.data);
+        console.log('recordresponse data is ' + JSON.stringify(fieldsResponse.data));
       } catch (err) {
         console.error('Error fetching records', err);
       }
     };
 
     fetchRecords();
-  }, [id, objectid, objectName]);
+  }, [id, objectName]);
+
+  useEffect(() => {
+    // Check the current path to determine which tab should be active
+    if (location.pathname.includes('related')) {
+      setActiveTabKey("2"); // Set to the "Related" tab if on the related record route
+    } else {
+      setActiveTabKey("1"); // Default to the "Detail" tab otherwise
+    }
+  }, [location.pathname]); // Listen to changes in the path
 
   const onFinish = async (values) => {
     try {
@@ -75,8 +88,8 @@ const RecordDetail = () => {
           alignItems: 'center',
           justifyContent: 'space-between',
           borderBottom: !isEditable ? '1px solid #ddd' : 'none',
-          paddingBottom: 8,  
-          marginBottom: 16,  
+          paddingBottom: 8,
+          marginBottom: 16,
         }}
       >
         {isEditable ? (
@@ -115,7 +128,18 @@ const RecordDetail = () => {
   };
 
   if (!record || fields.length === 0) {
-    return <p>Loading...</p>;
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
   }
 
   return (
@@ -123,7 +147,7 @@ const RecordDetail = () => {
       <Title level={2} style={{ marginBottom: '12px', marginTop: '0px' }}>
         {objectName}
       </Title>
-      <Tabs defaultActiveKey="1" style={{ marginBottom: '20px' }}>
+      <Tabs activeKey={activeTabKey} onChange={setActiveTabKey} style={{ marginBottom: '20px' }}>
         <TabPane tab="Detail" key="1">
           <Form form={form} layout="vertical" onFinish={onFinish}>
             <Title level={3} style={{ marginBottom: '24px' }}>Record Details</Title>
@@ -132,11 +156,11 @@ const RecordDetail = () => {
                 <Col key={index} xs={24} sm={12}>
                   <Form.Item label={field.label} style={{ marginBottom: 16 }}>
                     {renderFieldWithEdit(
-                      field.name, 
-                      field.label, 
-                      field.isPicklist, 
-                      field.options || [], 
-                      field.isTextArea, 
+                      field.name,
+                      field.label,
+                      field.isPicklist,
+                      field.options || [],
+                      field.isTextArea,
                       field.type === 'boolean'
                     )}
                   </Form.Item>
@@ -156,7 +180,7 @@ const RecordDetail = () => {
           </Form>
         </TabPane>
         <TabPane tab="Related" key="2">
-        <RelatedRecord objectName={objectName} recordId={id} />
+          <RelatedRecord objectName={objectName} recordId={id} />
         </TabPane>
       </Tabs>
     </div>

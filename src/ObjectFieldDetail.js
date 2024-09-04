@@ -19,10 +19,10 @@ const ObjectFieldDetail = () => {
   const [selectedField, setSelectedField] = useState(null); // Store the selected field to delete
 
   const fetchFieldsData = () => {
-    if (record?.key) {
+    if (record?.name) {
       setLoading(true); // Set loading state before making the API call
       axios
-        .get(`http://localhost:3000/mt_fields/object/${record.key}`)
+        .get(`http://localhost:3000/mt_fields/object/${record.name}`)
         .then((response) => {
           setFieldsData(response.data);
           setLoading(false);
@@ -36,7 +36,7 @@ const ObjectFieldDetail = () => {
 
   useEffect(() => {
     fetchFieldsData();
-  }, [record?.key]);
+  }, [record?.name]);
 
   const handleMenuClick = (e, record) => {
     if (e.key === '1') {
@@ -127,7 +127,7 @@ const ObjectFieldDetail = () => {
       <Title level={3}>{record?.label || 'Object Details'}</Title>
 
       <Tabs defaultActiveKey="1">
-        <TabPane tab="Details" key="1">
+        <TabPane tab="Properties" key="1">
           <Row justify="end" style={{ marginBottom: '16px' }}>
             <Col>
               <Button type="primary" onClick={showDrawer}>
@@ -147,8 +147,8 @@ const ObjectFieldDetail = () => {
             mtObjectId={record?.key} // Pass mt_object_id to CreateFieldDrawer
           />
         </TabPane>
-        <TabPane tab="Properties" key="2">
-          <p>Properties content goes here...</p>
+        <TabPane tab="Details" key="2">
+          <p>Details content goes here...</p>
         </TabPane>
       </Tabs>
 
