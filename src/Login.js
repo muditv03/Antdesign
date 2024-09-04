@@ -8,6 +8,7 @@ import jwtEncode from 'jwt-encode';
 import axios from 'axios';
 //const sign = require('jwt-encode');
 import Cookies from 'js-cookie';
+import { BASE_URL } from './Constant';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -32,7 +33,7 @@ const Login = () => {
       console.log('Decoded Token:', decodedToken);
 
       // Make the API call
-      const response = await axios.post('http://localhost:3000/login', {
+      const response = await axios.post(`${BASE_URL}/login`, {
         tokens: token,
       });
 

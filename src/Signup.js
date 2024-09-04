@@ -3,6 +3,7 @@ import { Form, Input, Button, Layout, Typography, message } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { BASE_URL } from './Constant';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -22,7 +23,7 @@ const Signup = () => {
 
     try {
       // Make the API call to the /register endpoint
-      const response = await axios.post('http://localhost:3000/register', {
+      const response = await axios.post(`${BASE_URL}/register`, {
         logintable: body,
       });
 

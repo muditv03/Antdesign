@@ -4,6 +4,7 @@ import { DownOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CreateObjectDrawer from './CreateObjectDrawer';
+import { BASE_URL } from './Constant';
 
 const { Title } = Typography;
 
@@ -20,7 +21,7 @@ const DataTable = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:3000/mt_objects');
+      const response = await axios.get(`${BASE_URL}/mt_objects`);
       setData(response.data.map((item) => ({
         key: item._id,
         label: item.label,
@@ -79,7 +80,7 @@ const DataTable = () => {
   const handleDelete = async () => {
     setLoading(true);
     try {
-      await axios.delete(`http://localhost:3000/mt_objects/${recordToDelete.key}`);
+      await axios.delete(`${BASE_URL}/${recordToDelete.key}`);
       setData((prevData) => prevData.filter((item) => item.key !== recordToDelete.key));
       message.success('Record deleted successfully.');
       setIsDeleteModalVisible(false);
