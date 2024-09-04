@@ -43,7 +43,7 @@ const RelatedRecord = ({ objectName, recordId }) => {
               <List.Item>
                 <List.Item.Meta
                   title={
-                    <Link to={`/record/${childObjectName}/${item._id}`}>
+                    <Link to={`/record/${childObjectName}/${item._id}`} style={{ color: '#0096FF' }}>
                       {item.Name}
                     </Link>
                   }
