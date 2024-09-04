@@ -9,7 +9,7 @@ import axios from 'axios';
 //const sign = require('jwt-encode');
 import Cookies from 'js-cookie';
 import { BASE_URL } from './Constant';
-
+ 
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
@@ -41,9 +41,16 @@ const Login = () => {
       console.log('username:', response.data.user.username);
 
       const username = response.data.user.username; // Adjust based on the actual structure
-      if (username) {
+      const email = response.data.user.email;
+      const name = response.data.user.name;
+
+      if (username && email && name) {
         Cookies.set('username', username, { expires: 7 });
+        Cookies.set('email', email, { expires: 7 });
+        Cookies.set('name', name, { expires: 7 });
         console.log('Username stored in cookie:', Cookies.get('username'));
+        console.log('Email stored in cookie:', Cookies.get('email'));
+        console.log('Name stored in cookie:', Cookies.get('name'));
       } else {
         console.error('Username is not available in the response');
       }
