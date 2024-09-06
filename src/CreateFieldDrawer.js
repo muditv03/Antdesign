@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Input, Button, message, Select, Checkbox, Card, Spin } from 'antd';
 import axios from 'axios';
 import { BASE_URL } from './Constant';
-
+   
 const { Option } = Select;
  
 const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
@@ -34,12 +34,11 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
 
   const handleFinish = async (values) => {
     setLoading(true); // Show spinner
-    const adjustedFieldType = values.type === 'textarea' || values.type === 'longtextarea' ? 'String' : values.type;
 
     const newField = {
       label: values.label,
       name: values.name,
-      type: adjustedFieldType,
+      type: values.type,
       mt_object_id: mtObjectId,
       iseditable: values.iseditable || false,
       iswriteable: values.iswriteable || false,
@@ -50,10 +49,10 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
     }
 
     if (values.type === 'decimal') {
-      newField.decimal_places_before = values.length;
+      newField.decimal_places_before = values.length-values.decimal_places;
       newField.decimal_places_after = values.decimal_places;
     }
-
+    console.log('field body'+ JSON.stringify(newField));
     try {
       const response = await axios.post(`${BASE_URL}/mt_fields`, {
         mt_field: newField,
@@ -68,18 +67,21 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
         iswriteable: values.iswriteable,
         ...(values.type === 'Picklist' && { picklist_values: picklistValues }),
         ...(values.type === 'decimal' && { 
-          decimal_places_before: values.length,
+          decimal_places_before: values.length-values.decimal_places,
           decimal_places_after: values.decimal_places 
         }),
       });
 
+      console.log(values.length-values.decimal_places);
       message.success('Field created successfully');
       onClose();
       form.resetFields();
     } catch (error) {
       console.error('Error creating field:', error);
-      message.error('Failed to create field');
-    } finally {
+      const errorMessage = error.response?.data?.name
+      ? `Failed to create field because ${error.response.data.name[0]}`
+      : `Failed to create field due to an unknown error`;
+      message.error(errorMessage);     } finally {
       setLoading(false); // Hide spinner
     }
   };
@@ -156,8 +158,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
                 <Option value="Picklist">Picklist</Option> 
                 <Option value="currency">Currency</Option>
                 <Option value="lookup">Lookup</Option>
-                <Option value="textarea">Text Area</Option>
-                <Option value="longtextarea">Long Text Area</Option>  
+                <Option value="Text-Area">Text Area</Option>
               </Select>
             </Form.Item>
 
@@ -201,10 +202,10 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
               <>
                 <Form.Item
                   name="length"
-                  label="Length"
+                  label="Total Length"
                   rules={[{ required: true, message: 'Please enter the length' }]}
                 >
-                  <Input type='Number' placeholder="Enter length" />
+                  <Input type='Number' placeholder="Enter Total length" />
                 </Form.Item>
 
                 <Form.Item

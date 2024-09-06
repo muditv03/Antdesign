@@ -5,7 +5,7 @@ import axios from 'axios';
 import CreateFieldDrawer from './CreateFieldDrawer'; // Import the CreateFieldDrawer component
 import { DownOutlined } from '@ant-design/icons';
 import { BASE_URL } from './Constant';
-
+   
 const { Title } = Typography;
 const { TabPane } = Tabs;
 
@@ -21,11 +21,13 @@ const ObjectFieldDetail = () => {
 
   const fetchFieldsData = () => {
     if (record?.name) {
+      console.log(record.name);
       setLoading(true); // Set loading state before making the API call
       axios
         .get(`${BASE_URL}/mt_fields/object/${record.name}`)
         .then((response) => {
           setFieldsData(response.data);
+          console.log('field data is '+ response.data);
           setLoading(false);
         })
         .catch((error) => {
@@ -87,26 +89,7 @@ const ObjectFieldDetail = () => {
       key: 'iswriteable',
       render: (value) => (value ? 'Yes' : 'No'),
     },
-    {
-      title: 'Action',
-      key: 'operation',
-      fixed: 'right',
-      width: 50,
-      render: (_, record) => (
-        <Dropdown
-          overlay={
-            <Menu onClick={(e) => handleMenuClick(e, record)}>
-              <Menu.Item key="1">Delete</Menu.Item>
-            </Menu>
-          }
-          trigger={['click']}
-        >
-          <a onClick={(e) => e.preventDefault()}>
-            <DownOutlined />
-          </a>
-        </Dropdown>
-      ),
-    },
+    
   ];
 
   const showDrawer = () => {
