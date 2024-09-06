@@ -3,7 +3,7 @@ import { Drawer, Form, Input, Button, message, Card, Checkbox, Select, Spin } fr
 import axios from 'axios';
 import * as Icons from '@ant-design/icons';
 import { BASE_URL } from './Constant';
-  
+   
 const { Option } = Select;
 
 const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord }) => {
@@ -70,7 +70,10 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       form.resetFields();
     } catch (error) {
       console.error('Error creating/updating object:', error);
-      message.error(`Failed to ${editingRecord ? 'update' : 'create'} object`);
+      const errorMessage = error.response?.data?.name
+      ? `Failed to create object because ${error.response.data.name[0]}`
+      : `Failed to create object due to an unknown error`;
+      message.error(errorMessage); 
     } finally {
       setLoading(false); // Stop the spinner
     }

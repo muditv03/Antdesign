@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Table, Typography, Button, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message,Select,DatePicker,Spin, Modal } from 'antd';
+import { Table, Typography, Button, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker,Spin, Modal,Space } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DownOutlined } from '@ant-design/icons';
 import { BASE_URL } from './Constant';
-      
+import dayjs from 'dayjs';
+ 
+           
 const { Title } = Typography;
 
 const ObjectSetupDetail = () => {
@@ -21,10 +23,12 @@ const ObjectSetupDetail = () => {
   const [fieldsData, setFieldsData] = useState([]);
   const [form] = Form.useForm();
   const navigate = useNavigate();
-
   const [lookupOptions, setLookupOptions] = useState([]);
+  const [lookupName, setLookupName] = useState('');
   const [lookupFieldName, setLookupFieldName] = useState('');
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+
 
   
   const fetchRecords = async () => {
@@ -78,7 +82,7 @@ const ObjectSetupDetail = () => {
     setDrawerVisible(true);
     try {
       setLoading(true);
-      const response = await axios.get(`${BASE_URL}/mt_fields/object/${id}`);
+      const response = await axios.get(`${BASE_URL}/mt_fields/object/${objectName}`);
       setFieldsData(response.data);
     } catch (error) {
       setLoading(false);
@@ -90,20 +94,44 @@ const ObjectSetupDetail = () => {
   };
 
   const handleEditClick = async (record) => {
-    setSelectedRecord(record); // Set the selected record for editing
-    form.setFieldsValue(record); // Populate the form with the selected record's data
+    setSelectedRecord(record); 
+    form.setFieldsValue(record); 
     setDrawerVisible(true);
+
     try {
       setLoading(true);
-      const response = await axios.get(`${BASE_URL}/mt_fields/object/${id}`);
-      setFieldsData(response.data);
-    } catch (error) {
-      setLoading(false);
-      console.error('Error fetching API response:', error);
-    }
-    setLoading(false);
 
-  };
+      const fieldsResponse = await axios.get(`${BASE_URL}/mt_fields/object/${objectName}`);
+      
+      setFieldsData(fieldsResponse.data);
+
+      const lookupField = fieldsResponse.data.find(field => field.type === 'lookup');
+      if (lookupField) {
+        const ob = lookupField.name;
+        const objectName = lookupField.name.toLowerCase();
+        const recordId = record[`${objectName}_id`];
+
+        if (recordId) {
+          const response = await axios.get(`${BASE_URL}/fetch_single_record/${ob}/${recordId}`);
+          console.log('lookup record name is ' + response.data.Name);
+
+          // Store the name in a state to display it in the UI
+          setLookupName(response.data.Name);
+          
+          // Set the lookup ID in the form
+          form.setFieldsValue({
+            [lookupField.name]: recordId
+          });
+        }
+      }
+
+      
+    } catch (error) {
+      console.error('Error fetching API response:', error);
+    } finally {
+      setLoading(false);
+    }
+};
   const handleCloneClick =  (record) => {
     const clonedRecord = { ...record, _id: undefined, isClone: true };
     setSelectedRecord(clonedRecord);
@@ -148,8 +176,13 @@ const ObjectSetupDetail = () => {
       setLoading(false);
 
       console.error('Error saving record:', error);
-      message.error('Failed to save record');
-    }
+      const errorMessage = error.response?.data?.name
+      ? `Failed to create record because ${error.response.data.name[0]}`
+      : `Failed to create record due to an unknown error`;
+
+
+    message.error(errorMessage);    
+   }
     setLoading(false);
 };
 
@@ -201,7 +234,10 @@ const ObjectSetupDetail = () => {
 
   };
 
-  const renderFormItem = (field) => {
+  const renderFormItem = (field,selectedDate, setSelectedDate) => {
+    const validationRules = [{ required: true, message: `Please enter ${field.label}` }]; // Ensuring all fields are required
+
+
     switch (field.type) {
       case 'String':
         return (
@@ -209,7 +245,7 @@ const ObjectSetupDetail = () => {
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: field.required, message: `Please enter ${field.label}` }]}
+            rules={[{ required: true, message: `Please enter ${field.label}` }]}
           >
             <Input placeholder={`Enter ${field.label}`} />
           </Form.Item>
@@ -221,6 +257,8 @@ const ObjectSetupDetail = () => {
             key={field.name}
             name={field.name}
             label={field.label}
+            rules={[{ required: true, message: `Please enter ${field.label}` }]}
+
           >
             <Input type="number" placeholder={`Enter ${field.label}`} />
           </Form.Item>
@@ -233,23 +271,39 @@ const ObjectSetupDetail = () => {
             name={field.name}
             valuePropName="checked"
             initialValue={false}
-            rules={[{ required: field.required, message: `Please select ${field.label}` }]}
+            rules={[{ required: true, message: `Please select ${field.label}` }]}
           >
             <Checkbox>{field.label}</Checkbox>
           </Form.Item>
         );
 
-      case 'Date':
-        return (
-          <Form.Item
+        case 'Date':
+          return (
+            <Form.Item
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: field.required, message: `Please select a valid ${field.label}` }]}
+            rules={[{ required: true, message: `Please select a valid ${field.label}` }]}
           >
-            <DatePicker placeholder={`Select ${field.label}`} style={{ width: '100%' }} />
+            <Space>
+            <DatePicker
+             placeholder={`Select ${field.label}`}
+             style={{ width: '100%' }}
+             format="YYYY-MM-DD"
+
+             value={selectedDate || (form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name)) : null)}
+                onChange={(date, dateString) => {
+                  console.log('Selected Date:', dateString); // Debugging - check if the correct date is selected
+
+                  // Update both the form and local state
+                  setSelectedDate(date ? dayjs(dateString) : null);  // Update local state
+                  form.setFieldsValue({ [field.name]: dateString });        // Update form value
+                }}           
+            />
+            </Space>
           </Form.Item>
-        );
+          
+          );
 
       case 'currency':
         return (
@@ -257,22 +311,12 @@ const ObjectSetupDetail = () => {
             key={field.name}
             name={field.name}
             label={field.label}
+            rules={[{ required: true, message: `Please enter ${field.label}` }]}
+
           >
             <Input type="number" step="0.01" placeholder={`Enter ${field.label}`} />
           </Form.Item>
         );
-
-      case 'decimal':
-        return (
-          <Form.Item
-            key={field.name}
-            name={field.name}
-            label={field.label}
-          >
-            <Input type="number" step="0.01" placeholder={`Enter ${field.label}`} />
-          </Form.Item>
-        );
-
       case 'Picklist':
       console.log('Picklist Values:', field); // Log the picklist values
 
@@ -281,7 +325,7 @@ const ObjectSetupDetail = () => {
           key={field.name}
           name={field.name}
           label={field.label}
-          rules={[{ required: field.required, message: `Please select ${field.label}` }]}
+          rules={[{ required: true, message: `Please select ${field.label}` }]}
         >
           <Select placeholder={`Select ${field.label}`}>
             {field.picklist_values.map((value) => (
@@ -299,7 +343,7 @@ const ObjectSetupDetail = () => {
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: field.required, message: `Please select a ${field.label}` }]}
+            rules={[{ required: true, message: `Please select a ${field.label}` }]}
           >
             <Select placeholder={`Select ${field.label}`}>
               {lookupOptions.map(option => (
@@ -311,31 +355,46 @@ const ObjectSetupDetail = () => {
           </Form.Item>
         );
         case 'decimal':
-      const decimalPlacesBefore = field.decimal_places_before || 9; // Default to 9 if not provided
-      const decimalPlacesAfter = field.decimal_places_after || 2;   // Default to 2 if not provided
-
-      // Construct a regex pattern based on decimalPlacesBefore and decimalPlacesAfter
-      const decimalPattern = new RegExp(`^\\d{1,${decimalPlacesBefore}}(\\.\\d{0,${decimalPlacesAfter}})?$`);
-
-      return (
-        <Form.Item
-          key={field.name}
-          name={field.name}
-          label={field.label}
-          rules={[
-            { required: field.required, message: `Please enter ${field.label}` },
-            {
-              pattern: decimalPattern,
-              message: `Enter a valid number with up to ${decimalPlacesBefore} digits before the decimal and ${decimalPlacesAfter} digits after the decimal.`,
-            },
-          ]}
-        >
-          <Input
-            placeholder={`Enter ${field.label}`}
-            maxLength={decimalPlacesBefore + decimalPlacesAfter + 1} // +1 for the decimal point
-          />
-        </Form.Item>
-      );
+          const decimalPlacesBefore = field.decimal_places_before ;
+          const decimalPlacesAfter = field.decimal_places_after ;
+          console.log('decimal before'+decimalPlacesBefore);
+          console.log('decimal after'+decimalPlacesAfter);
+    
+          const decimalPattern = new RegExp(`^\\d{1,${decimalPlacesBefore}}(\\.\\d{0,${decimalPlacesAfter}})?$`);
+    
+          return (
+            <Form.Item
+              key={field.name}
+              name={field.name}
+              label={field.label}
+              rules={[
+                { required: true, message: `Please enter ${field.label}` },
+                {
+                  pattern: decimalPattern,
+                  message: `Enter a valid number with up to ${decimalPlacesBefore} digits before the decimal and ${decimalPlacesAfter} digits after the decimal.`,
+                },
+              ]}
+            >
+              <Input
+                placeholder={`Enter ${field.label}`}
+                maxLength={decimalPlacesBefore + decimalPlacesAfter + 1} 
+              />
+            </Form.Item>
+          );
+    
+        case 'Text-Area':
+          return (
+            <Form.Item
+              key={field.name}
+              name={field.name}
+              label={field.label}
+              rules={[{ required: true, message: `Please enter ${field.label}` }]}
+            >
+              <Input.TextArea
+                placeholder={`Enter ${field.label}`}
+              />
+            </Form.Item>
+          );
 
       default:
         return null;
@@ -461,7 +520,7 @@ const ObjectSetupDetail = () => {
             onFinish={handleFinish}
             style={{ fontSize: '16px' }}
           >
-            {fieldsData?.map((field) => renderFormItem(field))}
+            {fieldsData?.map((field) => renderFormItem(field,selectedDate, setSelectedDate))}
           </Form>
         </Card>
         </Spin> 

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Card, List, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { BASE_URL } from './Constant';
-
+ 
 const { Title } = Typography;
 
 const RelatedRecord = ({ objectName, recordId }) => {

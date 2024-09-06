@@ -132,23 +132,8 @@ const DataTable = () => {
       key: 'plurallabel',
       width: 100,
     },
-    {
-      title: 'Action',
-      key: 'operation',
-      fixed: 'right',
-      width: 50,
-      render: (_, record) => (
-        <Dropdown
-          overlay={menu}
-          trigger={['click']}
-          onVisibleChange={() => setSelectedRecord(record)}
-        >
-          <a onClick={(e) => e.preventDefault()}>
-            <DownOutlined />
-          </a>
-        </Dropdown>
-      ),
-    },
+   
+  
   ];
 
   return (

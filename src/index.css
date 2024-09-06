@@ -54,12 +54,13 @@ body {
 html, body, #root, .layout {
   height: 100%;
   margin: 0;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .layout {
   display: flex;
   flex-direction: column;
+  overflow:auto;
 }
 
 .content-layout, .content {
