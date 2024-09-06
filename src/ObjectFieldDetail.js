@@ -76,6 +76,8 @@ const ObjectFieldDetail = () => {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
+      render: (value) => value ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : '', // Capitalize first letter
+
     },
     {
       title: 'Is Editable',
