@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Card, Table, Typography } from 'antd';
+import { Card, Typography } from 'antd';
 import { BASE_URL } from './Constant';
+import ChildRecordTable from './RecordTable'; // Import the new component
+import ApiService from './apiService'; // Import ApiService class
 
 const { Title } = Typography;
 
@@ -9,91 +10,76 @@ const RelatedRecord = ({ objectName, recordId }) => {
   const [groupedData, setGroupedData] = useState({});
   const [childRecordsMap, setChildRecordsMap] = useState({}); // Store child records by related list ID
 
-  useEffect(() => {
-    const fetchRelatedRecords = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/related_lists/for_object/${objectName}`);
+  // Fetch related records using ApiService
+  const fetchRelatedRecords = async () => {
+    try {
+      // Use ApiService to fetch related lists
+      const relatedListService = new ApiService(
+        `${BASE_URL}/related_lists/for_object/${objectName}`, // Endpoint
+        {}, // Headers (none in this case)
+        'GET' // HTTP method
+      );
+      const response = await relatedListService.makeCall(); // Make the API call
+ 
+      console.log('API response:', response);
 
-        console.log('API response:', response.data);
-
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          // Group data by child_object_name
-          const grouped = response.data.reduce((acc, record) => {
-            if (!acc[record.child_object_name]) {
-              acc[record.child_object_name] = [];
-            }
-            acc[record.child_object_name].push(record);
-            return acc;
-          }, {});
-
-          setGroupedData(grouped);
-          console.log('Grouped data:', grouped);
-
-          // Fetch child records for each related list
-          for (const childObjectName of Object.keys(grouped)) {
-            for (const relatedList of grouped[childObjectName]) {
-              fetchChildRecords(relatedList._id, recordId, childObjectName);
-            }
+      if (Array.isArray(response) && response.length > 0) {
+        // Group data by child_object_name
+        const grouped = response.reduce((acc, record) => {
+          if (!acc[record.child_object_name]) {
+            acc[record.child_object_name] = [];
           }
-        } else {
-          console.warn('Unexpected API response format or empty data');
-        }
-      } catch (err) {
-        console.error('Error fetching related records', err);
+          acc[record.child_object_name].push(record);
+          return acc;
+        }, {});
+
+        setGroupedData(grouped);
+        console.log('Grouped data:', grouped);
+
+        // Flatten grouped data and fetch child records
+        const flattenedRelatedLists = Object.keys(grouped).flatMap((childObjectName) =>
+          grouped[childObjectName].map((relatedList) => ({
+            relatedListId: relatedList._id,
+            childObjectName,
+          }))
+        );
+
+        flattenedRelatedLists.forEach(({ relatedListId, childObjectName }) => {
+          fetchChildRecords(relatedListId, recordId, childObjectName);
+        });
+      } else {
+        console.warn('Unexpected API response format or empty data');
       }
-    };
+    } catch (err) {
+      console.error('Error fetching related records', err);
+    }
+  };
 
-    fetchRelatedRecords();
-  }, [objectName, recordId]);
-
-  // Fetch child records for a specific related list
+  // Fetch child records using ApiService
   const fetchChildRecords = async (relatedListId, recordId, childObjectName) => {
     try {
-      const response = await axios.get(`${BASE_URL}/related_lists/${relatedListId}/${recordId}/child_records`);
+      // Use ApiService to fetch child records
+      const childRecordsService = new ApiService(
+        `${BASE_URL}/related_lists/${relatedListId}/${recordId}/child_records`, // Endpoint
+        {}, // Headers (none in this case)
+        'GET' // HTTP method
+      );
+      const response = await childRecordsService.makeCall(); // Make the API call
 
       setChildRecordsMap((prevMap) => ({
         ...prevMap,
-        [relatedListId]: response.data,
+        [relatedListId]: response,
       }));
 
-      console.log(`Child records for ${childObjectName} (relatedListId: ${relatedListId}):`, response.data);
+      console.log(`Child records for ${childObjectName} (relatedListId: ${relatedListId}):`, response);
     } catch (err) {
       console.error(`Error fetching child records for ${childObjectName} (relatedListId: ${relatedListId}):`, err);
     }
   };
 
-  const renderTable = (records, relatedListId) => {
-    // Dynamically generate columns based on fields_to_display in child records
-    const columns = records[0]?.fields_to_display.map((field) => ({
-      title: field, // Column heading
-      dataIndex: field, // Field name
-      key: field,
-    })) || [];
-
-    const dataSource = (childRecordsMap[relatedListId] || []).map((childRecord) => {
-      const row = {
-        key: childRecord._id,
-      };
-
-      // Populate fields dynamically from the child record data
-      records[0]?.fields_to_display.forEach((field) => {
-        row[field] = childRecord[field] || ''; // Fill the row with the field values from the API response
-      });
-
-      return row;
-    });
-
-    console.log(`Render table for relatedListId ${relatedListId}:`, dataSource);
-
-    return (
-      <Table
-        dataSource={dataSource.slice(0, 3)} // Show only 3 records
-        columns={columns}
-        pagination={false}
-        scroll={{ y: 150 }} // Set the scroll height to make the table scrollable
-      />
-    );
-  };
+  useEffect(() => {
+    fetchRelatedRecords(); // Call the function when component mounts
+  }, [objectName, recordId]);
 
   return (
     <div>
@@ -108,7 +94,11 @@ const RelatedRecord = ({ objectName, recordId }) => {
             }
             style={{ marginBottom: 16 }}
           >
-            {renderTable(groupedData[childObjectName], relatedList._id)}
+            <ChildRecordTable 
+              records={groupedData[childObjectName]} 
+              fieldsToDisplay={relatedList.fields_to_display} 
+              childRecords={childRecordsMap[relatedList._id] || []} 
+            />
           </Card>
         ))
       ))}

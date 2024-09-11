@@ -5,7 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
+} 
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
@@ -88,3 +88,30 @@ html, body, #root, .layout {
 .sidebar-expanded .object-field-detail-container {
   margin-left: 200px; /* Adjust based on your expanded sidebar width */
 }
+
+
+/* Hide scrollbar for WebKit-based browsers (Chrome, Safari) */
+.custom-scrollbar::-webkit-scrollbar {
+  display: none; /* Hides scrollbar in WebKit-based browsers */
+}
+
+/*
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px; /* Set the width of the scrollbar 
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* Background of the scrollbar track 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: grey; /* Scrollbar thumb color 
+  border-radius: 10px; /* Round the edges of the scrollbar thumb 
+  border: 2px solid transparent; /* Add padding around thumb 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #a0a0a0; /* Lighter grey on hover for a sleek look 
+}
+  */
+

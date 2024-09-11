@@ -13,9 +13,9 @@ import RecordComponent from './Components/recordComponent';
 import AppFooter from './Footer';  // Import the footer component
 import Profile from './Profile';  // Import the Profile component
 import RecordDetail from './RecordDetailPage';
-  
+   
 const { Content } = Layout;
-
+  
 // Define the sidebar routes
 const sidebarRoutes = [
   '/object-setup',

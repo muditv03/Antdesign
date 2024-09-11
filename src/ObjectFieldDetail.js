@@ -5,6 +5,7 @@ import axios from 'axios';
 import CreateFieldDrawer from './CreateFieldDrawer'; // Import the CreateFieldDrawer component
 import { DownOutlined } from '@ant-design/icons';
 import { BASE_URL } from './Constant';
+import ApiService from './apiService'; // Import ApiService class
    
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -19,23 +20,36 @@ const ObjectFieldDetail = () => {
   const [modalVisible, setModalVisible] = useState(false); // Manage modal visibility
   const [selectedField, setSelectedField] = useState(null); // Store the selected field to delete
 
-  const fetchFieldsData = () => {
+  const fetchFieldsData = async () => {
     if (record?.name) {
       console.log(record.name);
       setLoading(true); // Set loading state before making the API call
-      axios
-        .get(`${BASE_URL}/mt_fields/object/${record.name}`)
-        .then((response) => {
-          setFieldsData(response.data);
-          console.log('field data is '+ response.data);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error('Error fetching fields:', error);
-          setLoading(false);
-        });
+      
+      try {
+        // Instantiate the ApiService class for the GET request
+        const apiService = new ApiService(
+          `${BASE_URL}/mt_fields/object/${record.name}`,
+          {
+            'Content-Type': 'application/json',
+          },
+          'GET' // Specify the method as 'GET'
+        );
+  
+        // Make the API call
+        const response = await apiService.makeCall();
+  
+        // Set the fields data with the response
+        setFieldsData(response);
+        console.log('field data is ' + JSON.stringify(response));
+  
+      } catch (error) {
+        console.error('Error fetching fields:', error);
+      } finally {
+        setLoading(false); // Stop loading state
+      }
     }
   };
+  
 
   useEffect(() => {
     fetchFieldsData();

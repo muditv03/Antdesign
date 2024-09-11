@@ -6,6 +6,8 @@ import { EditOutlined } from '@ant-design/icons';
 import RelatedRecord from './RelatedRecords';
 import { BASE_URL } from './Constant';
 import dayjs from 'dayjs';
+import ApiService from './apiService'; // Import ApiService class
+
     
 const { TextArea } = Input;
 const { Option } = Select;
@@ -27,20 +29,33 @@ const RecordDetail = () => {
   const fetchRecords = async () => {
     try {
       // Fetch the record data
-      const response = await axios.get(`${BASE_URL}/fetch_single_record/${objectName}/${id}`);
-      const recordData = response.data;
+      const apiService = new ApiService(`${BASE_URL}/fetch_single_record/${objectName}/${id}`, {}, 'GET');
+      const responseData = await apiService.makeCall();
+      console.log(responseData); // Process the data as needed
+      const recordData = responseData;
 
       // Fetch the fields for this object
-      const fieldsResponse = await axios.get(`${BASE_URL}/mt_fields/object/${objectName}`);
-      setFields(fieldsResponse.data);
+      // const fieldsResponse = await axios.get(`${BASE_URL}/mt_fields/object/${objectName}`);
+      // console.log('fieldresponse :', fieldsResponse.data);
+      // setFields(fieldsResponse.data);
+
+      const fieldCallout = new ApiService(`${BASE_URL}/mt_fields/object/${objectName}`, {}, 'GET');
+      const fieldsResponse = await fieldCallout.makeCall();
+
+      console.log('fieldresponse :', fieldsResponse);
+      setFields(fieldsResponse);
 
       // Process lookup fields to fetch names
-      const lookupPromises = fieldsResponse.data
+      const lookupPromises = fieldsResponse
         .filter(field => field.type === 'lookup' && recordData[field.name.toLowerCase() + '_id'])
         .map(async field => {
           const lookupId = recordData[field.name.toLowerCase() + '_id'];
-          const lookupResponse = await axios.get(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`);
-          return { [field.name]: lookupResponse.data.Name };
+          // const lookupResponse = await axios.get(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`);
+
+          const fetchSingleRec = new ApiService(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`, {}, 'GET');
+          const lookupResponse = await fetchSingleRec.makeCall();
+
+          return { [field.name]: lookupResponse.Name };
         });
 
       const lookupResults = await Promise.all(lookupPromises);
@@ -55,12 +70,16 @@ const RecordDetail = () => {
       setInitialValues(recordData);
 
       // Fetch lookup field options
-      const lookupFieldPromises = fieldsResponse.data
+      const lookupFieldPromises = fieldsResponse
         .filter(field => field.type === 'lookup')
         .map(async field => {
           const lookupFieldName = field.name;
-          const lookupResponse = await axios.get(`${BASE_URL}/fetch_records/${lookupFieldName}`);
-          return { [lookupFieldName]: lookupResponse.data };
+          // const lookupResponse = await axios.get(`${BASE_URL}/fetch_records/${lookupFieldName}`);
+
+          const fetchRec = new ApiService(`${BASE_URL}/fetch_records/${lookupFieldName}`, {}, 'GET');
+          const lookupResponse = await fetchRec.makeCall();
+
+          return { [lookupFieldName]: lookupResponse };
         });
 
       const lookupOptionsResults = await Promise.all(lookupFieldPromises);
@@ -100,7 +119,12 @@ const RecordDetail = () => {
         },
       };
 
-      await axios.post('http://localhost:3000/insert_or_update_records', body);
+      // await axios.post(`${BASE_URL}/insert_or_update_records`, body);
+
+      const apiService = new ApiService(`${BASE_URL}/insert_or_update_records`, {
+        'Content-Type': 'application/json', // Add any necessary headers, such as content type
+      }, 'POST', body);
+      const response = await apiService.makeCall();
       message.success('Record saved successfully');
 
       // Update initial values
