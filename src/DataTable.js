@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CreateObjectDrawer from './CreateObjectDrawer';
 import { BASE_URL } from './Constant';
+import ApiService from './apiService'; // Import ApiService class
 
 const { Title } = Typography;
 
@@ -21,8 +22,16 @@ const DataTable = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${BASE_URL}/mt_objects`);
-      setData(response.data.map((item) => ({
+      // Instantiate the ApiService class for the GET request
+      const apiService = new ApiService(`${BASE_URL}/mt_objects`, {
+        'Content-Type': 'application/json'}, 'GET'
+      );
+  
+      // Make the API call
+      const response = await apiService.makeCall();
+  
+      // Set the data state with the response
+      setData(response.map((item) => ({
         key: item._id,
         label: item.label,
         name: item.name,
@@ -34,6 +43,7 @@ const DataTable = () => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchData();
@@ -151,8 +161,8 @@ const DataTable = () => {
           <Table
             columns={columns}
             dataSource={data}
-            scroll={{ x: 1500, y: 'calc(100vh - 200px)' }}
-            pagination={false}
+          //  scroll={{ x: 1500, y: 'calc(100vh - 200px)' }}
+            pagination={true}
             style={{ width: '100%' }}
           />
         </div>

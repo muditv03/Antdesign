@@ -9,6 +9,7 @@ import axios from 'axios';
 //const sign = require('jwt-encode');
 import Cookies from 'js-cookie';
 import { BASE_URL } from './Constant';
+import ApiService from './apiService'; // Import ApiService class
  
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -33,16 +34,24 @@ const Login = () => {
       console.log('Decoded Token:', decodedToken);
 
       // Make the API call
-      const response = await axios.post(`${BASE_URL}/login`, {
+      // const response = await axios.post(`${BASE_URL}/login`, {
+      //   tokens: token,
+      // });
+
+      const apiService = new ApiService(`${BASE_URL}/login`, {
+        'Content-Type': 'application/json', // Add any necessary headers, such as content type
+      }, 'POST', {
         tokens: token,
       });
 
-      console.log('API Response:', response.data);
-      console.log('username:', response.data.user.username);
+      const response = await apiService.makeCall();
 
-      const username = response.data.user.username; // Adjust based on the actual structure
-      const email = response.data.user.email;
-      const name = response.data.user.name;
+      console.log('API Response:', response);
+      console.log('username:', response.user.username);
+
+      const username = response.user.username; // Adjust based on the actual structure
+      const email = response.user.email;
+      const name = response.user.name;
 
       if (username && email && name) {
         Cookies.set('username', username, { expires: 7 });

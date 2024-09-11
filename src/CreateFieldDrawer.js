@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Input, Button, message, Select, Checkbox, Card, Spin } from 'antd';
-import axios from 'axios';
 import { BASE_URL } from './Constant';
-   
+import ApiService from './apiService'; // Import ApiService class
+
 const { Option } = Select;
- 
+
 const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
   const [form] = Form.useForm();
   const [fieldType, setFieldType] = useState('');
@@ -14,14 +14,19 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
 
   useEffect(() => {
     if (fieldType === 'lookup') {
-      axios.get(`${BASE_URL}/mt_objects`)
-        .then(response => {
-          setAvailableObjects(response.data);
-        })
-        .catch(error => {
+      // Use ApiService for fetching objects
+      const fetchAvailableObjects = async () => {
+        try {
+          const objectService = new ApiService(`${BASE_URL}/mt_objects`, {}, 'GET');
+          const response = await objectService.makeCall();
+          setAvailableObjects(response);
+        } catch (error) {
           console.error('Error fetching objects:', error);
           message.error('Failed to fetch objects');
-        });
+        }
+      };
+
+      fetchAvailableObjects();
     } else {
       setAvailableObjects([]);
     }
@@ -43,20 +48,24 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
       iseditable: values.iseditable || false,
       iswriteable: values.iswriteable || false,
     };
-
+ 
     if (values.type === 'Picklist') {
       newField.picklist_values = picklistValues;
     }
 
     if (values.type === 'decimal') {
-      newField.decimal_places_before = values.length-values.decimal_places;
+      newField.decimal_places_before = values.length - values.decimal_places;
       newField.decimal_places_after = values.decimal_places;
     }
-    console.log('field body'+ JSON.stringify(newField));
+
+    console.log('field body' + JSON.stringify(newField));
+
     try {
-      const response = await axios.post(`${BASE_URL}/mt_fields`, {
+      // Use ApiService for posting the field data
+      const fieldService = new ApiService(`${BASE_URL}/mt_fields`, {}, 'POST', {
         mt_field: newField,
       });
+      const response = await fieldService.makeCall();
 
       onAddField({
         key: Date.now(),
@@ -66,22 +75,22 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
         iseditable: values.iseditable,
         iswriteable: values.iswriteable,
         ...(values.type === 'Picklist' && { picklist_values: picklistValues }),
-        ...(values.type === 'decimal' && { 
-          decimal_places_before: values.length-values.decimal_places,
-          decimal_places_after: values.decimal_places 
+        ...(values.type === 'decimal' && {
+          decimal_places_before: values.length - values.decimal_places,
+          decimal_places_after: values.decimal_places,
         }),
       });
 
-      console.log(values.length-values.decimal_places);
       message.success('Field created successfully');
       onClose();
       form.resetFields();
     } catch (error) {
       console.error('Error creating field:', error);
       const errorMessage = error.response?.data?.name
-      ? `Failed to create field because ${error.response.data.name[0]}`
-      : `Failed to create field due to an unknown error`;
-      message.error(errorMessage);     } finally {
+        ? `Failed to create field because ${error.response.data.name[0]}`
+        : `Failed to create field due to an unknown error`;
+      message.error(errorMessage);
+    } finally {
       setLoading(false); // Hide spinner
     }
   };
@@ -205,7 +214,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
                   label="Total Length"
                   rules={[{ required: true, message: 'Please enter the length' }]}
                 >
-                  <Input type='Number' placeholder="Enter Total length" />
+                  <Input type="Number" placeholder="Enter Total length" />
                 </Form.Item>
 
                 <Form.Item
@@ -213,7 +222,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
                   label="Decimal Places"
                   rules={[{ required: true, message: 'Please enter decimal places' }]}
                 >
-                  <Input type='Number' placeholder="Enter decimal places" />
+                  <Input type="Number" placeholder="Enter decimal places" />
                 </Form.Item>
               </>
             )}

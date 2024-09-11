@@ -4,6 +4,8 @@ import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { BASE_URL } from './Constant';
+import ApiService from './apiService'; // Import ApiService class
+
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -23,13 +25,22 @@ const Signup = () => {
 
     try {
       // Make the API call to the /register endpoint
-      const response = await axios.post(`${BASE_URL}/register`, {
+      // const response = await axios.post(`${BASE_URL}/register`, {
+      //   logintable: body,
+      // });
+
+      const apiService = new ApiService(`${BASE_URL}/register`, {
+        'Content-Type': 'application/json', // Add any necessary headers, such as content type
+      }, 'POST', {
         logintable: body,
       });
 
+      const response = await apiService.makeCall();
+
+
       // Handle successful registration
       message.success('Registration successful!');
-      console.log('Success:', response.data);
+      console.log('Success:', response);
 
       // Clear the form fields
       form.resetFields();

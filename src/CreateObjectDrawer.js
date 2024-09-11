@@ -3,6 +3,7 @@ import { Drawer, Form, Input, Button, message, Card, Checkbox, Select, Spin } fr
 import axios from 'axios';
 import * as Icons from '@ant-design/icons';
 import { BASE_URL } from './Constant';
+import ApiService from './apiService'; // Import ApiService class
    
 const { Option } = Select;
 
@@ -27,57 +28,101 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       addObjectTab: values.addObjectTab,
       icon: values.icon,
     };
-
+  
     try {
       let response;
       if (editingRecord) {
-        // Update existing record
-        response = await axios.put(`${BASE_URL}/mt_objects/${editingRecord.key}`, {
-          mt_object: formData,
-        });
+        // Update existing record using ApiService
+        const apiService = new ApiService(
+          `${BASE_URL}/mt_objects/${editingRecord.key}`,
+          {
+            'Content-Type': 'application/json',
+          },
+          'PUT',
+          {
+            mt_object: formData,
+          }
+        );
+  
+        response = await apiService.makeCall(); 
         message.success('Object updated successfully');
+        
       } else {
-        // Create new record
-        response = await axios.post(`${BASE_URL}/mt_objects`, {
-          mt_object: formData,
+        // Create new record using ApiService
+        const apiService = new ApiService(
+          `${BASE_URL}/mt_objects`,
+          {
+            'Content-Type': 'application/json',
+          },
+          'POST',
+          {
+            mt_object: formData,
+          }
+        );
+      
+        response = await apiService.makeCall();
+        
+        console.log("API Response:", response); // Log the response for debugging
+  
+        if (response && response._id) { 
+          message.success('Object created successfully');
+        } else {
+          throw new Error("Invalid response from server");
+        }
+  
+        // Create newTab only when object is created successfully
+        const newTab = {
+          label: values.label,
+          name: values.name,
+          description: "All Accounts",
+          mt_object_id: response._id, // Use the new object ID from the response
+          icon: values.icon,
+          addObjectTab: values.addObjectTab,
+        };
+  
+        if (newTab.icon && newTab.addObjectTab) {
+          // Create a new instance of ApiService for the tab creation callout
+          const apiServiceForTab = new ApiService(
+            `${BASE_URL}/mt_tabs`,
+            {
+              'Content-Type': 'application/json',
+            },
+            'POST',
+            { mt_tab: newTab }
+          );
+  
+          const tabResponse = await apiServiceForTab.makeCall();
+  
+          // Check if the tab creation was successful
+          if (!tabResponse || !tabResponse._id) {
+            throw new Error("Failed to create a new tab");
+          }
+        }
+  
+        // Update the list of objects
+        onAddOrEditObject({
+          key: response._id, // Use the ID from the response
+          label: values.label,
+          name: values.name,
+          plurallabel: values.plurallabel,
+          addObjectTab: values.addObjectTab,
+          icon: values.icon,
         });
-        message.success('Object created successfully');
       }
-
-      const newTab = {
-        label: values.label,
-        name: values.name,
-        description: "All Accounts",
-        mt_object_id: editingRecord ? editingRecord.key : response.data._id,
-        icon: values.icon,
-        addObjectTab: values.addObjectTab,
-      };
-
-      if (newTab.icon && newTab.addObjectTab) {
-        await axios.post(`${BASE_URL}/mt_tabs`, { mt_tab: newTab });
-      }
-
-      onAddOrEditObject({
-        key: editingRecord ? editingRecord.key : response.data._id,
-        label: values.label,
-        name: values.name,
-        plurallabel: values.plurallabel,
-        addObjectTab: values.addObjectTab,
-        icon: values.icon,
-      });
-
-      onClose();
+  
+      onClose(); // Close the drawer upon success
       form.resetFields();
     } catch (error) {
       console.error('Error creating/updating object:', error);
       const errorMessage = error.response?.data?.name
-      ? `Failed to create object because ${error.response.data.name[0]}`
-      : `Failed to create object due to an unknown error`;
-      message.error(errorMessage); 
+        ? `Failed to create object because ${error.response.data.name[0]}`
+        : `Failed to create object due to an unknown error`;
+      message.error(errorMessage);
     } finally {
       setLoading(false); // Stop the spinner
     }
   };
+  
 
   const iconOptions = Object.keys(Icons).map((iconName) => {
     const IconComponent = Icons[iconName];

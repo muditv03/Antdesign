@@ -5,6 +5,7 @@ import * as Icons from '@ant-design/icons';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { BASE_URL } from './Constant';
+import ApiService from './apiService'; // Import ApiService class
   
 const { useBreakpoint } = Grid;
 
@@ -30,8 +31,12 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${BASE_URL}/mt_tabs`);
-        const filteredItems = response.data
+       // const response = await axios.get(`${BASE_URL}/mt_tabs`);
+
+        const apiService = new ApiService(`${BASE_URL}/mt_tabs`, {}, 'GET');
+        const response = await apiService.makeCall();
+
+        const filteredItems = response
           .filter((item) => item.icon !== null)
           .map((item) => {
             const IconComponent = Icons[item.icon];
@@ -65,7 +70,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
       const isRecordPath = location.pathname.startsWith(`/record/${item.key}`);
       return isObjectPath || isRecordPath;
     });
-    setSelectedKey(matchedItem ? matchedItem.key : null);  // Only select tab if match found
+    setSelectedKey(matchedItem ? matchedItem.key : null);  // Only select tab if match foundz
   }, [location.pathname, items]);
 
   const handleClick = (e) => {
@@ -147,6 +152,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
                 overflowY: 'auto',
                 backgroundColor: '#001529',
               }}
+               className="custom-scrollbar"
             >
               <Menu
                 onClick={handleClick}

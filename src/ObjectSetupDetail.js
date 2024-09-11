@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { DownOutlined } from '@ant-design/icons';
 import { BASE_URL } from './Constant';
 import dayjs from 'dayjs';
+import ApiService from './apiService'; // Import ApiService class
  
            
 const { Title } = Typography;
@@ -34,28 +35,54 @@ const ObjectSetupDetail = () => {
   const fetchRecords = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${BASE_URL}/mt_objects/${id}`);
-      const objName = response.data.name;
-      const recordsResponse = await axios.get(`${BASE_URL}/fetch_records/${objName}`);
-      setRecords(recordsResponse.data);
-      setObjectName(response.data.label);
-      setobjectPluralName(response.data.pluralLabel)
+  
+      // Fetch object details using ApiService
+      const apiServiceForObject = new ApiService(
+        `${BASE_URL}/mt_objects/${id}`,
+        { 'Content-Type': 'application/json' },
+        'GET' // Specify the method as 'GET'
+      );
+  
+      const response = await apiServiceForObject.makeCall();
+      const objName = response.name;
 
-      const fieldsResponse = await axios.get(`${BASE_URL}/mt_fields/object/${objName}`);
-      setFieldsData(fieldsResponse.data.slice(0, 5)); // Get the first 5 fields
-
+      console.log('objectname :', objName);
+  
+      // Fetch records based on object name
+      const apiServiceForRecords = new ApiService(
+        `${BASE_URL}/fetch_records/${objName}`,
+        { 'Content-Type': 'application/json' },
+        'GET' // Specify the method as 'GET'
+      );
+  
+      const recordsResponse = await apiServiceForRecords.makeCall();
+      setRecords(recordsResponse);
+  
+      setObjectName(response.label);
+      setobjectPluralName(response.pluralLabel);
+  
+      // Fetch fields data for the object
+      const apiServiceForFields = new ApiService(
+        `${BASE_URL}/mt_fields/object/${objName}`,
+        { 'Content-Type': 'application/json' },
+        'GET' // Specify the method as 'GET'
+      );
+  
+      const fieldsResponse = await apiServiceForFields.makeCall();
+      setFieldsData(fieldsResponse.slice(0, 5)); // Get the first 5 fields
+  
       // Identify and set the lookup field name
-      const lookupField = fieldsResponse.data.find(field => field.type === 'lookup');
+      const lookupField = fieldsResponse.find(field => field.type === 'lookup');
       if (lookupField) {
         setLookupFieldName(lookupField.name);
       }
     } catch (err) {
-      setLoading(false);
-      setError(err.response.data.error || 'Error fetching records');
+      setError(err.response?.data?.error || 'Error fetching records');
     } finally {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchRecords();
@@ -65,58 +92,90 @@ const ObjectSetupDetail = () => {
     if (lookupFieldName) {
       const fetchLookupOptions = async () => {
         try {
-          const response = await axios.get(`${BASE_URL}/fetch_records/${lookupFieldName}`);
-          setLookupOptions(response.data);
+          // Create an instance of ApiService for fetching lookup options
+          const apiServiceForLookup = new ApiService(
+            `${BASE_URL}/fetch_records/${lookupFieldName}`,
+            { 'Content-Type': 'application/json' },
+            'GET' // Specify the method as 'GET'
+          );
+  
+          // Fetch the lookup options
+          const response = await apiServiceForLookup.makeCall();
+          setLookupOptions(response); // Set the response data to lookup options
         } catch (error) {
           console.error(`Error fetching lookup options for ${lookupFieldName}:`, error);
         }
       };
-
+  
       fetchLookupOptions();
     }
   }, [lookupFieldName]);
+  
 
   const handleCreateClick = async () => {
     setSelectedRecord(null); // Ensure no record is selected when creating a new record
     form.resetFields(); // Clear the form fields
     setDrawerVisible(true);
+  
     try {
       setLoading(true);
-      const response = await axios.get(`${BASE_URL}/mt_fields/object/${objectName}`);
-      setFieldsData(response.data);
+  
+      // Create an instance of ApiService for fetching fields data
+      const apiServiceForFields = new ApiService(
+        `${BASE_URL}/mt_fields/object/${objectName}`,
+        { 'Content-Type': 'application/json' },
+        'GET' // Specify the method as 'GET'
+      );
+  
+      // Fetch the fields data
+      const response = await apiServiceForFields.makeCall();
+      setFieldsData(response); // Set the response data to fieldsData
+  
     } catch (error) {
-      setLoading(false);
-
       console.error('Error fetching API response:', error);
+    } finally {
+      setLoading(false); // Stop the spinner regardless of success or failure
     }
-    setLoading(false);
-
   };
+  
 
   const handleEditClick = async (record) => {
     setSelectedRecord(record); 
     form.setFieldsValue(record); 
     setDrawerVisible(true);
-
+  
     try {
       setLoading(true);
-
-      const fieldsResponse = await axios.get(`${BASE_URL}/mt_fields/object/${objectName}`);
-      
-      setFieldsData(fieldsResponse.data);
-
-      const lookupField = fieldsResponse.data.find(field => field.type === 'lookup');
+  
+      // Create an instance of ApiService for fetching fields data
+      const apiServiceForFields = new ApiService(
+        `${BASE_URL}/mt_fields/object/${objectName}`,
+        { 'Content-Type': 'application/json' },
+        'GET' // Specify the method as 'GET'
+      );
+  
+      const fieldsResponse = await apiServiceForFields.makeCall();
+      setFieldsData(fieldsResponse);
+  
+      const lookupField = fieldsResponse.find(field => field.type === 'lookup');
       if (lookupField) {
         const ob = lookupField.name;
         const objectName = lookupField.name.toLowerCase();
         const recordId = record[`${objectName}_id`];
-
+  
         if (recordId) {
-          const response = await axios.get(`${BASE_URL}/fetch_single_record/${ob}/${recordId}`);
-          console.log('lookup record name is ' + response.data.Name);
-
+          // Create an instance of ApiService for fetching the single record
+          const apiServiceForRecord = new ApiService(
+            `${BASE_URL}/fetch_single_record/${ob}/${recordId}`,
+            { 'Content-Type': 'application/json' },
+            'GET' // Specify the method as 'GET'
+          );
+  
+          const response = await apiServiceForRecord.makeCall();
+          console.log('lookup record name is ' + response.Name);
+  
           // Store the name in a state to display it in the UI
-          setLookupName(response.data.Name);
+          setLookupName(response.Name);
           
           // Set the lookup ID in the form
           form.setFieldsValue({
@@ -124,14 +183,14 @@ const ObjectSetupDetail = () => {
           });
         }
       }
-
-      
+  
     } catch (error) {
       console.error('Error fetching API response:', error);
     } finally {
       setLoading(false);
     }
-};
+  };  
+
   const handleCloneClick =  (record) => {
     const clonedRecord = { ...record, _id: undefined, isClone: true };
     setSelectedRecord(clonedRecord);
@@ -141,52 +200,59 @@ const ObjectSetupDetail = () => {
 
   const handleFinish = async (values) => {
     const updatedValues = {};
-
+  
     // Iterate through the fields data to check if the field is a lookup
     fieldsData.forEach((field) => {
-        const fieldName = field.name;
-        if (field.type === 'lookup') {
-            // Convert lookup field names to lowercase
-            updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
-        } else {
-            // Keep other fields unchanged
-            updatedValues[fieldName] = values[fieldName];
-        }
+      const fieldName = field.name;
+      if (field.type === 'lookup') {
+        // Convert lookup field names to lowercase
+        updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
+      } else {
+        // Keep other fields unchanged
+        updatedValues[fieldName] = values[fieldName];
+      }
     });
-
+  
     const body = {
-      "object_name": objectName,
-      "data": {
+      object_name: objectName,
+      data: {
         _id: selectedRecord?._id && !selectedRecord?.isClone ? selectedRecord._id : undefined, // If cloning, exclude the ID
         ...updatedValues // Use the updated values
       }
     };
-
+  
     try {
       setLoading(true);
-
+  
       console.log('body while updating is ' + JSON.stringify(body));
-      await axios.post(`${BASE_URL}/insert_or_update_records`, body);
-
+  
+      // Create an instance of ApiService for the POST request
+      const apiService = new ApiService(
+        `${BASE_URL}/insert_or_update_records`,
+        { 'Content-Type': 'application/json' },
+        'POST',
+        body
+      );
+  
+      await apiService.makeCall();
+  
       message.success(selectedRecord?._id && !selectedRecord?.isClone ? 'Record updated successfully' : 'Record created successfully');
       setDrawerVisible(false);
       fetchRecords();
       form.resetFields();
     } catch (error) {
-      setLoading(false);
-
       console.error('Error saving record:', error);
+  
       const errorMessage = error.response?.data?.name
-      ? `Failed to create record because ${error.response.data.name[0]}`
-      : `Failed to create record due to an unknown error`;
-
-
-    message.error(errorMessage);    
-   }
-    setLoading(false);
-};
-
-
+        ? `Failed to create record because ${error.response.data.name[0]}`
+        : `Failed to create record due to an unknown error`;
+  
+      message.error(errorMessage);
+    } finally {
+      setLoading(false); // Ensure loading is stopped regardless of success or failure
+    }
+  };
+  
 
   const handleLabelClick = (record) => {
     if (record._id) {
@@ -216,9 +282,15 @@ const ObjectSetupDetail = () => {
   );
 
   const deleteRecord = async (record) => {
-
     try {
-      await axios.delete(`${BASE_URL}/delete_record/${objectName}/${record._id}`);
+      // Create ApiService instance for DELETE request
+      const apiService = new ApiService(
+        `${BASE_URL}/delete_record/${objectName}/${record._id}`,
+        {}, // Headers (if any)
+        'DELETE'
+      );
+  
+      await apiService.makeCall();
       message.success('Record deleted successfully.');
       fetchRecords();
     } catch (error) {
@@ -226,6 +298,7 @@ const ObjectSetupDetail = () => {
       console.error('Error deleting record:', error);
     }
   };
+  
 
   const confirmDelete = async () => {
     deleteRecord(selectedRecord);
