@@ -173,7 +173,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
               onClick={toggleFixed}
               icon={<PushpinOutlined />}
               style={{
-                margin: '10px',
+                margin: '20px',
                 backgroundColor: fixed ? '#ff4d4f' : '#fff',
                 borderRadius: '50%',
               }}

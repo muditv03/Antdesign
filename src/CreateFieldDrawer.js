@@ -45,7 +45,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
       name: values.name,
       type: values.type,
       mt_object_id: mtObjectId,
-      iseditable: values.iseditable || false,
+      iseditable: values.iseditable || false, 
       iswriteable: values.iswriteable || false,
     };
  

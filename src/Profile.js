@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Layout, Input, Button, Form, Avatar, Typography, Divider } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie';
-
+ 
 const { Content } = Layout;
 const { Title, Text } = Typography;
  
