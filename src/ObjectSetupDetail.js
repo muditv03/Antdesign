@@ -7,7 +7,7 @@ import { DownOutlined } from '@ant-design/icons';
 import { BASE_URL } from './Constant';
 import dayjs from 'dayjs';
 import ApiService from './apiService'; // Import ApiService class
- 
+   
            
 const { Title } = Typography;
 
@@ -30,58 +30,60 @@ const ObjectSetupDetail = () => {
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
 
-
+  const fetchRecords = () => {
+    setLoading(true);
   
-  const fetchRecords = async () => {
-    try {
-      setLoading(true);
+    // Fetch object details using ApiService
+    const apiServiceForObject = new ApiService(
+      `${BASE_URL}/mt_objects/${id}`,
+      { 'Content-Type': 'application/json' },
+      'GET'
+    );
   
-      // Fetch object details using ApiService
-      const apiServiceForObject = new ApiService(
-        `${BASE_URL}/mt_objects/${id}`,
-        { 'Content-Type': 'application/json' },
-        'GET' // Specify the method as 'GET'
-      );
+    apiServiceForObject.makeCall()
+      .then(response => {
+        const objName = response.name;
+        console.log('Object name:', objName);
   
-      const response = await apiServiceForObject.makeCall();
-      const objName = response.name;
-
-      console.log('objectname :', objName);
+        // Fetch records and fields in parallel
+        const apiServiceForRecords = new ApiService(
+          `${BASE_URL}/fetch_records/${objName}`,
+          { 'Content-Type': 'application/json' },
+          'GET'
+        );
   
-      // Fetch records based on object name
-      const apiServiceForRecords = new ApiService(
-        `${BASE_URL}/fetch_records/${objName}`,
-        { 'Content-Type': 'application/json' },
-        'GET' // Specify the method as 'GET'
-      );
+        const apiServiceForFields = new ApiService(
+          `${BASE_URL}/mt_fields/object/${objName}`,
+          { 'Content-Type': 'application/json' },
+          'GET'
+        );
   
-      const recordsResponse = await apiServiceForRecords.makeCall();
-      setRecords(recordsResponse);
+        return Promise.all([
+          apiServiceForRecords.makeCall(),
+          apiServiceForFields.makeCall(),
+        ]).then(([recordsResponse, fieldsResponse]) => {
+          setRecords(recordsResponse);
+          setFieldsData(fieldsResponse.slice(0, 5)); // Get the first 5 fields
   
-      setObjectName(response.label);
-      setobjectPluralName(response.pluralLabel);
+          // Identify and set the lookup field name
+          const lookupField = fieldsResponse.find(field => field.type === 'lookup');
+          if (lookupField) {
+            setLookupFieldName(lookupField.name);
+          }
   
-      // Fetch fields data for the object
-      const apiServiceForFields = new ApiService(
-        `${BASE_URL}/mt_fields/object/${objName}`,
-        { 'Content-Type': 'application/json' },
-        'GET' // Specify the method as 'GET'
-      );
-  
-      const fieldsResponse = await apiServiceForFields.makeCall();
-      setFieldsData(fieldsResponse.slice(0, 5)); // Get the first 5 fields
-  
-      // Identify and set the lookup field name
-      const lookupField = fieldsResponse.find(field => field.type === 'lookup');
-      if (lookupField) {
-        setLookupFieldName(lookupField.name);
-      }
-    } catch (err) {
-      setError(err.response?.data?.error || 'Error fetching records');
-    } finally {
-      setLoading(false);
-    }
+          // Set additional object details
+          setObjectName(response.label);
+          setobjectPluralName(response.pluralLabel);
+        });
+      })
+      .catch(err => {
+        setError(err.response?.data?.error || 'Error fetching records');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
+  
   
 
   useEffect(() => {
@@ -89,27 +91,31 @@ const ObjectSetupDetail = () => {
   }, [id]);
 
   useEffect(() => {
-    if (lookupFieldName) {
-      const fetchLookupOptions = async () => {
+    const fetchAllLookupOptions = async () => {
+      const lookupFields = fieldsData.filter(field => field.type === 'lookup');
+      const lookupOptionsObj = {};
+  
+      for (const lookupField of lookupFields) {
         try {
-          // Create an instance of ApiService for fetching lookup options
           const apiServiceForLookup = new ApiService(
-            `${BASE_URL}/fetch_records/${lookupFieldName}`,
+            `${BASE_URL}/fetch_records/${lookupField.name}`,
             { 'Content-Type': 'application/json' },
-            'GET' // Specify the method as 'GET'
+            'GET'
           );
-  
-          // Fetch the lookup options
           const response = await apiServiceForLookup.makeCall();
-          setLookupOptions(response); // Set the response data to lookup options
+          lookupOptionsObj[lookupField.name] = response; // Store options for each lookup field
         } catch (error) {
-          console.error(`Error fetching lookup options for ${lookupFieldName}:`, error);
+          console.error(`Error fetching lookup options for ${lookupField.name}:`, error);
         }
-      };
+      }
+      setLookupOptions(lookupOptionsObj); // Store all lookup options in state
+    };
   
-      fetchLookupOptions();
+    if (fieldsData.some(field => field.type === 'lookup')) {
+      fetchAllLookupOptions();
     }
-  }, [lookupFieldName]);
+  }, [fieldsData]);
+  
   
 
   const handleCreateClick = async () => {
@@ -140,8 +146,8 @@ const ObjectSetupDetail = () => {
   
 
   const handleEditClick = async (record) => {
-    setSelectedRecord(record); 
-    form.setFieldsValue(record); 
+    setSelectedRecord(record);
+    form.setFieldsValue(record);
     setDrawerVisible(true);
   
     try {
@@ -157,8 +163,64 @@ const ObjectSetupDetail = () => {
       const fieldsResponse = await apiServiceForFields.makeCall();
       setFieldsData(fieldsResponse);
   
-      const lookupField = fieldsResponse.find(field => field.type === 'lookup');
-      if (lookupField) {
+      // Fetch all lookup field values and prefill in the form
+      const lookupFields = fieldsResponse.filter(field => field.type === 'lookup');
+  
+      for (const lookupField of lookupFields) {
+        const ob = lookupField.name;
+        const objectName = lookupField.name.toLowerCase();
+        const recordId = record[`${objectName}_id`];
+  
+        if (recordId) {
+          // Create an instance of ApiService for fetching the single record
+          const apiServiceForRecord = new ApiService(
+            `${BASE_URL}/fetch_single_record/${ob}/${recordId}`,
+            { 'Content-Type': 'application/json' },
+            'GET' // Specify the method as 'GET'
+          );
+  
+          const response = await apiServiceForRecord.makeCall();
+          console.log('lookup record name is ' + response.Name);
+  
+          // Store the name in a state to display it in the UI
+          setLookupName(prev => ({ ...prev, [lookupField.name]: response.Name }));
+          
+          // Set the lookup ID in the form
+          form.setFieldsValue({
+            [lookupField.name]: recordId
+          });
+        }
+      }
+  
+    } catch (error) {
+      console.error('Error fetching API response:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleCloneClick = async (record) => {
+    const clonedRecord = { ...record, _id: undefined, isClone: true };
+    setSelectedRecord(clonedRecord);
+    form.setFieldsValue(clonedRecord); // Set the cloned record values
+  
+    try {
+      setLoading(true);
+  
+      // Create an instance of ApiService for fetching fields data
+      const apiServiceForFields = new ApiService(
+        `${BASE_URL}/mt_fields/object/${objectName}`,
+        { 'Content-Type': 'application/json' },
+        'GET' // Specify the method as 'GET'
+      );
+  
+      const fieldsResponse = await apiServiceForFields.makeCall();
+      setFieldsData(fieldsResponse);
+  
+      // Prefill all lookup fields
+      const lookupFields = fieldsResponse.filter(field => field.type === 'lookup');
+  
+      for (const lookupField of lookupFields) {
         const ob = lookupField.name;
         const objectName = lookupField.name.toLowerCase();
         const recordId = record[`${objectName}_id`];
@@ -177,7 +239,7 @@ const ObjectSetupDetail = () => {
           // Store the name in a state to display it in the UI
           setLookupName(response.Name);
           
-          // Set the lookup ID in the form
+          // Set the lookup ID in the form for each lookup field
           form.setFieldsValue({
             [lookupField.name]: recordId
           });
@@ -189,14 +251,10 @@ const ObjectSetupDetail = () => {
     } finally {
       setLoading(false);
     }
-  };  
-
-  const handleCloneClick =  (record) => {
-    const clonedRecord = { ...record, _id: undefined, isClone: true };
-    setSelectedRecord(clonedRecord);
-    form.setFieldsValue(clonedRecord);
-    setDrawerVisible(true);
+  
+    setDrawerVisible(true); // Open the drawer after setting the values
   };
+  
 
   const handleFinish = async (values) => {
     const updatedValues = {};
@@ -213,6 +271,8 @@ const ObjectSetupDetail = () => {
       }
     });
   
+    console.log('object is '+objectName)
+
     const body = {
       object_name: objectName,
       data: {
@@ -223,7 +283,8 @@ const ObjectSetupDetail = () => {
   
     try {
       setLoading(true);
-  
+      console.log('object name is '+objectName)
+
       console.log('body while updating is ' + JSON.stringify(body));
   
       // Create an instance of ApiService for the POST request
@@ -306,8 +367,8 @@ const ObjectSetupDetail = () => {
     setIsDeleteModalVisible(false);
 
   };
-
-  const renderFormItem = (field,selectedDate, setSelectedDate) => {
+  
+ const renderFormItem = (field,selectedDate, setSelectedDate) => {
     const validationRules = [{ required: true, message: `Please enter ${field.label}` }]; // Ensuring all fields are required
 
 
@@ -418,13 +479,20 @@ const ObjectSetupDetail = () => {
             label={field.label}
             rules={[{ required: true, message: `Please select a ${field.label}` }]}
           >
-            <Select placeholder={`Select ${field.label}`}>
-              {lookupOptions.map(option => (
-                <Select.Option key={option._id} value={option._id}>
-                  {option.Name}
-                </Select.Option>
-              ))}
-            </Select>
+             <Select
+            placeholder={`Select ${field.label}`}
+            showSearch
+            allowClear
+            filterOption={(input, option) =>
+              option.children.toLowerCase().includes(input.toLowerCase())
+            }
+          >
+            {lookupOptions[field.name]?.map((option) => (
+              <Select.Option key={option._id} value={option._id}>
+                {option.Name}
+              </Select.Option>
+            ))}
+          </Select>
           </Form.Item>
         );
         case 'decimal':
@@ -615,3 +683,13 @@ const ObjectSetupDetail = () => {
 };
 
 export default ObjectSetupDetail;
+
+
+
+
+
+
+
+
+
+

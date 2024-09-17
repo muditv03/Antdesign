@@ -1,11 +1,21 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 class ApiService {
   constructor(endpoint, headers = {}, method = '', body = null) {
     this.endpoint = endpoint;
-    this.headers = headers;
+    this.headers = {
+      'Content-Type': 'application/json',  // Ensure 'Content-Type' is always set to 'application/json'
+      ...headers,                          // Merge any custom headers passed in
+    };
     this.method = method;
     this.body = body;
+
+    // Add cookie data to headers if available
+    const authToken = Cookies.get('tokenRes'); // Replace 'auth_token' with the actual cookie name
+    if (authToken) {
+      this.headers['Authorization'] = `Bearer ${authToken}`; // Add the Authorization header
+    }
   }
 
   async makeCall() {
@@ -19,7 +29,6 @@ class ApiService {
 
       const response = await axios(options);
 
-      // Equivalent to response.ok in Fetch API
       if (response.status >= 200 && response.status < 300) {
         return response.data;
       } else {
@@ -27,15 +36,12 @@ class ApiService {
       }
     } catch (error) {
       if (error.response) {
-        // Server responded with a status outside of the 2xx range
         console.error(`API call failed: ${error.response.status} - ${error.response.statusText}`);
         throw new Error(`API call failed with status code ${error.response.status}`);
       } else if (error.request) {
-        // Request was made but no response was received
         console.error('API call failed: No response received');
         throw new Error('API call failed: No response received');
       } else {
-        // Something else happened during the request setup
         console.error('API call failed:', error.message);
         throw new Error(`API call failed: ${error.message}`);
       }

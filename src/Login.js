@@ -47,16 +47,21 @@ const Login = () => {
       const response = await apiService.makeCall();
 
       console.log('API Response:', response);
+      console.log('API Response token:', response.token);
+
       console.log('username:', response.user.username);
 
+      const tokenRes = response.token;
       const username = response.user.username; // Adjust based on the actual structure
       const email = response.user.email;
       const name = response.user.name;
 
-      if (username && email && name) {
+      if (token && username && email && name) {
+        Cookies.set('tokenRes', tokenRes, { expires: 7 });
         Cookies.set('username', username, { expires: 7 });
         Cookies.set('email', email, { expires: 7 });
         Cookies.set('name', name, { expires: 7 });
+        console.log('Token stored in cookie:', Cookies.get('tokenRes'));
         console.log('Username stored in cookie:', Cookies.get('username'));
         console.log('Email stored in cookie:', Cookies.get('email'));
         console.log('Name stored in cookie:', Cookies.get('name'));
