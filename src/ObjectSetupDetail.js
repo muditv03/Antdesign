@@ -7,7 +7,7 @@ import { DownOutlined } from '@ant-design/icons';
 import { BASE_URL } from './Constant';
 import dayjs from 'dayjs';
 import ApiService from './apiService'; // Import ApiService class
-    
+      
            
 const { Title } = Typography;
 
@@ -422,7 +422,7 @@ const ObjectSetupDetail = () => {
             <DatePicker
              placeholder={`Select ${field.label}`}
              style={{ width: '100%' }}
-             format="DD-MM-YYYY"
+             format="YYYY-MM-DD"
              value={selectedDate || (form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name)) : null)}
                 onChange={(date, dateString) => {
                   console.log('Selected Date:', dateString); // Debugging - check if the correct date is selected

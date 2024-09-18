@@ -231,7 +231,7 @@ const RecordDetail = () => {
             ) : type === 'Date' ? (
               <Space>
               <DatePicker
-                format="DD-MM-YYYY"
+                format="YYYY-MM-DD"
                 placeholder={label}
                 value={selectedDate || (form.getFieldValue(name) ? dayjs(form.getFieldValue(name)) : null)}
                 onChange={(date, dateString) => {
