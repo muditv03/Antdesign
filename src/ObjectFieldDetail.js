@@ -82,7 +82,7 @@ const ObjectFieldDetail = () => {
       key: 'label',
     },
     {
-      title: 'Name',
+      title: 'API Name',
       dataIndex: 'name',
       key: 'name',
     },
