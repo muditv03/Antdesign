@@ -24,6 +24,8 @@ const RecordDetail = () => {
   const [lookupOptions, setLookupOptions] = useState({});
   const [lookupNames, setLookupNames] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
+  const [recordName, setRecordName] = useState('');
+
 
 
   const fetchRecords = async () => {
@@ -33,6 +35,7 @@ const RecordDetail = () => {
       const responseData = await apiService.makeCall();
       console.log(responseData); // Process the data as needed
       const recordData = responseData;
+      setRecordName(responseData.Name);
 
       // Fetch the fields for this object
       // const fieldsResponse = await axios.get(`${BASE_URL}/mt_fields/object/${objectName}`);
@@ -302,7 +305,7 @@ const RecordDetail = () => {
   return (
     <div style={{ padding: '20px', overflowY: 'auto', }}>
       <Title level={2} style={{  marginTop: '0px' }}>
-        {objectName}
+        {recordName}
       </Title>
       <Tabs defaultActiveKey="1" >
         <TabPane tab="Detail" key="1">

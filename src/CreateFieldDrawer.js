@@ -45,8 +45,8 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
       name: values.name,
       type: values.type,
       mt_object_id: mtObjectId,
-      iseditable: values.iseditable || false, 
-      iswriteable: values.iswriteable || false,
+      iseditable: values.iseditable || true, 
+      iswriteable: values.iswriteable || true,
     };
  
     if (values.type === 'Picklist') {
@@ -173,7 +173,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
 
             <Form.Item
               name="name"
-              label="Name"
+              label="API Name"
               rules={[{ required: true, message: 'Please enter the name' }]}
             >
               {fieldType === 'lookup' ? (
@@ -227,7 +227,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
               </>
             )}
 
-            <Form.Item
+            {/* <Form.Item
               name="iseditable"
               valuePropName="checked"
             >
@@ -239,7 +239,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
               valuePropName="checked"
             >
               <Checkbox>Is Writeable</Checkbox>
-            </Form.Item>
+            </Form.Item> */}
           </Form>
         </Card>
       </Spin>

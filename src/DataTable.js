@@ -130,7 +130,7 @@ const DataTable = () => {
       ),
     },
     {
-      title: 'Name',
+      title: 'API Name',
       width: 100,
       dataIndex: 'name',
       key: 'name',

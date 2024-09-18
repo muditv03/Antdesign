@@ -72,7 +72,7 @@ const ObjectSetupDetail = () => {
           }
   
           // Set additional object details
-          setObjectName(response.label);
+          setObjectName(response.name);
           setobjectPluralName(response.pluralLabel);
         });
       })

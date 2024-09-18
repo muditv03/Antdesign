@@ -198,7 +198,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
             </Form.Item>
             <Form.Item
               name="name"
-              label="Name"
+              label="API Name"
               rules={[{ required: true, message: 'Please enter the name' }]}
             >
               <Input placeholder="Please enter the name" />
