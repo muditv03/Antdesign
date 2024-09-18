@@ -7,7 +7,7 @@ import RelatedRecord from './RelatedRecords';
 import { BASE_URL } from './Constant';
 import dayjs from 'dayjs';
 import ApiService from './apiService'; // Import ApiService class
-
+ 
     
 const { TextArea } = Input;
 const { Option } = Select;
@@ -156,18 +156,7 @@ const RecordDetail = () => {
 
 
     const validationRules = [];
-    if (['String', 'Integer', 'Text-Area','currency', 'Number', 'decimal', 'Picklist'].includes(type)) {
-      validationRules.push({
-        required: true,
-        message: `Please enter ${label}`,
-      });
-    }
-    if (field.isRequired) {
-      validationRules.push({
-        required: true,
-        message: `Please enter ${label}`,
-      });
-    }
+    
 
     if (type === 'Integer') {
       validationRules.push({
@@ -239,7 +228,7 @@ const RecordDetail = () => {
             ) : type === 'Date' ? (
               <Space>
               <DatePicker
-                format="YYYY-MM-DD"
+                format="DD-MM-YYYY"
                 placeholder={label}
                 value={selectedDate || (form.getFieldValue(name) ? dayjs(form.getFieldValue(name)) : null)}
                 onChange={(date, dateString) => {
@@ -253,6 +242,12 @@ const RecordDetail = () => {
             </Space>
             ) : type === 'Text-Area' ? (
               <TextArea placeholder={label} />
+            ) : type === 'currency' ? (
+              <Input
+                placeholder={label}
+                type="number"
+                addonBefore="$"
+              />
             ) : (
               <Input placeholder={label} type={type === 'date' ? 'date' : 'text'} />
             )}
@@ -273,8 +268,16 @@ const RecordDetail = () => {
               ? form.getFieldValue(name)
                 ? "True"
                 : "False"
+              : type === 'currency'
+              ? `$${form.getFieldValue(name) || '0.00'}`
+              :type === 'Date'
+              ? dayjs(form.getFieldValue(name)).format('DD-MM-YYYY')  // Format date to DD-MM-YYYY
               : type === 'String'
               ? form.getFieldValue(name) || ''
+              : type === 'Integer'
+              ? form.getFieldValue(name) || '0'
+              : type === 'Decimal'
+              ? form.getFieldValue(name) || '0.00'
               : lookupNames[name] || form.getFieldValue(name)}
           </div>
           

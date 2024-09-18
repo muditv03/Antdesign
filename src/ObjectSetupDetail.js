@@ -7,7 +7,7 @@ import { DownOutlined } from '@ant-design/icons';
 import { BASE_URL } from './Constant';
 import dayjs from 'dayjs';
 import ApiService from './apiService'; // Import ApiService class
-   
+    
            
 const { Title } = Typography;
 
@@ -369,7 +369,6 @@ const ObjectSetupDetail = () => {
   };
   
  const renderFormItem = (field,selectedDate, setSelectedDate) => {
-    const validationRules = [{ required: true, message: `Please enter ${field.label}` }]; // Ensuring all fields are required
 
 
     switch (field.type) {
@@ -379,7 +378,7 @@ const ObjectSetupDetail = () => {
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: true, message: `Please enter ${field.label}` }]}
+            //rules={[{ required: true, message: `Please enter ${field.label}` }]}
           >
             <Input placeholder={`Enter ${field.label}`} />
           </Form.Item>
@@ -391,7 +390,7 @@ const ObjectSetupDetail = () => {
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: true, message: `Please enter ${field.label}` }]}
+            //rules={[{ required: true, message: `Please enter ${field.label}` }]}
 
           >
             <Input type="number" placeholder={`Enter ${field.label}`} />
@@ -405,7 +404,7 @@ const ObjectSetupDetail = () => {
             name={field.name}
             valuePropName="checked"
             initialValue={false}
-            rules={[{ required: true, message: `Please select ${field.label}` }]}
+            //rules={[{ required: true, message: `Please select ${field.label}` }]}
           >
             <Checkbox>{field.label}</Checkbox>
           </Form.Item>
@@ -417,14 +416,13 @@ const ObjectSetupDetail = () => {
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: true, message: `Please select a valid ${field.label}` }]}
+            //rules={[{ required: true, message: `Please select a valid ${field.label}` }]}
           >
             <Space>
             <DatePicker
              placeholder={`Select ${field.label}`}
              style={{ width: '100%' }}
-             format="YYYY-MM-DD"
-
+             format="DD-MM-YYYY"
              value={selectedDate || (form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name)) : null)}
                 onChange={(date, dateString) => {
                   console.log('Selected Date:', dateString); // Debugging - check if the correct date is selected
@@ -445,10 +443,13 @@ const ObjectSetupDetail = () => {
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: true, message: `Please enter ${field.label}` }]}
-
+            //rules={[{ required: true, message: `Please enter ${field.label}` }]}
           >
-            <Input type="number" step="0.01" placeholder={`Enter ${field.label}`} />
+            <Input 
+              addonBefore="$"
+              type="float"
+              step="0.01"
+              placeholder={`Enter ${field.label}`} />
           </Form.Item>
         );
       case 'Picklist':
@@ -459,7 +460,7 @@ const ObjectSetupDetail = () => {
           key={field.name}
           name={field.name}
           label={field.label}
-          rules={[{ required: true, message: `Please select ${field.label}` }]}
+          //rules={[{ required: true, message: `Please select ${field.label}` }]}
         >
           <Select placeholder={`Select ${field.label}`}>
             {field.picklist_values.map((value) => (
@@ -477,7 +478,7 @@ const ObjectSetupDetail = () => {
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: true, message: `Please select a ${field.label}` }]}
+            //rules={[{ required: true, message: `Please select a ${field.label}` }]}
           >
              <Select
             placeholder={`Select ${field.label}`}
@@ -508,13 +509,13 @@ const ObjectSetupDetail = () => {
               key={field.name}
               name={field.name}
               label={field.label}
-              rules={[
-                { required: true, message: `Please enter ${field.label}` },
-                {
-                  pattern: decimalPattern,
-                  message: `Enter a valid number with up to ${decimalPlacesBefore} digits before the decimal and ${decimalPlacesAfter} digits after the decimal.`,
-                },
-              ]}
+              // rules={[
+              //   { required: true, message: `Please enter ${field.label}` },
+              //   {
+              //     pattern: decimalPattern,
+              //     message: `Enter a valid number with up to ${decimalPlacesBefore} digits before the decimal and ${decimalPlacesAfter} digits after the decimal.`,
+              //   },
+              // ]}
             >
               <Input
                 placeholder={`Enter ${field.label}`}
@@ -529,7 +530,7 @@ const ObjectSetupDetail = () => {
               key={field.name}
               name={field.name}
               label={field.label}
-              rules={[{ required: true, message: `Please enter ${field.label}` }]}
+              //rules={[{ required: true, message: `Please enter ${field.label}` }]}
             >
               <Input.TextArea
                 placeholder={`Enter ${field.label}`}
@@ -563,6 +564,14 @@ const ObjectSetupDetail = () => {
     render: (text, record) => {
       if (field.type === 'boolean') {
         return text ? 'True' : 'False';
+      }else if (field.type === 'currency') {
+        return text ? `$${text.toFixed(2)}` : '$0.00'; // Format as currency with dollar sign
+      } else if (field.type === 'Date') {
+        return text ? dayjs(text).format('DD-MM-YYYY') : 'N/A'; // Format date as DD-MM-YYYY
+      }else if (field.type === 'Integer') {
+        return text === undefined || text === null ? '0' : text === 0 ? '0' : text; // Show 0 for blank or zero values
+      }else if (field.type === 'decimal') {
+        return text === undefined || text === null || text === '' ? '0.00' : Number(text).toFixed(2); // Show 0.00 for blank values
       }
       return index === 0 ? (
         <a onClick={() => handleLabelClick(record)}>{text}</a>
