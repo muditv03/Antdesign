@@ -24,13 +24,10 @@ const Signup = () => {
     };
 
     try {
-      // Make the API call to the /register endpoint
-      // const response = await axios.post(`${BASE_URL}/register`, {
-      //   logintable: body,
-      // });
+      
 
       const apiService = new ApiService(`${BASE_URL}/register`, {
-        'Content-Type': 'application/json', // Add any necessary headers, such as content type
+        'Content-Type': 'application/json', 
       }, 'POST', {
         logintable: body,
       });

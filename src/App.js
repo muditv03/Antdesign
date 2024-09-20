@@ -6,10 +6,10 @@ import Signup from './Signup';
 import ForgotPassword from './ForgotPassword';
 import AppHeader from './Header';
 import AppSidebar from './Sidebar';
-import DataTable from './DataTable';
+import DataTable from './ObjectSetupView';
 import ObjectSetupDetail from './ObjectSetupDetail';
-import ObjectFieldDetail from './ObjectFieldDetail';
-import RecordComponent from './Components/recordComponent';
+import ObjectFieldDetail from './ObjectDetail';
+
 import AppFooter from './Footer';  // Import the footer component
 import Profile from './Profile';  // Import the Profile component
 import RecordDetail from './RecordDetailPage';
