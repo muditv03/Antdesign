@@ -4,7 +4,7 @@ import axios from 'axios';
 import * as Icons from '@ant-design/icons';
 import { BASE_URL } from './Constant';
 import ApiService from './apiService'; // Import ApiService class
-     
+
 const { Option } = Select;
 
 const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord }) => {
@@ -28,78 +28,63 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       addObjectTab: values.addObjectTab,
       icon: values.icon,
     };
-  
+
     try {
       let response;
-      if (editingRecord) {
+      if (editingRecord && editingRecord.key) {
         // Update existing record using ApiService
         const apiService = new ApiService(
           `${BASE_URL}/mt_objects/${editingRecord.key}`,
-          {
-            'Content-Type': 'application/json',
-          },
+          { 'Content-Type': 'application/json' },
           'PUT',
-          {
-            mt_object: formData,
-          }
+          { mt_object: formData }
         );
-  
-        response = await apiService.makeCall(); 
+
+        response = await apiService.makeCall();
         message.success('Object updated successfully');
-        
+        onAddOrEditObject({ ...editingRecord, ...formData }); // Update the object in the parent component
       } else {
         // Create new record using ApiService
         const apiService = new ApiService(
           `${BASE_URL}/mt_objects`,
-          {
-            'Content-Type': 'application/json',
-          },
+          { 'Content-Type': 'application/json' },
           'POST',
-          {
-            mt_object: formData,
-          }
+          { mt_object: formData }
         );
-      
+
         response = await apiService.makeCall();
-        
-        console.log("API Response:", response); // Log the response for debugging
-  
-        if (response && response._id) { 
+        if (response && response._id) {
           message.success('Object created successfully');
         } else {
-          throw new Error("Invalid response from server");
+          throw new Error('Invalid response from server');
         }
-  
+
         // Create newTab only when object is created successfully
         const newTab = {
           label: values.label,
           name: values.name,
-          description: "All Accounts",
+          description: 'All Accounts',
           mt_object_id: response._id, // Use the new object ID from the response
           icon: values.icon,
           addObjectTab: values.addObjectTab,
         };
-  
+
         if (newTab.icon && newTab.addObjectTab) {
-          // Create a new instance of ApiService for the tab creation callout
           const apiServiceForTab = new ApiService(
             `${BASE_URL}/mt_tabs`,
-            {
-              'Content-Type': 'application/json',
-            },
+            { 'Content-Type': 'application/json' },
             'POST',
             { mt_tab: newTab }
           );
-  
+
           const tabResponse = await apiServiceForTab.makeCall();
-  
-          // Check if the tab creation was successful
+
           if (!tabResponse || !tabResponse._id) {
-            throw new Error("Failed to create a new tab");
+            throw new Error('Failed to create a new tab');
           }
         }
-  
-        // Update the list of objects
+
+        // Update the list of objects in the parent component
         onAddOrEditObject({
           key: response._id, // Use the ID from the response
           label: values.label,
@@ -109,7 +94,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
           icon: values.icon,
         });
       }
-  
+
       onClose(); // Close the drawer upon success
       form.resetFields();
     } catch (error) {
@@ -122,7 +107,6 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       setLoading(false); // Stop the spinner
     }
   };
-  
 
   const iconOptions = Object.keys(Icons).map((iconName) => {
     const IconComponent = Icons[iconName];
@@ -199,7 +183,24 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
             <Form.Item
               name="name"
               label="API Name"
-              rules={[{ required: true, message: 'Please enter the name' }]}
+              rules={[
+                { required: true, message: 'Please enter the name' },
+                {
+                  validator: (_, value) => {
+                    if (!value) {
+                      return Promise.resolve();
+                    }
+
+                    // Check for non-alphabetic characters (including numbers, special characters, and spaces)
+                    const alphabetOnlyRegex = /^[a-zA-Z]+$/;
+                    if (!alphabetOnlyRegex.test(value)) {
+                      return Promise.reject(new Error('Name should only contain alphabets without spaces.'));
+                    }
+
+                    return Promise.resolve();
+                  },
+                },
+              ]}
             >
               <Input placeholder="Please enter the name" />
             </Form.Item>
@@ -210,27 +211,33 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
             >
               <Input placeholder="Please enter the plural label" />
             </Form.Item>
-            <Form.Item
-              name="addObjectTab"
-              valuePropName="checked"
-            >
-              <Checkbox>Add Object Tab</Checkbox>
-            </Form.Item>
-            <Form.Item
-              name="icon"
-              label="Icon"
-            >
-              <Select
-                placeholder="Select an icon"
-                optionLabelProp="label"
-                showSearch
-                filterOption={(input, option) =>
-                  option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                }
-              >
-                {iconOptions}
-              </Select>
-            </Form.Item>
+
+            {!editingRecord && (
+              <>
+                <Form.Item
+                  name="addObjectTab"
+                  valuePropName="checked"
+                >
+                  <Checkbox>Add Object Tab</Checkbox>
+                </Form.Item>
+
+                <Form.Item
+                  name="icon"
+                  label="Icon"
+                >
+                  <Select
+                    placeholder="Select an icon"
+                    optionLabelProp="label"
+                    showSearch
+                    filterOption={(input, option) =>
+                      option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    }
+                  >
+                    {iconOptions}
+                  </Select>
+                </Form.Item>
+              </>
+            )}
           </Form>
         </Card>
       </Spin>
