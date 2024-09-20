@@ -54,7 +54,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
       newField.picklist_values = picklistValues;
     }
 
-    if (values.type === 'decimal') {
+    if (values.type === 'decimal' || values.type === 'currency') {
       newField.decimal_places_before = values.length - values.decimal_places;
       newField.decimal_places_after = values.decimal_places;
     }
@@ -76,7 +76,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
         iseditable: values.iseditable,
         iswriteable: values.iswriteable,
         ...(values.type === 'Picklist' && { picklist_values: picklistValues }),
-        ...(values.type === 'decimal' && {
+        ...(values.type === 'decimal'|| values.type === 'currency' && {
           decimal_places_before: values.length - values.decimal_places,
           decimal_places_after: values.decimal_places,
         }),
@@ -231,7 +231,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
               </Form.Item>
             )}
 
-            {fieldType === 'decimal' && (
+            {(fieldType === 'decimal' || fieldType === 'currency') && (
               <>
                 <Form.Item
                   name="length"

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Table, Typography, Button, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker,Spin, Modal,Space } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DownOutlined } from '@ant-design/icons';
-import { BASE_URL } from './Constant';
+import { BASE_URL,DateFormat } from './Constant';
 import dayjs from 'dayjs';
 import ApiService from './apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -171,7 +171,7 @@ const ObjectSetupDetail = () => {
       fieldsResponse.forEach(field => {
         if (field.type === 'Date' && record[field.name]) {
           // Format date to DD/MM/YYYY if the field is of Date type
-          formattedRecord[field.name] = dayjs(record[field.name]).format('DD/MM/YYYY');
+          formattedRecord[field.name] = dayjs(record[field.name]).format(DateFormat);
         }
       });
   
@@ -218,9 +218,8 @@ const ObjectSetupDetail = () => {
   
   
   const handleCloneClick = async (record) => {
+    // Clone the record and remove the ID, set isClone to true
     const clonedRecord = { ...record, _id: undefined, isClone: true };
-    setSelectedRecord(clonedRecord);
-    form.setFieldsValue(clonedRecord); // Set the cloned record values
   
     try {
       setLoading(true);
@@ -234,6 +233,21 @@ const ObjectSetupDetail = () => {
   
       const fieldsResponse = await apiServiceForFields.makeCall();
       setFieldsData(fieldsResponse);
+  
+      // Format date fields in the cloned record before setting them in the form
+      const formattedClonedRecord = { ...clonedRecord };
+  
+      // Iterate over the fields to identify and format date fields
+      fieldsResponse.forEach(field => {
+        if (field.type === 'Date' && clonedRecord[field.name]) {
+          // Format date to DD/MM/YYYY if the field is of Date type
+          formattedClonedRecord[field.name] = dayjs(clonedRecord[field.name]).format(DateFormat);
+        }
+      });
+  
+      // Set the formatted cloned record values in the form
+      setSelectedRecord(formattedClonedRecord);
+      form.setFieldsValue(formattedClonedRecord); 
   
       // Prefill all lookup fields
       const lookupFields = fieldsResponse.filter(field => field.type === 'lookup');
@@ -255,9 +269,9 @@ const ObjectSetupDetail = () => {
           console.log('lookup record name is ' + response.Name);
   
           // Store the name in a state to display it in the UI
-          setLookupName(response.Name);
-          
-          // Set the lookup ID in the form for each lookup field
+          setLookupName(prev => ({ ...prev, [lookupField.name]: response.Name }));
+  
+          // Set the lookup ID in the form
           form.setFieldsValue({
             [lookupField.name]: recordId
           });
@@ -272,6 +286,7 @@ const ObjectSetupDetail = () => {
   
     setDrawerVisible(true); // Open the drawer after setting the values
   };
+  
   
 
   const handleFinish = async (values) => {
@@ -386,7 +401,7 @@ const ObjectSetupDetail = () => {
 
   };
   
-  const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY'];
+  //const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY'];
 
  const renderFormItem = (field,selectedDate, setSelectedDate) => {
 
@@ -442,14 +457,14 @@ const ObjectSetupDetail = () => {
             <DatePicker
              placeholder={`Select ${field.label}`}
              style={{ width: '100%' }}
-             format={dateFormatList}
-             value={(form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name),dateFormatList[0]) : null)}
+             format={DateFormat}
+             value={(form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name),DateFormat) : null)}
                 onChange={(date, dateString) => {
                   console.log('Selected Date:', dateString); // Debugging - check if the correct date is selected
 
                   // Update both the form and local state
 
-                  setSelectedDate(date ? dayjs(dateString,dateFormatList[0]) : null); 
+                  setSelectedDate(date ? dayjs(dateString,DateFormat) : null); 
                   console.log('date which is selected is '+selectedDate); // Update local state
                   form.setFieldsValue({ [field.name]: dateString });        // Update form value
                 }}           
@@ -460,21 +475,41 @@ const ObjectSetupDetail = () => {
           );
 
 
-      case 'currency':
-        return (
-          <Form.Item
-            key={field.name}
-            name={field.name}
-            label={field.label}
-            //rules={[{ required: true, message: `Please enter ${field.label}` }]}
-          >
-            <Input 
-              addonBefore="$"
-              type="float"
-              step="0.01"
-              placeholder={`Enter ${field.label}`} />
-          </Form.Item>
-        );
+          case 'currency':
+            const currencyDecimalPlacesBefore = field.decimal_places_before;
+            const currencyDecimalPlacesAfter = field.decimal_places_after;
+            console.log('decimal places before for currency is '+ currencyDecimalPlacesBefore);
+            console.log('decimal places after for currency is '+ currencyDecimalPlacesAfter);
+
+            // Regex pattern to allow up to 'currencyDecimalPlacesBefore' digits before decimal
+            // and 'currencyDecimalPlacesAfter' digits after decimal.
+            const regexPattern = new RegExp(`^\\d{1,${currencyDecimalPlacesBefore}}(\\.\\d{0,${currencyDecimalPlacesAfter}})?$`);
+            
+            // Handler to validate input as per the pattern
+            const handleCurrencyInput = (event) => {
+              const inputValue = event.target.value;
+          
+              // Validate using regex pattern
+              if (!regexPattern.test(inputValue)) {
+                event.preventDefault();
+              }
+            };
+          
+            return (
+              <Form.Item
+                key={field.name}
+                name={field.name}
+                label={field.label}
+              >
+                <Input
+                  addonBefore="$"
+                  placeholder={`Enter ${field.label}`}
+                  onInput={handleCurrencyInput}
+                  maxLength={currencyDecimalPlacesBefore + currencyDecimalPlacesAfter + 1} // Allow max length based on input
+                />
+              </Form.Item>
+            );
+
       case 'Picklist':
       console.log('Picklist Values:', field); // Log the picklist values
 
@@ -587,10 +622,10 @@ const ObjectSetupDetail = () => {
     render: (text, record) => {
       if (field.type === 'boolean') {
         return text ? 'True' : 'False';
+      } else if (field.type === 'Date') {
+        return text ? dayjs(text).format(DateFormat) : 'N/A'; // Format date as DD-MM-YYYY
       }else if (field.type === 'currency') {
         return text ? `$${text.toFixed(2)}` : '$0.00'; // Format as currency with dollar sign
-      } else if (field.type === 'Date') {
-        return text ? dayjs(text).format('DD-MM-YYYY') : 'N/A'; // Format date as DD-MM-YYYY
       }else if (field.type === 'Integer') {
         return text === undefined || text === null ? '0' : text === 0 ? '0' : text; // Show 0 for blank or zero values
       }else if (field.type === 'decimal') {

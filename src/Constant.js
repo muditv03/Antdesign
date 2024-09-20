@@ -1,3 +1,3 @@
 const BASE_URL = 'http://localhost:3000';
-
-export { BASE_URL } ; 
+const DateFormat='DD/MM/YYYY';
+export { BASE_URL,DateFormat } ; 
