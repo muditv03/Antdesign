@@ -1,10 +1,7 @@
 
-
-
-
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Table, Button, message, Spin, Space } from 'antd';
+import { Row,Col,Table, Button, message, Spin, Space } from 'antd';
 import CreateFieldDrawer from '../CreateFieldDrawer'; 
 import ApiService from '../apiService'; 
 import { BASE_URL } from '../Constant';
@@ -97,10 +94,13 @@ const ObjectFieldTab = ( object ) => {
 
   return (
     <div>  
-      
-        <Button type="primary" onClick={showDrawer}>
-        Create +
-        </Button>
+        <Row justify="end" style={{ marginBottom: '16px' }}>
+            <Col>
+              <Button type="primary" onClick={showDrawer}>
+                Create +
+              </Button>
+            </Col>
+          </Row>
             
           
         <Spin spinning={loadingFields || loading}>

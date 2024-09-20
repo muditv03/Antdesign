@@ -7,7 +7,9 @@ import RelatedRecord from './RelatedRecords';
 import { BASE_URL } from './Constant';
 import dayjs from 'dayjs';
 import ApiService from './apiService'; // Import ApiService class
- 
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
+   
     
 const { TextArea } = Input;
 const { Option } = Select;
@@ -48,6 +50,13 @@ const RecordDetail = () => {
       console.log('fieldresponse :', fieldsResponse);
       setFields(fieldsResponse);
 
+      // Format date fields in recordData
+      fieldsResponse.forEach(field => {
+        if (field.type === 'Date' && recordData[field.name]) {
+          // Format the date using dayjs to 'DD/MM/YYYY'
+          recordData[field.name] = dayjs(recordData[field.name]).format('DD/MM/YYYY');
+        }
+      });
       // Process lookup fields to fetch names
       const lookupPromises = fieldsResponse
         .filter(field => field.type === 'lookup' && recordData[field.name.toLowerCase() + '_id'])
@@ -154,6 +163,9 @@ const RecordDetail = () => {
   };
 
  
+  const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY'];
+
+
   const renderFieldWithEdit = (field,selectedDate, setSelectedDate) => {
     const { name, label, type, picklist_values, isTextArea } = field;
 
@@ -231,18 +243,19 @@ const RecordDetail = () => {
             ) : type === 'Date' ? (
               <Space>
               <DatePicker
-                format="YYYY-MM-DD"
-                placeholder={label}
-                value={selectedDate || (form.getFieldValue(name) ? dayjs(form.getFieldValue(name)) : null)}
-                onChange={(date, dateString) => {
-                  console.log('Selected Date:', dateString); // Debugging - check if the correct date is selected
+              placeholder={`Select ${field.label}`}
+              style={{ width: '100%' }}
+              format={dateFormatList}
+              value={(form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name),dateFormatList[0]) : null)}
+                  onChange={(date, dateString) => {
+                    console.log('Selected Date:', dateString); // Debugging - check if the correct date is selected
 
-                  // Update both the form and local state
-                  setSelectedDate(date ? dayjs(dateString) : null);  // Update local state
-                  form.setFieldsValue({ [name]: dateString });        // Update form value
-                }}
+                    // Update both the form and local state
+                    setSelectedDate(date ? dayjs(dateString,dateFormatList[0]) : null);  // Update local state
+                    form.setFieldsValue({ [field.name]: dateString });        // Update form value
+                  }}           
               />
-            </Space>
+              </Space>
             ) : type === 'Text-Area' ? (
               <TextArea placeholder={label} />
             ) : type === 'currency' ? (
@@ -273,8 +286,7 @@ const RecordDetail = () => {
                 : "False"
               : type === 'currency'
               ? `$${form.getFieldValue(name) || '0.00'}`
-              :type === 'Date'
-              ? dayjs(form.getFieldValue(name)).format('DD-MM-YYYY')  // Format date to DD-MM-YYYY
+
               : type === 'String'
               ? form.getFieldValue(name) || ''
               : type === 'Integer'
