@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Input, Button, message, Select, Checkbox, Card, Spin } from 'antd';
 import { BASE_URL } from './Constant';
 import ApiService from './apiService'; // Import ApiService class
+// import pluralize from 'pluralize';
 
 const { Option } = Select;
  
@@ -174,7 +175,30 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId }) => {
             <Form.Item
               name="name"
               label="API Name"
-              rules={[{ required: true, message: 'Please enter the name' }]}
+              rules={[{ required: true, message: 'Please enter the name' },
+
+                {
+                  validator: (_, value) => {
+                    if (!value) {
+                      return Promise.resolve();
+                    }
+            
+                    // Check for non-alphabetic characters (including numbers and special characters and spaces)
+                    const alphabetOnlyRegex = /^[a-zA-Z]+$/;
+                    if (!alphabetOnlyRegex.test(value)) {
+                      return Promise.reject(new Error('Name should only contain alphabets without spaces.'));
+                    }
+            
+                    // Check if the word is plural
+                    // if (pluralize.isPlural(value)) {
+                    //   return Promise.reject(new Error('Name should not be plural.'));
+                    // }
+            
+                    return Promise.resolve();
+                  },
+                },
+
+              ]}
             >
               {fieldType === 'lookup' ? (
                 <Select placeholder="Select an object">
