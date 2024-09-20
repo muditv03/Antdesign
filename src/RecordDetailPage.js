@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { EditOutlined } from '@ant-design/icons';
 import RelatedRecord from './RelatedRecords';
-import { BASE_URL } from './Constant';
+import { BASE_URL,DateFormat } from './Constant';
 import dayjs from 'dayjs';
 import ApiService from './apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -54,7 +54,7 @@ const RecordDetail = () => {
       fieldsResponse.forEach(field => {
         if (field.type === 'Date' && recordData[field.name]) {
           // Format the date using dayjs to 'DD/MM/YYYY'
-          recordData[field.name] = dayjs(recordData[field.name]).format('DD/MM/YYYY');
+          recordData[field.name] = dayjs(recordData[field.name]).format(DateFormat);
         }
       });
       // Process lookup fields to fetch names
@@ -163,7 +163,6 @@ const RecordDetail = () => {
   };
 
  
-  const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY'];
 
 
   const renderFieldWithEdit = (field,selectedDate, setSelectedDate) => {
@@ -245,13 +244,13 @@ const RecordDetail = () => {
               <DatePicker
               placeholder={`Select ${field.label}`}
               style={{ width: '100%' }}
-              format={dateFormatList}
-              value={(form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name),dateFormatList[0]) : null)}
+              format={DateFormat}
+              value={(form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name),DateFormat) : null)}
                   onChange={(date, dateString) => {
                     console.log('Selected Date:', dateString); // Debugging - check if the correct date is selected
 
                     // Update both the form and local state
-                    setSelectedDate(date ? dayjs(dateString,dateFormatList[0]) : null);  // Update local state
+                    setSelectedDate(date ? dayjs(dateString,DateFormat) : null);  // Update local state
                     form.setFieldsValue({ [field.name]: dateString });        // Update form value
                   }}           
               />
@@ -284,8 +283,8 @@ const RecordDetail = () => {
               ? form.getFieldValue(name)
                 ? "True"
                 : "False"
-              : type === 'currency'
-              ? `$${form.getFieldValue(name) || '0.00'}`
+               : type === 'currency'
+              ? `$${(form.getFieldValue(name) ? parseFloat(form.getFieldValue(name)).toFixed(2) : '0.00')}`
 
               : type === 'String'
               ? form.getFieldValue(name) || ''
