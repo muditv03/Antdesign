@@ -55,6 +55,11 @@ const DataTable = () => {
     }
   };
 
+  const handleEdit = (record) => {
+    setEditingRecord(record);
+    setDrawerVisible(true);
+  };
+
   const showDrawer = () => {
     setEditingRecord(null);
     setDrawerVisible(true);
@@ -139,6 +144,17 @@ const DataTable = () => {
       dataIndex: 'plurallabel',
       key: 'plurallabel',
       width: 100,
+    },
+
+    {
+      title: 'Action',
+      key: 'action',
+      width: 100,
+      render: (text, record) => (
+        <Button type="primary" ghost onClick={() => handleEdit(record)}>
+          Edit
+        </Button>
+      ),
     },
    
   

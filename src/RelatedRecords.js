@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Typography } from 'antd';
+import { Card, Typography,  Row, Col, Button } from 'antd';
 import { BASE_URL } from './Constant';
 import ChildRecordTable from './RecordTable'; // Import the new component
 import ApiService from './apiService'; // Import ApiService class
@@ -88,9 +88,16 @@ const RelatedRecord = ({ objectName, recordId }) => {
           <Card
             key={relatedList._id}
             title={
-              <Title level={4} style={{ margin: 0 }}>
-                {relatedListName}
-              </Title>
+              <Row justify="space-between" align="middle">
+              <Col>
+                <Title level={4} style={{ margin: 0 }}>
+                  {relatedListName}
+                </Title>
+              </Col>
+              <Col>
+                <Button type="primary">New</Button>
+              </Col>
+            </Row>
             }
             style={{ marginBottom: 16 }}
           >
