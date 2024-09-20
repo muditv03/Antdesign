@@ -2,7 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 class ApiService {
-  constructor(endpoint, headers = {}, method = '', body = null) {
+  constructor(endpoint,data, url,headers = {}, method = '', body = null) {
     this.endpoint = endpoint;
     this.headers = {
       'Content-Type': 'application/json',  // Ensure 'Content-Type' is always set to 'application/json'
@@ -10,6 +10,9 @@ class ApiService {
     };
     this.method = method;
     this.body = body;
+    this.url = url;
+
+    this.data = data;
 
     // Add cookie data to headers if available
     const authToken = Cookies.get('tokenRes'); // Replace 'auth_token' with the actual cookie name

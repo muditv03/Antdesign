@@ -1,85 +1,88 @@
+
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import { Layout, Input, Button, Form, Avatar, Typography, Divider } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie';
- 
 const { Content } = Layout;
 const { Title, Text } = Typography;
- 
 const ProfilePage = () => {
   const [form] = Form.useForm();
   const [profile, setProfile] = useState({
     username: '',
     email: '',
-    name: '',
+    firstName: '',
+    lastName: '',
     address: '',
     phone: '',
   });
-
   useEffect(() => {
     // Retrieve profile data from cookies
     const storedProfile = {
       username: Cookies.get('username') || 'Aptclouds',
       email: Cookies.get('email') || 'user@example.com',
-      name: Cookies.get('name') || '',
+      firstName: Cookies.get('firstName') || '',
+      lastName: Cookies.get('lastName') || '',
       address: Cookies.get('address') || '',
       phone: Cookies.get('phone') || '',
     };
-    console.log('cookie is '+Cookies);
-
-
     setProfile(storedProfile);
-    console.log(profile);
-
     // Set initial values in the form
     form.setFieldsValue(storedProfile);
   }, [form]);
-
   const onFinish = (values) => {
     console.log('Profile Data:', values);
     // Save the updated profile data
   };
-
   const inputStyle = {
     padding: '10px',
     fontSize: '16px',
     backgroundColor: '#E6F7FF',
   };
-
   const labelStyle = {
     fontWeight: 'bold',
   };
-
   const cardStyle = {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     padding: '20px',
     borderRadius: '10px',
     boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-    width: '100%',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
   };
-
+  const headerContainerStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '10px 0',
+  };
   const headerStyle = {
-    backgroundColor: '#1890ff', // Any shade of blue you prefer
-    color: '#ffffff',
+    backgroundColor: '#1890FF', // Any shade of blue you prefer
+    color: '#FFFFFF',
     textAlign: 'center',
-    padding: '20px 0',
+    padding: '5px 20px', // Reduced padding
     fontSize: '24px',
     fontWeight: 'bold',
+    borderRadius: '5px',
   };
-
   const layoutStyle = {
     minHeight: '100vh',
-    backgroundColor: '#f0f2f5',
-    padding: '20px', // Adjusted padding for layout
+    backgroundColor: '#AFEEEE', // Black background color
+    padding: '20px',
   };
-
   return (
     <Layout style={layoutStyle}>
       {/* Hello text header */}
-      <div style={headerStyle}>
-        Hello
+      <div style={headerContainerStyle}>
+        <div style={headerStyle}>Hello</div>
       </div>
-
       <Content
         style={{
           padding: '20px',
@@ -88,9 +91,9 @@ const ProfilePage = () => {
           alignItems: 'center',
         }}
       >
-        <div style={{ width: '100%', maxWidth: '1200px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <div style={{ width: '100%', maxWidth: '1200px', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
           {/* Sidebar Card */}
-          <div style={{ ...cardStyle, flex: '1 1 300px', maxWidth: '350px', marginRight: '20px', marginBottom: '20px' }}>
+          <div style={cardStyle}>
             <div style={{ textAlign: 'center' }}>
               <Avatar size={120} icon={<UserOutlined />} style={{ marginBottom: '20px' }} />
               <Title level={3}>{profile.username || 'User Name'}</Title>
@@ -102,9 +105,8 @@ const ProfilePage = () => {
             </div>
             <Divider />
           </div>
-
           {/* Main Profile Information */}
-          <div style={{ ...cardStyle, flex: '2 1 500px' }}>
+          <div style={cardStyle}>
             <Form
               form={form}
               layout="vertical"
@@ -112,7 +114,7 @@ const ProfilePage = () => {
               initialValues={{
                 username: profile.username,
                 email: profile.email,
-                name: profile.name,
+                fullName: `${profile.firstName} ${profile.lastName}`,
                 phone: profile.phone,
                 address: profile.address,
               }}
@@ -125,14 +127,12 @@ const ProfilePage = () => {
               >
                 <Input placeholder="Username" style={inputStyle} />
               </Form.Item>
-
               <Form.Item
                 label={<span style={labelStyle}>Full Name</span>}
-                name="name"
+                name="fullName"
               >
                 <Input placeholder="Full Name" style={inputStyle} />
               </Form.Item>
-
               <Form.Item
                 label={<span style={labelStyle}>Email</span>}
                 name="email"
@@ -140,7 +140,6 @@ const ProfilePage = () => {
               >
                 <Input type="email" placeholder="Email" style={inputStyle} disabled />
               </Form.Item>
-
               <Form.Item
                 label={<span style={labelStyle}>Phone</span>}
                 name="phone"
@@ -148,9 +147,6 @@ const ProfilePage = () => {
               >
                 <Input placeholder="Phone" style={inputStyle} />
               </Form.Item>
-
-              
-
               <Form.Item>
                 <Button type="primary" htmlType="submit">
                   Save
@@ -163,15 +159,4 @@ const ProfilePage = () => {
     </Layout>
   );
 };
-
 export default ProfilePage;
-
-
-
-
-
-
-
-
-
-
