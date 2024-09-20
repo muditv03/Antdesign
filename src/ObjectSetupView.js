@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Typography, Button, Row, Col, Menu, message, Spin, Modal } from 'antd';
+import { Table, Typography, Tooltip, Button, Row, Col, Menu, message, Spin, Modal } from 'antd';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { EditOutlined } from '@ant-design/icons';
 import CreateObjectDrawer from './CreateObjectDrawer';
 import { BASE_URL } from './Constant';
 import ApiService from './apiService'; 
@@ -151,9 +152,12 @@ const DataTable = () => {
       key: 'action',
       width: 100,
       render: (text, record) => (
-        <Button type="primary" ghost onClick={() => handleEdit(record)}>
-          Edit
-        </Button>
+        <Tooltip title="Edit">
+          <EditOutlined
+            onClick={() => handleEdit(record)}
+            style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
+          />
+        </Tooltip>
       ),
     },
    

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Table, Typography, Button, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker,Spin, Modal,Space } from 'antd';
+import { Table, Typography, Button,Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker,Spin, Modal,Space } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { DownOutlined } from '@ant-design/icons';
+import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined  } from '@ant-design/icons';
 import { BASE_URL,DateFormat } from './Constant';
 import dayjs from 'dayjs';
 import ApiService from './apiService'; // Import ApiService class
@@ -643,15 +643,32 @@ const ObjectSetupDetail = () => {
     title: 'Action',
     key: 'operation',
     render: (_, record) => (
-      <Dropdown
-        overlay={menu}
-        trigger={['click']}
-        onVisibleChange={() => setSelectedRecord(record)}
-      >
-        <a onClick={(e) => e.preventDefault()}>
-          <DownOutlined />
-        </a>
-      </Dropdown>
+      <>
+        <Tooltip title="Edit">
+          <EditOutlined
+            onClick={() => handleEditClick(record)}
+            style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
+          />
+        </Tooltip>
+  
+        <Tooltip title="Clone">
+          <CopyOutlined
+            onClick={() => handleCloneClick(record)}
+            style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
+          />
+        </Tooltip>
+  
+        <Tooltip title="Delete">
+          <Popconfirm
+            title="Are you sure you want to delete this item?"
+            onConfirm={() => deleteRecord(record)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <DeleteOutlined style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }} />
+          </Popconfirm>
+        </Tooltip>
+      </>
     ),
   });
 
