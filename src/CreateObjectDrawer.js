@@ -202,7 +202,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
                 },
               ]}
             >
-              <Input placeholder="Please enter the name" />
+              <Input placeholder="Please enter the name" disabled={!!editingRecord}/>
             </Form.Item>
             <Form.Item
               name="plurallabel"

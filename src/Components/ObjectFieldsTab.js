@@ -1,28 +1,43 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Row,Col,Table, Button, message, Spin, Space } from 'antd';
+import { Row, Col, Table, Button, message, Spin, Tooltip } from 'antd';
 import CreateFieldDrawer from '../CreateFieldDrawer'; 
 import ApiService from '../apiService'; 
 import { BASE_URL } from '../Constant';
+import { EditOutlined } from '@ant-design/icons';
 
-
-const ObjectFieldTab = ( object ) => {
+const ObjectFieldTab = () => {
   const location = useLocation();
   const { record } = location.state || {};
   const [fieldsData, setFieldsData] = useState([]);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [loadingFields, setLoadingFields] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [editField, setEditField] = useState(null); // Track the field being edited
+
+  const handleEdit = (field) => {
+    setEditField(field); // Pass the field to the drawer
+    showDrawer(); // Open the drawer
+  };
 
   const showDrawer = () => setDrawerVisible(true);
   const closeDrawer = () => {
     setDrawerVisible(false);
-    fetchFieldsData();
+    setEditField(null); // Reset the edit field when drawer is closed
+    fetchFieldsData(); // Fetch the updated fields after the drawer is closed
   };
 
   const handleAddField = (newField) => {
     setFieldsData([...fieldsData, newField]);
+  };
+
+  const handleUpdateField = (updatedField) => {
+    // Update the specific field in the fieldsData array after editing
+    setFieldsData((prevFields) =>
+      prevFields.map((field) =>
+        field._id === updatedField._id ? updatedField : field
+      )
+    );
   };
 
   const fetchFieldsData = async () => {
@@ -43,21 +58,17 @@ const ObjectFieldTab = ( object ) => {
         setLoadingFields(false);
         setLoading(false);
       }
-    }else{
-        setLoadingFields(false);
-        setLoading(false);
+    } else {
+      setLoadingFields(false);
+      setLoading(false);
     }
   };
-
-  
 
   useEffect(() => {
     if (record?.name) {
       fetchFieldsData();
     }
   }, [record?.name]);
-
-
 
   const fieldColumns = [
     {
@@ -74,7 +85,8 @@ const ObjectFieldTab = ( object ) => {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
-      render: (value) => value ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : '',
+      render: (value) =>
+        value ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : '',
     },
     {
       title: 'Is Editable',
@@ -88,40 +100,45 @@ const ObjectFieldTab = ( object ) => {
       key: 'iswriteable',
       render: (value) => (value ? 'Yes' : 'No'),
     },
+    {
+      title: 'Action',
+      key: 'action',
+      width: 100,
+      render: (text, record) => (
+        <Tooltip title="Edit">
+          <EditOutlined
+            onClick={() => handleEdit(record)}
+            style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
+          />
+        </Tooltip>
+      ),
+    },
   ];
-
-  
 
   return (
     <div>  
-        <Row justify="end" style={{ marginBottom: '16px' }}>
-            <Col>
-              <Button type="primary" onClick={showDrawer}>
-                Create +
-              </Button>
-            </Col>
-          </Row>
-            
-          
-        <Spin spinning={loadingFields || loading}>
+      <Row justify="end" style={{ marginBottom: '16px' }}>
+        <Col>
+          <Button type="primary" onClick={showDrawer}>
+            Create +
+          </Button>
+        </Col>
+      </Row>
+      
+      <Spin spinning={loadingFields || loading}>
         <Table columns={fieldColumns} dataSource={fieldsData} pagination={false} />
-        </Spin>
-        <CreateFieldDrawer
+      </Spin>
+      
+      <CreateFieldDrawer
         visible={drawerVisible}
         onClose={closeDrawer}
         onAddField={handleAddField}
         mtObjectId={record?.key}
-        />
-        
-      
+        editField={editField} // Pass the field being edited
+        onSaveEdit={handleUpdateField} // Function to handle saving edited field
+      />
     </div>
   );
 };
 
 export default ObjectFieldTab;
-
-
-
-
-
-
