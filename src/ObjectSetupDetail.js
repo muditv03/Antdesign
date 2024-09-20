@@ -7,6 +7,10 @@ import { DownOutlined } from '@ant-design/icons';
 import { BASE_URL } from './Constant';
 import dayjs from 'dayjs';
 import ApiService from './apiService'; // Import ApiService class
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
+        
+
       
            
 const { Title } = Typography;
@@ -146,10 +150,7 @@ const ObjectSetupDetail = () => {
   
 
   const handleEditClick = async (record) => {
-    setSelectedRecord(record);
-    form.setFieldsValue(record);
-    setDrawerVisible(true);
-  
+    // Fetch fields data first to check for date fields
     try {
       setLoading(true);
   
@@ -162,6 +163,21 @@ const ObjectSetupDetail = () => {
   
       const fieldsResponse = await apiServiceForFields.makeCall();
       setFieldsData(fieldsResponse);
+  
+      // Format date fields in the record before setting them in the form
+      const formattedRecord = { ...record };
+  
+      // Iterate over the record to identify and format date fields
+      fieldsResponse.forEach(field => {
+        if (field.type === 'Date' && record[field.name]) {
+          // Format date to DD/MM/YYYY if the field is of Date type
+          formattedRecord[field.name] = dayjs(record[field.name]).format('DD/MM/YYYY');
+        }
+      });
+  
+      setSelectedRecord(formattedRecord);
+      form.setFieldsValue(formattedRecord);
+      setDrawerVisible(true);
   
       // Fetch all lookup field values and prefill in the form
       const lookupFields = fieldsResponse.filter(field => field.type === 'lookup');
@@ -184,7 +200,7 @@ const ObjectSetupDetail = () => {
   
           // Store the name in a state to display it in the UI
           setLookupName(prev => ({ ...prev, [lookupField.name]: response.Name }));
-          
+  
           // Set the lookup ID in the form
           form.setFieldsValue({
             [lookupField.name]: recordId
@@ -198,6 +214,8 @@ const ObjectSetupDetail = () => {
       setLoading(false);
     }
   };
+  
+  
   
   const handleCloneClick = async (record) => {
     const clonedRecord = { ...record, _id: undefined, isClone: true };
@@ -368,6 +386,8 @@ const ObjectSetupDetail = () => {
 
   };
   
+  const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY'];
+
  const renderFormItem = (field,selectedDate, setSelectedDate) => {
 
 
@@ -422,13 +442,15 @@ const ObjectSetupDetail = () => {
             <DatePicker
              placeholder={`Select ${field.label}`}
              style={{ width: '100%' }}
-             format="YYYY-MM-DD"
-             value={selectedDate || (form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name)) : null)}
+             format={dateFormatList}
+             value={(form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name),dateFormatList[0]) : null)}
                 onChange={(date, dateString) => {
                   console.log('Selected Date:', dateString); // Debugging - check if the correct date is selected
 
                   // Update both the form and local state
-                  setSelectedDate(date ? dayjs(dateString) : null);  // Update local state
+
+                  setSelectedDate(date ? dayjs(dateString,dateFormatList[0]) : null); 
+                  console.log('date which is selected is '+selectedDate); // Update local state
                   form.setFieldsValue({ [field.name]: dateString });        // Update form value
                 }}           
             />
@@ -436,6 +458,7 @@ const ObjectSetupDetail = () => {
           </Form.Item>
           
           );
+
 
       case 'currency':
         return (

@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Table, Typography, Button, Row, Col, message, Tabs, Spin, Space } from 'antd';
