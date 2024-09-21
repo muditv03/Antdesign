@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Row, Col, Typography, Avatar, Select, Tabs, Checkbox, message, Space, DatePicker } from 'antd';
+import { Form, Card,Input, Button, Row, Col, Typography, Avatar, Select, Tabs, Checkbox, message, Space, DatePicker } from 'antd';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { EditOutlined } from '@ant-design/icons';
@@ -10,7 +10,7 @@ import ApiService from './apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
    
-    
+     
 const { TextArea } = Input;
 const { Option } = Select;
 const { Title } = Typography;
@@ -165,24 +165,22 @@ const RecordDetail = () => {
  
 
 
-  const renderFieldWithEdit = (field,selectedDate, setSelectedDate) => {
+  const renderFieldWithEdit = (field, selectedDate, setSelectedDate) => {
     const { name, label, type, picklist_values, isTextArea } = field;
-
-
+  
     const validationRules = [];
-    
-
+  
     if (type === 'Integer') {
       validationRules.push({
         type: 'number',
-        transform: value => Number(value),
+        transform: (value) => Number(value),
         min: 0,
         message: 'Please enter a valid integer.',
       });
     } else if (type === 'decimal') {
       validationRules.push({
         type: 'number',
-        transform: value => Number(value),
+        transform: (value) => Number(value),
         min: 0,
         precision: field.decimal_places_after || 2,
         message: 'Please enter a valid decimal number.',
@@ -195,21 +193,23 @@ const RecordDetail = () => {
     } else if (type === 'currency') {
       validationRules.push({
         type: 'number',
-        transform: value => Number(value),
+        transform: (value) => Number(value),
         min: 0,
         message: 'Please enter a valid currency value.',
       });
     }
-
+  
     return (
       <div
+        className="editable-field-container"
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           borderBottom: !isEditable ? '1px solid #ddd' : 'none',
-          paddingBottom: 8,
-          marginBottom: 5,
+          paddingBottom: 0,
+          marginBottom: 20,
+          position: 'relative', // Added to position the icon correctly
         }}
       >
         {isEditable ? (
@@ -241,67 +241,61 @@ const RecordDetail = () => {
               </Select>
             ) : type === 'Date' ? (
               <Space>
-              <DatePicker
-              placeholder={`Select ${field.label}`}
-              style={{ width: '100%' }}
-              format={DateFormat}
-              value={(form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name),DateFormat) : null)}
+                <DatePicker
+                  placeholder={`Select ${field.label}`}
+                  style={{ width: '100%' }}
+                  format={DateFormat}
+                  value={form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name), DateFormat) : null}
                   onChange={(date, dateString) => {
-                    console.log('Selected Date:', dateString); // Debugging - check if the correct date is selected
-
-                    // Update both the form and local state
-                    setSelectedDate(date ? dayjs(dateString,DateFormat) : null);  // Update local state
-                    form.setFieldsValue({ [field.name]: dateString });        // Update form value
-                  }}           
-              />
+                    setSelectedDate(date ? dayjs(dateString, DateFormat) : null);
+                    form.setFieldsValue({ [field.name]: dateString });
+                  }}
+                />
               </Space>
             ) : type === 'Text-Area' ? (
               <TextArea placeholder={label} />
             ) : type === 'currency' ? (
-              <Input
-                placeholder={label}
-                type="number"
-                addonBefore="$"
-              />
+              <Input placeholder={label} type="number" addonBefore="$" />
             ) : (
               <Input placeholder={label} type={type === 'date' ? 'date' : 'text'} />
             )}
           </Form.Item>
         ) : (
-          <div style={{
-            flex: 1,
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-            maxWidth: '100%',
-            background: 'transparent',
-            border: 'none',
-            padding: 0,
-            margin: 0,
-            overflowWrap: 'break-word'
-          }}>
+          <div
+            style={{
+              flex: 1,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              maxWidth: '100%',
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              margin: 0,
+              overflowWrap: 'break-word',
+              fontSize:'16px',
+              fontWeight:500
+            }}
+          >
             {type === 'boolean'
               ? form.getFieldValue(name)
-                ? "True"
-                : "False"
-               : type === 'currency'
-              ? `$${(form.getFieldValue(name) ? parseFloat(form.getFieldValue(name)).toFixed(2) : '0.00')}`
-
-              : type === 'String'
-              ? form.getFieldValue(name) || ''
-              : type === 'Integer'
-              ? form.getFieldValue(name) || '0'
-              : type === 'Decimal'
-              ? form.getFieldValue(name) || '0.00'
-              : lookupNames[name] || form.getFieldValue(name)}
+                ? 'True'
+                : 'False'
+              : type === 'currency'
+              ? `$${form.getFieldValue(name) ? parseFloat(form.getFieldValue(name)).toFixed(2) : '0.00'}`
+              : form.getFieldValue(name) || ''}
           </div>
-          
-        
         )}
         {!isEditable && (
           <Avatar
             icon={<EditOutlined />}
-            size={16}
-            style={{ marginLeft: 8, cursor: 'pointer' }}
+            size={24}
+            className="edit-icon"
+            style={{
+              marginLeft: 8,
+              cursor: 'pointer',
+              backgroundColor: 'transparent',
+              color: 'black',
+            }}
             onClick={handleEditClick}
           />
         )}
@@ -320,7 +314,8 @@ const RecordDetail = () => {
       </Title>
       <Tabs defaultActiveKey="1" >
         <TabPane tab="Detail" key="1">
-          <Form form={form} layout="vertical" onFinish={onFinish}>
+          <Card>
+          <Form form={form} layout="vertical" onFinish={onFinish} style={{position: 'relative'}}>
             <Title level={3} style={{ marginTop: '0px' }}>Record Details</Title>
             <Row gutter={24} style={{marginBottom:'0px'}}>
               {fields.map((field, index) => (
@@ -332,6 +327,7 @@ const RecordDetail = () => {
               ))}
             </Row>
             {isEditable && (
+              
               <Row justify="end" style={{ marginTop: 24 }}>
                 <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
                   Save
@@ -340,11 +336,14 @@ const RecordDetail = () => {
                   Cancel
                 </Button>
               </Row>
+              
+              
             )}
           </Form>
+          </Card>
         </TabPane>
         <TabPane tab="Related" key="2">
-          <RelatedRecord objectName={objectName} recordId={id} />
+          {/* <RelatedRecord objectName={objectName} recordId={id} /> */}
         </TabPane>
       </Tabs>
     </div>

@@ -8,10 +8,7 @@ import { BASE_URL,DateFormat } from './Constant';
 import dayjs from 'dayjs';
 import ApiService from './apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-dayjs.extend(customParseFormat);
-        
-
-      
+dayjs.extend(customParseFormat);      
            
 const { Title } = Typography;
 
@@ -712,18 +709,18 @@ const ObjectSetupDetail = () => {
               borderTop: '1px solid #e8e8e8',
             }}
           >
-            <Button onClick={() => setDrawerVisible(false)} style={{ height: '47px', width: '120px', fontSize: '18px' }}>
+            <Button onClick={() => setDrawerVisible(false)} style={{ height: '34px', width: '90px', fontSize: '14px' }}>
               Cancel
             </Button>
             <Button
               onClick={() => form.submit()}
               type="primary"
               style={{
-                height: '47px',
-                width: '120px',
-                fontSize: '18px',
-                backgroundColor: 'white',
-                color: '#1890ff',
+                height: '34px',
+                width: '90px',
+                fontSize: '14px',
+                // backgroundColor: 'white',
+                // color: '#1890ff',
                 border: '1px solid #1890ff'
               }}
             >

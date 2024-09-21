@@ -54,6 +54,7 @@ const ObjectRelatedListTab = () => {
 
   const fetchRelatedLists = async () => {
     setLoadingRelatedLists(true);
+    console.log('console before calout');
     try {
       const apiService = new ApiService(
         `${BASE_URL}/related_lists/for_object/${parentObjectName}`,
@@ -61,6 +62,8 @@ const ObjectRelatedListTab = () => {
         'GET'
       );
       const response = await apiService.makeCall();
+
+      console.log('related list response :' , response);
       setRelatedLists(response.map((list) => ({ ...list, key: list.name })));
     } catch (error) {
       console.error('Error fetching related lists:', error);
@@ -71,9 +74,11 @@ const ObjectRelatedListTab = () => {
   };
 
   useEffect(() => {
+    console.log(record?.name);
     if (record?.name) {
       
       fetchRelatedLists();
+      console.log('console in use effect');
     }
   }, [record?.name]);
 

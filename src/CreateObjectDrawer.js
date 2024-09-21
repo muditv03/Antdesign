@@ -140,7 +140,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
             borderTop: '1px solid #e8e8e8',
           }}
         >
-          <Button onClick={onClose} style={{ height: '47px', width: '120px', fontSize: '18px' }}>
+          <Button onClick={onClose} style={{ height: '34px', width: '90px', fontSize: '14px' }}>
             Cancel
           </Button>
           <Button
@@ -148,15 +148,15 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
             disabled={loading}
             type="primary"
             style={{
-              height: '47px',
-              width: '120px',
-              fontSize: '18px',
-              backgroundColor: 'white',
-              color: '#1890ff',
+              height: '34px',
+              width: '90px',
+              fontSize: '14px',
+              // backgroundColor: 'white',
+              // color: '#1890ff',
               border: '1px solid #1890ff',
             }}
           >
-            {editingRecord ? 'Save Changes' : 'Save'}
+            {editingRecord ? 'Save' : 'Save'}
           </Button>
         </div>
       }
