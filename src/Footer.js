@@ -47,7 +47,7 @@ const AppFooter = () => {
         </div>
         {/* Copyright information */}
         <div style={{ fontSize: '14px' }}>
-          © {currentYear} APT CLOUDS. All Rights Reserved.
+          © {currentYear} Aptclouds. All Rights Reserved.
         </div>
       </div>
     </Footer>

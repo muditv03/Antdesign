@@ -143,18 +143,18 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             borderTop: '1px solid #e8e8e8',
           }}
         >
-          <Button onClick={onClose} style={{ height: '47px', width: '120px', fontSize: '18px' }}>
+          <Button onClick={onClose} style={{ height: '34px', width: '90px', fontSize: '14px' }}>
             Cancel
           </Button>
           <Button
             onClick={() => form.submit()}
             type="primary"
             style={{
-              height: '47px',
-              width: '120px',
-              fontSize: '18px',
-              backgroundColor: 'white',
-              color: '#1890ff',
+              height: '34px',
+              width: '90px',
+              fontSize: '14px',
+             // backgroundColor: 'white',
+             // color: '#1890ff',
               border: '1px solid #1890ff',
             }}
           >
