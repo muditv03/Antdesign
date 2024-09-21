@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Input, Button, Select, message } from 'antd';
 import apiService from './apiService'; // Import your ApiService class
+import { BASE_URL } from './Constant';
 const { Option } = Select;
 
 const CreateRelatedListDrawer = ({ visible, onClose, onCreate, record }) => {
@@ -13,11 +14,11 @@ const CreateRelatedListDrawer = ({ visible, onClose, onCreate, record }) => {
   const [loadingRelatedLists, setLoadingRelatedLists] = useState(false);
   const [relatedLists, setRelatedLists] = useState([]);
   const [selectedChildName, setSelectedChildName] = useState('');
-
+ 
   // Fetch parent objects
   useEffect(() => {
     const fetchParentObjects = async () => {
-      const api = new apiService('http://127.0.0.1:3000/mt_objects', {}, 'GET');
+      const api = new apiService(`${BASE_URL}/mt_objects`, {}, 'GET');
       try {
         const res = await api.makeCall();
         setParentObjects(res);
@@ -33,7 +34,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onCreate, record }) => {
   useEffect(() => {
     if (selectedChild) {
       const fetchChildObjectFields = async () => {
-        const api = new apiService(`http://127.0.0.1:3000/mt_fields/object/${selectedChild}`, {}, 'GET');
+        const api = new apiService(`${BASE_URL}/mt_fields/object/${selectedChild}`, {}, 'GET');
         try {
           const res = await api.makeCall();
           setChildObjectFields(res);
@@ -86,7 +87,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onCreate, record }) => {
       fields_to_display: fieldsToDisplay,
     };
 
-    const api = new apiService('http://127.0.0.1:3000/create_related_list', {}, 'POST', data);
+    const api = new apiService(`${BASE_URL}/create_related_list`, {}, 'POST', data);
     api.makeCall()
       .then(() => {
         message.success('Related list created successfully!');
@@ -101,7 +102,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onCreate, record }) => {
   const fetchRelatedLists = async () => {
     if (record) {
       setLoadingRelatedLists(true);
-      const api = new apiService(`http://127.0.0.1:3000/related_lists/for_object/${record}`, {}, 'GET');
+      const api = new apiService(`${BASE_URL}/related_lists/for_object/${record}`, {}, 'GET');
       try {
         const res = await api.makeCall();
         setRelatedLists(res.map(list => ({
