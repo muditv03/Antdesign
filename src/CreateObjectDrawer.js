@@ -4,6 +4,7 @@ import axios from 'axios';
 import * as Icons from '@ant-design/icons';
 import { BASE_URL } from './Constant';
 import ApiService from './apiService'; // Import ApiService class
+import pluralize from 'pluralize';
 
 const { Option } = Select;
 
@@ -202,6 +203,9 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
                     const alphabetOnlyRegex = /^[a-zA-Z]+$/;
                     if (!alphabetOnlyRegex.test(value)) {
                       return Promise.reject(new Error('Name should only contain alphabets without spaces.'));
+                    }
+                    if (pluralize.isPlural(value)) {
+                      return Promise.reject(new Error('API name cannot be plural.'));
                     }
 
                     return Promise.resolve();

@@ -17,7 +17,10 @@
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "jwt-encode": "^1.0.1",
-    "react-jwt": "^1.2.2"
+    "react-jwt": "^1.2.2",
+    "pluralize": "^8.0.0"
+
+
   },
   "scripts": {
     "start": "react-scripts start",

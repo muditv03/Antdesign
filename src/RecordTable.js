@@ -24,6 +24,9 @@ const ChildRecordTable = ({ fieldsData, childRecords }) => {
       let value = childRecord[field.name] || ''; // Get the value from childRecord
 
       console.log('field type is '+field.type);
+      if (field.type === 'lookup' && childRecord[`${field.name.toLowerCase()}_id`]) {
+        value = childRecord[`${field.name.toLowerCase()}_id`] || '';
+      }
       // Check if the field type is Date and format accordingly
       // Check for field type and apply the necessary formatting
       if (field.type === 'Date' && value) {
