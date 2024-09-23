@@ -95,6 +95,13 @@ html, body, #root, .layout {
   display: none; /* Hides scrollbar in WebKit-based browsers */
 }
 
+.editable-field-container .edit-icon {
+  visibility: hidden;
+}
+.editable-field-container:hover .edit-icon {
+  visibility: visible;
+}
+
 /*
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px; /* Set the width of the scrollbar 
