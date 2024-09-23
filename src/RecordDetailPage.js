@@ -276,13 +276,20 @@ const RecordDetail = () => {
               fontWeight:500
             }}
           >
-            {type === 'boolean'
+             {type === 'boolean'
               ? form.getFieldValue(name)
-                ? 'True'
-                : 'False'
-              : type === 'currency'
-              ? `$${form.getFieldValue(name) ? parseFloat(form.getFieldValue(name)).toFixed(2) : '0.00'}`
-              : form.getFieldValue(name) || ''}
+                ? "True"
+                : "False"
+               : type === 'currency'
+              ? `$${(form.getFieldValue(name) ? parseFloat(form.getFieldValue(name)).toFixed(2) : '0.00')}`
+
+              : type === 'String'
+              ? form.getFieldValue(name) || ''
+              : type === 'Integer'
+              ? form.getFieldValue(name) || '0'
+              : type === 'Decimal'
+              ? form.getFieldValue(name) || '0.00'
+              : lookupNames[name] || form.getFieldValue(name)}
           </div>
         )}
         {!isEditable && (
@@ -337,13 +344,13 @@ const RecordDetail = () => {
                 </Button>
               </Row>
               
-              
+               
             )}
           </Form>
           </Card>
         </TabPane>
         <TabPane tab="Related" key="2">
-          {/* <RelatedRecord objectName={objectName} recordId={id} /> */}
+          <RelatedRecord objectName={objectName} recordId={id} />
         </TabPane>
       </Tabs>
     </div>

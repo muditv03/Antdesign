@@ -108,14 +108,21 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
     }
   };
 
-  const iconOptions = Object.keys(Icons).map((iconName) => {
+  const iconOptions = Object.keys(Icons)
+  .filter((iconName) => iconName[0] >= 'A' && iconName[0] <= 'T') // Filter icons from A to T
+  .map((iconName) => {
     const IconComponent = Icons[iconName];
     return (
       <Option key={iconName} value={iconName} label={iconName}>
-        <IconComponent /> {iconName}
+        <span>
+          {React.createElement(IconComponent, null)} {/* Render the icon */}
+          <span style={{ marginLeft: 8 }}>{iconName}</span> {/* Display icon name */}
+        </span>
       </Option>
     );
   });
+
+  
 
   return (
     <Drawer

@@ -96,7 +96,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onCreate, record }) => {
       .catch(error => {
         message.error('Error creating related list');
       });
-  };
+  }; 
 
   // Fetch related lists data based on parent object name
   const fetchRelatedLists = async () => {
