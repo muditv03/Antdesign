@@ -1,11 +1,50 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table } from 'antd';
 import dayjs from 'dayjs';
-import { BASE_URL,DateFormat } from './Constant';
+import { BASE_URL, DateFormat } from './Constant';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-dayjs.extend(customParseFormat);     
+import ApiService from './apiService'; // Import ApiService class
+dayjs.extend(customParseFormat);
 
-const ChildRecordTable = ({ fieldsData, childRecords }) => {
+const ChildRecordTable = ({ fieldsData, childRecords, childObjectName }) => {
+  const [lookupNames, setLookupNames] = useState({});
+
+  // Function to fetch the lookup name
+  const fetchLookupName = async (objectName, id) => {
+    try {
+      const apiService = new ApiService(`${BASE_URL}/fetch_single_record/${objectName}/${id}`, {}, 'GET');
+      const responseData = await apiService.makeCall();
+      console.log(responseData); // Process the data as needed
+      return responseData.Name; // Assuming 'Name' is the field you're interested in
+    } catch (error) {
+      console.error('Error fetching lookup name:', error);
+      return ''; // Return empty string in case of error
+    }
+  };
+
+  useEffect(() => {
+    const fetchAllLookupNames = async () => {
+      const lookupNamePromises = childRecords.map(async (childRecord) => {
+        let newLookupNames = {};
+        for (const field of fieldsData) {
+          if (field.type === 'lookup' && childRecord[`${field.name.toLowerCase()}_id`]) {
+            const lookupId = childRecord[`${field.name.toLowerCase()}_id`];
+            const lookupName = await fetchLookupName(field.name, lookupId);
+            newLookupNames[lookupId] = lookupName;
+          }
+        }
+        return newLookupNames;
+      });
+
+      // Combine all the lookup names into one state
+      const allLookupNames = await Promise.all(lookupNamePromises);
+      const combinedLookupNames = Object.assign({}, ...allLookupNames);
+      setLookupNames(combinedLookupNames);
+    };
+
+    fetchAllLookupNames();
+  }, [childRecords, fieldsData, childObjectName]);
+
   // Dynamically generate columns based on fieldsData (which contains labels and API names)
   const columns = fieldsData.map((field) => ({
     title: field.label, // Use the label as column heading
@@ -23,37 +62,33 @@ const ChildRecordTable = ({ fieldsData, childRecords }) => {
     fieldsData.forEach((field) => {
       let value = childRecord[field.name] || ''; // Get the value from childRecord
 
-      console.log('field type is '+field.type);
       if (field.type === 'lookup' && childRecord[`${field.name.toLowerCase()}_id`]) {
-        value = childRecord[`${field.name.toLowerCase()}_id`] || '';
+        const lookupId = childRecord[`${field.name.toLowerCase()}_id`];
+        value = lookupNames[lookupId] || 'Loading...'; // Show 'Loading...' until the name is fetched
       }
-      // Check if the field type is Date and format accordingly
-      // Check for field type and apply the necessary formatting
+
+      // Format date fields
       if (field.type === 'Date' && value) {
-        // Format date value
-        console.log('console in Date');
         value = dayjs(value).format(DateFormat);
-      } 
-      if (field.type === 'Integer' && value==0) {
-        //console.log('field type is '+field.type);
-        console.log('value when integer is '+value);
-        // Display 0 if the value is explicitly 0 for number fields
+      }
+
+      // Handle Integer and Decimal types
+      if (field.type === 'Integer' && value === 0) {
         value = 0;
       }
-       if ((field.type === 'decimal' ) && value == 0.0) {
-        // Show 0.00 if value is 0 for decimal or currency fields
-        value = '0.00';
-      } 
-      if (field.type === 'currency') {
-        if (value == 0) {
-          value = '0.00';
-        }
-        value = `$${value}`; // Add the $ prefix to the currency value
-      }
-      if(field.type==='boolean' &&value){
-        value = value ? 'True' : 'False';
 
+      if (field.type === 'decimal' && value == 0.0) {
+        value = '0.00';
       }
+
+      if (field.type === 'currency') {
+        value = value === 0 ? '0.00' : `$${value}`;
+      }
+
+      if (field.type === 'boolean') {
+        value = value ? 'True' : 'False';
+      }
+
       // Add the value to the row object for this child record
       row[field.name] = value;
     });

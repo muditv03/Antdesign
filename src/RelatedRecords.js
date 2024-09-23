@@ -3,13 +3,14 @@ import { Card, Typography, Row, Col, Button } from 'antd';
 import { BASE_URL } from './Constant';
 import ChildRecordTable from './RecordTable'; // Import the new component
 import ApiService from './apiService'; // Import ApiService class
-  
+   
 const { Title } = Typography;
 
 const RelatedRecord = ({ objectName, recordId }) => {
   const [groupedData, setGroupedData] = useState({});
   const [childRecordsMap, setChildRecordsMap] = useState({}); // Store child records by related list ID
   const [fieldsDataMap, setFieldsDataMap] = useState({}); // Store fields data for each related list
+  const [childObjectName,setChildObjectName]=useState('');
 
   // Fetch related records using ApiService
   const fetchRelatedRecords = async () => {
@@ -28,6 +29,7 @@ const RelatedRecord = ({ objectName, recordId }) => {
         // Group data by related_list_name
         const grouped = response.reduce((acc, record) => {
           const relatedListName = record.related_list.related_list_name;
+          setChildObjectName(record.related_list.child_object_name);
 
           // Store related list and fields data separately
           if (!acc[relatedListName]) {
@@ -112,6 +114,7 @@ const RelatedRecord = ({ objectName, recordId }) => {
               fieldsToDisplay={relatedList.fields_to_display} 
               childRecords={childRecordsMap[relatedList._id] || []} 
               fieldsData={fieldsDataMap[relatedList._id] || []} // Pass the fields data
+              childObjectName={childObjectName}
             />
           </Card>
         ))
