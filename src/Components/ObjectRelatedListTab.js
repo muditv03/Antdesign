@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Table, Button, Row, Col, message, Spin, Space } from 'antd';
@@ -13,11 +9,8 @@ const ObjectRelatedListTab = () => {
   const location = useLocation();
   const { record } = location.state || {};
   const [relatedLists, setRelatedLists] = useState([]);
-  
   const [relatedListDrawerVisible, setRelatedListDrawerVisible] = useState(false);
-  
   const [loadingRelatedLists, setLoadingRelatedLists] = useState(false);
-  
   const [editingRelatedList, setEditingRelatedList] = useState(null);
   const [selectedRelatedList, setSelectedRelatedList] = useState(null);
   const [parentObjectName, setParentObjectName] = useState(record?.name || 'Account');
@@ -50,11 +43,9 @@ const ObjectRelatedListTab = () => {
     closeRelatedListDrawer();
   };
 
-  
-
+  // Modified fetchRelatedLists function
   const fetchRelatedLists = async () => {
     setLoadingRelatedLists(true);
-    console.log('console before calout');
     try {
       const apiService = new ApiService(
         `${BASE_URL}/related_lists/for_object/${parentObjectName}`,
@@ -63,8 +54,15 @@ const ObjectRelatedListTab = () => {
       );
       const response = await apiService.makeCall();
 
-      console.log('related list response :' , response);
-      setRelatedLists(response.map((list) => ({ ...list, key: list.name })));
+      // Mapping response to match table structure
+      const formattedData = response.map((item) => ({
+        key: item.related_list._id, // unique key for each row
+        related_list_name: item.related_list.related_list_name,
+        child_object_name: item.related_list.child_object_name,
+        fields_to_display: item.related_list.fields_to_display.join(', '), // join fields into a single string
+      }));
+
+      setRelatedLists(formattedData);
     } catch (error) {
       console.error('Error fetching related lists:', error);
       message.error('Error fetching related lists');
@@ -74,23 +72,15 @@ const ObjectRelatedListTab = () => {
   };
 
   useEffect(() => {
-    console.log(record?.name);
     if (record?.name) {
-      
       fetchRelatedLists();
-      console.log('console in use effect');
     }
   }, [record?.name]);
-
-  
-  
 
   const handleEditRelatedList = (record) => {
     setEditingRelatedList(record);
     setRelatedListDrawerVisible(true);
   };
-
-  
 
   const relatedListColumns = [
     {
@@ -122,34 +112,25 @@ const ObjectRelatedListTab = () => {
 
   return (
     <div>
-      
-          <Row justify="end" style={{ marginBottom: '16px' }}>
-            <Col>
-              <Button type="primary" onClick={showRelatedListDrawer}>
-                Add Related List
-              </Button>
-            </Col>
-          </Row>
-          <Spin spinning={loadingRelatedLists}>
-            <Table columns={relatedListColumns} dataSource={relatedLists} pagination={false} />
-          </Spin>
-          <CreateRelatedListDrawer
-            visible={relatedListDrawerVisible}
-            onClose={closeRelatedListDrawer}
-            onAddRelatedList={handleAddRelatedList}
-            parentObjectName={parentObjectName}
-            editingRelatedList={editingRelatedList}
-          />
-        
-      
+      <Row justify="end" style={{ marginBottom: '16px' }}>
+        <Col>
+          <Button type="primary" onClick={showRelatedListDrawer}>
+            Add Related List
+          </Button>
+        </Col>
+      </Row>
+      <Spin spinning={loadingRelatedLists}>
+        <Table columns={relatedListColumns} dataSource={relatedLists} pagination={false} />
+      </Spin>
+      <CreateRelatedListDrawer
+        visible={relatedListDrawerVisible}
+        onClose={closeRelatedListDrawer}
+        onAddRelatedList={handleAddRelatedList}
+        parentObjectName={parentObjectName}
+        editingRelatedList={editingRelatedList}
+      />
     </div>
   );
 };
 
 export default ObjectRelatedListTab;
-
-
-
-
-
-
