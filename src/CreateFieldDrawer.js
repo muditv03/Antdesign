@@ -14,6 +14,30 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   const [loading, setLoading] = useState(false); // Spinner state
   const isEditMode = !!editField; // Check if it's edit mode
 
+  // Utility function to sanitize label and create API name
+  const generateApiName = (label) => {
+    return label
+      .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special characters
+      .trim() // Remove leading and trailing spaces
+      .split(/\s+/) // Split by one or more spaces
+      .map((word, index) => {
+        if (index === 0) {
+          return word.charAt(0).toLowerCase() + word.slice(1); // First word lowercase
+        }
+        return word.charAt(0).toUpperCase() + word.slice(1); // Capitalize other words
+      })
+      .join(''); // Join back into a single string
+  };
+  
+
+  // Handle label change and update API name
+  const handleLabelChange = (e) => {
+    const label = e.target.value;
+    form.setFieldsValue({
+      name: generateApiName(label), // Set the API name based on the sanitized label
+    });
+  };
+
   // Fetch available objects for the lookup field
   useEffect(() => {
     if (fieldType === 'lookup') {
@@ -154,8 +178,6 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
               height: '34px',
               width: '90px',
               fontSize: '14px',
-             // backgroundColor: 'white',
-             // color: '#1890ff',
               border: '1px solid #1890ff',
             }}
           >
@@ -175,32 +197,21 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             style={{ fontSize: '16px' }}
           >
             <Form.Item
-              name="type"
-              label="Type"
-              rules={[{ required: true, message: 'Please select the type' }]}
+              name="label"
+              label="Label"
+              rules={[{ required: true, message: 'Please enter the label' }]}
             >
-              <Select
-                placeholder="Select the field type"
-                onChange={(value) => setFieldType(value)}
-                disabled={isEditMode} // Disable field type selection in edit mode
-              >
-                <Option value="String">Text</Option>
-                <Option value="Integer">Number</Option>
-                <Option value="decimal">Decimal</Option>
-                <Option value="Date">Date</Option>
-                <Option value="boolean">Boolean</Option>
-                <Option value="Picklist">Picklist</Option>
-                <Option value="currency">Currency</Option>
-                <Option value="lookup">Lookup</Option>
-                <Option value="Text-Area">Text Area</Option>
-              </Select>
+              <Input 
+                placeholder="Please enter the field label" 
+                onBlur={handleLabelChange} // Add onChange handler here
+              />
             </Form.Item>
 
             <Form.Item
               name="name"
               label="API Name"
-              rules={[
-                { required: true, message: 'Please enter the name' },
+              rules={[ 
+                { required: true, message: 'Please enter the name' }, 
                 {
                   validator: (_, value) => {
                     if (!value) {
@@ -232,41 +243,78 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             </Form.Item>
 
             <Form.Item
-              name="label"
-              label="Label"
-              rules={[{ required: true, message: 'Please enter the label' }]}
+              name="type"
+              label="Type"
+              rules={[{ required: true, message: 'Please select the type' }]}
             >
-              <Input placeholder="Please enter the field label" />
+              <Select
+                placeholder="Select the field type"
+                onChange={(value) => setFieldType(value)}
+                disabled={isEditMode} // Disable field type selection in edit mode
+              >
+                <Option value="String">Text</Option>
+                <Option value="Integer">Number</Option>
+                <Option value="decimal">Decimal</Option>
+                <Option value="currency">Currency</Option>
+                <Option value="boolean">Boolean</Option>
+                <Option value="Picklist">Picklist</Option>
+                <Option value="lookup">Lookup</Option>
+                <Option value="Date">Date</Option>
+                <Option value="LongText">Long Text Area</Option>
+              </Select>
             </Form.Item>
 
             {fieldType === 'Picklist' && (
               <Form.Item
                 name="picklist_values"
-                label="Picklist Values (comma separated)"
-                rules={[{ required: true, message: 'Please enter picklist values' }]}
+                label="Picklist Values"
               >
-                <Input placeholder="Enter values separated by commas" onChange={handlePicklistChange} />
+                <Input 
+                  placeholder="Enter picklist values separated by commas"
+                  onChange={handlePicklistChange}
+                />
               </Form.Item>
             )}
 
-            {(fieldType === 'decimal' || fieldType === 'currency') && (
+            {fieldType === 'decimal' && (
               <>
                 <Form.Item
                   name="length"
-                  label="Total Length"
+                  label="Length"
                   rules={[{ required: true, message: 'Please enter the length' }]}
                 >
-                  <Input type="Number" placeholder="Enter total length" />
+                  <Input placeholder="Enter length" />
                 </Form.Item>
                 <Form.Item
                   name="decimal_places"
                   label="Decimal Places"
-                  rules={[{ required: true, message: 'Please enter the decimal places' }]}
+                  rules={[{ required: true, message: 'Please enter decimal places' }]}
                 >
-                  <Input type="Number" placeholder="Enter decimal places" />
+                  <Input placeholder="Enter decimal places" />
                 </Form.Item>
               </>
             )}
+
+            {fieldType === 'currency' && (
+              <>
+                <Form.Item
+                  name="length"
+                  label="Length"
+                  rules={[{ required: true, message: 'Please enter the length' }]}
+                >
+                  <Input placeholder="Enter length" />
+                </Form.Item>
+                <Form.Item
+                  name="decimal_places"
+                  label="Decimal Places"
+                  rules={[{ required: true, message: 'Please enter decimal places' }]}
+                >
+                  <Input placeholder="Enter decimal places" />
+                </Form.Item>
+              </>
+            )}
+
+           
           </Form>
         </Card>
       </Spin>

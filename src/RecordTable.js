@@ -20,7 +20,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName }) => {
       console.error('Error fetching lookup name:', error);
       return ''; // Return empty string in case of error
     }
-  };
+  }; 
 
   useEffect(() => {
     const fetchAllLookupNames = async () => {

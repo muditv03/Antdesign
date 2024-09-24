@@ -9,11 +9,9 @@ import AppSidebar from './Sidebar';
 import DataTable from './ObjectSetupView';
 import ObjectSetupDetail from './ObjectSetupDetail';
 import ObjectFieldDetail from './ObjectDetail';
-
 import AppFooter from './Footer';  // Import the footer component
 import Profile from './Profile';  // Import the Profile component
 import RecordDetail from './RecordDetailPage';
-import  CreateRelatedListDrawer from  './CreateRelatedListDrawer' ;
    
 const { Content } = Layout;
   
