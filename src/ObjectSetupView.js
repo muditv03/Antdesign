@@ -162,7 +162,7 @@ const DataTable = () => {
     },
    
   
-  ];
+  ]; 
 
   return (
     <Spin spinning={loading}>

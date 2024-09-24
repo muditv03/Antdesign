@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined  } from '@ant-design/icons';
 import { BASE_URL,DateFormat } from './Constant';
 import dayjs from 'dayjs';
+import CreateRecordDrawer from './CreateRecordDrawer';
 import ApiService from './apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);      
@@ -125,7 +126,7 @@ const ObjectSetupDetail = () => {
     setDrawerVisible(true);
   
     try {
-      setLoading(true);
+      //setLoading(true);
   
       // Create an instance of ApiService for fetching fields data
       const apiServiceForFields = new ApiService(
@@ -149,7 +150,7 @@ const ObjectSetupDetail = () => {
   const handleEditClick = async (record) => {
     // Fetch fields data first to check for date fields
     try {
-      setLoading(true);
+      //setLoading(true);
   
       // Create an instance of ApiService for fetching fields data
       const apiServiceForFields = new ApiService(
@@ -219,7 +220,7 @@ const ObjectSetupDetail = () => {
     const clonedRecord = { ...record, _id: undefined, isClone: true };
   
     try {
-      setLoading(true);
+      //setLoading(true);
   
       // Create an instance of ApiService for fetching fields data
       const apiServiceForFields = new ApiService(
@@ -312,7 +313,7 @@ const ObjectSetupDetail = () => {
     };
   
     try {
-      setLoading(true);
+      //setLoading(true);
       console.log('object name is '+objectName)
 
       console.log('body while updating is ' + JSON.stringify(body));
@@ -684,7 +685,7 @@ const ObjectSetupDetail = () => {
       </Row>
       <Table columns={columns} dataSource={records} rowKey="_id" />
 
-      <Drawer
+      {/* <Drawer
         title={<div style={{ fontSize: '20px', fontWeight: 'bold' }}>
            {selectedRecord?.isClone ? 'Clone Record' : selectedRecord ? 'Edit Record' : 'Create New Record'}
 
@@ -746,7 +747,20 @@ const ObjectSetupDetail = () => {
           </Form>
         </Card>
         </Spin> 
-      </Drawer>
+      </Drawer> */}
+      <CreateRecordDrawer
+        visible={drawerVisible}
+        onClose={() => setDrawerVisible(false)}
+        onFinish={handleFinish}
+        loading={loading}
+        fieldsData={fieldsData}
+        selectedRecord={selectedRecord}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        form={form}
+      />
+
+
 
       <Modal
         title="Confirm Deletion"

@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Table, Typography, Button, Row, Col, message, Tabs, Spin, Space } from 'antd';
-import CreateRelatedListDrawer from './CreateRelatedListDrawer'; 
-import ApiService from './apiService'; 
-import { BASE_URL } from './Constant';
 import ObjectFieldTab from './Components/ObjectFieldsTab';
 import ObjectRelatedListTab from './Components/ObjectRelatedListTab';
 
