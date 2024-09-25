@@ -4,7 +4,7 @@ import * as Icons from '@ant-design/icons';
 import { BASE_URL } from './Constant';
 import ApiService from './apiService'; // Import ApiService class
 import pluralize from 'pluralize';
-
+ 
 const { Option } = Select;
 
 const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord }) => {
@@ -18,6 +18,31 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       form.resetFields(); // Reset form for new object creation
     }
   }, [editingRecord, form]);
+
+  // Utility function to sanitize label and create API name
+  const generateApiName = (label) => {
+    return label
+      .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special characters
+      .trim() // Remove leading and trailing spaces
+      .split(/\s+/) // Split by one or more spaces
+      .map((word, index) => {
+        if (index === 0) {
+          return word.charAt(0).toLowerCase() + word.slice(1); // First word lowercase
+        }
+        return word.charAt(0).toUpperCase() + word.slice(1); // Capitalize other words
+      })
+      .join(''); // Join back into a single string
+  };
+  
+
+  // Handle label change and update API name
+  const handleLabelChange = (e) => {
+    const label = e.target.value;
+    form.setFieldsValue({
+      name: generateApiName(label), // Set the API name based on the sanitized label
+    });
+  };
+
 
   const handleFinish = async (values) => {
     setLoading(true); // Start the spinner
@@ -185,8 +210,12 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
               label="Label"
               rules={[{ required: true, message: 'Please enter the label' }]}
             >
-              <Input placeholder="Please enter the label" />
+              <Input 
+                placeholder="Please enter the field label" 
+                onBlur={handleLabelChange} // Add onChange handler here
+              />
             </Form.Item>
+ 
             <Form.Item
               name="name"
               label="API Name"

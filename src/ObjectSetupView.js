@@ -181,7 +181,7 @@ const DataTable = () => {
             dataSource={data}
             pagination={true}
             style={{ width: '100%' }}
-          />
+          /> 
         </div>
         <CreateObjectDrawer
           visible={drawerVisible}

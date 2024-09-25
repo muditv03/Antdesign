@@ -115,6 +115,8 @@ const ObjectFieldTab = () => {
     },
   ];
 
+  console.log(fieldsData);
+
   return (
     <div>  
       <Row justify="end" style={{ marginBottom: '16px' }}>
