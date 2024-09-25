@@ -83,7 +83,6 @@ const ObjectRelatedListTab = () => {
       fetchRelatedLists();
     }
   }, [record]);
-
   const handleEditRelatedList = (record) => {
     setEditingRelatedList(record);
     setEditRelatedListDrawerVisible(true);

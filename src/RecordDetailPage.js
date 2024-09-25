@@ -29,7 +29,7 @@ const RecordDetail = () => {
   const [recordName, setRecordName] = useState('');
 
 
-
+ 
   const fetchRecords = async () => {
     try {
       // Fetch the record data

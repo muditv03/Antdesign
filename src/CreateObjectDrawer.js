@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Input, Button, message, Card, Checkbox, Select, Spin } from 'antd';
-import axios from 'axios';
 import * as Icons from '@ant-design/icons';
 import { BASE_URL } from './Constant';
 import ApiService from './apiService'; // Import ApiService class
