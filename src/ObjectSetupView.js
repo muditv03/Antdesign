@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Table, Typography, Tooltip, Button, Row, Col, Menu, message, Spin, Modal } from 'antd';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -147,7 +147,7 @@ const DataTable = () => {
       width: 100,
     },
 
-    {
+    { 
       title: 'Action',
       key: 'action',
       width: 100,
