@@ -66,6 +66,30 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
         );
 
         response = await apiService.makeCall();
+
+        const newTab = {
+          label: values.label,
+          name: values.name,
+          description: 'All Accounts',
+          mt_object_id: response._id, // Use the new object ID from the response
+          icon: values.icon,
+          addObjectTab: values.addObjectTab,
+        };
+
+        if (newTab.icon && newTab.addObjectTab) {
+          const apiServiceForTab = new ApiService(
+            `${BASE_URL}/mt_tabs`,
+            { 'Content-Type': 'application/json' },
+            'POST',
+            { mt_tab: newTab }
+          );
+
+          const tabResponse = await apiServiceForTab.makeCall();
+
+          if (!tabResponse || !tabResponse._id) {
+            throw new Error('Failed to create a new tab');
+          }
+        }
         message.success('Object updated successfully');
         onAddOrEditObject({ ...editingRecord, ...formData }); // Update the object in the parent component
       } else {
@@ -251,7 +275,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
               <Input placeholder="Please enter the plural label" />
             </Form.Item>
 
-            {!editingRecord && (
+           
               <>
                 <Form.Item
                   name="addObjectTab"
@@ -276,7 +300,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
                   </Select>
                 </Form.Item>
               </>
-            )}
+          
           </Form>
         </Card>
       </Spin>
