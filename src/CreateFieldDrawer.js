@@ -183,7 +183,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
           >
             Save
           </Button>
-        </div>
+        </div> 
       }
       footerStyle={{ textAlign: 'right', padding: '0' }}
     >
