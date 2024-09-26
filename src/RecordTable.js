@@ -174,7 +174,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       fetchAllLookupNames();
     }
   }, [childRecords, fieldsData, childObjectName]);
-
+ 
   // Define columns dynamically based on fieldsData
   const columns = fieldsData.map((field,index) => ({
     title: field.label,
@@ -430,13 +430,13 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
         <Tooltip title="Edit">
           <EditOutlined
             onClick={() => handleEditClick(record)}
-            style={{ marginRight: 16, fontSize: '18px', cursor: 'pointer' }}
+            style={{ marginRight: 16, fontSize: '14px', cursor: 'pointer' }}
           />
         </Tooltip>
         <Tooltip title="Clone">
           <CopyOutlined
             onClick={() => handleCloneClick(record)}
-            style={{ marginRight: 16, fontSize: '18px', cursor: 'pointer' }}
+            style={{ marginRight: 16, fontSize: '14px', cursor: 'pointer' }}
           />
         </Tooltip>
         <Tooltip title="Delete">
@@ -445,7 +445,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
             onConfirm={() => deleteRecord(record)}
           >
             <DeleteOutlined
-              style={{ color: 'red', fontSize: '18px', cursor: 'pointer' }}
+              style={{ color: 'red', fontSize: '14px', cursor: 'pointer' }}
             />
           </Popconfirm>
         </Tooltip>
