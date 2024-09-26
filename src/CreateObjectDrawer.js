@@ -21,34 +21,50 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
 
   // Utility function to sanitize label and create API name
   const generateApiName = (label) => {
-    return label
-      .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special characters
-      .trim() // Remove leading and trailing spaces
-      .split(/\s+/) // Split by one or more spaces
-      .map((word, index) => {
-        if (index === 0) {
-          return word.charAt(0).toLowerCase() + word.slice(1); // First word lowercase
-        }
-        return word.charAt(0).toUpperCase() + word.slice(1); // Capitalize other words
-      })
-      .join(''); // Join back into a single string
+    return toPascalCase(label)
+      // .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special characters
+      // .trim() // Remove leading and trailing spaces
+      // .split(/\s+/) // Split by one or more spaces
+      // .map((word, index) => {
+      //   if (index === 0) {
+      //     return word.charAt(0).toLowerCase() + word.slice(1); // First word lowercase
+      //   }
+      //   return word.charAt(0).toUpperCase() + word.slice(1); // Capitalize other words
+      // })
+      // .join(''); // Join back into a single string
   };
   
 
   // Handle label change and update API name
   const handleLabelChange = (e) => {
     const label = e.target.value;
-    form.setFieldsValue({
-      name: generateApiName(label), // Set the API name based on the sanitized label
-    });
+    const currentName = form.getFieldValue('name');
+  
+    // Only auto-populate the name if it's empty
+    if (!currentName) {
+      form.setFieldsValue({
+        name: generateApiName(label), // Set the API name based on the sanitized label
+      });
+    }
   };
+  
+
+  const toPascalCase = (str) => {
+  return str
+    .replace(/(?:^|\s)(\w)/g, (_, char) => char.toUpperCase())  // Capitalize the first letter of each word
+    .replace(/\s+/g, '');  // Remove all spaces
+};
+
+  
 
 
   const handleFinish = async (values) => {
     setLoading(true); // Start the spinner
+    const pascalCaseName = toPascalCase(values.name);
+    console.log( pascalCaseName)
     const formData = {
       label: values.label,
-      name: values.name,
+      name: pascalCaseName,
       pluralLabel: values.plurallabel,
       addObjectTab: values.addObjectTab,
       icon: values.icon,

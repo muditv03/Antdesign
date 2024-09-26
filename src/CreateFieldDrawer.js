@@ -288,7 +288,18 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                 <Form.Item
                   name="decimal_places"
                   label="Decimal Places"
-                  rules={[{ required: true, message: 'Please enter decimal places' }]}
+                  rules={[{ required: true, message: 'Please enter decimal places' },
+                    {
+                      validator: (_, value) => {
+                        if (value === "0" || value === 0) {
+                          return Promise.reject(new Error('Zero is not allowed for decimal places'));
+                        }
+                        return Promise.resolve();
+                      }
+                    }
+
+
+                  ]}
                 >
                   <Input placeholder="Enter decimal places" />
                 </Form.Item>
