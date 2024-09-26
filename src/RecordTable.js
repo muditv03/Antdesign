@@ -176,11 +176,26 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
   }, [childRecords, fieldsData, childObjectName]);
 
   // Define columns dynamically based on fieldsData
-  const columns = fieldsData.map((field) => ({
+  const columns = fieldsData.map((field,index) => ({
     title: field.label,
     dataIndex: field.name,
     key: field.name,
     render: (value, record) => {
+      
+      // Make the first column a clickable link
+      if (index === 0) {
+        return (
+          <a
+            href="#"
+            onClick={() => {
+              navigate(`/record/${childObjectName}/${record._id}`); // Use record.key directly
+              window.location.reload(); // Reload the page after navigation
+            }}
+            >
+            {value}
+          </a>
+        );
+      }
       if (field.type === 'lookup' && record[`${field.name.toLowerCase()}_id`]) {
         const lookupId = record[`${field.name.toLowerCase()}_id`];
         return lookupNames[lookupId] || 'Loading...';

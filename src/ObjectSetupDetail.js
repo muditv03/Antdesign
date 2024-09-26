@@ -646,14 +646,14 @@ const ObjectSetupDetail = () => {
         <Tooltip title="Edit">
           <EditOutlined
             onClick={() => handleEditClick(record)}
-            style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
+            style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
           />
         </Tooltip>
   
         <Tooltip title="Clone">
           <CopyOutlined
             onClick={() => handleCloneClick(record)}
-            style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
+            style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
           />
         </Tooltip>
   
@@ -664,7 +664,7 @@ const ObjectSetupDetail = () => {
             okText="Yes"
             cancelText="No"
           >
-            <DeleteOutlined style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }} />
+            <DeleteOutlined style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }} />
           </Popconfirm>
         </Tooltip>
       </>
