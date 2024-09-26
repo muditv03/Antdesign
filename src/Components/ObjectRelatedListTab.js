@@ -1,8 +1,9 @@
 
+
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Table, Button, Row, Col, message, Spin, Space, Tooltip } from 'antd';
-import { EditOutlined } from '@ant-design/icons'; // Import the Edit icon
+import { EditOutlined } from '@ant-design/icons';
 import CreateRelatedListDrawer from '../CreateRelatedListDrawer'; 
 import RelatedListEditDrawer from '../RelatedListEditDrawer'; 
 import ApiService from '../apiService'; 
@@ -10,7 +11,7 @@ import { BASE_URL } from '../Constant';
 
 const ObjectRelatedListTab = () => {
   const location = useLocation();
-  const navigate = useNavigate(); // Define navigate
+  const navigate = useNavigate(); 
   const { record } = location.state || {};
   const [relatedLists, setRelatedLists] = useState([]);
   const [relatedListDrawerVisible, setRelatedListDrawerVisible] = useState(false);
@@ -18,7 +19,6 @@ const ObjectRelatedListTab = () => {
   const [loadingRelatedLists, setLoadingRelatedLists] = useState(false);
   const [editingRelatedList, setEditingRelatedList] = useState(null);
   const [parentObjectName, setParentObjectName] = useState(record?.name || 'Account');
-  const [parentObjects, setParentObjects] = useState([]); // Define your state here
 
   const showRelatedListDrawer = () => {
     setEditingRelatedList(null);
@@ -41,14 +41,15 @@ const ObjectRelatedListTab = () => {
       related_object_name: values.relatedObjectType,
       related_field_name: values.relatedFieldType,
     };
+
     if (editingRelatedList) {
       setRelatedLists((prev) =>
         prev.map((list) =>
-          list.name === editingRelatedList.name ? newRelatedList : list
+          list.key === editingRelatedList.key ? newRelatedList : list
         )
       );
     } else {
-      setRelatedLists([...relatedLists, newRelatedList]);
+      setRelatedLists([...relatedLists, { ...newRelatedList, key: Date.now() }]);
     }
     closeRelatedListDrawer();
   };
@@ -62,12 +63,14 @@ const ObjectRelatedListTab = () => {
         'GET'
       );
       const response = await apiService.makeCall();
+
       const formattedData = response.map((item) => ({
         key: item.related_list._id,
         related_list_name: item.related_list.related_list_name,
         child_object_name: item.related_list.child_object_name,
-        fields_to_display: item.related_list.fields_to_display.join(', '),
+        fields_to_display: item.related_list.fields_to_display,
       }));
+
       setRelatedLists(formattedData);
     } catch (error) {
       console.error('Error fetching related lists:', error);
@@ -79,12 +82,16 @@ const ObjectRelatedListTab = () => {
 
   useEffect(() => {
     if (record?.name) {
-      setParentObjectName(record.name); // Ensure the parent object name is set
+      setParentObjectName(record.name);
       fetchRelatedLists();
     }
   }, [record]);
+
   const handleEditRelatedList = (record) => {
-    setEditingRelatedList(record);
+    setEditingRelatedList({
+      ...record,
+      fields_to_display: record.fields_to_display || [],
+    });
     setEditRelatedListDrawerVisible(true);
   };
 
@@ -100,8 +107,8 @@ const ObjectRelatedListTab = () => {
       key: 'child_object_name',
       render: (text) => (
         <a
-          onClick={() => navigate(`/object-setup/${text}`)} // Now navigate is correctly scoped
-          style={{ cursor: 'pointer', color: '#1890FF' }} // Add some styles to make it look like a link
+          onClick={() => navigate(`/object-setup/${text}`)}
+          style={{ cursor: 'pointer', color: '#1890FF' }}
         >
           {text}
         </a>
@@ -111,18 +118,19 @@ const ObjectRelatedListTab = () => {
       title: 'Related Field Name',
       dataIndex: 'fields_to_display',
       key: 'fields_to_display',
+      render: (fields) => fields.join(', '), // Join for display
     },
     {
       title: 'Actions',
       key: 'actions',
       render: (text, record) => (
         <Space size="middle">
-          <Tooltip title="Edit">
+          {<Tooltip title="Edit">
             <EditOutlined
               onClick={() => handleEditRelatedList(record)}
               style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
             />
-          </Tooltip>
+          </Tooltip> }
         </Space>
       ),
     },
@@ -144,17 +152,15 @@ const ObjectRelatedListTab = () => {
         visible={relatedListDrawerVisible}
         onClose={closeRelatedListDrawer}
         onAddRelatedList={handleAddRelatedList}
-        parentObjectName={parentObjectName} // Pass the parent object name
+        parentObjectName={parentObjectName}
         editingRelatedList={editingRelatedList}
       />
-     <RelatedListEditDrawer
-  visible={editRelatedListDrawerVisible}
-  onClose={closeEditRelatedListDrawer}
-  record={editingRelatedList}
-  parentObjects={parentObjects}
-  parentObjectName={parentObjectName} // Pass the parent object name here
-/>
-
+      <RelatedListEditDrawer
+        visible={editRelatedListDrawerVisible}
+        onClose={closeEditRelatedListDrawer}
+        record={editingRelatedList}
+        parentObjectName={parentObjectName}
+      />
     </div>
   );
 };

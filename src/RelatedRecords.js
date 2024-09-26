@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Typography, Row, Col, Button, Form,message } from 'antd';
+
+
+
+
+
+
+
 import { BASE_URL } from './Constant';
 import ChildRecordTable from './RecordTable';
 import ApiService from './apiService';
@@ -15,7 +22,6 @@ const RelatedRecord = ({ objectName, recordId }) => {
   const [form] = Form.useForm(); // Form instance
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
-
 
   // Fetch related records
   const fetchRelatedRecords = async () => {
