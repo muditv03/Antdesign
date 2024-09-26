@@ -14,6 +14,7 @@ dayjs.extend(customParseFormat);
 const { Title } = Typography;
 
 const ObjectSetupDetail = () => {
+  
   const { id } = useParams();
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
