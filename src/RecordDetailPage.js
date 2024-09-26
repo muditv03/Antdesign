@@ -197,7 +197,7 @@ const RecordDetail = () => {
         min: 0,
         message: 'Please enter a valid currency value.',
       });
-    }
+    } 
   
     return (
       <div

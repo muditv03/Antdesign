@@ -1,11 +1,10 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { Table, Typography, Tabs,Row ,Col,Button } from 'antd'
+import { Table, Form, Card, Button, Row, Col, Typography, Tabs } from 'antd';
 import ObjectFieldTab from './Components/ObjectFieldsTab';
 import ObjectRelatedListTab from './Components/ObjectRelatedListTab';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import CreateObjectDrawer from './CreateObjectDrawer';
-
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -15,46 +14,12 @@ const ObjectFieldDetail = () => {
   const { record } = location.state || {};
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
-  const [data, setData] = useState([]);
-
+  const [form] = Form.useForm();
 
   const handleAddOrEditObject = (updatedObject) => {
-    setData((prevData) =>
-      prevData.map((item) => (item.key === updatedObject.key ? updatedObject : item))
-    );
+    // Logic to update the object in state
   };
 
-
-  // Define the columns for specific keys
-  const columns = [
-    {
-      title: 'Key',
-      dataIndex: 'key',
-      key: 'key',
-    },
-    {
-      title: 'Label',
-      dataIndex: 'label',
-      key: 'label',
-    },
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Plural Label',
-      dataIndex: 'plurallabel',
-      key: 'plurallabel',
-    },
-  ];
-
-  const onCloseDrawer = () => {
-    setDrawerVisible(false);
-    setEditingRecord(null);
-  };
-
-  // Data source for the table with the corresponding values from the record
   const dataset = [
     {
       key: record?.key || 'N/A',
@@ -64,40 +29,76 @@ const ObjectFieldDetail = () => {
     },
   ];
 
-  const createTab=()=>{
-    console.log('button clicked');
+  const createTab = () => {
     setDrawerVisible(true);
     setEditingRecord(record);
   };
- 
+
+  const onCloseDrawer = () => {
+    setDrawerVisible(false);
+    setEditingRecord(null);
+  };
+
   return (
     <div>
       <Title level={3}>{record?.label || 'Object Details'}</Title>
       <Tabs defaultActiveKey="1">
         <TabPane tab="Details" key="1">
           <Row justify="end" style={{ marginBottom: '16px' }}>
-        <Col>
-          <Button type="primary" onClick={createTab}>
-            Create Tab
-          </Button>
-
-          <CreateObjectDrawer
-          visible={drawerVisible}
-          onClose={onCloseDrawer}
-          onAddOrEditObject={handleAddOrEditObject}
-          editingRecord={editingRecord}
-        />
-        </Col>
-      </Row>
-          <Table
-            columns={columns}
-            dataSource={dataset}
-            pagination={false} // Disable pagination for simplicity
-          />
-
-       
-
-    
+            <Col>
+              <Button type="primary" onClick={createTab}>
+                Create Tab
+              </Button>
+              <CreateObjectDrawer
+                visible={drawerVisible}
+                onClose={onCloseDrawer}
+                onAddOrEditObject={handleAddOrEditObject}
+                editingRecord={editingRecord}
+              />
+            </Col>
+          </Row>
+          <Card>
+            <Form form={form} layout="vertical" style={{ position: 'relative' }}>
+              <Title level={3} style={{ marginTop: '0px' }}>Details</Title>
+              <Row gutter={24} style={{ marginBottom: '0px' }}>
+                {dataset.map((field, index) => (
+                  <React.Fragment key={index}>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Label"
+                        labelCol={{ span: 6 }} // Adjust label column width
+                        wrapperCol={{ span: 18 }} // Adjust wrapper column width
+                        style={{ marginBottom: '8px',borderBottom: '1px solid  #ddd' }} // Decrease bottom margin
+                      >
+                        <span style={{ fontWeight: 500 }}>{field.label}</span>
+                      </Form.Item>
+                    </Col>
+              
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Name"
+                        labelCol={{ span: 6 }}
+                        wrapperCol={{ span: 18 }}
+                        style={{ marginBottom: '8px' ,borderBottom: '1px solid  #ddd'}}
+                      >
+                        <span style={{ fontWeight: 500 }}>{field.name}</span>
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Plural Label"
+                        labelCol={{ span: 6 }}
+                        wrapperCol={{ span: 18 }}
+                        style={{ marginBottom: '8px',borderBottom: '1px solid  #ddd' }}
+                      >
+                        <span style={{ fontWeight: 500 }}>{field.plurallabel}</span>
+                      </Form.Item>
+                    </Col>
+                  </React.Fragment>
+                ))}
+              </Row>
+            </Form>
+          </Card>
         </TabPane>
         <TabPane tab="Properties" key="2">
           <ObjectFieldTab object={record} />
@@ -106,8 +107,7 @@ const ObjectFieldDetail = () => {
           <ObjectRelatedListTab object={record} />
         </TabPane>
       </Tabs>
-      </div>
-      
+    </div>
   );
 };
 

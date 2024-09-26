@@ -173,7 +173,7 @@ const DataTable = () => {
           </Col>
           <Col>
             <Button type="primary" onClick={showDrawer}>Create +</Button>
-          </Col>
+           </Col>
         </Row>
         <div style={{ flex: 1, overflow: 'auto' }}>
           <Table
