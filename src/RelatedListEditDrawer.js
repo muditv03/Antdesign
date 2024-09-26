@@ -298,8 +298,9 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
           name="parentObject"
           label="Parent Object"
           rules={[{ required: true, message: 'Please select a parent object' }]}
-        >
-          <Select placeholder="Select parent object" value={parentObjectName} onChange={(value) => form.setFieldsValue({ parentObject: value })}>
+          
+        > 
+          <Select placeholder="Select parent object" value={parentObjectName} disabled onChange={(value) => form.setFieldsValue({ parentObject: value })}> 
             {parentObjects.map(obj => (
               <Option key={obj.name} value={obj.name}>{obj.label}</Option>
             ))}

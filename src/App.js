@@ -12,6 +12,12 @@ import ObjectFieldDetail from './ObjectDetail';
 import AppFooter from './Footer';  // Import the footer component
 import Profile from './Profile';  // Import the Profile component
 import RecordDetail from './RecordDetailPage';
+import ErrorPage from './Error'
+import ForbiddenError from './Error-403'
+import NotFoundError from './Error-404'
+import InternalServerError from './Error-500'
+import UnprocessableEntity from './Error-422'
+
    
 const { Content } = Layout;
   
@@ -84,6 +90,13 @@ const App = () => {
             <Route path="/record/:objectName/:id" element={<RecordDetail />} />
             <Route path="/object/:id" element={<ObjectSetupDetail />} />
             <Route path="/object-profile" element={<Profile />} />
+            <Route path="/Error" element={<ErrorPage />} />
+            <Route path ="/Error/403" element={<ForbiddenError/>}/>
+            <Route path ="/Error/404" element={<NotFoundError/>}/>
+            <Route path ="/Error/500" element={<InternalServerError/>}/>
+            <Route path ="/Error/422" element={<UnprocessableEntity/>}/>
+
+
             {/* Add more routes as needed */}
           </Routes>
         </Content>
