@@ -18,6 +18,9 @@ const RelatedRecord = ({ objectName, recordId }) => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
 
+  const [currentRecordName, setCurrentRecordName] = useState('');
+  const [isFieldReadOnly, setIsFieldReadOnly] = useState(false);
+
   // Fetch related records
   const fetchRelatedRecords = async () => {
     try {
@@ -55,8 +58,14 @@ const RelatedRecord = ({ objectName, recordId }) => {
 
   useEffect(() => {
     fetchRelatedRecords();
+    fetchCurrentRecordDetails();
+
   }, [objectName, recordId]);
 
+
+  const refreshRecords = () => {
+    fetchRelatedRecords();
+  };
   const handleDeleteChildRecord = useCallback(
     async (childObjectName, childRecordId) => {
       try {
@@ -78,6 +87,20 @@ const RelatedRecord = ({ objectName, recordId }) => {
     [fetchRelatedRecords]
   );
 
+  // Fetch current record details, including its name
+const fetchCurrentRecordDetails = async () => {
+  try {
+    console.log('object name of current record is  '+objectName);
+    console.log('record id'+recordId);
+    const recordService = new ApiService(`${BASE_URL}/fetch_single_record/${objectName}/${recordId}`, {}, 'GET');
+    const response = await recordService.makeCall();
+    console.log('response is '+JSON.stringify(response));
+    setCurrentRecordName(response?.Name || ''); // Assuming 'name' is the property for the record's name
+    console.log("current record name is "+response.Name);
+  } catch (error) {
+    console.error('Error fetching current record details:', error);
+  }
+};
   // Fetch fields for the child object
   const fetchFieldsForChildObject = async (childObjectName) => {
     try {
@@ -88,6 +111,9 @@ const RelatedRecord = ({ objectName, recordId }) => {
       );
       const response = await fieldsService.makeCall();
       setCurrentFieldsData(response);
+      console.log('field data is '+JSON.stringify(response));
+      console.log('field data of current fields  data '+JSON.stringify(currentFieldsData));
+
     } catch (err) {
       console.error('Error fetching fields for child object:', err);
     }
@@ -151,12 +177,13 @@ const RelatedRecord = ({ objectName, recordId }) => {
     }
   };
 
-  // Open drawer for the selected related list
-  const handleNewButtonClick = async (relatedList) => {
-    setCurrentChildObjectName(relatedList.child_object_name);
-    await fetchFieldsForChildObject(relatedList.child_object_name);
-    setIsDrawerVisible(true);
-  };
+  
+  
+const handleNewButtonClick = async (relatedList) => {
+  setCurrentChildObjectName(relatedList.child_object_name);
+  await fetchFieldsForChildObject(relatedList.child_object_name);
+  setIsDrawerVisible(true);
+};
 
   const handleDrawerClose = () => {
     setIsDrawerVisible(false);
@@ -199,11 +226,12 @@ const RelatedRecord = ({ objectName, recordId }) => {
                 relatedListId={relatedList._id} // Pass related list ID for deletion
                 currentRecordId={recordId} // Pass the current record ID
                 currentObjectName={objectName} // Pass the current object name
+                refreshRecords={refreshRecords} // Pass the refresh function
               />
             </Card>
           ))
         )
-      ) : (
+      ) : ( 
         <p>No related records found</p>
       )}
       <CreateRecordDrawer
@@ -211,7 +239,7 @@ const RelatedRecord = ({ objectName, recordId }) => {
         onClose={handleDrawerClose}
         onFinish={handleFinish}
         loading={false}
-        fieldsData={currentFieldsData || []}
+        fieldsData={currentFieldsData }
         form={form}
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}

@@ -21,7 +21,7 @@ const CreateRecordDrawer = ({
  
   const [lookupOptions, setLookupOptions] = useState([]);
 
-
+//console.log('fields'+ JSON.stringify(fieldsData));
   useEffect(() => {
     const fetchAllLookupOptions = async () => {
       const lookupFields = fieldsData.filter(field => field.type === 'lookup');
