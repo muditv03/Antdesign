@@ -42,8 +42,10 @@ const ObjectFieldDetail = () => {
   return (
     <div>
       <Title level={3}>{record?.label || 'Object Details'}</Title>
-      <Tabs defaultActiveKey="1">
+      <Tabs defaultActiveKey="1" tabPosition='left'>
         <TabPane tab="Details" key="1">
+          
+          <Card>
           <Row justify="end" style={{ marginBottom: '16px' }}>
             <Col>
               <Button type="primary" onClick={createTab}>
@@ -57,7 +59,6 @@ const ObjectFieldDetail = () => {
               />
             </Col>
           </Row>
-          <Card>
             <Form form={form} layout="vertical" style={{ position: 'relative' }}>
               <Title level={3} style={{ marginTop: '0px' }}>Details</Title>
               <Row gutter={24} style={{ marginBottom: '0px' }}>
@@ -100,11 +101,16 @@ const ObjectFieldDetail = () => {
             </Form>
           </Card>
         </TabPane>
+
         <TabPane tab="Properties" key="2">
-          <ObjectFieldTab object={record} />
+          <Card>
+          <ObjectFieldTab object={record} />  
+          </Card>
         </TabPane>
         <TabPane tab="Related Lists" key="3">
-          <ObjectRelatedListTab object={record} />
+         <Card>
+         <ObjectRelatedListTab object={record} />
+         </Card>
         </TabPane>
       </Tabs>
     </div>
