@@ -2,11 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, Typography, Row, Col, Button, Form,message } from 'antd';
 
 
-
-
-
-
-
 import { BASE_URL } from './Constant';
 import ChildRecordTable from './RecordTable';
 import ApiService from './apiService';
@@ -62,6 +57,8 @@ const RelatedRecord = ({ objectName, recordId }) => {
     fetchRelatedRecords();
   }, [objectName, recordId]);
 
+
+  
   // Fetch fields for the child object
   const fetchFieldsForChildObject = async (childObjectName) => {
     console.log('fetching fields....')

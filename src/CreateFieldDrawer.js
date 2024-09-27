@@ -93,7 +93,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
     }
 
     if (values.type === 'decimal' || values.type === 'currency') {
-      newField.decimal_places_before = values.length - values.decimal_places;
+      newField.decimal_places_before = values.length ;
       newField.decimal_places_after = values.decimal_places;
     }
 
@@ -124,7 +124,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
           iswriteable: values.iswriteable,
           ...(values.type === 'Picklist' && { picklist_values: picklistValues }),
           ...(values.type === 'decimal' || values.type === 'currency' && {
-            decimal_places_before: values.length - values.decimal_places,
+            decimal_places_before: values.length ,
             decimal_places_after: values.decimal_places,
           }),
         });
