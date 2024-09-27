@@ -8,10 +8,13 @@ import { BASE_URL, DateFormat } from './Constant';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import ApiService from './apiService'; // Import ApiService class
 import CreateRecordDrawer from './CreateRecordDrawer';
-
+ 
 dayjs.extend(customParseFormat);
 
-const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, onClone, onDelete }) => {
+const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, onClone, onDelete,relatedListId,currentRecordId,currentObjectName }) => {
+
+  console.log('id is '+currentRecordId);
+  console.log('object name is'+currentObjectName);
   const [lookupNames, setLookupNames] = useState({});
   const { id } = useParams();
   const [records, setRecords] = useState([]);
@@ -297,14 +300,8 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
 
   const deleteRecord = async (record) => {
     try {
-      const apiService = new ApiService(
-        `${BASE_URL}/delete_record/${childObjectName}/${record._id}`,
-        {},
-        'DELETE'
-      );
+      onDelete(childObjectName, record._id); // Call the delete function passed as a prop
 
-      await apiService.makeCall();
-      message.success('Record deleted successfully.');
       fetchRecords();
     } catch (error) {
       message.error('Failed to delete record.');
