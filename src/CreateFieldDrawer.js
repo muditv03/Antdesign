@@ -33,10 +33,14 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   // Handle label change and update API name
   const handleLabelChange = (e) => {
     const label = e.target.value;
-    form.setFieldsValue({
-      name: generateApiName(label), // Set the API name based on the sanitized label
-    });
-  };
+
+    // Only set the name if the field is not a lookup
+    if (fieldType !== 'lookup') {
+        form.setFieldsValue({
+            name: generateApiName(label), // Set the API name based on the sanitized label
+        });
+    }
+};
 
   // Fetch available objects for the lookup field
   useEffect(() => {
