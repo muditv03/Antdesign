@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Spin, message, Button } from 'antd';
+import { Table, Spin, message, Button,Tooltip,Popconfirm } from 'antd';
 import { BASE_URL } from '../Constant';
 import ApiService from '../apiService'; 
+import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined  } from '@ant-design/icons';
+
 import CreateTabDrawer from './CreateTabDrawer'; // Import the CreateTabDrawer component
 
 const CustomTabs = () => {
@@ -75,6 +77,30 @@ const CustomTabs = () => {
     },
   ];
  
+  columns.push({
+    title: 'Action',
+    key: 'operation',
+    render: (_, record) => (
+      <>
+        <Tooltip title="Edit">
+          <EditOutlined
+        
+            style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
+          />
+        </Tooltip>
+        <Tooltip title="Delete">
+          <Popconfirm
+            title="Are you sure you want to delete this item?"
+            
+            okText="Yes"
+            cancelText="No"
+          >
+            <DeleteOutlined style={{  color: 'red',marginRight: 8, fontSize: '14px', cursor: 'pointer' }} />
+          </Popconfirm>
+        </Tooltip>
+      </>
+    ),
+  });
   return (
     <div style={{  }}>
       <Button type="primary" onClick={() => setDrawerVisible(true)} 
@@ -82,7 +108,7 @@ const CustomTabs = () => {
         Create New Tab
       </Button>
       {loading ? (
-        <Spin size="large" />
+        <Spin size="small" />
       ) : error ? (
         <div>Error loading data</div>
       ) : (

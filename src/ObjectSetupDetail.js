@@ -664,7 +664,7 @@ const ObjectSetupDetail = () => {
             okText="Yes"
             cancelText="No"
           >
-            <DeleteOutlined style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }} />
+            <DeleteOutlined style={{ color: 'red', marginRight: 8, fontSize: '14px', cursor: 'pointer' }} />
           </Popconfirm>
         </Tooltip>
       </>

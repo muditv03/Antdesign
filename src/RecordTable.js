@@ -10,11 +10,11 @@ import ApiService from './apiService'; // Import ApiService class
 import CreateRecordDrawer from './CreateRecordDrawer';
  
 dayjs.extend(customParseFormat);
+ 
+const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, onClone, onDelete,relatedListId,currentRecordId,currentObjectName ,refreshRecords}) => {
 
-const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, onClone, onDelete,relatedListId,currentRecordId,currentObjectName }) => {
-
-  console.log('id is '+currentRecordId);
-  console.log('object name is'+currentObjectName);
+  //console.log('id is '+currentRecordId);
+  //console.log('object name is'+currentObjectName);
   const [lookupNames, setLookupNames] = useState({});
   const { id } = useParams();
   const [records, setRecords] = useState([]);
@@ -159,7 +159,9 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
             [lookupField.name]: recordId
           });
         }
+
       }
+      refreshRecords();
     } catch (error) {
       console.error('Error fetching API response:', error);
     } finally {
@@ -216,6 +218,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
           });
         }
       }
+      refreshRecords();
     } catch (error) {
       console.error('Error fetching API response:', error);
     } finally {
@@ -284,6 +287,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       message.success(selectedRecord?._id && !selectedRecord?.isClone ? 'Record updated successfully' : 'Record created successfully');
       setDrawerVisible(false);
       fetchRecords();
+      refreshRecords();
       form.resetFields();
     } catch (error) {
       console.error('Error saving record:', error);
