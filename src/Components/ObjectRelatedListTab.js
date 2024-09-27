@@ -88,12 +88,16 @@ const ObjectRelatedListTab = () => {
   }, [record]);
 
   const handleEditRelatedList = (record) => {
+    
+    
     setEditingRelatedList({
       ...record,
       fields_to_display: record.fields_to_display || [],
     });
+
     setEditRelatedListDrawerVisible(true);
-  };
+  }; console.log("editingRelatedList");
+  console.log(editingRelatedList);
 
   const relatedListColumns = [
     {

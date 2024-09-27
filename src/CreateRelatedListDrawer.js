@@ -1,6 +1,5 @@
 
 
-
 import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Input, Button, Select, message } from 'antd';
 import apiService from './apiService'; // Import your ApiService class
@@ -111,13 +110,14 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
   return (
     <Drawer
       title={editingRelatedList ? "Edit Related List" : "Create Related List"}
-      width={720}
+      width={400}
       onClose={onClose}
       visible={visible}
-      bodyStyle={{ paddingBottom: 80 }}
+      headerStyle={{ backgroundColor: '#f0f2f5' }}  // Set background for the header
+      footerStyle={{ backgroundColor: '#f0f2f5' }}  // Set background for the footer
       footer={
-        <div style={{ textAlign: 'right' }}>
-          <Button onClick={onClose} style={{ marginRight: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+          <Button onClick={onClose}>
             Cancel
           </Button>
           <Button onClick={() => form.submit()} type="primary">

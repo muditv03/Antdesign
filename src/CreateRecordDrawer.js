@@ -221,7 +221,8 @@ const CreateRecordDrawer = ({
       bodyStyle={{ paddingBottom: 80 }}
       headerStyle={{
         padding: '20px 16px',
-        background: '#20b2aa',
+        //background: '#20b2aa',
+        background: '#f0f2f5',
         borderBottom: '1px solid #e8e8e8',
       }}
       footer={

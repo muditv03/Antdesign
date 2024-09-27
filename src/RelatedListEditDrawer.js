@@ -1,7 +1,5 @@
 
 
-
-
 import React, { useEffect, useState } from 'react';
 import { Drawer, Form, Input, Button, Select, message } from 'antd';
 import apiService from './apiService';
@@ -15,6 +13,7 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
   const [childObjectFields, setChildObjectFields] = useState([]);
   const [allChildObjects, setAllChildObjects] = useState([]);
   const [selectedChild, setSelectedChild] = useState('');
+  const [selectedFields, setSelectedFields] = useState([]); // Track selected fields
 
   // Fetch parent objects
   useEffect(() => {
@@ -32,7 +31,6 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
     fetchParentObjects();
   }, []);
 
- 
   // Prepopulate form and set selected child
   useEffect(() => {
     if (record && visible) {
@@ -42,11 +40,9 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
         childObject: record.child_object_name,
         fieldsToDisplay: record.fields_to_display || [],
       });
-      console.log("fields to display "+  record.fields_to_display);
-     
       setSelectedChild(record.child_object_name);
+      setSelectedFields(record.fields_to_display || []);
     }
-    console.log('file');
   }, [record, visible, form, parentObjectName]);
 
   // Fetch fields for the selected child object
@@ -68,24 +64,35 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
     fetchChildObjectFields();
   }, [selectedChild]);
 
+  // Handle child object selection
+  const handleChildObjectChange = (value) => {
+    setSelectedChild(value);
+    setSelectedFields([]); // Reset selected fields when a new child object is chosen
+  };
+
+  // Handle field selection with a maximum of 7 fields
+  const handleFieldChange = (value) => {
+    if (value.length > 7) {
+      message.error('You can select up to 7 fields.');
+      return;
+    }
+    setSelectedFields(value);
+  };
+
   const handleFinish = (values) => {
-    const { relatedListName, parentObject,fieldsToDisplay } = values;
+    const { relatedListName, parentObject, fieldsToDisplay } = values;
 
     if (!relatedListName || !parentObject || !selectedChild) {
       message.error('Please complete all required fields.');
       return;
     }
 
-    
-    console.log(record);
     const data = {
       related_list_name: relatedListName,
       parent_object_name: parentObject,
       child_object_name: selectedChild,
       fields_to_display: fieldsToDisplay,
-      
     };
-    console.log("after edit "+fieldsToDisplay);
 
     const api = new apiService(
       `${BASE_URL}/related_lists/${record.key}`,
@@ -100,7 +107,7 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
         onClose();
       })
       .catch((error) => {
-        console.error("Error updating related list:", error);
+        console.error('Error updating related list:', error);
         message.error('Error updating related list');
       });
   };
@@ -111,11 +118,17 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
       width={360}
       onClose={onClose}
       visible={visible}
-      bodyStyle={{ paddingBottom: 80 }}
+      
+      headerStyle={{ backgroundColor: '#f0f2f5' }} // Header background color
+      footerStyle={{ backgroundColor: '#f0f2f5' }} // Footer background color
       footer={
-        <div style={{ textAlign: 'right' }}>
-          <Button onClick={onClose} style={{ marginRight: 8 }}>Cancel</Button>
-          <Button onClick={() => form.submit()} type="primary">Submit</Button>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}> {/* Flexbox layout */}
+          <Button onClick={onClose} style={{ marginRight: 8 }}>
+            Cancel
+          </Button>
+          <Button onClick={() => form.submit()} type="primary">
+            Submit
+          </Button>
         </div>
       }
     >
@@ -127,29 +140,40 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
         >
           <Input placeholder="Enter related list name" />
         </Form.Item>
+
         <Form.Item
           name="parentObject"
           label="Parent Object"
           rules={[{ required: true, message: 'Please select a parent object' }]}
+
           
         > 
           <Select placeholder="Select parent object" value={parentObjectName} disabled onChange={(value) => form.setFieldsValue({ parentObject: value })}> 
             {parentObjects.map(obj => (
               <Option key={obj.name} value={obj.name}>{obj.label}</Option>
+
             ))}
           </Select>
         </Form.Item>
+
         <Form.Item
           name="childObject"
           label="Child Object"
           rules={[{ required: true, message: 'Please select a child object' }]}
         >
-          <Select placeholder="Select child object" onChange={setSelectedChild} value={selectedChild}>
-            {allChildObjects.map(obj => (
-              <Option key={obj._id} value={obj.name}>{obj.label}</Option>
+          <Select
+            placeholder="Select child object"
+            onChange={handleChildObjectChange}
+            value={selectedChild}
+          >
+            {allChildObjects.map((obj) => (
+              <Option key={obj._id} value={obj.name}>
+                {obj.label}
+              </Option>
             ))}
           </Select>
         </Form.Item>
+
         {selectedChild && (
           <Form.Item
             name="fieldsToDisplay"
@@ -159,12 +183,16 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
             <Select
               mode="multiple"
               placeholder="Select fields to display"
-              onChange={value => form.setFieldsValue({ fieldsToDisplay: value })}
+              onChange={handleFieldChange}
+              value={selectedFields}
             >
-              {childObjectFields.map(field => (
-                <Option key={field.name} value={field.name}>{field.label}</Option>
-                
-              ))}
+              {childObjectFields
+                .filter((field) => !selectedFields.includes(field.name))
+                .map((field) => (
+                  <Option key={field.name} value={field.name}>
+                    {field.label}
+                  </Option>
+                ))}
             </Select>
           </Form.Item>
         )}
@@ -174,13 +202,3 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
 };
 
 export default RelatedListEditDrawer;
-
-
-
-
-
-
-
-
-
-
