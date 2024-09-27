@@ -47,8 +47,8 @@ const AppHeader = () => {
 
   const settingsMenu = (
     <Menu>
-      <Menu.Item key="1" icon={<SettingOutlined />} onClick={() => navigate('/object-setup')}>
-        Object Setup
+      <Menu.Item key="1" icon={<SettingOutlined />} onClick={() => navigate('/setup')}>
+        Setup
       </Menu.Item>
     </Menu>
   );

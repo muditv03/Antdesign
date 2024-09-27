@@ -1,3 +1,5 @@
+//App.js
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from 'antd';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
@@ -16,7 +18,9 @@ import ErrorPage from './Error'
 import ForbiddenError from './Error-403'
 import NotFoundError from './Error-404'
 import InternalServerError from './Error-500'
-import UnprocessableEntity from './Error-422'
+import UnprocessableEntity from './Error-422';
+import SetupPage from './Components/Setup';
+import Home from './Components/Home';
 
    
 const { Content } = Layout;
@@ -80,16 +84,17 @@ const App = () => {
             height: '100%', // Ensure content uses full height
             overflow: 'auto', // Enable scrolling if content overflows
           }}
-        >
+        > 
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/object-setup" element={<DataTable />} />
+            <Route path="setup/objectManager" element={<DataTable />} />
             <Route path="/object-setup/:id" element={<ObjectFieldDetail />} />
             <Route path="/record/:objectName/:id" element={<RecordDetail />} />
             <Route path="/object/:id" element={<ObjectSetupDetail />} />
             <Route path="/object-profile" element={<Profile />} />
+            <Route path="/setup" element={<SetupPage />} />
             <Route path="/Error" element={<ErrorPage />} />
             <Route path ="/Error/403" element={<ForbiddenError/>}/>
             <Route path ="/Error/404" element={<NotFoundError/>}/>
