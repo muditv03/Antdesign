@@ -197,52 +197,6 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             style={{ fontSize: '16px' }}
           >
             <Form.Item
-              name="label"
-              label="Label"
-              rules={[{ required: true, message: 'Please enter the label' }]}
-            >
-              <Input 
-                placeholder="Please enter the field label" 
-                onBlur={handleLabelChange} // Add onChange handler here
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="name"
-              label="API Name"
-              rules={[ 
-                { required: true, message: 'Please enter the name' }, 
-                {
-                  validator: (_, value) => {
-                    if (!value) {
-                      return Promise.resolve();
-                    }
-                    const alphabetOnlyRegex = /^[a-zA-Z]+$/;
-                    if (!alphabetOnlyRegex.test(value)) {
-                      return Promise.reject(new Error('Name should only contain alphabets without spaces.'));
-                    }
-                    if (pluralize.isPlural(value)) {
-                      return Promise.reject(new Error('API name cannot be plural.'));
-                    }
-                    return Promise.resolve();
-                  },
-                },
-              ]}
-            >
-              {fieldType === 'lookup' ? (
-                <Select placeholder="Select an object" disabled={isEditMode}>
-                  {availableObjects.map((object) => (
-                    <Option key={object.id} value={object.name}>
-                      {object.name}
-                    </Option>
-                  ))}
-                </Select>
-              ) : (
-                <Input placeholder="Please enter the name" disabled={isEditMode} /> // Read-only in edit mode
-              )}
-            </Form.Item>
-
-            <Form.Item
               name="type"
               label="Type"
               rules={[{ required: true, message: 'Please select the type' }]}
@@ -324,6 +278,134 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                 </Form.Item>
               </>
             )}
+            <Form.Item
+              name="label"
+              label="Label"
+              rules={[{ required: true, message: 'Please enter the label' }]}
+            >
+              <Input 
+                placeholder="Please enter the field label" 
+                onBlur={handleLabelChange} // Add onChange handler here
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="name"
+              label="API Name"
+              rules={[ 
+                { required: true, message: 'Please enter the name' }, 
+                {
+                  validator: (_, value) => {
+                    if (!value) {
+                      return Promise.resolve();
+                    }
+                    const alphabetOnlyRegex = /^[a-zA-Z]+$/;
+                    if (!alphabetOnlyRegex.test(value)) {
+                      return Promise.reject(new Error('Name should only contain alphabets without spaces.'));
+                    }
+                    if (pluralize.isPlural(value)) {
+                      return Promise.reject(new Error('API name cannot be plural.'));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
+              {fieldType === 'lookup' ? (
+                <Select placeholder="Select an object" disabled={isEditMode}>
+                  {availableObjects.map((object) => (
+                    <Option key={object.id} value={object.name}>
+                      {object.name}
+                    </Option>
+                  ))}
+                </Select>
+              ) : (
+                <Input placeholder="Please enter the name" disabled={isEditMode} /> // Read-only in edit mode
+              )}
+            </Form.Item>
+
+            {/* <Form.Item
+              name="type"
+              label="Type"
+              rules={[{ required: true, message: 'Please select the type' }]}
+            >
+              <Select
+                placeholder="Select the field type"
+                onChange={(value) => setFieldType(value)}
+                disabled={isEditMode} // Disable field type selection in edit mode
+              >
+                <Option value="String">Text</Option>
+                <Option value="Integer">Number</Option>
+                <Option value="decimal">Decimal</Option>
+                <Option value="currency">Currency</Option>
+                <Option value="boolean">Boolean</Option>
+                <Option value="Picklist">Picklist</Option>
+                <Option value="lookup">Lookup</Option>
+                <Option value="Date">Date</Option>
+                <Option value="LongText">Long Text Area</Option>
+              </Select>
+            </Form.Item>
+
+            {fieldType === 'Picklist' && (
+              <Form.Item
+                name="picklist_values"
+                label="Picklist Values"
+              >
+                <Input 
+                  placeholder="Enter picklist values separated by commas"
+                  onChange={handlePicklistChange}
+                />
+              </Form.Item>
+            )}
+
+            {fieldType === 'decimal' && (
+              <>
+                <Form.Item
+                  name="length"
+                  label="Length"
+                  rules={[{ required: true, message: 'Please enter the length' }]}
+                >
+                  <Input placeholder="Enter length" />
+                </Form.Item>
+                <Form.Item
+                  name="decimal_places"
+                  label="Decimal Places"
+                  rules={[{ required: true, message: 'Please enter decimal places' },
+                    {
+                      validator: (_, value) => {
+                        if (value === "0" || value === 0) {
+                          return Promise.reject(new Error('Zero is not allowed for decimal places'));
+                        }
+                        return Promise.resolve();
+                      }
+                    }
+
+
+                  ]}
+                >
+                  <Input placeholder="Enter decimal places" />
+                </Form.Item>
+              </>
+            )}
+
+            {fieldType === 'currency' && (
+              <>
+                <Form.Item
+                  name="length"
+                  label="Length"
+                  rules={[{ required: true, message: 'Please enter the length' }]}
+                >
+                  <Input placeholder="Enter length" />
+                </Form.Item>
+                <Form.Item
+                  name="decimal_places"
+                  label="Decimal Places"
+                  rules={[{ required: true, message: 'Please enter decimal places' }]}
+                >
+                  <Input placeholder="Enter decimal places" />
+                </Form.Item>
+              </>
+            )} */}
 
            
           </Form>
