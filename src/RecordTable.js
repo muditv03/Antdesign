@@ -174,13 +174,28 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       fetchAllLookupNames();
     }
   }, [childRecords, fieldsData, childObjectName]);
-
+ 
   // Define columns dynamically based on fieldsData
-  const columns = fieldsData.map((field) => ({
+  const columns = fieldsData.map((field,index) => ({
     title: field.label,
     dataIndex: field.name,
     key: field.name,
     render: (value, record) => {
+      
+      // Make the first column a clickable link
+      if (index === 0) {
+        return (
+          <a
+            href="#"
+            onClick={() => {
+              navigate(`/record/${childObjectName}/${record._id}`); // Use record.key directly
+              window.location.reload(); // Reload the page after navigation
+            }}
+            >
+            {value}
+          </a>
+        );
+      }
       if (field.type === 'lookup' && record[`${field.name.toLowerCase()}_id`]) {
         const lookupId = record[`${field.name.toLowerCase()}_id`];
         return lookupNames[lookupId] || 'Loading...';
@@ -415,13 +430,13 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
         <Tooltip title="Edit">
           <EditOutlined
             onClick={() => handleEditClick(record)}
-            style={{ marginRight: 16, fontSize: '18px', cursor: 'pointer' }}
+            style={{ marginRight: 16, fontSize: '14px', cursor: 'pointer' }}
           />
         </Tooltip>
         <Tooltip title="Clone">
           <CopyOutlined
             onClick={() => handleCloneClick(record)}
-            style={{ marginRight: 16, fontSize: '18px', cursor: 'pointer' }}
+            style={{ marginRight: 16, fontSize: '14px', cursor: 'pointer' }}
           />
         </Tooltip>
         <Tooltip title="Delete">
@@ -430,7 +445,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
             onConfirm={() => deleteRecord(record)}
           >
             <DeleteOutlined
-              style={{ color: 'red', fontSize: '18px', cursor: 'pointer' }}
+              style={{ color: 'red', fontSize: '14px', cursor: 'pointer' }}
             />
           </Popconfirm>
         </Tooltip>
