@@ -28,7 +28,7 @@ const RecordDetail = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [recordName, setRecordName] = useState('');
 
-
+ 
  
   const fetchRecords = async () => {
     try {

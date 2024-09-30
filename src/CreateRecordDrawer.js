@@ -16,7 +16,7 @@ const CreateRecordDrawer = ({
   selectedDate, 
   setSelectedDate,
   form 
-}) => {
+}) => { 
   // Function to render form items based on field type
  
   const [lookupOptions, setLookupOptions] = useState([]);

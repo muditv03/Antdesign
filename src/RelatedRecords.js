@@ -178,6 +178,23 @@ const fetchCurrentRecordDetails = async () => {
   };
 
   
+  useEffect(() => {
+    // Run this effect when currentFieldsData changes
+    if (currentFieldsData.length > 0) {
+      // Check if there is a lookup field that matches the current object name
+      console.log('Updated currentFieldsData:', currentFieldsData);
+      currentFieldsData.forEach((field) => {
+        if (field.type === 'lookup' && field.name.toLowerCase() === objectName.toLowerCase()) {
+          form.setFieldsValue({
+            [field.name]: recordId,
+          });
+  
+          setIsFieldReadOnly(true);
+  
+        }
+      });
+    }
+  }, [currentFieldsData, objectName, currentRecordName, form]);
   
 const handleNewButtonClick = async (relatedList) => {
   setCurrentChildObjectName(relatedList.child_object_name);
