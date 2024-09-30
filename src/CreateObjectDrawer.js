@@ -232,7 +232,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
             {editingRecord ? 'Save' : 'Save'}
           </Button>
         </div>
-      }
+      } 
       footerStyle={{ textAlign: 'right', padding: '0' }}
     >
       <Spin spinning={loading} tip="Loading...">

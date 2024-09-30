@@ -47,17 +47,7 @@ const ObjectFieldDetail = () => {
           
           <Card>
           <Row justify="end" style={{ marginBottom: '16px' }}>
-            <Col>
-              <Button type="primary" onClick={createTab}>
-                Create Tab
-              </Button>
-              <CreateObjectDrawer
-                visible={drawerVisible}
-                onClose={onCloseDrawer}
-                onAddOrEditObject={handleAddOrEditObject}
-                editingRecord={editingRecord}
-              />
-            </Col>
+            
           </Row>
             <Form form={form} layout="vertical" style={{ position: 'relative' }}>
               <Title level={3} style={{ marginTop: '0px' }}>Details</Title>

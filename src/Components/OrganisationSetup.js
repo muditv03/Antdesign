@@ -25,7 +25,7 @@ const OrganisationSetup = () => {
     <Card>
       <Row justify="space-between" align="middle" style={{ marginBottom: '16px' }}>
         <Col>
-          <Title level={4} style={{ margin: 0,fontSize:'24px' }}>Organisation Setup</Title>
+          <Title level={4} style={{ margin: 0, fontSize: '24px' }}>Organisation Setup</Title>
         </Col>
         <Col>
           {!isEditing && (
@@ -52,10 +52,10 @@ const OrganisationSetup = () => {
               label="Default Currency"
               labelCol={{ span: 6 }} // Adjust label column width
               wrapperCol={{ span: 18 }} // Adjust wrapper column width
-              style={{ marginBottom: '8px', borderBottom: '1px solid  #ddd' }} // Decrease bottom margin
+              style={{ marginBottom: '8px',borderBottom: '1px solid  #ddd' }} // Remove border styling
             >
               {isEditing ? (
-                <Select defaultValue={initialValues.currency}>
+                <Select defaultValue={initialValues.currency} style={{ border: 'none', boxShadow: 'none' }}>
                   <Select.Option value="Dollar">Dollar</Select.Option>
                   <Select.Option value="Euro">Euro</Select.Option>
                   <Select.Option value="Pound">Pound</Select.Option>
@@ -72,10 +72,10 @@ const OrganisationSetup = () => {
               label="Local"
               labelCol={{ span: 6 }}
               wrapperCol={{ span: 18 }}
-              style={{ marginBottom: '8px', borderBottom: '1px solid  #ddd' }}
+              style={{ marginBottom: '8px',borderBottom: '1px solid  #ddd' }} // Remove border styling
             >
               {isEditing ? (
-                <Input defaultValue={initialValues.local} />
+                <Input defaultValue={initialValues.local} style={{ border: 'none', boxShadow: 'none' }} />
               ) : (
                 <span style={{ fontWeight: 500 }}>{initialValues.local}</span>
               )}

@@ -2,12 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Table, Button, Row, Col, message, Spin, Space, Tooltip } from 'antd';
+import { Table, Button, Row, Col, message, Spin, Space, Tooltip ,Typography} from 'antd';
 import { EditOutlined } from '@ant-design/icons';
 import CreateRelatedListDrawer from '../CreateRelatedListDrawer'; 
 import RelatedListEditDrawer from '../RelatedListEditDrawer'; 
 import ApiService from '../apiService'; 
 import { BASE_URL } from '../Constant';
+
+
+const { Title } = Typography;
 
 const ObjectRelatedListTab = () => {
   const location = useLocation();
@@ -142,13 +145,16 @@ const ObjectRelatedListTab = () => {
 
   return (
     <div>
-      <Row justify="end" style={{ marginBottom: '16px' }}>
-        <Col>
-          <Button type="primary" onClick={showRelatedListDrawer}>
-            Add Related List
-          </Button>
-        </Col>
-      </Row>
+       <Row justify="space-between" align="middle" style={{ marginBottom: 10 }}>
+      <Col>
+        <Title level={3} style={{ marginTop:'10px' }}>Related Lists</Title>
+      </Col>
+      <Col  style={{ marginTop:'10px' }}>
+        <Button type="primary" onClick={showRelatedListDrawer} style={{ marginBottom: 5 }}>
+          Create Related List
+        </Button>
+      </Col>
+    </Row>
       <Spin spinning={loadingRelatedLists}>
         <Table columns={relatedListColumns} dataSource={relatedLists} pagination={false} />
       </Spin>

@@ -316,6 +316,8 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
   columns.push({
     title: 'Action',
     key: 'operation',
+    width: 130, 
+
     render: (_, record) => (
       <>
         <Tooltip title="Edit">
@@ -340,7 +342,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
             />
           </Popconfirm>
         </Tooltip>
-      </>
+      </> 
     ),
   });
 

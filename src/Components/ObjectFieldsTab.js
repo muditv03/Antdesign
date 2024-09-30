@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Row, Col, Table, Button, message, Spin, Tooltip } from 'antd';
+import { Row, Col, Table, Button, message, Spin, Tooltip,Typography } from 'antd';
 import CreateFieldDrawer from '../CreateFieldDrawer'; 
 import ApiService from '../apiService'; 
 import { BASE_URL } from '../Constant';
 import { EditOutlined } from '@ant-design/icons';
+
+const {Title}=Typography;
 
 const ObjectFieldTab = () => {
   const location = useLocation();
@@ -119,13 +121,16 @@ const ObjectFieldTab = () => {
 
   return (
     <div>  
-      <Row justify="end" style={{ marginBottom: '16px' }}>
-        <Col>
-          <Button type="primary" onClick={showDrawer}>
-            Create +
-          </Button>
-        </Col>
-      </Row>
+      <Row justify="space-between" align="middle" style={{ marginBottom: 10 }}>
+      <Col>
+        <Title level={3} style={{ marginTop:'10px' }}>Properties</Title>
+      </Col>
+      <Col  style={{ marginTop:'10px' }}>
+        <Button type="primary" onClick={showDrawer} style={{ marginBottom: 5 }}>
+          Create Field
+        </Button>
+      </Col>
+    </Row>
       
       <Spin spinning={loadingFields || loading}>
         <Table columns={fieldColumns} dataSource={fieldsData} pagination={false} />
