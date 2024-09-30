@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Input, Button, Select, message } from 'antd';
 import apiService from './apiService'; // Import your ApiService class
@@ -12,8 +10,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
   const [parentObjects, setParentObjects] = useState([]);
   const [childObjectFields, setChildObjectFields] = useState([]);
   const [selectedChild, setSelectedChild] = useState('');
-  const [selectedFields, setSelectedFields] = useState([]); // Track selected fields
-
+  const [selectedFields, setSelectedFields] = useState([]); 
   // Fetch parent objects
   useEffect(() => {
     const fetchParentObjects = async () => {
@@ -110,7 +107,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
   return (
     <Drawer
       title={editingRelatedList ? "Edit Related List" : "Create Related List"}
-      width={400}
+      width="30%"
       onClose={onClose}
       visible={visible}
       headerStyle={{ backgroundColor: '#f0f2f5' }}  // Set background for the header
