@@ -5,7 +5,6 @@ import * as Icons from '@ant-design/icons';
 import ApiService from '../apiService'; // Ensure this points to your ApiService
 import { BASE_URL } from '../Constant';
 import pluralize from 'pluralize';
-import { json } from 'react-router-dom';
  
 
 const { Option } = Select;
@@ -127,9 +126,10 @@ const CreateTabDrawer = ({ visible, onClose }) => {
           <span>Create New Tab</span>
         </div>
       }
+      width="30%"
       placement="right"
       closable={false} // Disable default close button
-      onClose={onClose}
+      onClose={!loading ? onClose : null} // Prevent drawer from closing when loading is true
       visible={visible}
       headerStyle={{
         padding: '20px 16px',
@@ -139,7 +139,8 @@ const CreateTabDrawer = ({ visible, onClose }) => {
       }}
       footer={
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={onClose}  disabled={loading} // Disable save button when loading is true
+          >Cancel</Button>
           <Button type="primary" form="createTabForm" htmlType="submit">
             Create Tab
           </Button>

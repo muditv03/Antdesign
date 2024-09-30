@@ -5,7 +5,7 @@ import ApiService from './apiService'; // Import ApiService class
 import pluralize from 'pluralize';
 
 const { Option } = Select;
-
+ 
 const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField, onSaveEdit }) => {
   const [form] = Form.useForm();
   const [fieldType, setFieldType] = useState('');
@@ -153,7 +153,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
     <Drawer
       title={<div style={{ fontSize: '20px', fontWeight: 'bold' }}>{isEditMode ? 'Edit Field' : 'Create New Field'}</div>}
       width="40%"
-      onClose={onClose}
+      onClose={!loading ? onClose : null} // Prevent drawer from closing when loading is true
       visible={visible}
       bodyStyle={{ paddingBottom: 80 }}
       headerStyle={{
@@ -173,12 +173,13 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             borderTop: '1px solid #e8e8e8',
           }}
         >
-          <Button onClick={onClose} style={{ height: '34px', width: '90px', fontSize: '14px' }}>
+          <Button onClick={onClose} disabled={loading} style={{ height: '34px', width: '90px', fontSize: '14px' }}>
             Cancel
           </Button>
           <Button
             onClick={() => form.submit()}
             type="primary"
+            disabled={loading} 
             style={{
               height: '34px',
               width: '90px',

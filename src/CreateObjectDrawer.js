@@ -187,13 +187,14 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
     );
   });
 
-  
+   
 
   return (
     <Drawer
       title={<div style={{ fontSize: '20px', fontWeight: 'bold' }}>{editingRecord ? 'Edit Object' : 'Create New Object'}</div>}
       width="40%"
-      onClose={onClose}
+      onClose={!loading ? onClose : null} // Prevent drawer from closing when loading is true
+
       visible={visible}
       bodyStyle={{ paddingBottom: 80 }}
       headerStyle={{
@@ -213,7 +214,9 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
             borderTop: '1px solid #e8e8e8',
           }}
         >
-          <Button onClick={onClose} style={{ height: '34px', width: '90px', fontSize: '14px' }}>
+          <Button onClick={onClose} 
+                  disabled={loading} 
+                  style={{ height: '34px', width: '90px', fontSize: '14px' }}>
             Cancel
           </Button>
           <Button

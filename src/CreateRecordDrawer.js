@@ -216,7 +216,7 @@ const CreateRecordDrawer = ({
         {selectedRecord?.isClone ? 'Clone Record' : selectedRecord ? 'Edit Record' : 'Create New Record'}
       </div>}
       width="40%"
-      onClose={onClose}
+      onClose={!loading ? onClose : null} // Prevent drawer from closing when loading is true
       visible={visible}
       bodyStyle={{ paddingBottom: 80 }}
       headerStyle={{
@@ -236,11 +236,15 @@ const CreateRecordDrawer = ({
             borderTop: '1px solid #e8e8e8',
           }}
         >
-          <Button onClick={onClose} style={{ height: '34px', width: '90px', fontSize: '14px' }}>
+          <Button onClick={onClose}             
+          disabled={loading} // Disable save button when loading is true
+          style={{ height: '34px', width: '90px', fontSize: '14px' }}>
             Cancel
           </Button>
           <Button
             onClick={() => form.submit()}
+            disabled={loading} // Disable save button when loading is true
+
             type="primary"
             style={{
               height: '34px',
