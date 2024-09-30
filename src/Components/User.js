@@ -78,7 +78,10 @@ const UserComponent = () => {
       {loading ? (
         <Spin tip="Loading..." />
       ) : (
-        <Table dataSource={users} columns={columns} rowKey="id" />
+        <Table  title={() => (
+          <div style={{ fontWeight: 'bold', fontSize: '24px' }}>User List</div>
+        )} // Add bold and size styling here
+        dataSource={users} columns={columns} rowKey="id" />
       )}
     </div>
   );

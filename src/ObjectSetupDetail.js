@@ -673,82 +673,24 @@ const ObjectSetupDetail = () => {
 
 
   return (
-    <div>
-      <Row justify="space-between" align="middle">
-        <Col>
-          <Title level={3}>Records for {objectPluralName}</Title>
-        </Col>
-        <Col>
-          <Button type="primary" onClick={handleCreateClick}>
-            Create+
-          </Button>
-        </Col>
-      </Row>
+    <Card>
+
+<div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Row justify="space-between" align="middle" style={{ marginBottom: 10 }}>
+      <Col>
+        <Title level={3} style={{ marginTop:'10px' }}>Records for {objectPluralName}</Title>
+      </Col>
+      <Col  style={{ marginTop:'10px' }}>
+        <Button type="primary" onClick={handleCreateClick} style={{ marginBottom: 5 }}>
+          Create+
+        </Button>
+      </Col>
+    </Row>
+    <div style={{ flex: 1, overflow: 'auto' }}>
+
       <Table columns={columns} dataSource={records} rowKey="_id" />
-
-      {/* <Drawer
-        title={<div style={{ fontSize: '20px', fontWeight: 'bold' }}>
-           {selectedRecord?.isClone ? 'Clone Record' : selectedRecord ? 'Edit Record' : 'Create New Record'}
-
-          </div>}
-        width="40%"
-        onClose={() => setDrawerVisible(false)}
-        visible={drawerVisible}
-        bodyStyle={{ paddingBottom: 80 }}
-        headerStyle={{
-          padding: '20px 16px',
-          background: '#20b2aa',
-          borderBottom: '1px solid #e8e8e8',
-        }}
-        footer={
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '16px 16px',
-              background: '#f0f2f5',
-              borderTop: '1px solid #e8e8e8',
-            }}
-          >
-            <Button onClick={() => setDrawerVisible(false)} style={{ height: '34px', width: '90px', fontSize: '14px' }}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => form.submit()}
-              type="primary"
-              style={{
-                height: '34px',
-                width: '90px',
-                fontSize: '14px',
-                // backgroundColor: 'white',
-                // color: '#1890ff',
-                border: '1px solid #1890ff'
-              }}
-            >
-              Save
-            </Button>
-          </div>
-        }
-        footerStyle={{ textAlign: 'right', padding: '0' }}
-      >
-        <Spin spinning={loading} tip="Loading...">
-
-        <Card
-          style={{ margin: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
-        >
-          <Form
-            form={form}
-            layout="vertical"
-            hideRequiredMark
-            onFinish={handleFinish}
-            style={{ fontSize: '16px' }}
-          >
-            {fieldsData?.map((field) => renderFormItem(field,selectedDate, setSelectedDate))}
-          </Form>
-        </Card>
-        </Spin> 
-      </Drawer> */}
+      </div>
+     
       <CreateRecordDrawer
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}
@@ -761,8 +703,6 @@ const ObjectSetupDetail = () => {
         form={form}
       />
 
-
-
       <Modal
         title="Confirm Deletion"
         visible={isDeleteModalVisible}
@@ -774,7 +714,10 @@ const ObjectSetupDetail = () => {
       >
         <p>Are you sure you want to delete this record?</p>
       </Modal>
+
     </div>
+    </Card>
+
   );
 };
 

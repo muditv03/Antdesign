@@ -191,7 +191,7 @@ const fetchCurrentRecordDetails = async () => {
   
           setIsFieldReadOnly(true);
   
-        }
+        } 
       });
     }
   }, [currentFieldsData, objectName, currentRecordName, form]);

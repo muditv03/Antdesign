@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from 'react';
-import { Table, Typography, Tooltip, Button, Row, Col, Menu, message, Spin, Modal } from 'antd';
+import { Table, Typography, Tooltip, Button, Row, Col, Menu, message, Spin, Modal,Card } from 'antd';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { EditOutlined } from '@ant-design/icons';
@@ -166,6 +166,7 @@ const DataTable = () => {
 
   return (
     <Spin spinning={loading}>
+      <Card>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
         <Row justify="space-between" align="middle" style={{ marginBottom: '16px' }}>
           <Col>
@@ -182,7 +183,7 @@ const DataTable = () => {
             pagination={true}
             style={{ width: '100%' }}
           /> 
-        </div>
+        </div> 
         <CreateObjectDrawer
           visible={drawerVisible}
           onClose={onCloseDrawer}
@@ -202,6 +203,7 @@ const DataTable = () => {
       >
         <p>Are you sure you want to delete this record?</p>
       </Modal>
+      </Card>
     </Spin>
   );
 };

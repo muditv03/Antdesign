@@ -56,7 +56,7 @@ const RecordDetail = () => {
           // Format the date using dayjs to 'DD/MM/YYYY'
           recordData[field.name] = dayjs(recordData[field.name]).format(DateFormat);
         }
-      });
+      }); 
       // Process lookup fields to fetch names
       const lookupPromises = fieldsResponse
         .filter(field => field.type === 'lookup' && recordData[field.name.toLowerCase() + '_id'])
