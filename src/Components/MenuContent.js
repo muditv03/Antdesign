@@ -17,7 +17,7 @@ const MenuContent = ({ selectedItem }) => {
   }
 };
 
-
+ 
 const Tabs = () => (
   <div style={{ marginTop: '3px' }}> {/* Adjust margin as needed */}
     <h2>Custom Tabs</h2>
