@@ -181,7 +181,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
 
       const fieldsResponse = await apiServiceForFields.makeCall();
       setFieldsDataState(fieldsResponse);
-
+      console.log('field response while cloning is '+JSON.stringify(fieldsResponse));
       const formattedClonedRecord = { ...clonedRecord };
 
       fieldsResponse.forEach(field => {
@@ -247,7 +247,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
     const updatedValues = {};
   
     // Iterate through the fields data to check if the field is a lookup
-    fieldsData.forEach((field) => {
+    fieldsDataState.forEach((field) => {
       const fieldName = field.name;
       if (field.type === 'lookup') {
         // Convert lookup field names to lowercase
@@ -317,7 +317,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
     title: 'Action',
     key: 'operation',
     width: 130, 
-
+ 
     render: (_, record) => (
       <>
         <Tooltip title="Edit">
@@ -355,13 +355,17 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       rowKey="_id"
       pagination={false}
       loading={loading}
+       scroll={{
+        x: 'max-content',
+      }}
+      
       />
       <CreateRecordDrawer
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}
         onFinish={handleFinish}
         loading={loading}
-        fieldsData={fieldsData}
+        fieldsData={fieldsDataState}
         selectedRecord={selectedRecord}
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
