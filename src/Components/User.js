@@ -11,7 +11,7 @@ const UserComponent = () => {
 
   const fetchUsers = async () => {
     const apiServiceForLookup = new ApiService(
-      `${BASE_URL}/fetch_records/logintable`,
+      `${BASE_URL}/fetch_records/User`,
       { 'Content-Type': 'application/json' },
       'GET'
     );
@@ -33,8 +33,8 @@ const UserComponent = () => {
   const columns = [
     {
       title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'Name',
+      key: 'Name',
     },
     {
       title: 'Email',

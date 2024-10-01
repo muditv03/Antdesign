@@ -18,7 +18,7 @@ const Signup = () => {
       username: values.username,
       password: values.password,
       confirm_password: values.confirm,
-      name: values.name,
+      Name: values.name,
       email: values.email,
       loggedIn: true,
     };

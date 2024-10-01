@@ -59,9 +59,15 @@ const RecordDetail = () => {
       }); 
       // Process lookup fields to fetch names
       const lookupPromises = fieldsResponse
-        .filter(field => field.type === 'lookup' && recordData[field.name.toLowerCase() + '_id'])
+        .filter(field => field.type === 'lookup' )
         .map(async field => {
-          const lookupId = recordData[field.name.toLowerCase() + '_id'];
+          let lookupId='';
+          if(field.name=='User'){
+            lookupId=recordData[field.name + '_id'];
+          }else{
+            lookupId = recordData[field.name.toLowerCase() + '_id'];
+
+          }
           // const lookupResponse = await axios.get(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`);
 
           const fetchSingleRec = new ApiService(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`, {}, 'GET');
