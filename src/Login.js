@@ -54,9 +54,11 @@ const Login = () => {
       const tokenRes = response.token;
       const username = response.user.username; // Adjust based on the actual structure
       const email = response.user.email;
-      const name = response.user.name;
+      const name = response.user.Name;
 
-      if (token && username && email && name) {
+      console.log('token generated is '+ tokenRes);
+
+      if (token && username && email ) {
         Cookies.set('tokenRes', tokenRes, { expires: 7 });
         Cookies.set('username', username, { expires: 7 });
         Cookies.set('email', email, { expires: 7 });
