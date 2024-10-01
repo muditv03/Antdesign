@@ -50,6 +50,10 @@ const CreateRecordDrawer = ({
 
 
   const renderFormItem = (field, selectedDate, setSelectedDate) => {
+
+    if (field.type === 'lookup' && field.name === 'User') {
+      return null;
+    }
     switch (field.type) {
       case 'String':
         return (
@@ -209,7 +213,7 @@ const CreateRecordDrawer = ({
         return null;
     }
   };
-
+ 
   return (
     <Drawer
       title={<div style={{ fontSize: '20px', fontWeight: 'bold' }}>

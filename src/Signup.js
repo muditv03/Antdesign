@@ -29,7 +29,7 @@ const Signup = () => {
       const apiService = new ApiService(`${BASE_URL}/register`, {
         'Content-Type': 'application/json', 
       }, 'POST', {
-        logintable: body,
+        user: body,
       });
 
       const response = await apiService.makeCall();
