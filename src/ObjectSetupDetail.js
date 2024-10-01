@@ -184,6 +184,7 @@ const ObjectSetupDetail = () => {
       for (const lookupField of lookupFields) {
         const ob = lookupField.name;
         const objectName = lookupField.name.toLowerCase();
+        console.log('lookup object name is '+objectName);
         const recordId = record[`${objectName}_id`];
   
         if (recordId) {
@@ -629,6 +630,8 @@ const ObjectSetupDetail = () => {
         return text === undefined || text === null ? '0' : text === 0 ? '0' : text; // Show 0 for blank or zero values
       }else if (field.type === 'decimal') {
         return text === undefined || text === null || text === '' ? '0.00' : Number(text).toFixed(2); // Show 0.00 for blank values
+      }else if(field.type==='lookup' && field.name==='usertable'){
+        return text;
       }
       return index === 0 ? (
         <a onClick={() => handleLabelClick(record)}>{text}</a>

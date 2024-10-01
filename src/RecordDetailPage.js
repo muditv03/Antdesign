@@ -57,16 +57,27 @@ const RecordDetail = () => {
           recordData[field.name] = dayjs(recordData[field.name]).format(DateFormat);
         }
       });
+
       // Process lookup fields to fetch names
       const lookupPromises = fieldsResponse
-        .filter(field => field.type === 'lookup' && recordData[field.name.toLowerCase() + '_id'])
+        .filter(field => field.type === 'lookup' )
         .map(async field => {
-          const lookupId = recordData[field.name.toLowerCase() + '_id'];
+          console.log(recordData[field.name + '_id']);
+          let lookupId='';
+          if(field.name=='User'){
+            console.log('user if entered');
+            lookupId=recordData[field.name + '_id'];
+            console.log(lookupId);
+          }else{
+            lookupId = recordData[field.name.toLowerCase() + '_id'];
+
+          }
           // const lookupResponse = await axios.get(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`);
 
           const fetchSingleRec = new ApiService(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`, {}, 'GET');
           const lookupResponse = await fetchSingleRec.makeCall();
-
+        
+          console.log('user name is '+JSON.stringify(lookupResponse))
           return { [field.name]: lookupResponse.Name };
         });
 
@@ -169,6 +180,8 @@ const RecordDetail = () => {
     const { name, label, type, picklist_values, isTextArea } = field;
   
     const validationRules = [];
+
+   
   
     if (type === 'Integer') {
       validationRules.push({
@@ -213,6 +226,7 @@ const RecordDetail = () => {
         }}
       >
         {isEditable ? (
+         
           <Form.Item
             name={name}
             label={label}
@@ -231,6 +245,11 @@ const RecordDetail = () => {
                   </Option>
                 ))}
               </Select>
+               ) : type === 'lookup' && name === 'User' ? (
+                // Render as read-only when the field type is lookup and name is User
+                <div style={{ flex: 1, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                    {lookupNames[name] || form.getFieldValue(name)}
+                </div>
             ) : type === 'lookup' ? (
               <Select placeholder={label} defaultValue={form.getFieldValue(name) || lookupNames[name]}>
                 {lookupOptions[name]?.map((option) => (
