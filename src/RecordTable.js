@@ -373,6 +373,6 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       />
       </div>
   );
-};
+}; 
 
 export default ChildRecordTable;
