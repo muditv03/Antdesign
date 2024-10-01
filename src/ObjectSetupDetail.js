@@ -613,7 +613,7 @@ const ObjectSetupDetail = () => {
   const filteredFieldsData = fieldsData.filter(field => field.type !== 'lookup');
 
   const numberOfFieldsToShow = 5;
-
+ 
   const columns = filteredFieldsData.slice(0, numberOfFieldsToShow).map((field, index) => ({
     title: field.label,
     dataIndex: field.name,

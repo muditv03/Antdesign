@@ -164,7 +164,7 @@ const CreateRecordDrawer = ({
               filterOption={(input, option) =>
                 option.children.toLowerCase().includes(input.toLowerCase())
               }
-            >
+            > 
               {lookupOptions[field.name]?.map((option) => (
                 <Select.Option key={option._id} value={option._id}>
                   {option.Name}

@@ -206,7 +206,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
               name="type"
               label="Type"
               rules={[{ required: true, message: 'Please select the type' }]}
-            >
+            > 
               <Select
                 placeholder="Select the field type"
                 onChange={(value) => setFieldType(value)}
