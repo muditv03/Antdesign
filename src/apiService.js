@@ -11,7 +11,7 @@ class ApiService {
     this.method = method;
     this.body = body;
     
-    console.log('Cookie is '+ JSON.stringify(Cookies.get('tokenRes')));
+    //console.log('Cookie is '+ JSON.stringify(Cookies.get('tokenRes')));
     // Add cookie data to headers if available
     const authToken = Cookies.get('tokenRes'); // Replace 'auth_token' with the actual cookie name
     if (authToken) {

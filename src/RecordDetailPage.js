@@ -35,7 +35,7 @@ const RecordDetail = () => {
       // Fetch the record data
       const apiService = new ApiService(`${BASE_URL}/fetch_single_record/${objectName}/${id}`, {}, 'GET');
       const responseData = await apiService.makeCall();
-      console.log(responseData); // Process the data as needed
+      console.log('record fetched is '+JSON.stringify(responseData)); // Process the data as needed
       const recordData = responseData;
       setRecordName(responseData.Name);
 
@@ -61,13 +61,14 @@ const RecordDetail = () => {
       const lookupPromises = fieldsResponse
         .filter(field => field.type === 'lookup' )
         .map(async field => {
-          let lookupId='';
-          if(field.name=='User'){
-            lookupId=recordData[field.name + '_id'];
-          }else{
-            lookupId = recordData[field.name.toLowerCase() + '_id'];
+          let lookupId;
+        if(field.name==='User'){
+          lookupId = recordData[field.name+ '_id'];
+          console.log('lookup id after updating is '+lookupId);
+        }else{
+          lookupId = recordData[field.name.toLowerCase() + '_id'];
 
-          }
+        }
           // const lookupResponse = await axios.get(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`);
 
           const fetchSingleRec = new ApiService(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`, {}, 'GET');
@@ -116,10 +117,20 @@ const RecordDetail = () => {
   const onFinish = async (values) => {
     try {
       const bodyData = { ...values };
+      console.log(JSON.stringify(bodyData));
+      console.log(fields);
       fields.forEach(field => {
         if (field.type === 'lookup') {
-          const lookupFieldName = field.name.toLowerCase() + '_id';
+        let lookupFieldName;
+        if(field.name==='User'){
+          lookupFieldName = field.name + '_id';
+          console.log('lookup field name is '+lookupFieldName);
+
+        }else{  
+         lookupFieldName = field.name.toLowerCase() + '_id';
+        }
           if (bodyData[field.name]) {
+            console.log('body data while updating is '+bodyData[field.name])
             bodyData[lookupFieldName] = bodyData[field.name];
             delete bodyData[field.name];
           } else {
@@ -129,6 +140,7 @@ const RecordDetail = () => {
         }
       });
 
+      console.log('body data is '+JSON.stringify(bodyData));
       const body = {
         object_name: objectName,
         data: {
@@ -137,7 +149,7 @@ const RecordDetail = () => {
         },
       };
 
-      // await axios.post(`${BASE_URL}/insert_or_update_records`, body);
+      console.log('body while updating is '+ JSON.stringify(body));
 
       const apiService = new ApiService(`${BASE_URL}/insert_or_update_records`, {
         'Content-Type': 'application/json', // Add any necessary headers, such as content type
@@ -146,7 +158,7 @@ const RecordDetail = () => {
       message.success('Record saved successfully');
 
       // Update initial values
-      setInitialValues(values);
+      //setInitialValues(values);
       setIsEditable(false);
       fetchRecords();
     } catch (error) {
