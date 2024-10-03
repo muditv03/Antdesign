@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Layout } from 'antd';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation,useNavigate } from 'react-router-dom';
 import Login from './Login';
 import Signup from './Signup';
 import ForgotPassword from './ForgotPassword';
@@ -21,6 +21,7 @@ import InternalServerError from './Error-500'
 import UnprocessableEntity from './Error-422';
 import SetupPage from './Components/Setup';
 import Home from './Components/Home';
+import Cookies from 'js-cookie';
 
    
 const { Content } = Layout;
@@ -36,11 +37,21 @@ const sidebarRoutes = [
 
 const App = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+
 
   // Check if the current path is login, signup, or forgot-password
   const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(location.pathname.toLowerCase());
   const [sidebarWidth, setSidebarWidth] = useState('80px'); // Default to collapsed width
  
+  useEffect(() => {
+    // Check if the user is authenticated
+    const token = Cookies.get('tokenRes'); // Check for JWT token in cookies
+    if (!token && !isAuthPage) {
+      // If no token and not on an auth page, redirect to login
+      navigate('/login');
+    }
+  }, [location, navigate, isAuthPage]);
 
   useEffect(() => {
     // Deselect the tab if the current route is not in the sidebarRoutes array

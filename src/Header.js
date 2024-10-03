@@ -32,6 +32,7 @@ const AppHeader = () => {
   const handleLogout = () => {
     // Perform any logout-related tasks here (e.g., clearing tokens, session storage, etc.)
     Cookies.remove('username');
+    Cookies.remove('tokenRes');
     navigate('/login'); // Redirect to the login page
   };
 
