@@ -51,9 +51,9 @@ const CreateRecordDrawer = ({
 
   const renderFormItem = (field, selectedDate, setSelectedDate) => {
 
-    if (field.type === 'lookup' && field.name === 'User') {
-      return null;
-    }
+    // if (field.type === 'lookup' && field.name === 'User') {
+    //   return null;
+    // }
     switch (field.type) {
       case 'String':
         return (

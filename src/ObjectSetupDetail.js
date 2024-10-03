@@ -67,6 +67,7 @@ const ObjectSetupDetail = () => {
         ]).then(([recordsResponse, fieldsResponse]) => {
           setRecords(recordsResponse);
           setFieldsData(fieldsResponse.slice(0, 5)); // Get the first 5 fields
+          console.log(recordsResponse);
   
           // Identify and set the lookup field name
           const lookupField = fieldsResponse.find(field => field.type === 'lookup');
@@ -183,7 +184,14 @@ const ObjectSetupDetail = () => {
   
       for (const lookupField of lookupFields) {
         const ob = lookupField.name;
-        const objectName = lookupField.name.toLowerCase();
+        let objectName='';
+        if(lookupField.name=='User'){
+        objectName = lookupField.name;
+
+        }else{
+          objectName = lookupField.name.toLowerCase();
+
+        }        
         const recordId = record[`${objectName}_id`];
   
         if (recordId) {
@@ -253,7 +261,14 @@ const ObjectSetupDetail = () => {
   
       for (const lookupField of lookupFields) {
         const ob = lookupField.name;
-        const objectName = lookupField.name.toLowerCase();
+        let objectName='';
+        if(lookupField.name=='User'){
+        objectName = lookupField.name;
+
+        }else{
+          objectName = lookupField.name.toLowerCase();
+
+        }
         const recordId = record[`${objectName}_id`];
   
         if (recordId) {
@@ -295,8 +310,13 @@ const ObjectSetupDetail = () => {
     fieldsData.forEach((field) => {
       const fieldName = field.name;
       if (field.type === 'lookup') {
-        // Convert lookup field names to lowercase
-        updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
+        if(field.name=='User'){
+          updatedValues[`${fieldName}`] = values[fieldName];
+
+        }else{
+          updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
+
+        }
       } else {
         // Keep other fields unchanged
         updatedValues[fieldName] = values[fieldName];
@@ -328,7 +348,7 @@ const ObjectSetupDetail = () => {
       );
   
       await apiService.makeCall();
-  
+      
       message.success(selectedRecord?._id && !selectedRecord?.isClone ? 'Record updated successfully' : 'Record created successfully');
       setDrawerVisible(false);
       fetchRecords();
