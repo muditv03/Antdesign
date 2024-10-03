@@ -10,7 +10,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { BASE_URL } from './Constant';
 import ApiService from './apiService'; // Import ApiService class
-   
+    
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
