@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Card,Input, Button, Row, Col, Typography, Avatar, Select, Tabs, Checkbox, message, Space, DatePicker } from 'antd';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import { EditOutlined } from '@ant-design/icons';
 import RelatedRecord from './RelatedRecords';
 import { BASE_URL,DateFormat } from './Constant';
@@ -59,7 +58,7 @@ const RecordDetail = () => {
       }); 
       // Process lookup fields to fetch names
       const lookupPromises = fieldsResponse
-        .filter(field => field.type === 'lookup' )
+        .filter(field => field.type === 'lookup' &&(recordData[field.name+ '_id'] || recordData[field.name.toLowerCase()+ '_id']))
         .map(async field => {
           let lookupId;
         if(field.name==='User'){
@@ -90,7 +89,7 @@ const RecordDetail = () => {
 
       // Fetch lookup field options
       const lookupFieldPromises = fieldsResponse
-        .filter(field => field.type === 'lookup')
+        .filter(field => field.type === 'lookup' )
         .map(async field => {
           const lookupFieldName = field.name;
           // const lookupResponse = await axios.get(`${BASE_URL}/fetch_records/${lookupFieldName}`);
@@ -125,7 +124,7 @@ const RecordDetail = () => {
         if(field.name==='User'){
           lookupFieldName = field.name + '_id';
           console.log('lookup field name is '+lookupFieldName);
-
+ 
         }else{  
          lookupFieldName = field.name.toLowerCase() + '_id';
         }
@@ -134,8 +133,11 @@ const RecordDetail = () => {
             bodyData[lookupFieldName] = bodyData[field.name];
             delete bodyData[field.name];
           } else {
-            // Retain the original lookup ID if not edited
-            bodyData[lookupFieldName] = initialValues[lookupFieldName];
+            if(field.name==='User'){
+              bodyData[lookupFieldName] =initialValues[lookupFieldName];
+            }else{
+              bodyData[lookupFieldName] = null;
+             }
           }
         }
       });
@@ -154,7 +156,7 @@ const RecordDetail = () => {
       const apiService = new ApiService(`${BASE_URL}/insert_or_update_records`, {
         'Content-Type': 'application/json', // Add any necessary headers, such as content type
       }, 'POST', body);
-      const response = await apiService.makeCall();
+     await apiService.makeCall();
       message.success('Record saved successfully');
 
       // Update initial values
@@ -162,9 +164,9 @@ const RecordDetail = () => {
       setIsEditable(false);
       fetchRecords();
     } catch (error) {
-      console.error('Error saving record', error);
+      console.error('Error saving record'+ error.response.data[0]);
       const errorMessage = error.response?.data?.name
-        ? `Failed to update record because ${error.response.data.name[0]}`
+        ? `Failed to update record because ${error.response.data[0]}`
         : `Failed to update record due to an unknown error`;
 
       message.error(errorMessage);  
@@ -250,7 +252,7 @@ const RecordDetail = () => {
                 ))}
               </Select>
             ) : type === 'lookup' ? (
-              <Select placeholder={label} defaultValue={form.getFieldValue(name) || lookupNames[name]}>
+              <Select allowClear placeholder={label} defaultValue={form.getFieldValue(name) || lookupNames[name]}>
                 {lookupOptions[name]?.map((option) => (
                   <Option key={option._id} value={option._id}>
                     {option.Name}

@@ -21,8 +21,10 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
 
   // Utility function to sanitize label and create API name
   const generateApiName = (label) => {
-    return toPascalCase(label)
-      // .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special characters
+    return label
+    .replace(/[^a-zA-Z]/g, '') // Remove all characters except letters (a-z, A-Z)
+    .replace(/\s+/g, '')       // Remove all spaces
+    .trim();        // .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special characters
       // .trim() // Remove leading and trailing spaces
       // .split(/\s+/) // Split by one or more spaces
       // .map((word, index) => {
@@ -49,22 +51,11 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
   };
   
 
-  const toPascalCase = (str) => {
-  return str
-    .replace(/(?:^|\s)(\w)/g, (_, char) => char.toUpperCase())  // Capitalize the first letter of each word
-    .replace(/\s+/g, '');  // Remove all spaces
-};
-
-  
-
-
   const handleFinish = async (values) => {
     setLoading(true); // Start the spinner
-    const pascalCaseName = toPascalCase(values.name);
-    console.log( pascalCaseName)
     const formData = {
       label: values.label,
-      name: pascalCaseName,
+      name: values.name,
       pluralLabel: values.plurallabel,
       addObjectTab: values.addObjectTab,
       icon: values.icon,
@@ -219,7 +210,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
                   style={{ height: '34px', width: '90px', fontSize: '14px' }}>
             Cancel
           </Button>
-          <Button
+          <Button 
             onClick={() => form.submit()}
             disabled={loading}
             type="primary"

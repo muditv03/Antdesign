@@ -173,7 +173,7 @@ const ObjectSetupDetail = () => {
           // Format date to DD/MM/YYYY if the field is of Date type
           formattedRecord[field.name] = dayjs(record[field.name]).format(DateFormat);
         }
-      });
+      }); 
   
       setSelectedRecord(formattedRecord);
       form.setFieldsValue(formattedRecord);
@@ -315,7 +315,7 @@ const ObjectSetupDetail = () => {
 
         }else{
           updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
-
+ 
         }
       } else {
         // Keep other fields unchanged
@@ -331,7 +331,7 @@ const ObjectSetupDetail = () => {
         _id: selectedRecord?._id && !selectedRecord?.isClone ? selectedRecord._id : undefined, // If cloning, exclude the ID
         ...updatedValues // Use the updated values
       }
-    };
+    }; 
   
     try {
       //setLoading(true);
@@ -419,208 +419,7 @@ const ObjectSetupDetail = () => {
     setIsDeleteModalVisible(false);
 
   };
-  
-  //const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY', 'DD-MM-YYYY', 'DD-MM-YY'];
-
-//  const renderFormItem = (field,selectedDate, setSelectedDate) => {
-
-
-//     switch (field.type) {
-//       case 'String':
-//         return (
-//           <Form.Item
-//             key={field.name}
-//             name={field.name}
-//             label={field.label}
-//             //rules={[{ required: true, message: `Please enter ${field.label}` }]}
-//           >
-//             <Input placeholder={`Enter ${field.label}`} />
-//           </Form.Item>
-//         );
-
-//       case 'Integer':
-//         return (
-//           <Form.Item
-//             key={field.name}
-//             name={field.name}
-//             label={field.label}
-//             //rules={[{ required: true, message: `Please enter ${field.label}` }]}
-
-//           >
-//             <Input type="number" placeholder={`Enter ${field.label}`} />
-//           </Form.Item>
-//         );
-
-//       case 'boolean':
-//         return (
-//           <Form.Item
-//             key={field.name}
-//             name={field.name}
-//             valuePropName="checked"
-//             initialValue={false}
-//             //rules={[{ required: true, message: `Please select ${field.label}` }]}
-//           >
-//             <Checkbox>{field.label}</Checkbox>
-//           </Form.Item>
-//         );
-
-//         case 'Date':
-//           return (
-//             <Form.Item
-//             key={field.name}
-//             name={field.name}
-//             label={field.label}
-//             //rules={[{ required: true, message: `Please select a valid ${field.label}` }]}
-//           >
-//             <Space>
-//             <DatePicker
-//              placeholder={`Select ${field.label}`}
-//              style={{ width: '100%' }}
-//              format={DateFormat}
-//              value={(form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name),DateFormat) : null)}
-//                 onChange={(date, dateString) => {
-//                   console.log('Selected Date:', dateString); // Debugging - check if the correct date is selected
-
-//                   // Update both the form and local state
-
-//                   setSelectedDate(date ? dayjs(dateString,DateFormat) : null); 
-//                   console.log('date which is selected is '+selectedDate); // Update local state
-//                   form.setFieldsValue({ [field.name]: dateString });        // Update form value
-//                 }}           
-//             />
-//             </Space>
-//           </Form.Item>
-          
-//           );
-
-
-//           case 'currency':
-//             const currencyDecimalPlacesBefore = field.decimal_places_before;
-//             const currencyDecimalPlacesAfter = field.decimal_places_after;
-//             console.log('decimal places before for currency is '+ currencyDecimalPlacesBefore);
-//             console.log('decimal places after for currency is '+ currencyDecimalPlacesAfter);
-
-//             // Regex pattern to allow up to 'currencyDecimalPlacesBefore' digits before decimal
-//             // and 'currencyDecimalPlacesAfter' digits after decimal.
-//             const regexPattern = new RegExp(`^\\d{1,${currencyDecimalPlacesBefore}}(\\.\\d{0,${currencyDecimalPlacesAfter}})?$`);
-            
-//             // Handler to validate input as per the pattern
-//             const handleCurrencyInput = (event) => {
-//               const inputValue = event.target.value;
-          
-//               // Validate using regex pattern
-//               if (!regexPattern.test(inputValue)) {
-//                 event.preventDefault();
-//               }
-//             };
-          
-//             return (
-//               <Form.Item
-//                 key={field.name}
-//                 name={field.name}
-//                 label={field.label}
-//               >
-//                 <Input
-//                   addonBefore="$"
-//                   placeholder={`Enter ${field.label}`}
-//                   onInput={handleCurrencyInput}
-//                   maxLength={currencyDecimalPlacesBefore + currencyDecimalPlacesAfter + 1} // Allow max length based on input
-//                 />
-//               </Form.Item>
-//             );
-
-//       case 'Picklist':
-//       console.log('Picklist Values:', field); // Log the picklist values
-
-//       return (
-//         <Form.Item
-//           key={field.name}
-//           name={field.name}
-//           label={field.label}
-//           //rules={[{ required: true, message: `Please select ${field.label}` }]}
-//         >
-//           <Select placeholder={`Select ${field.label}`}>
-//             {field.picklist_values.map((value) => (
-//               <Select.Option key={value} value={value}>
-//                 {value}
-//               </Select.Option>
-//             ))}
-//           </Select>
-//         </Form.Item>
-//       );
-
-//       case 'lookup':
-//         return (
-//           <Form.Item
-//             key={field.name}
-//             name={field.name}
-//             label={field.label}
-//             //rules={[{ required: true, message: `Please select a ${field.label}` }]}
-//           >
-//              <Select
-//             placeholder={`Select ${field.label}`}
-//             showSearch
-//             allowClear
-//             filterOption={(input, option) =>
-//               option.children.toLowerCase().includes(input.toLowerCase())
-//             }
-//           >
-//             {lookupOptions[field.name]?.map((option) => (
-//               <Select.Option key={option._id} value={option._id}>
-//                 {option.Name}
-//               </Select.Option>
-//             ))}
-//           </Select>
-//           </Form.Item>
-//         );
-//         case 'decimal':
-//           const decimalPlacesBefore = field.decimal_places_before ;
-//           const decimalPlacesAfter = field.decimal_places_after ;
-//           console.log('decimal before'+decimalPlacesBefore);
-//           console.log('decimal after'+decimalPlacesAfter);
-    
-//           const decimalPattern = new RegExp(`^\\d{1,${decimalPlacesBefore}}(\\.\\d{0,${decimalPlacesAfter}})?$`);
-    
-//           return (
-//             <Form.Item
-//               key={field.name}
-//               name={field.name}
-//               label={field.label}
-//               // rules={[
-//               //   { required: true, message: `Please enter ${field.label}` },
-//               //   {
-//               //     pattern: decimalPattern,
-//               //     message: `Enter a valid number with up to ${decimalPlacesBefore} digits before the decimal and ${decimalPlacesAfter} digits after the decimal.`,
-//               //   },
-//               // ]}
-//             >
-//               <Input
-//                 placeholder={`Enter ${field.label}`}
-//                 maxLength={decimalPlacesBefore + decimalPlacesAfter + 1} 
-//               />
-//             </Form.Item>
-//           );
-    
-//         case 'Text-Area':
-//           return (
-//             <Form.Item
-//               key={field.name}
-//               name={field.name}
-//               label={field.label}
-//               //rules={[{ required: true, message: `Please enter ${field.label}` }]}
-//             >
-//               <Input.TextArea
-//                 placeholder={`Enter ${field.label}`}
-//               />
-//             </Form.Item>
-//           );
-
-//       default:
-//         return null;
-//     }
-//   };
-
-
+ 
   if (loading) {
     return <p>Loading...</p>;
   }

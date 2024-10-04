@@ -113,7 +113,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       return value;
     },
   }));
-
+ 
   const handleEditClick = async (record) => {
     try {
       // Fetch fields data
@@ -142,8 +142,14 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
 
       for (const lookupField of lookupFields) {
         const ob = lookupField.name;
-        const objectName = lookupField.name.toLowerCase();
-        const recordId = record[`${objectName}_id`];
+        let objectName='';
+        if(lookupField.name=='User'){
+        objectName = lookupField.name;
+
+        }else{
+          objectName = lookupField.name.toLowerCase();
+
+        }const recordId = record[`${objectName}_id`];
 
         if (recordId) {
           const apiServiceForRecord = new ApiService(
@@ -197,8 +203,14 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
 
       for (const lookupField of lookupFields) {
         const ob = lookupField.name;
-        const objectName = lookupField.name.toLowerCase();
-        console.log(`${objectName}_id`)
+        let objectName='';
+        if(lookupField.name=='User'){
+        objectName = lookupField.name;
+
+        }else{
+          objectName = lookupField.name.toLowerCase();
+
+        }       
         const recordId = record[`${objectName}_id`];
         console.log('REc')
         console.log(record)
@@ -250,9 +262,13 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
     fieldsDataState.forEach((field) => {
       const fieldName = field.name;
       if (field.type === 'lookup') {
-        // Convert lookup field names to lowercase
-        updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
-      } else {
+        if(field.name=='User'){
+          updatedValues[`${fieldName}`] = values[fieldName];
+
+        }else{
+          updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
+
+        }      } else {
         // Keep other fields unchanged
         updatedValues[fieldName] = values[fieldName];
       }

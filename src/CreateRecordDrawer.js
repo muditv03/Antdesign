@@ -18,7 +18,7 @@ const CreateRecordDrawer = ({
   form 
 }) => { 
   // Function to render form items based on field type
- 
+   
   const [lookupOptions, setLookupOptions] = useState([]);
 
 //console.log('fields'+ JSON.stringify(fieldsData));
@@ -144,7 +144,9 @@ const CreateRecordDrawer = ({
             name={field.name}
             label={field.label}
           >
-            <Select placeholder={`Select ${field.label}`}>
+            <Select placeholder={`Select ${field.label}`}    
+            allowClear 
+            >
               {field.picklist_values.map((value) => (
                 <Select.Option key={value} value={value}>
                   {value}
