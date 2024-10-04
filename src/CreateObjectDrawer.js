@@ -4,7 +4,8 @@ import * as Icons from '@ant-design/icons';
 import { BASE_URL } from './Constant';
 import ApiService from './apiService'; // Import ApiService class
 import pluralize from 'pluralize';
- 
+import eventBus from './eventBus'; // Import the event bus
+
 const { Option } = Select;
 
 const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord }) => {
@@ -49,7 +50,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       });
     }
   };
-  
+   
 
   const handleFinish = async (values) => {
     setLoading(true); // Start the spinner
@@ -150,6 +151,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
           icon: values.icon,
         });
       }
+      eventBus.emit('objectCreatedOrUpdated'); // Notify that object was created or updated
 
       onClose(); // Close the drawer upon success
       form.resetFields();

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Drawer, Form, Input, Button, Select, message } from 'antd';
+import { Drawer, Form, Input, Button, Select, message,Card } from 'antd';
 import apiService from './apiService'; // Import your ApiService class
 import { BASE_URL } from './Constant';
 
@@ -107,7 +107,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
   return (
     <Drawer
       title={editingRelatedList ? "Edit Related List" : "Create Related List"}
-      width="30%"
+      width="40%"
       onClose={onClose}
       visible={visible}
       headerStyle={{ backgroundColor: '#f0f2f5' }}  // Set background for the header
@@ -123,6 +123,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
         </div>
       }
     >
+      <Card>
       <Form layout="vertical" form={form} onFinish={handleFinish}>
         <Form.Item
           name="relatedListName"
@@ -174,6 +175,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
           </Form.Item>
         )}
       </Form>
+      </Card>
     </Drawer>
   );
 };

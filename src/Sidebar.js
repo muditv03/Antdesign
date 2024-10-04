@@ -6,6 +6,8 @@ import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { BASE_URL } from './Constant';
 import ApiService from './apiService'; // Import ApiService class
+import eventBus from './eventBus'; // Import the event bus
+
      
 const { useBreakpoint } = Grid;
 
@@ -60,7 +62,16 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
 
     };
 
-    fetchData();
+     // Fetch data initially
+  fetchData();
+
+  // Listen for event to reload sidebar data
+  eventBus.on('objectCreatedOrUpdated', fetchData);
+
+  // Cleanup the event listener when component unmounts
+  return () => {
+    eventBus.off('objectCreatedOrUpdated', fetchData);
+  };
   }, []);
 
   useEffect(() => {
