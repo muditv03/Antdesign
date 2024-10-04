@@ -138,7 +138,7 @@ const RecordDetail = () => {
             }else{
               bodyData[lookupFieldName] = null;
              }
-          }
+          } 
         }
       });
 
@@ -300,16 +300,15 @@ const RecordDetail = () => {
               ? form.getFieldValue(name)
                 ? "True"
                 : "False"
-               : type === 'currency'
-              ? `$${(form.getFieldValue(name) ? parseFloat(form.getFieldValue(name)).toFixed(2) : '0.00')}`
-
-              : type === 'String'
-              ? form.getFieldValue(name) || ''
-              : type === 'Integer'
-              ? form.getFieldValue(name) || '0'
-              : type === 'Decimal'
-              ? form.getFieldValue(name) || '0.00'
-              : lookupNames[name] || form.getFieldValue(name)}
+                : type === 'currency'
+                ? `$${form.getFieldValue(name) !== undefined && form.getFieldValue(name) !== null ? parseFloat(form.getFieldValue(name)).toFixed(2) : ''}`
+                : type === 'String'
+                ? form.getFieldValue(name) || ''
+                : type === 'Integer'
+                ? form.getFieldValue(name) !== undefined && form.getFieldValue(name) !== null ? form.getFieldValue(name) : ''
+                : type === 'Decimal'
+                ? form.getFieldValue(name) !== undefined && form.getFieldValue(name) !== null ? form.getFieldValue(name) : ''
+                : lookupNames[name] || form.getFieldValue(name)}
           </div>
         )}
         {!isEditable && (

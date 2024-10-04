@@ -412,7 +412,7 @@ const ObjectSetupDetail = () => {
     }
   };
   
-
+ 
   const confirmDelete = async () => {
     deleteRecord(selectedRecord);
 
@@ -441,18 +441,18 @@ const ObjectSetupDetail = () => {
       if (field.type === 'boolean') {
         return text ? 'True' : 'False';
       } else if (field.type === 'Date') {
-        return text ? dayjs(text).format(DateFormat) : 'N/A'; // Format date as DD-MM-YYYY
+        return text ? dayjs(text).format(DateFormat) : ''; // Format date as DD-MM-YYYY
       }else if (field.type === 'currency') {
-        return text ? `$${text.toFixed(2)}` : '$0.00'; // Format as currency with dollar sign
+        return text ? `$${text.toFixed(2)}` : ''; // Format as currency with dollar sign
       }else if (field.type === 'Integer') {
-        return text === undefined || text === null ? '0' : text === 0 ? '0' : text; // Show 0 for blank or zero values
+        return text === undefined || text === null ? '' : text === 0 ? '0' : text; // Show 0 for blank or zero values
       }else if (field.type === 'decimal') {
-        return text === undefined || text === null || text === '' ? '0.00' : Number(text).toFixed(2); // Show 0.00 for blank values
+        return text === undefined || text === null || text === '0' ? '' : Number(text).toFixed(2); // Show 0.00 for blank values
       }
       return index === 0 ? (
         <a onClick={() => handleLabelClick(record)}>{text}</a>
       ) : (
-        text || 'N/A'
+        text || ''
       );
     }
   }));
