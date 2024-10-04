@@ -123,7 +123,10 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
         </div>
       }
     >
-      <Card>
+      <Card 
+        style={{ margin: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
+
+      >
       <Form layout="vertical" form={form} onFinish={handleFinish}>
         <Form.Item
           name="relatedListName"

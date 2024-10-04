@@ -149,9 +149,10 @@ const CreateTabDrawer = ({ visible, onClose }) => {
                 </div>
             }
         >
-          <Card>
+          <Card
+            style={{ margin: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
 
-       
+          >
             <Form form={form} id="createTabForm" layout="vertical" onFinish={handleSubmit}>
                 <Form.Item label="Select Object" name="object" required>
                     <Select placeholder="Select an object" loading={fetchingObjects}>
