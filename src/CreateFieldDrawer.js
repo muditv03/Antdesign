@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Drawer, Form, Input, Button, message, Select, Card, Spin } from 'antd';
+import { Drawer, Form, Input, Button, message, Select, Card, Spin, Checkbox,Tooltip } from 'antd';
 import { BASE_URL } from './Constant';
+import { InfoCircleOutlined } from '@ant-design/icons'; // Import the InfoCircle icon
+
 import ApiService from './apiService'; // Import ApiService class
 import pluralize from 'pluralize';
 
 const { Option } = Select;
- 
+
 const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField, onSaveEdit }) => {
   const [form] = Form.useForm();
   const [fieldType, setFieldType] = useState('');
+  const [isAutoNumber, setIsAutoNumber] = useState(false); // State for auto number checkbox
   const [picklistValues, setPicklistValues] = useState([]);
   const [availableObjects, setAvailableObjects] = useState([]);
   const [loading, setLoading] = useState(false); // Spinner state
@@ -17,12 +20,10 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   // Utility function to sanitize label and create API name
   const generateApiName = (label) => {
     return label
-    .replace(/[^a-zA-Z]/g, '') // Remove all characters except letters (a-z, A-Z)
-    .replace(/\s+/g, '')       // Remove all spaces
-    .trim();     
-      
+      .replace(/[^a-zA-Z]/g, '') // Remove all characters except letters (a-z, A-Z)
+      .replace(/\s+/g, '')       // Remove all spaces
+      .trim();     
   };
-  
 
   // Handle label change and update API name
   const handleLabelChange = (e) => {
@@ -34,7 +35,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             name: generateApiName(label), // Set the API name based on the sanitized label
         });
     }
-};
+  };
 
   // Fetch available objects for the lookup field
   useEffect(() => {
@@ -64,8 +65,10 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         decimal_places: editField.decimal_places_after, // Set decimal places
       });
       setFieldType(editField.type); // Set field type for conditional rendering
+      setIsAutoNumber(editField.isAutoNumber || false); // Set auto number state if editing
     } else {
       form.resetFields(); // Reset fields for creating a new field
+      setIsAutoNumber(false); // Reset auto number state
     }
   }, [editField, form]);
 
@@ -84,14 +87,21 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       mt_object_id: mtObjectId,
       iseditable: values.iseditable || true,
       iswriteable: values.iswriteable || true,
+      is_auto_number: isAutoNumber, // Include isAutoNumber in the new field data
     };
+
+    // Include starting and ending points if isAutoNumber is true
+    if (isAutoNumber) {
+      newField.auto_number_format = values.format; // Add starting point
+      newField.auto_number_starting = values.startingPoint;     // Add ending point
+    }
 
     if (values.type === 'Picklist') {
       newField.picklist_values = picklistValues;
     }
 
     if (values.type === 'decimal' || values.type === 'currency') {
-      newField.decimal_places_before = values.length ;
+      newField.decimal_places_before = values.length;
       newField.decimal_places_after = values.decimal_places;
     }
 
@@ -120,9 +130,11 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
           type: values.type,
           iseditable: values.iseditable,
           iswriteable: values.iswriteable,
+          is_auto_number: isAutoNumber,
+          ...(isAutoNumber && { auto_number_format: values.format, auto_number_starting: values.startingPoint }),
           ...(values.type === 'Picklist' && { picklist_values: picklistValues }),
           ...(values.type === 'decimal' || values.type === 'currency' && {
-            decimal_places_before: values.length ,
+            decimal_places_before: values.length,
             decimal_places_after: values.decimal_places,
           }),
         });
@@ -152,7 +164,6 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       bodyStyle={{ paddingBottom: 80 }}
       headerStyle={{
         padding: '20px 16px',
-        //background: '#20b2aa',
         background: '#f0f2f5',
         borderBottom: '1px solid #e8e8e8',
       }}
@@ -173,7 +184,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
           <Button
             onClick={() => form.submit()}
             type="primary"
-            disabled={loading} 
+            disabled={loading}
             style={{
               height: '34px',
               width: '90px',
@@ -183,7 +194,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
           >
             Save
           </Button>
-        </div> 
+        </div>
       }
       footerStyle={{ textAlign: 'right', padding: '0' }}
     >
@@ -203,211 +214,126 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             > 
               <Select
                 placeholder="Select the field type"
-                onChange={(value) => setFieldType(value)}
+                onChange={(value) => {
+                  setFieldType(value);
+                  if (value !== 'String') {
+                    setIsAutoNumber(false); // Reset auto number checkbox if type is not String
+                  }
+                }}
                 disabled={isEditMode} // Disable field type selection in edit mode
               >
                 <Option value="String">Text</Option>
                 <Option value="Integer">Number</Option>
                 <Option value="decimal">Decimal</Option>
+                <Option value="Email">Email</Option>
                 <Option value="currency">Currency</Option>
                 <Option value="boolean">Boolean</Option>
+                <Option value="Date">Date</Option>
                 <Option value="Picklist">Picklist</Option>
                 <Option value="lookup">Lookup</Option>
-                <Option value="Date">Date</Option>
-                <Option value="LongText">Long Text Area</Option>
+                <Option value="Text-Area">Text Area</Option>
               </Select>
             </Form.Item>
 
-            {fieldType === 'Picklist' && (
-              <Form.Item
-                name="picklist_values"
-                label="Picklist Values"
-              >
-                <Input 
-                  placeholder="Enter picklist values separated by commas"
-                  onChange={handlePicklistChange}
-                />
-              </Form.Item>
-            )}
-
-            {fieldType === 'decimal' && (
-              <>
-                <Form.Item
-                  name="length"
-                  label="Length"
-                  rules={[{ required: true, message: 'Please enter the length' }]}
-                >
-                  <Input placeholder="Enter length" />
-                </Form.Item>
-                <Form.Item
-                  name="decimal_places"
-                  label="Decimal Places"
-                  rules={[{ required: true, message: 'Please enter decimal places' },
-                    {
-                      validator: (_, value) => {
-                        if (value === "0" || value === 0) {
-                          return Promise.reject(new Error('Zero is not allowed for decimal places'));
-                        }
-                        return Promise.resolve();
-                      }
-                    }
-
-
-                  ]}
-                >
-                  <Input placeholder="Enter decimal places" />
-                </Form.Item>
-              </>
-            )}
-
-            {fieldType === 'currency' && (
-              <>
-                <Form.Item
-                  name="length"
-                  label="Length"
-                  rules={[{ required: true, message: 'Please enter the length' }]}
-                >
-                  <Input placeholder="Enter length" />
-                </Form.Item>
-                <Form.Item
-                  name="decimal_places"
-                  label="Decimal Places"
-                  rules={[{ required: true, message: 'Please enter decimal places' }]}
-                >
-                  <Input placeholder="Enter decimal places" />
-                </Form.Item>
-              </>
-            )}
+            
             <Form.Item
               name="label"
               label="Label"
-              rules={[{ required: true, message: 'Please enter the label' }]}
+              rules={[{ required: true, message: 'Please enter a label' }]}
             >
-              <Input 
-                placeholder="Please enter the field label" 
-                onBlur={handleLabelChange} // Add onChange handler here
-              />
+              <Input onBlur={handleLabelChange} placeholder="Enter label" />
             </Form.Item>
-
             <Form.Item
               name="name"
               label="API Name"
-              rules={[ 
-                { required: true, message: 'Please enter the name' }, 
-                {
-                  validator: (_, value) => {
-                    if (!value) {
-                      return Promise.resolve();
-                    }
-                    const alphabetOnlyRegex = /^[a-zA-Z]+$/;
-                    if (!alphabetOnlyRegex.test(value)) {
-                      return Promise.reject(new Error('Name should only contain alphabets without spaces.'));
-                    }
-                    if (pluralize.isPlural(value)) {
-                      return Promise.reject(new Error('API name cannot be plural.'));
-                    }
-                    return Promise.resolve();
-                  },
-                },
-              ]}
+              rules={[{ required: true, message: 'Please enter an API name' }]}
             >
-              {fieldType === 'lookup' ? (
-                <Select placeholder="Select an object" disabled={isEditMode}>
-                  {availableObjects.map((object) => (
-                    <Option key={object.id} value={object.name}>
-                      {object.name}
-                    </Option>
-                  ))}
-                </Select>
-              ) : (
-                <Input placeholder="Please enter the name" disabled={isEditMode} /> // Read-only in edit mode
-              )}
+              <Input placeholder="Enter API name" disabled={isEditMode} />
             </Form.Item>
 
-            {/* <Form.Item
-              name="type"
-              label="Type"
-              rules={[{ required: true, message: 'Please select the type' }]}
-            >
-              <Select
-                placeholder="Select the field type"
-                onChange={(value) => setFieldType(value)}
-                disabled={isEditMode} // Disable field type selection in edit mode
-              >
-                <Option value="String">Text</Option>
-                <Option value="Integer">Number</Option>
-                <Option value="decimal">Decimal</Option>
-                <Option value="currency">Currency</Option>
-                <Option value="boolean">Boolean</Option>
-                <Option value="Picklist">Picklist</Option>
-                <Option value="lookup">Lookup</Option>
-                <Option value="Date">Date</Option>
-                <Option value="LongText">Long Text Area</Option>
-              </Select>
-            </Form.Item>
-
-            {fieldType === 'Picklist' && (
-              <Form.Item
-                name="picklist_values"
-                label="Picklist Values"
-              >
-                <Input 
-                  placeholder="Enter picklist values separated by commas"
-                  onChange={handlePicklistChange}
-                />
+            {fieldType === 'String' && ( // Only show for String type
+              <Form.Item>
+                <Checkbox
+                  checked={isAutoNumber}
+                  onChange={(e) => setIsAutoNumber(e.target.checked)}
+                >
+                  Auto Number
+                </Checkbox>
               </Form.Item>
             )}
 
-            {fieldType === 'decimal' && (
+            {isAutoNumber && ( // Only show these fields if isAutoNumber is checked
               <>
                 <Form.Item
-                  name="length"
-                  label="Length"
-                  rules={[{ required: true, message: 'Please enter the length' }]}
+                  name="format"
+                  label={
+                    <span>
+                      Format&nbsp;
+                      <Tooltip title="Enter the format using placeholders like {0000} for the auto-incremented number. Example: INV-{0000} for invoice numbers.">
+                        <InfoCircleOutlined style={{ color: '#1890ff' }} />
+                      </Tooltip>
+                    </span>
+                  } rules={[{ required: true, message: 'Please enter the format!' }]}
                 >
-                  <Input placeholder="Enter length" />
+                  <Input placeholder="Enter format" />
                 </Form.Item>
                 <Form.Item
-                  name="decimal_places"
-                  label="Decimal Places"
-                  rules={[{ required: true, message: 'Please enter decimal places' },
-                    {
-                      validator: (_, value) => {
-                        if (value === "0" || value === 0) {
-                          return Promise.reject(new Error('Zero is not allowed for decimal places'));
-                        }
-                        return Promise.resolve();
-                      }
-                    }
-
-
-                  ]}
+                  name="startingPoint"
+                  label="Starting Point"
+                  rules={[{ required: true, message: 'Please enter the starting point!' }]}
                 >
-                  <Input placeholder="Enter decimal places" />
+                  <Input type="number" placeholder="Enter starting point" />
                 </Form.Item>
               </>
             )}
 
-            {fieldType === 'currency' && (
+            {fieldType === 'Picklist' && ( // Only show for Picklist type
+              <Form.Item
+                name="picklist_values"
+                label="Picklist Values (comma separated)"
+                rules={[{ required: true, message: 'Please input the picklist values!' }]}
+              >
+                <Input placeholder="Enter picklist values" onChange={handlePicklistChange} />
+              </Form.Item>
+            )}
+
+            {fieldType === 'decimal' || fieldType === 'currency' ? ( // Only show for decimal and currency types
               <>
                 <Form.Item
                   name="length"
                   label="Length"
-                  rules={[{ required: true, message: 'Please enter the length' }]}
+                  rules={[{ required: true, message: 'Please enter the length!' }]}
                 >
-                  <Input placeholder="Enter length" />
+                  <Input placeholder="Enter total length" type="number" />
                 </Form.Item>
                 <Form.Item
                   name="decimal_places"
                   label="Decimal Places"
-                  rules={[{ required: true, message: 'Please enter decimal places' }]}
+                  rules={[{ required: true, message: 'Please enter the decimal places!' }]}
                 >
-                  <Input placeholder="Enter decimal places" />
+                  <Input placeholder="Enter decimal places" type="number" />
                 </Form.Item>
               </>
-            )} */}
+            ) : null}
 
-           
+            {fieldType === 'lookup' && ( // Only show for lookup type
+              <Form.Item
+                name="lookup_object"
+                label="Lookup Object"
+                rules={[{ required: true, message: 'Please select an object!' }]}
+              >
+                <Select placeholder="Select an object" disabled={isEditMode}>
+                  {availableObjects.map((obj) => (
+                    <Option key={obj._id} value={obj._id}>
+                      {obj.label}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            )}
+
+            {/* Add more fields as needed */}
+
           </Form>
         </Card>
       </Spin>

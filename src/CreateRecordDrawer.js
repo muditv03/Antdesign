@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Drawer, Button, Form, Card, Spin, Input, Checkbox, DatePicker, Space, Select } from 'antd';
+import {MailOutlined } from '@ant-design/icons';
+
 import dayjs from 'dayjs';
 import ApiService from './apiService'; // Import ApiService class
 import {BASE_URL,DateFormat} from './Constant' // Define the date format
@@ -51,9 +53,14 @@ const CreateRecordDrawer = ({
 
   const renderFormItem = (field, selectedDate, setSelectedDate) => {
 
-    // if (field.type === 'lookup' && field.name === 'User') {
-    //   return null;
-    // }
+    if (field.is_auto_number) {
+      return null; // Don't render the field if it's an auto-number field
+    }
+
+   if(field.name=='recordCount'){
+    return null;
+   }
+
     switch (field.type) {
       case 'String':
         return (
@@ -77,6 +84,19 @@ const CreateRecordDrawer = ({
           </Form.Item>
         );
 
+      case 'Email':
+        return(
+          <Form.Item
+            key={field.name}
+            name={field.name}
+            label={field.label}
+          rules={[
+            { type: 'email', message: 'The input is not valid E-mail!' },
+          ]}
+        >
+          <Input type='email' prefix={<MailOutlined />} />
+          </Form.Item>
+        );
       case 'boolean':
         return (
           <Form.Item
@@ -88,6 +108,7 @@ const CreateRecordDrawer = ({
             <Checkbox>{field.label}</Checkbox>
           </Form.Item>
         );
+
 
       case 'Date':
         return (
@@ -111,6 +132,42 @@ const CreateRecordDrawer = ({
           </Form.Item>
         );
 
+        case 'DateTime':
+          return (
+            <Form.Item
+              key={field.name}
+              name={field.name}
+              label={field.label}
+            >
+              <Space>
+              <DatePicker
+                showTime
+                placeholder={`Select ${field.label}`}
+                style={{ width: '100%' }}
+                format="DD/MM/YYYY HH:mm:ss"
+                value={form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name),"DD/MM/YYYY HH:mm:ss") : null}
+                onChange={(date, dateString) => {
+                  setSelectedDate(date ? dayjs(dateString,"DD/MM/YYYY HH:mm:ss") : null);
+                  form.setFieldsValue({ [field.name]: dateString });
+                }}
+              />
+              </Space>
+            </Form.Item>
+          );
+    
+        case 'URL':
+          return (
+            <Form.Item
+              key={field.name}
+              name={field.name}
+              label={field.label}
+              rules={[
+                { type: 'url', message: 'Please enter a valid URL!' },
+              ]}
+            >
+              <Input type="url" placeholder={`Enter ${field.label}`} />
+            </Form.Item>
+          );
       case 'currency':
         const currencyDecimalPlacesBefore = field.decimal_places_before;
         const currencyDecimalPlacesAfter = field.decimal_places_after;
