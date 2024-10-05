@@ -60,10 +60,13 @@ const RecordDetail = () => {
           recordData[field.name] = dayjs(recordData[field.name]).format(DateFormat);
         }
         if (field.type === 'DateTime' && recordData[field.name]) {
-          const localDateTime = dayjs.utc(recordData[field.name]).local().format('DD/MM/YYYY HH:mm:ss');
-          console.log('formatted date time is ' + localDateTime);
-          recordData[field.name] = localDateTime;
-        } 
+          // Assuming recordData[field.name] is in UTC
+          console.log(recordData[field.name]);
+          const localDateTime = dayjs(recordData[field.name]).utc().format('DD/MM/YYYY HH:mm:ss'); // Convert to local time
+          //console.log('formatted date time is ' + localDateTime.format('DD/MM/YYYY HH:mm:ss'));
+          recordData[field.name] = localDateTime; // Store formatted date-time
+      }
+      
       }); 
       // Process lookup fields to fetch names
       const lookupPromises = fieldsResponse
@@ -229,7 +232,7 @@ const RecordDetail = () => {
     }
 
     const isFieldEditable = !field.is_auto_number && isEditable;
-
+ 
    
     return (
       <div

@@ -467,7 +467,7 @@ const fieldsToShow = [nameField, autoNumberField, ...otherFields].filter(Boolean
       } else if (field.type === 'Date') {
         return text ? dayjs(text).format(DateFormat) : ''; // Format date as DD-MM-YYYY
       }else if (field.type === 'DateTime') {
-        return text ? dayjs(text).format('DD/MM/YYYY HH:mm:ss') : ''; // Format DateTime as DD/MM/YYYY HH:mm:ss
+        return text ? dayjs(text).utc().format('DD/MM/YYYY HH:mm:ss') : ''; // Format DateTime as DD/MM/YYYY HH:mm:ss
       } 
       else if (field.type === 'currency') {
         return text ? `$${text.toFixed(2)}` : ''; // Format as currency with dollar sign
