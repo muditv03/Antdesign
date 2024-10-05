@@ -5,10 +5,13 @@ import { EditOutlined } from '@ant-design/icons';
 import RelatedRecord from './RelatedRecords';
 import { BASE_URL,DateFormat } from './Constant';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import ApiService from './apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
-   
+dayjs.extend(utc);
+dayjs.extend(timezone); 
      
 const { TextArea } = Input;
 const { Option } = Select;
@@ -45,15 +48,21 @@ const RecordDetail = () => {
 
       const fieldCallout = new ApiService(`${BASE_URL}/mt_fields/object/${objectName}`, {}, 'GET');
       const fieldsResponse = await fieldCallout.makeCall();
+      const filteredFields = fieldsResponse.filter(field => field.name !== 'recordCount');
 
       console.log('fieldresponse :', fieldsResponse);
-      setFields(fieldsResponse);
-
+      setFields(filteredFields);
+      console.log(JSON.stringify(responseData));
       // Format date fields in recordData
       fieldsResponse.forEach(field => {
         if (field.type === 'Date' && recordData[field.name]) {
           // Format the date using dayjs to 'DD/MM/YYYY'
           recordData[field.name] = dayjs(recordData[field.name]).format(DateFormat);
+        }
+        if (field.type === 'DateTime' && recordData[field.name]) {
+          const localDateTime = dayjs.utc(recordData[field.name]).local().format('DD/MM/YYYY HH:mm:ss');
+          console.log('formatted date time is ' + localDateTime);
+          recordData[field.name] = localDateTime;
         }
       }); 
       // Process lookup fields to fetch names
@@ -133,11 +142,7 @@ const RecordDetail = () => {
             bodyData[lookupFieldName] = bodyData[field.name];
             delete bodyData[field.name];
           } else {
-            if(field.name==='User'){
-              bodyData[lookupFieldName] =initialValues[lookupFieldName];
-            }else{
-              bodyData[lookupFieldName] = null;
-             }
+            bodyData[lookupFieldName] =initialValues[lookupFieldName]; 
           } 
         }
       });
@@ -182,13 +187,13 @@ const RecordDetail = () => {
     setIsEditable(false);
   };
 
- 
-
-
   const renderFieldWithEdit = (field, selectedDate, setSelectedDate) => {
     const { name, label, type, picklist_values, isTextArea } = field;
   
     const validationRules = [];
+    if (name === 'recordCount') {
+      return null;
+    }
   
     if (type === 'Integer') {
       validationRules.push({
@@ -217,8 +222,15 @@ const RecordDetail = () => {
         min: 0,
         message: 'Please enter a valid currency value.',
       });
-    } 
-  
+    } else if (type === 'Email') {
+      validationRules.push(
+        { type: 'email', message: 'The input is not valid E-mail!' }
+      );
+    }
+
+    const isFieldEditable = !field.is_auto_number && isEditable;
+
+   
     return (
       <div
         className="editable-field-container"
@@ -232,7 +244,7 @@ const RecordDetail = () => {
           position: 'relative', // Added to position the icon correctly
         }}
       >
-        {isEditable ? (
+        {isFieldEditable ? (
           <Form.Item
             name={name}
             label={label}
@@ -272,10 +284,28 @@ const RecordDetail = () => {
                   }}
                 />
               </Space>
+            ): type==='DateTime'?(
+              <Space>
+              <DatePicker
+                showTime
+                placeholder={`Select ${field.label}`}
+                style={{ width: '100%' }}
+                format="DD/MM/YYYY HH:mm:ss"
+                value={form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name),"DD/MM/YYYY HH:mm:ss") : null}
+                onChange={(date, dateString) => {
+                  setSelectedDate(date ? dayjs(dateString,"DD/MM/YYYY HH:mm:ss") : null);
+                  form.setFieldsValue({ [field.name]: dateString });
+                }}
+              />
+              </Space>
             ) : type === 'Text-Area' ? (
               <TextArea placeholder={label} />
             ) : type === 'currency' ? (
               <Input placeholder={label} type="number" addonBefore="$" />
+            ) : type === 'Email' ? (
+              <Input placeholder={label} type="email" />
+            ) : type === 'URL' ? (
+              <Input placeholder={label} type="url" />
             ) : (
               <Input placeholder={label} type={type === 'date' ? 'date' : 'text'} />
             )}
@@ -308,6 +338,18 @@ const RecordDetail = () => {
                 ? form.getFieldValue(name) !== undefined && form.getFieldValue(name) !== null ? form.getFieldValue(name) : ''
                 : type === 'Decimal'
                 ? form.getFieldValue(name) !== undefined && form.getFieldValue(name) !== null ? form.getFieldValue(name) : ''
+                : type === 'Email'
+                ? form.getFieldValue(name) && (
+                    <a href={`mailto:${form.getFieldValue(name)}`}>
+                      {form.getFieldValue(name)}
+                    </a>
+                  )
+                  : type === 'URL'
+                  ? form.getFieldValue(name) && (
+                    <a href={form.getFieldValue(name).startsWith('http') ? form.getFieldValue(name) : `http://${form.getFieldValue(name)}`} target="_blank" rel="noopener noreferrer">
+                        {form.getFieldValue(name)}
+                      </a>
+                    )
                 : lookupNames[name] || form.getFieldValue(name)}
           </div>
         )}

@@ -34,8 +34,8 @@ const ObjectSetupDetail = () => {
   const [selectedDate, setSelectedDate] = useState(null);
 
   const fetchRecords = () => {
+    setError('');
     setLoading(true);
-  
     // Fetch object details using ApiService
     const apiServiceForObject = new ApiService(
       `${BASE_URL}/mt_objects/${id}`,
@@ -173,6 +173,10 @@ const ObjectSetupDetail = () => {
           // Format date to DD/MM/YYYY if the field is of Date type
           formattedRecord[field.name] = dayjs(record[field.name]).format(DateFormat);
         }
+        if (field.type === 'DateTime' && record[field.name]) {
+          // Format date to DD/MM/YYYY if the field is of Date type
+          formattedRecord[field.name] = dayjs(record[field.name]).format('DD/MM/YYYY HH:mm:ss');
+        }
       }); 
   
       setSelectedRecord(formattedRecord);
@@ -249,6 +253,10 @@ const ObjectSetupDetail = () => {
         if (field.type === 'Date' && clonedRecord[field.name]) {
           // Format date to DD/MM/YYYY if the field is of Date type
           formattedClonedRecord[field.name] = dayjs(clonedRecord[field.name]).format(DateFormat);
+        }
+        if (field.type === 'DateTime' && clonedRecord[field.name]) {
+          // Format date to DD/MM/YYYY if the field is of Date type
+          formattedClonedRecord[field.name] = dayjs(clonedRecord[field.name]).format('DD/MM/YYYY HH:mm:ss');
         }
       });
   
@@ -429,11 +437,27 @@ const ObjectSetupDetail = () => {
   }
 
   
-  const filteredFieldsData = fieldsData.filter(field => field.type !== 'lookup');
-
   const numberOfFieldsToShow = 5;
+
+// Filter fields, but always include the auto-number field
+const filteredFieldsData = fieldsData.filter(field => 
+  field.type !== 'lookup' && field.name !== 'recordCount'
+);
+
+// Separate the "Name" and "Auto-number" fields
+const nameField = filteredFieldsData.find(field => field.name === 'Name');
+const autoNumberField = filteredFieldsData.find(field => field.is_auto_number);
+
+// Get other fields, excluding "Name" and "Auto-number" fields
+const otherFields = filteredFieldsData
+  .filter(field => field.name !== 'Name' && !field.is_auto_number)
+  .slice(0, numberOfFieldsToShow);
+
+// Combine columns in the desired sequence: Name, Auto-number, other fields
+const fieldsToShow = [nameField, autoNumberField, ...otherFields].filter(Boolean); // filter(Boolean) removes undefined
+
  
-  const columns = filteredFieldsData.slice(0, numberOfFieldsToShow).map((field, index) => ({
+  const columns = fieldsToShow.map((field, index) => ({
     title: field.label,
     dataIndex: field.name,
     key: field.name,
@@ -442,13 +466,29 @@ const ObjectSetupDetail = () => {
         return text ? 'True' : 'False';
       } else if (field.type === 'Date') {
         return text ? dayjs(text).format(DateFormat) : ''; // Format date as DD-MM-YYYY
-      }else if (field.type === 'currency') {
+      }else if (field.type === 'DateTime') {
+        return text ? dayjs(text).format('DD/MM/YYYY HH:mm:ss') : ''; // Format DateTime as DD/MM/YYYY HH:mm:ss
+      } 
+      else if (field.type === 'currency') {
         return text ? `$${text.toFixed(2)}` : ''; // Format as currency with dollar sign
       }else if (field.type === 'Integer') {
         return text === undefined || text === null ? '' : text === 0 ? '0' : text; // Show 0 for blank or zero values
       }else if (field.type === 'decimal') {
         return text === undefined || text === null || text === '0' ? '' : Number(text).toFixed(2); // Show 0.00 for blank values
+      }else if (field.type === 'Email') {
+        return text ? (
+          <a href={`mailto:${text}`} target="_blank" rel="noopener noreferrer">
+            {text}
+          </a>
+        ) : '';
+      } else if (field.type === 'URL') {
+        return text ? (
+          <a href={text.startsWith('http') ? text : `http://${text}`} target="_blank" rel="noopener noreferrer">
+            {text}
+          </a>
+        ) : '';
       }
+
       return index === 0 ? (
         <a onClick={() => handleLabelClick(record)}>{text}</a>
       ) : (
