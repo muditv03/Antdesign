@@ -229,12 +229,14 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                 <Option value="currency">Currency</Option>
                 <Option value="boolean">Boolean</Option>
                 <Option value="Date">Date</Option>
+                <Option value="DateTime">Date Time</Option>
+                <Option value="URL">URL</Option>
                 <Option value="Picklist">Picklist</Option>
                 <Option value="lookup">Lookup</Option>
                 <Option value="Text-Area">Text Area</Option>
               </Select>
             </Form.Item>
-
+ 
             
             <Form.Item
               name="label"

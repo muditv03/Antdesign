@@ -488,7 +488,7 @@ const fieldsToShow = [nameField, autoNumberField, ...otherFields].filter(Boolean
           </a>
         ) : '';
       }
-
+ 
       return index === 0 ? (
         <a onClick={() => handleLabelClick(record)}>{text}</a>
       ) : (

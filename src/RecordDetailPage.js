@@ -63,7 +63,7 @@ const RecordDetail = () => {
           const localDateTime = dayjs.utc(recordData[field.name]).local().format('DD/MM/YYYY HH:mm:ss');
           console.log('formatted date time is ' + localDateTime);
           recordData[field.name] = localDateTime;
-        }
+        } 
       }); 
       // Process lookup fields to fetch names
       const lookupPromises = fieldsResponse
