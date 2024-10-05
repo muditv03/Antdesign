@@ -89,6 +89,10 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
           </a>
         );
       }
+
+     if(field.name==='recordCount'){
+      return null;
+     }
       if (field.type === 'lookup' && record[`${field.name.toLowerCase()}_id`]) {
         const lookupId = record[`${field.name.toLowerCase()}_id`];
         return lookupNames[lookupId] || 'Loading...';
@@ -96,6 +100,9 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
 
       if (field.type === 'Date' && value) {
         return dayjs(value).format(DateFormat);
+      }
+      if (field.type === 'DateTime' && value) {
+        return dayjs(value).utc().format('DD/MM/YYYY HH:mm:ss');
       }
 
       if (field.type === 'currency') {
@@ -131,6 +138,9 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       fieldsResponse.forEach(field => {
         if (field.type === 'Date' && record[field.name]) {
           formattedRecord[field.name] = dayjs(record[field.name]).format(DateFormat);
+        }
+        if (field.type === 'DateTime' && record[field.name]) {
+          formattedRecord[field.name] = dayjs(record[field.name]).format('DD/MM/YYYY HH:mm:ss');
         }
       });
 
@@ -193,6 +203,9 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       fieldsResponse.forEach(field => {
         if (field.type === 'Date' && clonedRecord[field.name]) {
           formattedClonedRecord[field.name] = dayjs(clonedRecord[field.name]).format(DateFormat);
+        }
+        if (field.type === 'DateTime' && clonedRecord[field.name]) {
+          formattedClonedRecord[field.name] = dayjs(clonedRecord[field.name]).format('DD/MM/YYYY HH:mm:ss');
         }
       });
 
@@ -257,7 +270,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
 
   const handleFinish = async (values) => {
     const updatedValues = {};
-  
+   
     // Iterate through the fields data to check if the field is a lookup
     fieldsDataState.forEach((field) => {
       const fieldName = field.name;
@@ -268,7 +281,8 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
         }else{
           updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
 
-        }      } else {
+        }      
+      } else {
         // Keep other fields unchanged
         updatedValues[fieldName] = values[fieldName];
       }
