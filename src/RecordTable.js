@@ -120,7 +120,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       return value;
     },
   }));
- 
+  
   const handleEditClick = async (record) => {
     try {
       // Fetch fields data

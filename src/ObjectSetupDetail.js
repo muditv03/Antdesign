@@ -456,7 +456,7 @@ const otherFields = filteredFieldsData
 // Combine columns in the desired sequence: Name, Auto-number, other fields
 const fieldsToShow = [nameField, autoNumberField, ...otherFields].filter(Boolean); // filter(Boolean) removes undefined
 
- 
+  
   const columns = fieldsToShow.map((field, index) => ({
     title: field.label,
     dataIndex: field.name,

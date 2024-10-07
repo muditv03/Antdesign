@@ -220,7 +220,6 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                     setIsAutoNumber(false); // Reset auto number checkbox if type is not String
                   }
                 }}
-                disabled={isEditMode} // Disable field type selection in edit mode
               >
                 <Option value="String">Text</Option>
                 <Option value="Integer">Number</Option>
@@ -237,7 +236,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
               </Select>
             </Form.Item>
  
-            
+             
             <Form.Item
               name="label"
               label="Label"
