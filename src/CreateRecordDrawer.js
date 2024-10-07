@@ -56,7 +56,7 @@ const CreateRecordDrawer = ({
     if (field.is_auto_number) {
       return null; // Don't render the field if it's an auto-number field
     }
-
+ 
    if(field.name=='recordCount'){
     return null;
    }

@@ -9,6 +9,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import ApiService from './apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import ActivityComponent from './ActivityComponent';
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone); 
@@ -41,10 +42,6 @@ const RecordDetail = () => {
       const recordData = responseData;
       setRecordName(responseData.Name);
 
-      // Fetch the fields for this object
-      // const fieldsResponse = await axios.get(`${BASE_URL}/mt_fields/object/${objectName}`);
-      // console.log('fieldresponse :', fieldsResponse.data);
-      // setFields(fieldsResponse.data);
 
       const fieldCallout = new ApiService(`${BASE_URL}/mt_fields/object/${objectName}`, {}, 'GET');
       const fieldsResponse = await fieldCallout.makeCall();
@@ -66,7 +63,7 @@ const RecordDetail = () => {
           //console.log('formatted date time is ' + localDateTime.format('DD/MM/YYYY HH:mm:ss'));
           recordData[field.name] = localDateTime; // Store formatted date-time
       }
-      
+       
       }); 
       // Process lookup fields to fetch names
       const lookupPromises = fieldsResponse
@@ -124,47 +121,42 @@ const RecordDetail = () => {
   useEffect(() => {
     fetchRecords();
   }, [id, objectid, objectName]);
-
+ 
   const onFinish = async (values) => {
     try {
-      const bodyData = { ...values };
-      console.log(JSON.stringify(bodyData));
-      console.log(fields);
+      console.log(values);
+      const bodyData = Object.assign({},values);
+      
+      
       fields.forEach(field => {
         if (field.type === 'lookup') {
-        let lookupFieldName;
-        if(field.name==='User'){
-          lookupFieldName = field.name + '_id';
-          console.log('lookup field name is '+lookupFieldName);
- 
-        }else{  
-         lookupFieldName = field.name.toLowerCase() + '_id';
-        }
-          if (bodyData[field.name]) {
-            console.log('body data while updating is '+bodyData[field.name])
-            bodyData[lookupFieldName] = bodyData[field.name];
-            delete bodyData[field.name];
-          } else {
-            bodyData[lookupFieldName] =initialValues[lookupFieldName]; 
-          } 
+          let lookupFieldName;
+          if(field.name==='User'){
+            lookupFieldName = field.name + '_id';
+          }else{  
+          lookupFieldName = field.name.toLowerCase() + '_id';
+          }
+          bodyData[lookupFieldName] = bodyData[field.name];
+          delete bodyData[field.name];
+            
+          
         }
       });
 
-      console.log('body data is '+JSON.stringify(bodyData));
+      console.log(bodyData);
+      var data = Object.assign(bodyData)
+      data['_id'] = record?._id;
       const body = {
         object_name: objectName,
-        data: {
-          _id: record?._id,
-          ...bodyData,
-        },
+        data: data
       };
 
-      console.log('body while updating is '+ JSON.stringify(body));
+      console.log(body);
 
       const apiService = new ApiService(`${BASE_URL}/insert_or_update_records`, {
         'Content-Type': 'application/json', // Add any necessary headers, such as content type
       }, 'POST', body);
-     await apiService.makeCall();
+      await apiService.makeCall();
       message.success('Record saved successfully');
 
       // Update initial values
@@ -172,13 +164,13 @@ const RecordDetail = () => {
       setIsEditable(false);
       fetchRecords();
     } catch (error) {
-      console.error('Error saving record'+ error.response.data[0]);
-      const errorMessage = error.response?.data?.name
-        ? `Failed to update record because ${error.response.data[0]}`
-        : `Failed to update record due to an unknown error`;
+      //console.error('Error saving record'+ error.response.data[0]);
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Failed to update record due to an unknown error';
+      console.log('Full error:', JSON.stringify(error));
 
       message.error(errorMessage);  
     }
+    
   };
 
   const handleEditClick = () => {
@@ -267,7 +259,18 @@ const RecordDetail = () => {
                 ))}
               </Select>
             ) : type === 'lookup' ? (
-              <Select allowClear placeholder={label} defaultValue={form.getFieldValue(name) || lookupNames[name]}>
+              <Select 
+                allowClear 
+                placeholder={label} 
+                defaultValue={form.getFieldValue(name) || lookupNames[name]}
+                onChange={(value) => {
+                  // If cleared, set the value to null for this specific field
+                  if (!value) {
+                    form.setFieldsValue({ [name]: null });
+                  } else {
+                    form.setFieldsValue({ [name]: value });
+                  }
+                }}>
                 {lookupOptions[name]?.map((option) => (
                   <Option key={option._id} value={option._id}>
                     {option.Name}
@@ -416,6 +419,10 @@ const RecordDetail = () => {
         <TabPane tab="Related" key="2">
           <RelatedRecord objectName={objectName} recordId={id} />
         </TabPane>
+        <TabPane tab="Activity" key="3">
+          <ActivityComponent/>
+        </TabPane>
+
       </Tabs>
     </div>
   );
