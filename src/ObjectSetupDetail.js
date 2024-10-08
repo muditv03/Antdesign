@@ -153,7 +153,7 @@ const ObjectSetupDetail = () => {
   
 
   useEffect(() => {
-    fetchRecords(selectedView);
+    fetchRecords();
   }, [id]);
 
   useEffect(() => {
