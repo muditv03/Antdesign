@@ -170,7 +170,7 @@ const RecordDetail = () => {
 
       message.error(errorMessage);  
     }
-    
+     
   };
 
   const handleEditClick = () => {

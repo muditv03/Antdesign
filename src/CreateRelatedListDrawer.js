@@ -146,7 +146,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
               <Option key={obj.name} value={obj.name}>{obj.label}</Option>
             ))}
           </Select>
-        </Form.Item>
+        </Form.Item> 
 
         <Form.Item
           name="childObject"

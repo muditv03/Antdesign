@@ -2,9 +2,11 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Table, Form, Card, Button, Row, Col, Typography, Tabs } from 'antd';
 import ObjectFieldTab from './Components/ObjectFieldsTab';
+import CreateListView from './Components/CreateListView';
 import ObjectRelatedListTab from './Components/ObjectRelatedListTab';
 import { useState } from 'react';
 import CreateObjectDrawer from './CreateObjectDrawer';
+
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -100,6 +102,11 @@ const ObjectFieldDetail = () => {
         <TabPane tab="Related Lists" key="3">
          <Card>
          <ObjectRelatedListTab object={record} />
+         </Card>
+        </TabPane>
+        <TabPane tab="Create List View" key="4">
+         <Card>
+            <CreateListView object={record}/>
          </Card>
         </TabPane>
       </Tabs>

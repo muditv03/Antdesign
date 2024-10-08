@@ -12,6 +12,8 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);      
            
 const { Title } = Typography;
+const { Option } = Select;
+
 
 const ObjectSetupDetail = () => {
   
@@ -32,8 +34,10 @@ const ObjectSetupDetail = () => {
   const [lookupFieldName, setLookupFieldName] = useState('');
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [listViews, setListViews] = useState([]);
+  const [selectedView, setSelectedView] = useState('All Records');
 
-  const fetchRecords = () => {
+  const fetchRecords = (selectedViewId) => {
     setError('');
     setLoading(true);
     // Fetch object details using ApiService
@@ -47,13 +51,27 @@ const ObjectSetupDetail = () => {
       .then(response => {
         const objName = response.name;
         console.log('Object name:', objName);
-  
-        // Fetch records and fields in parallel
-        const apiServiceForRecords = new ApiService(
-          `${BASE_URL}/fetch_records/${objName}`,
-          { 'Content-Type': 'application/json' },
-          'GET'
-        );
+         setObjectName(objName); 
+        let apiServiceForRecords;
+      console.log('selected view id is '+selectedViewId);
+        // Check if a selected list view exists
+        if (selectedViewId) {
+          console.log('id of list view is '+selectedViewId);
+          // If selected list view is present, use the new API call
+          apiServiceForRecords = new ApiService(
+            `${BASE_URL}/mt_list_views/${selectedViewId}/records`,
+            { 'Content-Type': 'application/json' },
+            'GET'
+          );
+        } else {
+          console.log('object name in else object')
+          // Otherwise, use the default records API call
+          apiServiceForRecords = new ApiService(
+            `${BASE_URL}/fetch_records/${objName}`,
+            { 'Content-Type': 'application/json' },
+            'GET'
+          );
+        }
   
         const apiServiceForFields = new ApiService(
           `${BASE_URL}/mt_fields/object/${objName}`,
@@ -66,8 +84,19 @@ const ObjectSetupDetail = () => {
           apiServiceForFields.makeCall(),
         ]).then(([recordsResponse, fieldsResponse]) => {
           setRecords(recordsResponse);
-          setFieldsData(fieldsResponse.slice(0, 5)); // Get the first 5 fields
+          console.log(fieldsResponse);
           console.log(recordsResponse);
+
+          // Get the field names from the recordsResponse
+        const recordFieldNames = Object.keys(recordsResponse[0] || {}); // First record as an example
+
+        // Filter fields from fieldsResponse based on whether their name exists in the recordFieldNames
+        const matchingFields = fieldsResponse.filter(field => 
+          recordFieldNames.includes(field.name)
+        );
+
+        // Set only the matching fields
+        setFieldsData(matchingFields);
   
           // Identify and set the lookup field name
           const lookupField = fieldsResponse.find(field => field.type === 'lookup');
@@ -88,11 +117,49 @@ const ObjectSetupDetail = () => {
       });
   };
   
+  const fetchListViews = async () => {
+    console.log('object name is '+objectName);
+    const apiService = new ApiService(
+        `${BASE_URL}/list-views/${objectName}`,
+        { 'Content-Type': 'application/json' },
+        'GET'
+    );
+    try {
+        const response = await apiService.makeCall();
+        setListViews(response.list_views); // Update state with fetched data
+        console.log(listViews);
+
+    } catch (error) {
+        console.error("Error fetching list views:", error); // Log any errors
+    } finally {
+        setLoading(false); // Set loading to false after the API call
+    }
+  };
   
 
   useEffect(() => {
     fetchRecords();
   }, [id]);
+
+  useEffect(() => {
+    if (objectName) {
+      fetchListViews();
+    }
+  }, [objectName]); // Use only the necessary dependencies
+  
+
+  const handleViewChange = (value) => {
+    setSelectedView(value);
+    console.log(value);
+    if (value) {
+      console.log('console in handle view change');
+      //console.log(selectedListView._id);
+      fetchRecords(value); // Fetch records for the selected list view
+    } else {
+      fetchRecords(); // Fetch all records if "All Records" is selected
+    }
+  };
+
 
   useEffect(() => {
     const fetchAllLookupOptions = async () => {
@@ -139,7 +206,7 @@ const ObjectSetupDetail = () => {
   
       // Fetch the fields data
       const response = await apiServiceForFields.makeCall();
-      setFieldsData(response); // Set the response data to fieldsData
+      setFieldsData(response); 
   
     } catch (error) {
       console.error('Error fetching API response:', error);
@@ -441,7 +508,7 @@ const ObjectSetupDetail = () => {
 
 // Filter fields, but always include the auto-number field
 const filteredFieldsData = fieldsData.filter(field => 
-  field.type !== 'lookup' && field.name !== 'recordCount'
+  field.type!=='lookup' && field.name !== 'recordCount'
 );
 
 // Separate the "Name" and "Auto-number" fields
@@ -530,14 +597,20 @@ const fieldsToShow = [nameField, autoNumberField, ...otherFields].filter(Boolean
     ),
   });
 
-
+  
   return (
     <Card>
 
-<div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
     <Row justify="space-between" align="middle" style={{ marginBottom: 10 }}>
       <Col>
         <Title level={3} style={{ marginTop:'10px' }}>Records for {objectPluralName}</Title>
+        <Select value={selectedView} onChange={handleViewChange} style={{ width: 200, marginBottom: 16 }}>
+        <Option value="">All Records</Option>
+        {listViews.map(view => (
+          <Option key={view._id} value={view._id}>{view.list_view_name}</Option>
+        ))}
+      </Select>
       </Col>
       <Col  style={{ marginTop:'10px' }}>
         <Button type="primary" onClick={handleCreateClick} style={{ marginBottom: 5 }}>
