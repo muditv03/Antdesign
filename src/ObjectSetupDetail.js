@@ -23,10 +23,11 @@ const ObjectSetupDetail = () => {
   const [error, setError] = useState(null);
   const [objectName, setObjectName] = useState(null);
   const [objectPluralName, setobjectPluralName] = useState(null);
-
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [fieldsData, setFieldsData] = useState([]);
+  const [fieldsDataDrawer, setFieldsDataDrawer] = useState([]);
+
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [lookupOptions, setLookupOptions] = useState([]);
@@ -36,6 +37,9 @@ const ObjectSetupDetail = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [listViews, setListViews] = useState([]);
   const [selectedView, setSelectedView] = useState('All Records');
+  const [lookupNameTable,setLookupNameTable]=useState('');
+  const [lookupNames, setLookupNames] = useState({});
+
 
   const fetchRecords = (selectedViewId) => {
     setError('');
@@ -84,16 +88,27 @@ const ObjectSetupDetail = () => {
           apiServiceForFields.makeCall(),
         ]).then(([recordsResponse, fieldsResponse]) => {
           setRecords(recordsResponse);
+          setFieldsDataDrawer(fieldsResponse);
           console.log(fieldsResponse);
           console.log(recordsResponse);
-
-          // Get the field names from the recordsResponse
-        const recordFieldNames = Object.keys(recordsResponse[0] || {}); // First record as an example
+          
+          
+       // Get the field names from the recordsResponse
+      const recordFieldNames = Object.keys(recordsResponse[0] || {}); // First record as an example
 
         // Filter fields from fieldsResponse based on whether their name exists in the recordFieldNames
-        const matchingFields = fieldsResponse.filter(field => 
-          recordFieldNames.includes(field.name)
-        );
+        const matchingFields = fieldsResponse.filter(field => {
+          if (field.type === 'lookup') {
+            // Check if the field name is 'User', then match with fieldName + '_id'
+            if (field.name === 'User') {
+              return recordFieldNames.includes(field.name + '_id');
+            }
+            // Otherwise, match with fieldName.toLowerCase() + '_id'
+            return recordFieldNames.includes(field.name.toLowerCase() + '_id');
+          }
+          // If not a lookup field, match directly by field name
+          return recordFieldNames.includes(field.name);
+        });
 
         // Set only the matching fields
         setFieldsData(matchingFields);
@@ -138,7 +153,7 @@ const ObjectSetupDetail = () => {
   
 
   useEffect(() => {
-    fetchRecords();
+    fetchRecords(selectedView);
   }, [id]);
 
   useEffect(() => {
@@ -163,7 +178,7 @@ const ObjectSetupDetail = () => {
 
   useEffect(() => {
     const fetchAllLookupOptions = async () => {
-      const lookupFields = fieldsData.filter(field => field.type === 'lookup');
+      const lookupFields = fieldsDataDrawer.filter(field => field.type === 'lookup');
       const lookupOptionsObj = {};
   
       for (const lookupField of lookupFields) {
@@ -182,13 +197,11 @@ const ObjectSetupDetail = () => {
       setLookupOptions(lookupOptionsObj); // Store all lookup options in state
     };
   
-    if (fieldsData.some(field => field.type === 'lookup')) {
+    if (fieldsDataDrawer.some(field => field.type === 'lookup')) {
       fetchAllLookupOptions();
     }
-  }, [fieldsData]);
+  }, [fieldsDataDrawer]);
   
-  
-
   const handleCreateClick = async () => {
     setSelectedRecord(null); // Ensure no record is selected when creating a new record
     form.resetFields(); // Clear the form fields
@@ -206,7 +219,7 @@ const ObjectSetupDetail = () => {
   
       // Fetch the fields data
       const response = await apiServiceForFields.makeCall();
-      setFieldsData(response); 
+      setFieldsDataDrawer(response); 
   
     } catch (error) {
       console.error('Error fetching API response:', error);
@@ -221,6 +234,11 @@ const ObjectSetupDetail = () => {
     try {
       //setLoading(true);
   
+      const apiServiceforCurrentRecord= new ApiService(
+        `${BASE_URL}/fetch_single_record/${objectName}/${record._id}`,
+        { 'Content-Type': 'application/json' },
+        'GET' // Specify the method as 'GET'
+      );
       // Create an instance of ApiService for fetching fields data
       const apiServiceForFields = new ApiService(
         `${BASE_URL}/mt_fields/object/${objectName}`,
@@ -228,11 +246,12 @@ const ObjectSetupDetail = () => {
         'GET' // Specify the method as 'GET'
       );
   
+      const recordResponse=await apiServiceforCurrentRecord.makeCall();
       const fieldsResponse = await apiServiceForFields.makeCall();
-      setFieldsData(fieldsResponse);
+      setFieldsDataDrawer(fieldsResponse);
   
       // Format date fields in the record before setting them in the form
-      const formattedRecord = { ...record };
+      const formattedRecord = { ...recordResponse };
   
       // Iterate over the record to identify and format date fields
       fieldsResponse.forEach(field => {
@@ -263,7 +282,7 @@ const ObjectSetupDetail = () => {
           objectName = lookupField.name.toLowerCase();
 
         }        
-        const recordId = record[`${objectName}_id`];
+        const recordId = recordResponse[`${objectName}_id`];
   
         if (recordId) {
           // Create an instance of ApiService for fetching the single record
@@ -297,11 +316,15 @@ const ObjectSetupDetail = () => {
   
   const handleCloneClick = async (record) => {
     // Clone the record and remove the ID, set isClone to true
-    const clonedRecord = { ...record, _id: undefined, isClone: true };
   
     try {
       //setLoading(true);
   
+      const apiServiceforCurrentRecord= new ApiService(
+        `${BASE_URL}/fetch_single_record/${objectName}/${record._id}`,
+        { 'Content-Type': 'application/json' },
+        'GET' // Specify the method as 'GET'
+      );
       // Create an instance of ApiService for fetching fields data
       const apiServiceForFields = new ApiService(
         `${BASE_URL}/mt_fields/object/${objectName}`,
@@ -309,9 +332,11 @@ const ObjectSetupDetail = () => {
         'GET' // Specify the method as 'GET'
       );
   
+      const recordResponse=await apiServiceforCurrentRecord.makeCall();
       const fieldsResponse = await apiServiceForFields.makeCall();
-      setFieldsData(fieldsResponse);
-  
+      setFieldsDataDrawer(fieldsResponse);
+      const clonedRecord = { ...recordResponse, _id: undefined, isClone: true };
+
       // Format date fields in the cloned record before setting them in the form
       const formattedClonedRecord = { ...clonedRecord };
   
@@ -382,7 +407,7 @@ const ObjectSetupDetail = () => {
     const updatedValues = {};
   
     // Iterate through the fields data to check if the field is a lookup
-    fieldsData.forEach((field) => {
+    fieldsDataDrawer.forEach((field) => {
       const fieldName = field.name;
       if (field.type === 'lookup') {
         if(field.name=='User'){
@@ -426,7 +451,7 @@ const ObjectSetupDetail = () => {
       
       message.success(selectedRecord?._id && !selectedRecord?.isClone ? 'Record updated successfully' : 'Record created successfully');
       setDrawerVisible(false);
-      fetchRecords();
+      fetchRecords(selectedView);
       form.resetFields();
     } catch (error) {
       console.error('Error saving record:', error);
@@ -480,13 +505,15 @@ const ObjectSetupDetail = () => {
   
       await apiService.makeCall();
       message.success('Record deleted successfully.');
-      fetchRecords();
+      fetchRecords(selectedView);
     } catch (error) {
       message.error('Failed to delete record.');
       console.error('Error deleting record:', error);
     }
   };
   
+
+ 
  
   const confirmDelete = async () => {
     deleteRecord(selectedRecord);
@@ -503,12 +530,11 @@ const ObjectSetupDetail = () => {
     return <p>Error: {error}</p>;
   }
 
-  
   const numberOfFieldsToShow = 5;
 
 // Filter fields, but always include the auto-number field
 const filteredFieldsData = fieldsData.filter(field => 
-  field.type!=='lookup' && field.name !== 'recordCount'
+  field.name !== 'recordCount'
 );
 
 // Separate the "Name" and "Auto-number" fields
@@ -524,7 +550,14 @@ const otherFields = filteredFieldsData
 const fieldsToShow = [nameField, autoNumberField, ...otherFields].filter(Boolean); // filter(Boolean) removes undefined
 
   
-  const columns = fieldsToShow.map((field, index) => ({
+const fetchLookupName = async (objectName, id) => {
+  const apiService = new ApiService(`${BASE_URL}/fetch_single_record/${objectName}/${id}`, {}, 'GET');
+  const responseData = await apiService.makeCall();
+  return responseData.Name || '';
+};
+
+
+  const columns =  fieldsToShow.map((field, index)  => ({
     title: field.label,
     dataIndex: field.name,
     key: field.name,
@@ -554,6 +587,27 @@ const fieldsToShow = [nameField, autoNumberField, ...otherFields].filter(Boolean
             {text}
           </a>
         ) : '';
+      }else if (field.type === 'lookup') {
+        let lookupId='';
+        if(field.name==='User'){
+          lookupId = record[field.name + '_id'];
+        }else{
+          lookupId = record[field.name.toLowerCase() + '_id'];
+
+        }
+        const objectName = field.name;
+        if(lookupId){
+        // Check if the name has already been fetched and stored
+        if (lookupNames[lookupId]) {
+          return lookupNames[lookupId]; // Return the cached name if available
+        } else {
+          // Fetch the name if not cached
+          fetchLookupName(objectName, lookupId).then(name => {
+            setLookupNames(prevState => ({ ...prevState, [lookupId]: name }));
+          });
+          return 'Loading...'; // Placeholder while fetching
+        }
+      }
       }
  
       return index === 0 ? (
@@ -628,7 +682,7 @@ const fieldsToShow = [nameField, autoNumberField, ...otherFields].filter(Boolean
         onClose={() => setDrawerVisible(false)}
         onFinish={handleFinish}
         loading={loading}
-        fieldsData={fieldsData}
+        fieldsData={fieldsDataDrawer}
         selectedRecord={selectedRecord}
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}

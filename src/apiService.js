@@ -17,7 +17,7 @@ class ApiService {
     if (authToken) {
       this.headers['Authorization'] = `Bearer ${authToken}`; // Add the Authorization header
     }
-  }
+  } 
 
   async makeCall() {
     try {
@@ -36,6 +36,7 @@ class ApiService {
         throw new Error(`API call failed with status code ${response.status}`);
       }
     } catch (error) {
+      console.log(error.response.data);
       if (error.response) {
         console.error(`API call failed: ${error.response.status} - ${error.response.statusText}`);
         throw new Error(`API call failed with status code ${error.response.status}`);

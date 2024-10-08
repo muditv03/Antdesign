@@ -1,5 +1,7 @@
 import React, { useState,useEffect } from 'react';
-import { Drawer, Form, Input, Button, Select,message,Card } from 'antd';
+import { Drawer, Form, Input, Button, Select,message,Card,Row,Col } from 'antd';
+import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
+
 import ApiService from '../apiService'; 
 import { BASE_URL } from '../Constant';
 
@@ -10,6 +12,8 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
   const [objectName, setObjectName] = useState([]);
   const [fields, setFields] = useState([]); // State to store fetched fields
   const [selectedFields, setSelectedFields] = useState([]); 
+  const [filters, setFilters] = useState([{ field: '', value: '' }]); // For managing filters
+
 
   const fetchFields = async () => {
     try {
@@ -21,7 +25,10 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
       const response = await apiService.makeCall();
       
       // Assuming the API returns an array of field objects with 'name' and 'label' keys
-      setFields(response); // Adjust as per API response structure
+        const filteredFields = response.filter(field => field.name !== 'recordCount'); // Filter out 'recordCount'
+
+        // Update the state with the filtered fields
+        setFields(filteredFields); // Adjust as per API response structure
       console.log(fields);
     } catch (error) {
       console.error('Error fetching fields:', error);
@@ -36,16 +43,57 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
     setSelectedFields(value);
   };
 
+  const handleAddFilter = () => {
+    setFilters([...filters, { field: '', value: '' }]);
+  };
+
+  const handleRemoveFilter = (index) => {
+    const updatedFilters = [...filters];
+    updatedFilters.splice(index, 1);
+    setFilters(updatedFilters);
+  };
+
+  const handleFilterChange = (index, key, value) => {
+    const updatedFilters = [...filters];
+    updatedFilters[index][key] = value;
+    setFilters(updatedFilters);
+  };
+
+
   const onFinish = async (values) => {
+
+    const filterObj = filters.reduce((acc, filter) => {
+        if (filter.field && filter.value) {
+          acc[filter.field] = filter.value;
+        }
+        return acc;
+      }, {});
+  
+
     console.log('Form Values: ', values);
 
-    // Construct the request body
+    // Map the selected fields and adjust based on the field type
+    const adjustedFields = selectedFields.map((field) => {
+    
+    const selectedField = fields.find((f) => f.name === field);
+
+    if (selectedField && selectedField.type === 'lookup') {
+      if (selectedField.name.toLowerCase() === 'user') {
+        return `${selectedField.name}_id`; // If field name is 'User'
+      } else {
+        return `${selectedField.name.toLowerCase()}_id`; // For other lookup fields
+      }
+    }
+
+    return field; // If not a lookup, return field as is
+  });
+
     const body = {
       list_view: {
         object_name: objectName,
         list_view_name: values.list_view_name,
-        filters: { status: values.filters }, // Assuming you only have a status filter
-        fields_to_display: selectedFields,
+        filters: filterObj, // Pass filters
+        fields_to_display: adjustedFields,
         sort_by: values.sort_by,
         sort_order: values.sort_order,
       },
@@ -58,7 +106,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
         { 'Content-Type': 'application/json' },
         'POST',
         body // Pass the request body
-      );
+      ); 
       const response = await apiService.makeCall();
       message.success('List view created successfully!');
       console.log('Response:', response); // Log the response if needed
@@ -112,10 +160,6 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
           <Input placeholder="Enter list view name" />
         </Form.Item>
 
-        <Form.Item name="filters" label="Filters (Status)">
-          <Input placeholder="Active" />
-        </Form.Item>
-
         <Form.Item
             name="fieldsToDisplay"
             label="Fields to Display"
@@ -145,6 +189,37 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
             <Option value="desc">Descending</Option>
           </Select>
         </Form.Item>
+
+          {/* Filter Section */}
+          <h3>Filters</h3>
+          {filters.map((filter, index) => (
+            <Row key={index} gutter={16} align="middle" style={{ marginBottom: '10px' }}>
+              <Col span={10}>
+                <Select
+                  allowClear
+                  placeholder="Select field"
+                  value={filter.field}
+                  onChange={(value) => handleFilterChange(index, 'field', value)}
+                  style={{ width: '100%' }} // Ensuring full width for the select field
+                  options={fields.map((field) => ({ value: field.name, label: field.label }))}
+                />
+              </Col>
+              <Col span={10}>
+                <Input
+                  placeholder="Enter value"
+                  value={filter.value}
+                  style={{ width: '100%' }} // Ensuring full width for the select field
+                  onChange={(e) => handleFilterChange(index, 'value', e.target.value)}
+                />
+              </Col>
+              <Col span={4}>
+                <MinusCircleOutlined onClick={() => handleRemoveFilter(index)} />
+              </Col>
+            </Row>
+          ))}
+          <Button type="dashed" onClick={handleAddFilter} block icon={<PlusOutlined />}>
+            Add Filter
+          </Button>
 
 
        

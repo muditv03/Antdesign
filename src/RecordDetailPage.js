@@ -348,7 +348,7 @@ const RecordDetail = () => {
                 ? form.getFieldValue(name) && (
                     <a href={`mailto:${form.getFieldValue(name)}`}>
                       {form.getFieldValue(name)}
-                    </a>
+                     </a>
                   )
                   : type === 'URL'
                   ? form.getFieldValue(name) && (
