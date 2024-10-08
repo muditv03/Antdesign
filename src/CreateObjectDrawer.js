@@ -165,7 +165,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       setLoading(false); // Stop the spinner
     }
   };
-
+ 
   const iconOptions = Object.keys(Icons)
   .filter((iconName) => iconName[0] >= 'A' && iconName[0] <= 'T') // Filter icons from A to T
   .map((iconName) => {

@@ -50,8 +50,8 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       const lookupNamePromises = childRecords.map(async (childRecord) => {
         let newLookupNames = {};
         for (const field of fieldsData) {
-          if (field.type === 'lookup' && childRecord[`${field.name.toLowerCase()}_id`]) {
-            const lookupId = childRecord[`${field.name.toLowerCase()}_id`];
+          if (field.type === 'lookup' && childRecord[`${field.name === 'User' ? 'User_id' : `${field.name.toLowerCase()}_id`}`]) {
+            const lookupId = childRecord[`${field.name === 'User' ? 'User_id' : `${field.name.toLowerCase()}_id`}`];
             const lookupName = await fetchLookupName(field.name, lookupId);
             newLookupNames[lookupId] = lookupName;
           }
@@ -93,9 +93,9 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
      if(field.name==='recordCount'){
       return null;
      }
-      if (field.type === 'lookup' && record[`${field.name.toLowerCase()}_id`]) {
-        const lookupId = record[`${field.name.toLowerCase()}_id`];
-        return lookupNames[lookupId] || 'Loading...';
+     if (field.type === 'lookup' && record[`${field.name === 'User' ? 'User_id' : `${field.name.toLowerCase()}_id`}`]) {
+      const lookupId = record[`${field.name === 'User' ? 'User_id' : `${field.name.toLowerCase()}_id`}`];
+      return lookupNames[lookupId] || 'Loading...';
       }
 
       if (field.type === 'Date' && value) {
@@ -119,7 +119,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
 
       return value;
     },
-  }));
+  })); 
   
   const handleEditClick = async (record) => {
     try {
