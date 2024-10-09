@@ -277,8 +277,14 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                         <InfoCircleOutlined style={{ color: '#1890ff' }} />
                       </Tooltip>
                     </span>
-                  } rules={[{ required: true, message: 'Please enter the format!' }]}
-                >
+                  } rules={[
+                    { required: true, message: 'Please enter the format!' },
+                    { 
+                      pattern: /^[^\{\}]*\{0+\}$/,
+                      message: 'Format should follow the pattern INV-{0000}!'
+                    }
+                  ]}
+                >  
                   <Input placeholder="Enter format" />
                 </Form.Item>
                 <Form.Item
