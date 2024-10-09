@@ -245,6 +245,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
                     allowClear
                     placeholder="Select value"
                     value={filter.value}
+                    style={{ width: '100%' }} // Ensuring full width for the select field
                     onChange={(value) => handleValueChange(index, value)}
                     options={lookupOptions}
                   />
