@@ -36,7 +36,7 @@ const ObjectSetupDetail = () => {
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [listViews, setListViews] = useState([]);
-  const [selectedView, setSelectedView] = useState('All Records');
+  const [selectedView, setSelectedView] = useState('');
   const [lookupNameTable,setLookupNameTable]=useState('');
   const [lookupNames, setLookupNames] = useState({});
 
@@ -153,7 +153,7 @@ const ObjectSetupDetail = () => {
   
 
   useEffect(() => {
-    fetchRecords();
+    fetchRecords(selectedView);
   }, [id]);
 
   useEffect(() => {
