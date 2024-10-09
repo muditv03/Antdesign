@@ -13,6 +13,8 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
   const [fields, setFields] = useState([]); // State to store fetched fields
   const [selectedFields, setSelectedFields] = useState([]); 
   const [filters, setFilters] = useState([{ field: '', value: '' }]); // For managing filters
+  const [lookupOptions, setLookupOptions] = useState([]); // For storing lookup options
+
 
 
   const fetchFields = async () => {
@@ -35,6 +37,26 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
     }
   };
 
+    // Function to fetch records for the lookup field
+    const fetchLookupRecords = async (objectName) => {
+        try {
+          const apiServiceForRecords = new ApiService(
+            `${BASE_URL}/fetch_records/${objectName}`,
+            { 'Content-Type': 'application/json' },
+            'GET'
+          );
+          const response = await apiServiceForRecords.makeCall();
+          // Assuming response is an array of records with _id and Name fields
+          const records = response.map(record => ({
+            value: record._id, // Set _id as value
+            label: record.Name, // Set Name as label
+          }));
+          setLookupOptions(records); // Set options for the lookup field
+        } catch (error) {
+          console.error('Error fetching lookup records:', error);
+        }
+      };
+
   const handleFieldChange = (value) => {
     if (value.length > 7) {
       message.error('You can select up to 7 fields.');
@@ -53,9 +75,22 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
     setFilters(updatedFilters);
   };
 
+  // Handle value change for filters
+  const handleValueChange = (index, value) => {
+    const updatedFilters = [...filters];
+    updatedFilters[index].value = value;
+    setFilters(updatedFilters);
+  };
+
   const handleFilterChange = (index, key, value) => {
     const updatedFilters = [...filters];
     updatedFilters[index][key] = value;
+
+    // If field type is 'lookup', fetch records for that field's object
+    const selectedField = fields.find(field => field.name === value);
+    if (selectedField && selectedField.type === 'lookup') {
+      fetchLookupRecords(selectedField.name); // Pass object name to fetch records
+    }
     setFilters(updatedFilters);
   };
 
@@ -205,12 +240,21 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
                 />
               </Col>
               <Col span={10}>
-                <Input
-                  placeholder="Enter value"
-                  value={filter.value}
-                  style={{ width: '100%' }} // Ensuring full width for the select field
-                  onChange={(e) => handleFilterChange(index, 'value', e.target.value)}
-                />
+              {fields.find((f) => f.name === filter.field)?.type === 'lookup' ? (
+                  <Select
+                    allowClear
+                    placeholder="Select value"
+                    value={filter.value}
+                    onChange={(value) => handleValueChange(index, value)}
+                    options={lookupOptions}
+                  />
+                ) : (
+                  <Input
+                    placeholder="Enter value"
+                    value={filter.value}
+                    onChange={(e) => handleValueChange(index, e.target.value)}
+                  />
+                )}
               </Col>
               <Col span={4}>
                 <MinusCircleOutlined onClick={() => handleRemoveFilter(index)} />
