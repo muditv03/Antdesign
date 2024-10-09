@@ -65,7 +65,7 @@ const ObjectSetupDetail = () => {
           apiServiceForRecords = new ApiService(
             `${BASE_URL}/mt_list_views/${selectedViewId}/records`,
             { 'Content-Type': 'application/json' },
-            'GET'
+            'GET' 
           );
         } else {
           console.log('object name in else object')

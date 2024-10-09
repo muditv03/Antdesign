@@ -124,7 +124,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
   });
 
     const body = {
-      list_view: {
+      mt_list_view: {
         object_name: objectName,
         list_view_name: values.list_view_name,
         filters: filterObj, // Pass filters
@@ -238,7 +238,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
                   style={{ width: '100%' }} // Ensuring full width for the select field
                   options={fields.map((field) => ({ value: field.name, label: field.label }))}
                 />
-              </Col>
+              </Col> 
               <Col span={10}>
               {fields.find((f) => f.name === filter.field)?.type === 'lookup' ? (
                   <Select
