@@ -30,7 +30,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
     const label = e.target.value;
 
     // Only set the name if the field is not a lookup
-    if (fieldType !== 'lookup') {
+    if (!isEditMode && fieldType !== 'lookup') {
         form.setFieldsValue({
             name: generateApiName(label), // Set the API name based on the sanitized label
         });
@@ -63,9 +63,11 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         ...editField,
         length: editField.decimal_places_before + editField.decimal_places_after, // Calculate total length
         decimal_places: editField.decimal_places_after, // Set decimal places
+        format:editField.auto_number_format,
+        startingPoint:editField.auto_number_starting
       });
       setFieldType(editField.type); // Set field type for conditional rendering
-      setIsAutoNumber(editField.isAutoNumber || false); // Set auto number state if editing
+      setIsAutoNumber(editField.is_auto_number || false); // Set auto number state if editing
     } else {
       form.resetFields(); // Reset fields for creating a new field
       setIsAutoNumber(false); // Reset auto number state
@@ -106,7 +108,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
     }
 
     console.log('field body', JSON.stringify(newField));
-
+ 
     try {
       if (isEditMode) {
         // Update field logic (PUT request)
@@ -253,7 +255,8 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             </Form.Item>
 
             {fieldType === 'String' && ( // Only show for String type
-              <Form.Item>
+              <Form.Item
+              name="autoNumber">
                 <Checkbox
                   checked={isAutoNumber}
                   onChange={(e) => setIsAutoNumber(e.target.checked)}
