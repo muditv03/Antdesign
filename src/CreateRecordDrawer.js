@@ -219,7 +219,7 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
-          >
+          > 
             <Select
               placeholder={`Select ${field.label}`}
               showSearch
@@ -236,6 +236,54 @@ const CreateRecordDrawer = ({
             </Select>
           </Form.Item>
         );
+
+        case 'Address':
+      return (
+        <Form.Item 
+          key={field.name}
+          label={field.label} // This shows "Address" as the label
+        >
+          <Card title="Enter Address" bordered={true}>
+            <Form.Item 
+            key="street"
+              name="street"
+              label="Street"
+            >
+              <Input placeholder="Enter Street" />
+            </Form.Item>
+            <Form.Item 
+              key="city"
+              name="city"
+              label="City"
+            >
+              <Input placeholder="Enter City" />
+            </Form.Item>
+            <Form.Item 
+               key="state"
+              name="state"
+              label="State"
+            >
+              <Input placeholder="Enter State" />
+            </Form.Item>
+            <Form.Item 
+              key="country"
+              name="country"
+              label="Country"
+            >
+              <Input placeholder="Enter Country" />
+            </Form.Item>
+            <Form.Item
+              key="postal_code"
+              name="postal_code"
+              label="Postal Code"
+            >
+              <Input placeholder="Enter Postal Code" />
+            </Form.Item>
+          </Card>
+        </Form.Item>
+      );
+
+        
 
       case 'decimal':
         const decimalPlacesBefore = field.decimal_places_before;

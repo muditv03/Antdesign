@@ -63,8 +63,17 @@ const RecordDetail = () => {
           //console.log('formatted date time is ' + localDateTime.format('DD/MM/YYYY HH:mm:ss'));
           recordData[field.name] = localDateTime; // Store formatted date-time
       }
+      if(field.type==='Address'){
+        const address=recordData[field.name];
+        console.log('helu');
+        console.log(address);
+        console.log(address.street);
+        
+      }
        
       }); 
+
+     
       // Process lookup fields to fetch names
       const lookupPromises = fieldsResponse
         .filter(field => field.type === 'lookup' &&(recordData[field.name+ '_id'] || recordData[field.name.toLowerCase()+ '_id']))
@@ -127,7 +136,6 @@ const RecordDetail = () => {
       console.log(values);
       const bodyData = Object.assign({},values);
       
-      
       fields.forEach(field => {
         if (field.type === 'lookup') {
           let lookupFieldName;
@@ -141,6 +149,19 @@ const RecordDetail = () => {
             
           
         }
+
+        if(field.type==='Address'){
+          bodyData[field.name] = {
+            street: values.street || '',
+            city: values.city || '',
+            state: values.state || '',
+            postal_code: values.postal_code || '',
+            country: values.country || '',
+          };
+  
+        }
+        
+        
       });
 
       console.log(bodyData);
@@ -152,7 +173,7 @@ const RecordDetail = () => {
       };
 
       console.log(body);
-
+ 
       const apiService = new ApiService(`${BASE_URL}/insert_or_update_records`, {
         'Content-Type': 'application/json', // Add any necessary headers, such as content type
       }, 'POST', body);
@@ -189,6 +210,7 @@ const RecordDetail = () => {
     if (name === 'recordCount') {
       return null;
     }
+
   
     if (type === 'Integer') {
       validationRules.push({
@@ -225,6 +247,25 @@ const RecordDetail = () => {
 
     const isFieldEditable = !field.is_auto_number && isEditable;
  
+    const   handleAddressChange =(parentField, childField, value)  =>{
+      // console.log(parentField)
+      // console.log(form.getFieldValue(parentField))
+      // var newAddress = {...form.getFieldValue(parentField)}  
+      // console.log(newAddress)    
+      // console.log(value)
+
+      console.log(parentField);
+      console.log(childField);
+      const currentAddress = form.getFieldValue(parentField);
+      const newAddress = {
+        currentAddress,
+        [childField]: value,
+      };
+
+
+      console.log(newAddress);
+      form.setFieldValue({parentField:newAddress});
+    }
    
     return (
       <div
@@ -290,6 +331,76 @@ const RecordDetail = () => {
                   }}
                 />
               </Space>
+               ) : type === 'Address' ? (
+                <Form>
+                <Row gutter={16} style={{ marginBottom: '16px' }}> {/* Add margin-bottom for spacing between rows */}
+                  <Col span={12}>
+                  <Form.Item
+                   name={[name, 'street']}
+                   label="Street"
+                   initialValue={form.getFieldValue(name).street}>
+
+                  <Input placeholder="Street" 
+                  onChange={(e) => handleAddressChange(name, 'street', e.target.value)}
+
+                  />
+                  </Form.Item>
+                    
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item 
+                      name={[name, 'city']}
+                      label="City" 
+                      initialValue={form.getFieldValue(name).city}
+
+                    >
+                      <Input placeholder="City" 
+                      onChange={(e) => handleAddressChange(name, 'city', e.target.value)}
+
+                     />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Row gutter={16} style={{ marginBottom: '16px' }}> {/* Add margin-bottom for spacing between rows */}
+                  <Col span={12}>
+                    <Form.Item 
+                   name={[name, 'state']}
+                   label="State" 
+                      initialValue={form.getFieldValue(name).state}
+
+                    >
+                      <Input placeholder="State"
+                      onChange={(e) => handleAddressChange(name, 'state', e.target.value)}
+
+                       />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item 
+                   name={[name, 'postal_code']}
+                   label="Postal Code" 
+                    initialValue={form.getFieldValue(name).postal_code}
+
+                    >
+                      <Input placeholder="Postal Code" 
+                       onChange={(e) => handleAddressChange(name, 'postal_code', e.target.value)}
+/>
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Row gutter={16} style={{ marginBottom: '16px' }}> {/* Add margin-bottom for spacing between rows */}
+                  <Col span={12}>
+                    <Form.Item 
+                      name="country" 
+                      label="Country" 
+                      initialValue={form.getFieldValue(type).country}
+
+                    >
+                      <Input placeholder="Country" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </Form>
             ): type==='DateTime'?(
               <Space>
               <DatePicker
@@ -304,6 +415,7 @@ const RecordDetail = () => {
                 }}
               />
               </Space>
+           
             ) : type === 'Text-Area' ? (
               <TextArea placeholder={label} />
             ) : type === 'currency' ? (
@@ -344,6 +456,7 @@ const RecordDetail = () => {
                 ? form.getFieldValue(name) !== undefined && form.getFieldValue(name) !== null ? form.getFieldValue(name) : ''
                 : type === 'Decimal'
                 ? form.getFieldValue(name) !== undefined && form.getFieldValue(name) !== null ? form.getFieldValue(name) : ''
+                
                 : type === 'Email'
                 ? form.getFieldValue(name) && (
                     <a href={`mailto:${form.getFieldValue(name)}`}>
@@ -356,6 +469,8 @@ const RecordDetail = () => {
                         {form.getFieldValue(name)}
                       </a>
                     )
+                  : type === 'Address'
+                  ? `${form.getFieldValue(name).street}, ${form.getFieldValue(name).city}, ${form.getFieldValue(name).state}, ${form.getFieldValue(name).postal_code}, ${form.getFieldValue(name).country}`
                 : lookupNames[name] || form.getFieldValue(name)}
           </div>
         )}

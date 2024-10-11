@@ -12,8 +12,11 @@ const CreateListView = ({ object }) => {
     const [drawerVisible, setDrawerVisible] = useState(false);
     const [listViews, setListViews] = useState([]); // State to store the fetched list views
     const [loading, setLoading] = useState(false); // Loading state for API call
+    const [selectedListView, setSelectedListView] = useState(null); // State to store the selected list view for editing
 
-    const showCreateListDrawer = () => {
+
+    const showCreateListDrawer = (listView) => {
+      setSelectedListView(listView); // Set the selected list view for editing
         setDrawerVisible(true); // Show the drawer
     };
 
@@ -95,7 +98,9 @@ const CreateListView = ({ object }) => {
         key: 'operation',
         render: (_, record) => (
           <>
-            <Tooltip title="Edit">
+            <Tooltip title="Edit"
+              onClick={() => showCreateListDrawer(record)} // Pass the selected record to the drawer
+>
               <EditOutlined
             
                 style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
@@ -132,6 +137,8 @@ const CreateListView = ({ object }) => {
         onClose={closeCreateListDrawer}
         object={object}
         fetchListViews={fetchListViews}
+        selectedListView={selectedListView} // Pass selected list view for editing
+
       />
 
             <Table

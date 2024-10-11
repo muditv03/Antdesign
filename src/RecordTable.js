@@ -43,7 +43,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       console.error('Error fetching lookup name:', error);
       return '';
     }
-  };
+  }; 
 
   useEffect(() => {
     const fetchAllLookupNames = async () => {
@@ -97,6 +97,22 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       const lookupId = record[`${field.name === 'User' ? 'User_id' : `${field.name.toLowerCase()}_id`}`];
       return lookupNames[lookupId] || 'Loading...';
       }
+       if (field.type === 'Address') {
+        // Ensure the address is properly constructed from the record
+        const address = record[field.name]; // Access the address object
+        if (address) {
+          // Combine address fields into a single string
+          const { street, city, state, country, postal_code } = address;
+          return [
+            street,
+            city,
+            state,
+            country,
+            postal_code,
+          ].filter(Boolean).join(', '); // Join non-empty fields with a comma
+        }
+        return ''; // Return an empty string if the address is not available
+      }
 
       if (field.type === 'Date' && value) {
         return dayjs(value).format(DateFormat);
@@ -136,6 +152,16 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       const formattedRecord = { ...record };
 
       fieldsResponse.forEach(field => {
+        if (field.type === 'Address' && record.Address) {
+          const { Address } = record;
+          // Set individual address fields
+          formattedRecord.street = Address.street || '';
+          formattedRecord.city = Address.city || '';
+          formattedRecord.state = Address.state || '';
+          formattedRecord.country = Address.country || '';
+          formattedRecord.postal_code = Address.postal_code || '';
+        }
+
         if (field.type === 'Date' && record[field.name]) {
           formattedRecord[field.name] = dayjs(record[field.name]).format(DateFormat);
         }
@@ -201,6 +227,17 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       const formattedClonedRecord = { ...clonedRecord };
 
       fieldsResponse.forEach(field => {
+        
+        if (field.type === 'Address' && clonedRecord.Address) {
+          const { Address } = clonedRecord;
+          // Set individual address fields
+          formattedClonedRecord.street = Address.street || '';
+          formattedClonedRecord.city = Address.city || '';
+          formattedClonedRecord.state = Address.state || '';
+          formattedClonedRecord.country = Address.country || '';
+          formattedClonedRecord.postal_code = Address.postal_code || '';
+        }
+
         if (field.type === 'Date' && clonedRecord[field.name]) {
           formattedClonedRecord[field.name] = dayjs(clonedRecord[field.name]).format(DateFormat);
         }
@@ -282,7 +319,19 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
           updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
 
         }      
-      } else {
+      } 
+
+      if (field.type === 'Address') {
+        // Combine address fields into a JSON object
+        updatedValues[fieldName] = {
+          street: values["street"],
+          city: values["city"],
+          state: values["state"],
+          country: values["country"],
+          postal_code: values["postal_code"]
+        };
+      }
+      else {
         // Keep other fields unchanged
         updatedValues[fieldName] = values[fieldName];
       }
