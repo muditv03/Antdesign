@@ -7,7 +7,7 @@ import { BASE_URL } from '../Constant';
 
 const { Option } = Select;
 
-const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
+const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selectedListView }) => {
   const [form] = Form.useForm();
   const [objectName, setObjectName] = useState([]);
   const [fields, setFields] = useState([]); // State to store fetched fields
@@ -15,6 +15,38 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
   const [filters, setFilters] = useState([{ field: '', value: '' }]); // For managing filters
   const [lookupOptions, setLookupOptions] = useState([]); // For storing lookup options
 
+
+  useEffect(() => {
+    if (selectedListView) {
+      // Set form values if editing an existing list view
+     
+      form.setFieldsValue({
+        list_view_name: selectedListView.list_view_name,
+        object_name: selectedListView.object_name,
+        fieldsToDisplay: selectedListView.fields_to_display || [],
+        sort_by: selectedListView.sort_by,
+        sort_order: selectedListView.sort_order,
+      });
+      setSelectedFields(selectedListView.fields_to_display || []);
+      
+      // Populate filters
+      const existingFilters = selectedListView.filters 
+        ? Object.keys(selectedListView.filters).map((key) => ({
+            field: key,
+            value: selectedListView.filters[key],
+          }))
+        : [{ field: '', value: '' }]; // Default filter structure if no filters exist
+  
+      setFilters(existingFilters); // Set filters state here
+      fetchLookupRecordsForExistingFilters(existingFilters); // Fetch lookup records for existing filters
+
+    } else {
+      // Reset form and filters if creating a new list view
+      form.resetFields();
+      setFilters([{ field: '', value: '' }]); // Reset filters state
+    }
+  }, [selectedListView, form]);
+  
 
 
   const fetchFields = async () => {
@@ -29,14 +61,24 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
       // Assuming the API returns an array of field objects with 'name' and 'label' keys
         const filteredFields = response.filter(field => field.name !== 'recordCount'); // Filter out 'recordCount'
 
-        // Update the state with the filtered fields
-        setFields(filteredFields); // Adjust as per API response structure
+      // Update the state with the filtered fields
+      setFields(filteredFields); // Adjust as per API response structure
       console.log(fields);
     } catch (error) {
       console.error('Error fetching fields:', error);
     }
   };
 
+
+  // New function to fetch lookup records based on existing filters
+  const fetchLookupRecordsForExistingFilters = (existingFilters) => {
+    existingFilters.forEach(filter => {
+      const selectedField = fields.find(field => field.name === filter.field);
+      if (selectedField && selectedField.type === 'lookup') {
+        fetchLookupRecords(selectedField.name); // Fetch records for lookup fields
+      }
+    });
+  };
     // Function to fetch records for the lookup field
     const fetchLookupRecords = async (objectName) => {
         try {
@@ -96,79 +138,85 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
 
 
   const onFinish = async (values) => {
-
     const filterObj = filters.reduce((acc, filter) => {
-        if (filter.field && filter.value) {
-          acc[filter.field] = filter.value;
-        }
-        return acc;
-      }, {});
-  
+      if (filter.field && filter.value) {
+        acc[filter.field] = filter.value;
+      }
+      return acc;
+    }, {});
 
     console.log('Form Values: ', values);
 
-    // Map the selected fields and adjust based on the field type
     const adjustedFields = selectedFields.map((field) => {
-    
-    const selectedField = fields.find((f) => f.name === field);
-
-    if (selectedField && selectedField.type === 'lookup') {
-      if (selectedField.name.toLowerCase() === 'user') {
-        return `${selectedField.name}_id`; // If field name is 'User'
-      } else {
-        return `${selectedField.name.toLowerCase()}_id`; // For other lookup fields
+      const selectedField = fields.find((f) => f.name === field);
+      if (selectedField && selectedField.type === 'lookup') {
+        return selectedField.name.toLowerCase() === 'user' 
+          ? `${selectedField.name}_id` 
+          : `${selectedField.name.toLowerCase()}_id`; 
       }
-    }
-
-    return field; // If not a lookup, return field as is
-  });
+      return field;
+    });
 
     const body = {
       mt_list_view: {
         object_name: objectName,
         list_view_name: values.list_view_name,
-        filters: filterObj, // Pass filters
+        filters: filterObj,
         fields_to_display: adjustedFields,
         sort_by: values.sort_by,
         sort_order: values.sort_order,
       },
     };
 
-    // Make the API call
     try {
-      const apiService = new ApiService(
-        `${BASE_URL}/create_list_view`, 
-        { 'Content-Type': 'application/json' },
-        'POST',
-        body // Pass the request body
-      ); 
+      let apiService;
+      if (selectedListView) {
+        // For updating an existing list view
+        apiService = new ApiService(
+          `${BASE_URL}/list-view-edit/${selectedListView._id}`,  // Use the selected record's ID
+          { 'Content-Type': 'application/json' },
+          'PATCH', 
+          body // Pass the request body
+        );
+        message.success('List view updated successfully!');
+      } else {
+        // For creating a new list view
+        apiService = new ApiService(
+          `${BASE_URL}/create_list_view`, 
+          { 'Content-Type': 'application/json' },
+          'POST', 
+          body // Pass the request body
+        );
+        message.success('List view created successfully!');
+      }
+      
       const response = await apiService.makeCall();
-      message.success('List view created successfully!');
-      console.log('Response:', response); // Log the response if needed
-      fetchListViews();
-    } catch (error) {
-      console.error('Error creating list view:', error);
-      message.error('Failed to create list view. Please try again.');
-      fetchListViews();
-    }
-    form.resetFields();
-    onClose(); // Close drawer after submit
-  };
+      console.log('Response:', response);
+      fetchListViews(); // Refresh the list views
 
+    } catch (error) {
+      console.error('Error creating/updating list view:', error);
+      message.error('Failed to process the list view. Please try again.');
+    }
+    
+    form.resetFields();
+    onClose();
+  }; 
 
   useEffect(() => {
     console.log(JSON.stringify(object));
     console.log(object.name);
     setObjectName(object.name);
     fetchFields(); // Call to fetch fields on object name change
+    
 
     
   },[]);
 
   return (
     <Drawer
-      title="Create List View"
-      width="40%"
+    title={selectedListView ? "Edit List View" : "Create List View"}
+    width="40%"
       onClose={onClose}
       visible={visible}
       bodyStyle={{ paddingBottom: 80 }}
@@ -204,6 +252,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews }) => {
               mode="multiple"
               placeholder="Select fields to display"
               onChange={handleFieldChange}
+              defaultValue={selectedFields}
               value={selectedFields}
               options={fields
                 .filter((field) => !selectedFields.includes(field.name))

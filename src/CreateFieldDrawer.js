@@ -229,6 +229,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                 <Option value="Email">Email</Option>
                 <Option value="currency">Currency</Option>
                 <Option value="boolean">Boolean</Option>
+                <Option value="Address">Address</Option>
                 <Option value="Date">Date</Option>
                 <Option value="DateTime">Date Time</Option>
                 <Option value="URL">URL</Option>
@@ -268,7 +269,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
 
             {isAutoNumber && ( // Only show these fields if isAutoNumber is checked
               <>
-                <Form.Item
+                <Form.Item 
                   name="format"
                   label={
                     <span>

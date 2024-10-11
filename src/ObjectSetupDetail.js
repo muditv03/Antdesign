@@ -66,7 +66,7 @@ const ObjectSetupDetail = () => {
             `${BASE_URL}/mt_list_views/${selectedViewId}/records`,
             { 'Content-Type': 'application/json' },
             'GET' 
-          );
+          ); 
         } else {
           console.log('object name in else object')
           // Otherwise, use the default records API call
@@ -255,6 +255,17 @@ const ObjectSetupDetail = () => {
   
       // Iterate over the record to identify and format date fields
       fieldsResponse.forEach(field => {
+
+        if (field.type === 'Address' && recordResponse.Address) {
+          const { Address } = recordResponse;
+          // Set individual address fields
+          formattedRecord.street = Address.street || '';
+          formattedRecord.city = Address.city || '';
+          formattedRecord.state = Address.state || '';
+          formattedRecord.country = Address.country || '';
+          formattedRecord.postal_code = Address.postal_code || '';
+        }
+
         if (field.type === 'Date' && record[field.name]) {
           // Format date to DD/MM/YYYY if the field is of Date type
           formattedRecord[field.name] = dayjs(record[field.name]).format(DateFormat);
@@ -342,6 +353,16 @@ const ObjectSetupDetail = () => {
   
       // Iterate over the fields to identify and format date fields
       fieldsResponse.forEach(field => {
+
+        if (field.type === 'Address' && clonedRecord.Address) {
+          const { Address } = clonedRecord;
+          // Set individual address fields
+          formattedClonedRecord.street = Address.street || '';
+          formattedClonedRecord.city = Address.city || '';
+          formattedClonedRecord.state = Address.state || '';
+          formattedClonedRecord.country = Address.country || '';
+          formattedClonedRecord.postal_code = Address.postal_code || '';
+        }
         if (field.type === 'Date' && clonedRecord[field.name]) {
           // Format date to DD/MM/YYYY if the field is of Date type
           formattedClonedRecord[field.name] = dayjs(clonedRecord[field.name]).format(DateFormat);
@@ -413,11 +434,25 @@ const ObjectSetupDetail = () => {
         if(field.name=='User'){
           updatedValues[`${fieldName}`] = values[fieldName];
 
-        }else{
+        }
+       
+        else{
           updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
  
         }
-      } else {
+      }
+      
+      if (field.type === 'Address') {
+        // Combine address fields into a JSON object
+        updatedValues[fieldName] = {
+          street: values["street"],
+          city: values["city"],
+          state: values["state"],
+          country: values["country"],
+          postal_code: values["postal_code"]
+        };
+      }
+       else {
         // Keep other fields unchanged
         updatedValues[fieldName] = values[fieldName];
       }
@@ -609,7 +644,23 @@ const fetchLookupName = async (objectName, id) => {
         }
       }
       }
- 
+      else if (field.type === 'Address') {
+        // Ensure the address is properly constructed from the record
+        const address = record[field.name]; // Access the address object
+        if (address) {
+          // Combine address fields into a single string
+          const { street, city, state, country, postal_code } = address;
+          return [
+            street,
+            city,
+            state,
+            country,
+            postal_code,
+          ].filter(Boolean).join(', '); // Join non-empty fields with a comma
+        }
+        return ''; // Return an empty string if the address is not available
+      }
+      
       return index === 0 ? (
         <a onClick={() => handleLabelClick(record)}>{text}</a>
       ) : (
