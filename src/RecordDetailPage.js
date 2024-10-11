@@ -151,12 +151,14 @@ const RecordDetail = () => {
         }
 
         if(field.type==='Address'){
+          console.log('Checking Address Values')
+          console.log(values)
           bodyData[field.name] = {
-            street: values.street || '',
-            city: values.city || '',
-            state: values.state || '',
-            postal_code: values.postal_code || '',
-            country: values.country || '',
+            street: bodyData[field.name]['street'] || '',
+            city: bodyData[field.name]['city'] || '',
+            state: bodyData[field.name]['state'] || '',
+            postal_code: bodyData[field.name]['postal_code'] || '',
+            country: bodyData[field.name]['country'] || '',
           };
   
         }
@@ -260,7 +262,7 @@ const RecordDetail = () => {
 
 
       console.log(newAddress);
-      form.setFieldValue({parentField:newAddress});
+      // form.setFieldValue({parentField:newAddress, childField: undefined});
     }
    
     return (
@@ -277,17 +279,29 @@ const RecordDetail = () => {
         }}
       >
         {isFieldEditable ? (
-          <Form.Item
+          <>
+            {type === 'boolean' ? (
+              <Form.Item
+              name={name}
+              label={label}
+              key={name}
+              valuePropName={type === 'boolean' ? 'checked' : 'value'}
+              initialValue={form.getFieldValue(name)}
+              rules={validationRules}
+              noStyle
+            >
+              <Checkbox>{label}</Checkbox>
+              </Form.Item>
+            ) : type === 'Picklist' ? (
+              <Form.Item
             name={name}
             label={label}
+            key={name}
             valuePropName={type === 'boolean' ? 'checked' : 'value'}
             initialValue={form.getFieldValue(name)}
             rules={validationRules}
             noStyle
           >
-            {type === 'boolean' ? (
-              <Checkbox>{label}</Checkbox>
-            ) : type === 'Picklist' ? (
               <Select placeholder={label}>
                 {picklist_values?.map((option) => (
                   <Option key={option} value={option}>
@@ -295,7 +309,17 @@ const RecordDetail = () => {
                   </Option>
                 ))}
               </Select>
+              </Form.Item>
             ) : type === 'lookup' ? (
+              <Form.Item
+            name={name}
+            label={label}
+            key={name}
+            valuePropName={type === 'boolean' ? 'checked' : 'value'}
+            initialValue={form.getFieldValue(name)}
+            rules={validationRules}
+            noStyle
+          >
               <Select 
                 allowClear 
                 placeholder={label} 
@@ -314,7 +338,17 @@ const RecordDetail = () => {
                   </Option>
                 ))}
               </Select>
+              </Form.Item>
             ) : type === 'Date' ? (
+              <Form.Item
+            name={name}
+            label={label}
+            key={name}
+            valuePropName={type === 'boolean' ? 'checked' : 'value'}
+            initialValue={form.getFieldValue(name)}
+            rules={validationRules}
+            noStyle
+          >
               <Space>
                 <DatePicker
                   placeholder={`Select ${field.label}`}
@@ -327,18 +361,22 @@ const RecordDetail = () => {
                   }}
                 />
               </Space>
+              </Form.Item>
                ) : type === 'Address' ? (
-                <>
+                <Form.Item 
+                key={name}
+ // This shows "Address" as the label
+              >
                 <Row gutter={16} style={{ marginBottom: '16px' }}> {/* Add margin-bottom for spacing between rows */}
                   <Col span={12}>
                   <Form.Item
-                   name='street'
-                   key='street'
+                   name={[name, 'street']}
+                   
                    label="Street"
                    initialValue={form.getFieldValue(name).street}>
 
                   <Input placeholder="Street" 
-                  onChange={(e) => handleAddressChange(name, 'street', e.target.value)}
+                  // onChange={(e) => handleAddressChange(name, 'street', e.target.value)}
 
                   />
                   </Form.Item>
@@ -346,14 +384,16 @@ const RecordDetail = () => {
                   </Col>
                   <Col span={12}>
                     <Form.Item 
-                      name='city'
-                      key='city'
+                      name={[name, 'city']}
+                      
                       label="City"
                       initialValue={form.getFieldValue(name).city}
 
                     >
                       <Input placeholder="City" 
-                      onChange={(e) => handleAddressChange(name, 'city', e.target.value)}
+                      // onChange={(e) => {
+                        
+                      //   handleAddressChange(name, 'city', e.target.value)}}
 
                      />
                     </Form.Item>
@@ -375,13 +415,13 @@ const RecordDetail = () => {
                   </Col>
                   <Col span={12}>
                     <Form.Item 
-                   name={[name, 'postal_code']}
+                   name={['BillingAddress', 'postal_code']}
                    label="Postal Code" 
                     initialValue={form.getFieldValue(name).postal_code}
 
                     >
                       <Input placeholder="Postal Code" 
-                       onChange={(e) => handleAddressChange(name, 'postal_code', e.target.value)}
+                      //  onChange={(e) => handleAddressChange(name, 'postal_code', e.target.value)}
 />
                     </Form.Item>
                   </Col>
@@ -389,7 +429,7 @@ const RecordDetail = () => {
                 <Row gutter={16} style={{ marginBottom: '16px' }}> {/* Add margin-bottom for spacing between rows */}
                   <Col span={12}>
                     <Form.Item 
-                      name="country" 
+                      name={[name, 'country']}
                       label="Country" 
                       initialValue={form.getFieldValue(name).country}
                     >
@@ -397,9 +437,18 @@ const RecordDetail = () => {
                     </Form.Item>
                   </Col>
                 </Row>
-                </>
+                </Form.Item>
               
             ): type==='DateTime'?(
+              <Form.Item
+            name={name}
+            label={label}
+            key={name}
+            valuePropName={type === 'boolean' ? 'checked' : 'value'}
+            initialValue={form.getFieldValue(name)}
+            rules={validationRules}
+            noStyle
+          >
               <Space>
               <DatePicker
                 showTime
@@ -413,19 +462,70 @@ const RecordDetail = () => {
                 }}
               />
               </Space>
+              </Form.Item>
            
             ) : type === 'Text-Area' ? (
+              <Form.Item
+            name={name}
+            label={label}
+            key={name}
+            valuePropName={type === 'boolean' ? 'checked' : 'value'}
+            initialValue={form.getFieldValue(name)}
+            rules={validationRules}
+            noStyle
+          >
               <TextArea placeholder={label} />
+              </Form.Item>
             ) : type === 'currency' ? (
+              <Form.Item
+            name={name}
+            label={label}
+            key={name}
+            valuePropName={type === 'boolean' ? 'checked' : 'value'}
+            initialValue={form.getFieldValue(name)}
+            rules={validationRules}
+            noStyle
+          >
               <Input placeholder={label} type="number" addonBefore="$" />
+              </Form.Item>
             ) : type === 'Email' ? (
+              <Form.Item
+            name={name}
+            label={label}
+            key={name}
+            valuePropName={type === 'boolean' ? 'checked' : 'value'}
+            initialValue={form.getFieldValue(name)}
+            rules={validationRules}
+            noStyle
+          >
               <Input placeholder={label} type="email" />
+              </Form.Item>
             ) : type === 'URL' ? (
+              <Form.Item
+            name={name}
+            label={label}
+            key={name}
+            valuePropName={type === 'boolean' ? 'checked' : 'value'}
+            initialValue={form.getFieldValue(name)}
+            rules={validationRules}
+            noStyle
+          >
               <Input placeholder={label} type="url" />
+              </Form.Item>
             ) : (
+              <Form.Item
+            name={name}
+            label={label}
+            key={name}
+            valuePropName={type === 'boolean' ? 'checked' : 'value'}
+            initialValue={form.getFieldValue(name)}
+            rules={validationRules}
+            noStyle
+          >
               <Input placeholder={label} type={type === 'date' ? 'date' : 'text'} />
+              </Form.Item>
             )}
-          </Form.Item>
+          </>
         ) : (
           <div
             style={{
@@ -507,8 +607,9 @@ const RecordDetail = () => {
             <Row gutter={24} style={{marginBottom:'0px'}}>
               {fields.map((field, index) => (
                 <Col key={index} xs={24} sm={12} style={{marginBottom:-5}}>
-                  
+                  <Form.Item label={field.label} style={{ marginBottom: -1,padding:'0px' }}>
                     {renderFieldWithEdit(field,selectedDate, setSelectedDate)}
+                    </Form.Item>
                   
                 </Col>
               ))}
