@@ -248,17 +248,13 @@ const RecordDetail = () => {
     const isFieldEditable = !field.is_auto_number && isEditable;
  
     const   handleAddressChange =(parentField, childField, value)  =>{
-      // console.log(parentField)
-      // console.log(form.getFieldValue(parentField))
-      // var newAddress = {...form.getFieldValue(parentField)}  
-      // console.log(newAddress)    
-      // console.log(value)
+     
 
       console.log(parentField);
       console.log(childField);
       const currentAddress = form.getFieldValue(parentField);
       const newAddress = {
-        currentAddress,
+        ...currentAddress,
         [childField]: value,
       };
 
@@ -332,11 +328,12 @@ const RecordDetail = () => {
                 />
               </Space>
                ) : type === 'Address' ? (
-                <Form>
+                <>
                 <Row gutter={16} style={{ marginBottom: '16px' }}> {/* Add margin-bottom for spacing between rows */}
                   <Col span={12}>
                   <Form.Item
-                   name={[name, 'street']}
+                   name='street'
+                   key='street'
                    label="Street"
                    initialValue={form.getFieldValue(name).street}>
 
@@ -349,8 +346,9 @@ const RecordDetail = () => {
                   </Col>
                   <Col span={12}>
                     <Form.Item 
-                      name={[name, 'city']}
-                      label="City" 
+                      name='city'
+                      key='city'
+                      label="City"
                       initialValue={form.getFieldValue(name).city}
 
                     >
@@ -393,14 +391,14 @@ const RecordDetail = () => {
                     <Form.Item 
                       name="country" 
                       label="Country" 
-                      initialValue={form.getFieldValue(type).country}
-
+                      initialValue={form.getFieldValue(name).country}
                     >
                       <Input placeholder="Country" />
                     </Form.Item>
                   </Col>
                 </Row>
-              </Form>
+                </>
+              
             ): type==='DateTime'?(
               <Space>
               <DatePicker
@@ -509,9 +507,9 @@ const RecordDetail = () => {
             <Row gutter={24} style={{marginBottom:'0px'}}>
               {fields.map((field, index) => (
                 <Col key={index} xs={24} sm={12} style={{marginBottom:-5}}>
-                  <Form.Item label={field.label} style={{ marginBottom: -1,padding:'0px' }}>
+                  
                     {renderFieldWithEdit(field,selectedDate, setSelectedDate)}
-                  </Form.Item>
+                  
                 </Col>
               ))}
             </Row>
