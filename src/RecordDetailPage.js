@@ -160,7 +160,7 @@ const RecordDetail = () => {
             postal_code: bodyData[field.name]['postal_code'] || '',
             country: bodyData[field.name]['country'] || '',
           };
-  
+   
         }
         
         
@@ -479,14 +479,14 @@ const RecordDetail = () => {
               </Form.Item>
             ) : type === 'currency' ? (
               <Form.Item
-            name={name}
-            label={label}
-            key={name}
-            valuePropName={type === 'boolean' ? 'checked' : 'value'}
-            initialValue={form.getFieldValue(name)}
-            rules={validationRules}
-            noStyle
-          >
+                name={name}
+                label={label}
+                key={name}
+                valuePropName={type === 'boolean' ? 'checked' : 'value'}
+                initialValue={form.getFieldValue(name)}
+                rules={validationRules}
+                noStyle
+              >
               <Input placeholder={label} type="number" addonBefore="$" />
               </Form.Item>
             ) : type === 'Email' ? (
