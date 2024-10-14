@@ -239,7 +239,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
               </Select>
             </Form.Item>
  
-             
+              
             <Form.Item
               name="label"
               label="Label"
@@ -250,9 +250,36 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             <Form.Item
               name="name"
               label="API Name"
-              rules={[{ required: true, message: 'Please enter an API name' }]}
+              rules={[ 
+                { required: true, message: 'Please enter the name' }, 
+                {
+                  validator: (_, value) => {
+                    if (!value) {
+                      return Promise.resolve();
+                    }
+                    const alphabetOnlyRegex = /^[a-zA-Z]+$/;
+                    if (!alphabetOnlyRegex.test(value)) {
+                      return Promise.reject(new Error('Name should only contain alphabets without spaces.'));
+                    }
+                    if (pluralize.isPlural(value)) {
+                      return Promise.reject(new Error('API name cannot be plural.'));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
             >
-              <Input placeholder="Enter API name" disabled={isEditMode} />
+              {fieldType === 'lookup' ? (
+                <Select placeholder="Select an object" disabled={isEditMode}>
+                  {availableObjects.map((object) => (
+                    <Option key={object.id} value={object.name}>
+                      {object.name}
+                    </Option>
+                  ))}
+                </Select>
+              ) : (
+                <Input placeholder="Please enter the name" disabled={isEditMode} /> // Read-only in edit mode
+              )}
             </Form.Item>
 
             {fieldType === 'String' && ( // Only show for String type
@@ -327,23 +354,6 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
               </>
             ) : null}
 
-            {fieldType === 'lookup' && ( // Only show for lookup type
-              <Form.Item
-                name="lookup_object"
-                label="Lookup Object"
-                rules={[{ required: true, message: 'Please select an object!' }]}
-              >
-                <Select placeholder="Select an object" disabled={isEditMode}>
-                  {availableObjects.map((obj) => (
-                    <Option key={obj._id} value={obj._id}>
-                      {obj.label}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            )}
-
-            {/* Add more fields as needed */}
 
           </Form>
         </Card>
