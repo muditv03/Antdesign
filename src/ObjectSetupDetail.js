@@ -7,6 +7,7 @@ import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined  } from '@ant-
 import { BASE_URL,DateFormat } from './Constant';
 import dayjs from 'dayjs';
 import CreateRecordDrawer from './CreateRecordDrawer';
+import CreateListViewDrawer from './Components/CreateListViewDrawer';
 import ApiService from './apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);      
@@ -39,6 +40,9 @@ const ObjectSetupDetail = () => {
   const [selectedView, setSelectedView] = useState('');
   const [lookupNameTable,setLookupNameTable]=useState('');
   const [lookupNames, setLookupNames] = useState({});
+  const [selectedListView, setSelectedListView] = useState(null); // State to store the selected list view for editing
+  const[isListViewDrawerVisible,setIsListViewDrawerVisible]=useState(false);
+  const[objectForListView,setObjectForListView]=useState();
 
 
   const fetchRecords = (selectedViewId) => {
@@ -54,6 +58,7 @@ const ObjectSetupDetail = () => {
     apiServiceForObject.makeCall()
       .then(response => {
         const objName = response.name;
+        setObjectForListView(response);
         console.log('Object name:', objName);
          setObjectName(objName); 
         let apiServiceForRecords;
@@ -370,7 +375,7 @@ const ObjectSetupDetail = () => {
 
           formattedClonedRecord[`${field.name}_postalcode`] = clonedRecord[field.name]['postal_code'] || '';
 
-         
+          
         }
         if (field.type === 'Date' && clonedRecord[field.name]) {
           // Format date to DD/MM/YYYY if the field is of Date type
@@ -711,6 +716,15 @@ const fetchLookupName = async (objectName, id) => {
     ),
   });
 
+  const showCreateListDrawer = (listView) => {
+    setSelectedListView(listView); // Set the selected list view for editing
+    setIsListViewDrawerVisible(true); // Show the drawer
+  };
+
+  const closeCreateListDrawer = () => {
+    setIsListViewDrawerVisible(false); // Hide the drawer
+  };
+
   
   return (
     <Card>
@@ -727,8 +741,11 @@ const fetchLookupName = async (objectName, id) => {
       </Select>
       </Col>
       <Col  style={{ marginTop:'10px' }}>
-        <Button type="primary" onClick={handleCreateClick} style={{ marginBottom: 5 }}>
-          Create+
+        <Button type="primary" onClick={handleCreateClick} style={{ marginBottom: 5,marginRight:'5px' }}>
+          Create Record
+        </Button>
+        <Button type="primary" onClick={showCreateListDrawer} style={{ marginBottom: 5 }}>
+          Create List View
         </Button>
       </Col>
     </Row>
@@ -747,6 +764,15 @@ const fetchLookupName = async (objectName, id) => {
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
         form={form}
+      />
+
+      <CreateListViewDrawer
+        visible={isListViewDrawerVisible}
+        onClose={closeCreateListDrawer}
+        object={objectForListView}
+        fetchListViews={fetchListViews}
+        selectedListView={selectedListView} // Pass selected list view for editing
+
       />
 
       <Modal

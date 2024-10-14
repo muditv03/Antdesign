@@ -14,9 +14,11 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
   const [selectedFields, setSelectedFields] = useState([]); 
   const [filters, setFilters] = useState([{ field: '', value: '' }]); // For managing filters
   const [lookupOptions, setLookupOptions] = useState([]); // For storing lookup options
-
+ 
 
   useEffect(() => {
+
+    console.log('selected list view is '+selectedListView);
     if (selectedListView) {
       // Set form values if editing an existing list view
       const transformedFields = (selectedListView.fields_to_display || []).map((field) => {
@@ -164,6 +166,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       return field;
     });
 
+    console.log('object name in body is'+ objectName);
     const body = {
       mt_list_view: {
         object_name: objectName,
@@ -175,32 +178,37 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       },
     };
 
+    console.log(body);
+
     try {
-      let apiService;
-      if (selectedListView) {
+      console.log('selected list view');
+      console.log(selectedListView);
+      if (selectedListView._id) {
         // For updating an existing list view
-        apiService = new ApiService(
+        const apiServiceEdit = new ApiService(
           `${BASE_URL}/list-view-edit/${selectedListView._id}`,  // Use the selected record's ID
           { 'Content-Type': 'application/json' },
           'PATCH', 
           body // Pass the request body
         );
+        await apiServiceEdit.makeCall();
         message.success('List view updated successfully!');
-      } else {
+      } 
+      else {
         // For creating a new list view
-        apiService = new ApiService(
+        console.log('request while creating ')
+        console.log(JSON.stringify(body));
+        const apiService = new ApiService(
           `${BASE_URL}/create_list_view`, 
           { 'Content-Type': 'application/json' },
           'POST', 
           body // Pass the request body
         );
+        await apiService.makeCall();
+
         message.success('List view created successfully!');
       }
-      
-      const response = await apiService.makeCall();
-      console.log('Response:', response);
-      fetchListViews(); // Refresh the list views
-
+       fetchListViews(); // Refresh the list views
     } catch (error) {
       console.error('Error creating/updating list view:', error);
       message.error('Failed to process the list view. Please try again.');
@@ -212,6 +220,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
 
   useEffect(() => {
     console.log(JSON.stringify(object));
+    console.log('object name is ');
     console.log(object.name);
     setObjectName(object.name);
     fetchFields(); // Call to fetch fields on object name change
@@ -222,7 +231,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
 
   return (
     <Drawer
-    title={selectedListView ? "Edit List View" : "Create List View"}
+    title={"Create List View"}
     width="40%"
       onClose={onClose}
       visible={visible}

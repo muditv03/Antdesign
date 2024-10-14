@@ -58,7 +58,7 @@ const CreateListView = ({ object }) => {
             key: 'object_name',
         },
        
-        {
+        { 
             title: 'Fields to display',
             dataIndex: 'fields_to_display',
             key: 'fields_to_display',
