@@ -53,7 +53,9 @@ const ObjectFieldTab = () => {
           'GET'
         );
         const response = await apiService.makeCall();
-        setFieldsData(response.map((field) => ({ ...field, key: field._id })));
+        setFieldsData(response
+          .filter((field) => field.name !== 'recordCount')
+          .map((field) => ({ ...field, key: field._id })));
       } catch (error) {
         console.error('Error fetching fields:', error);
       } finally {
