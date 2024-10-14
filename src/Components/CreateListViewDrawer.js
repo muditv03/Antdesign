@@ -186,7 +186,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       if (selectedListView._id) {
         // For updating an existing list view
         const apiServiceEdit = new ApiService(
-          `${BASE_URL}/list-view-edit/${selectedListView._id}`,  // Use the selected record's ID
+          `${BASE_URL}/edit_list_view/${selectedListView._id}`,  // Use the selected record's ID
           { 'Content-Type': 'application/json' },
           'PATCH', 
           body // Pass the request body
