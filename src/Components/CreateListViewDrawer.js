@@ -19,15 +19,22 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
   useEffect(() => {
     if (selectedListView) {
       // Set form values if editing an existing list view
+      const transformedFields = (selectedListView.fields_to_display || []).map((field) => {
+        if (field.endsWith('_id')) {
+          const fieldWithoutId = field.replace('_id', '');
+          return fieldWithoutId.charAt(0).toUpperCase() + fieldWithoutId.slice(1); // Capitalize first letter
+        }
+        return field; // Return the field as is if no '_id' suffix
+      });
      
       form.setFieldsValue({
         list_view_name: selectedListView.list_view_name,
         object_name: selectedListView.object_name,
-        fieldsToDisplay: selectedListView.fields_to_display || [],
+        fieldsToDisplay: transformedFields || [],
         sort_by: selectedListView.sort_by,
         sort_order: selectedListView.sort_order,
       });
-      setSelectedFields(selectedListView.fields_to_display || []);
+      setSelectedFields(transformedFields || []);
       
       // Populate filters
       const existingFilters = selectedListView.filters 

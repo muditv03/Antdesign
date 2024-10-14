@@ -415,7 +415,7 @@ const RecordDetail = () => {
                   </Col>
                   <Col span={12}>
                     <Form.Item 
-                   name={['BillingAddress', 'postal_code']}
+                   name={[name, 'postal_code']}
                    label="Postal Code" 
                     initialValue={form.getFieldValue(name).postal_code}
 
