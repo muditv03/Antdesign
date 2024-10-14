@@ -63,13 +63,13 @@ const RecordDetail = () => {
           //console.log('formatted date time is ' + localDateTime.format('DD/MM/YYYY HH:mm:ss'));
           recordData[field.name] = localDateTime; // Store formatted date-time
       }
-      if(field.type==='Address'){
-        const address=recordData[field.name];
-        console.log('helu');
-        console.log(address);
-        console.log(address.street);
+      // if(field.type==='Address'){
+      //   const address=recordData[field.name];
+      //   console.log('helu');
+      //   console.log(address);
+      //   console.log(address.street);
         
-      }
+      // }
        
       }); 
 
@@ -373,7 +373,8 @@ const RecordDetail = () => {
                    name={[name, 'street']}
                    
                    label="Street"
-                   initialValue={form.getFieldValue(name).street}>
+                   //initialValue={form.getFieldValue(name).street}
+                   >
 
                   <Input placeholder="Street" 
                   // onChange={(e) => handleAddressChange(name, 'street', e.target.value)}
@@ -387,7 +388,7 @@ const RecordDetail = () => {
                       name={[name, 'city']}
                       
                       label="City"
-                      initialValue={form.getFieldValue(name).city}
+                     // initialValue={form.getFieldValue(name).city}
 
                     >
                       <Input placeholder="City" 
@@ -404,20 +405,20 @@ const RecordDetail = () => {
                     <Form.Item 
                    name={[name, 'state']}
                    label="State" 
-                      initialValue={form.getFieldValue(name).state}
+                     // initialValue={form.getFieldValue(name).state}
 
                     >
                       <Input placeholder="State"
                       onChange={(e) => handleAddressChange(name, 'state', e.target.value)}
 
-                       />
+                       /> 
                     </Form.Item>
                   </Col>
                   <Col span={12}>
                     <Form.Item 
                    name={[name, 'postal_code']}
                    label="Postal Code" 
-                    initialValue={form.getFieldValue(name).postal_code}
+                   // initialValue={form.getFieldValue(name).postal_code}
 
                     >
                       <Input placeholder="Postal Code" 
@@ -431,7 +432,7 @@ const RecordDetail = () => {
                     <Form.Item 
                       name={[name, 'country']}
                       label="Country" 
-                      initialValue={form.getFieldValue(name).country}
+                     // initialValue={form.getFieldValue(name).country}
                     >
                       <Input placeholder="Country" />
                     </Form.Item>
@@ -568,7 +569,7 @@ const RecordDetail = () => {
                       </a>
                     )
                   : type === 'Address'
-                  ? `${form.getFieldValue(name).street}, ${form.getFieldValue(name).city}, ${form.getFieldValue(name).state}, ${form.getFieldValue(name).postal_code}, ${form.getFieldValue(name).country}`
+                  ?form.getFieldValue(name) && ( `${form.getFieldValue(name).street}, ${form.getFieldValue(name).city}, ${form.getFieldValue(name).state}, ${form.getFieldValue(name).postal_code}, ${form.getFieldValue(name).country}`)
                 : lookupNames[name] || form.getFieldValue(name)}
           </div>
         )}
