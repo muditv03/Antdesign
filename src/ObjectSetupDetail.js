@@ -256,14 +256,19 @@ const ObjectSetupDetail = () => {
       // Iterate over the record to identify and format date fields
       fieldsResponse.forEach(field => {
 
-        if (field.type === 'Address' && recordResponse.Address) {
-          const { Address } = recordResponse;
+        if (field.type === 'Address' && formattedRecord[field.name]) {
+          console.log(recordResponse[field.name]['street']);
           // Set individual address fields
-          formattedRecord.street = Address.street || '';
-          formattedRecord.city = Address.city || '';
-          formattedRecord.state = Address.state || '';
-          formattedRecord.country = Address.country || '';
-          formattedRecord.postal_code = Address.postal_code || '';
+          formattedRecord[`${field.name}_street`] = recordResponse[field.name]['street'] || '';
+          formattedRecord[`${field.name}_city`] = recordResponse[field.name]['city'] || '';
+
+          formattedRecord[`${field.name}_state`] = recordResponse[field.name]['state'] || '';
+
+          formattedRecord[`${field.name}_country`] = recordResponse[field.name]['country'] || '';
+
+          formattedRecord[`${field.name}_postalcode`] = recordResponse[field.name]['postal_code'] || '';
+
+         
         }
 
         if (field.type === 'Date' && record[field.name]) {
@@ -354,14 +359,18 @@ const ObjectSetupDetail = () => {
       // Iterate over the fields to identify and format date fields
       fieldsResponse.forEach(field => {
 
-        if (field.type === 'Address' && clonedRecord.Address) {
-          const { Address } = clonedRecord;
+        if (field.type === 'Address' && clonedRecord[field.name]) {
           // Set individual address fields
-          formattedClonedRecord.street = Address.street || '';
-          formattedClonedRecord.city = Address.city || '';
-          formattedClonedRecord.state = Address.state || '';
-          formattedClonedRecord.country = Address.country || '';
-          formattedClonedRecord.postal_code = Address.postal_code || '';
+          formattedClonedRecord[`${field.name}_street`] = clonedRecord[field.name]['street'] || '';
+          formattedClonedRecord[`${field.name}_city`] = clonedRecord[field.name]['city'] || '';
+
+          formattedClonedRecord[`${field.name}_state`] = clonedRecord[field.name]['state'] || '';
+
+          formattedClonedRecord[`${field.name}_country`] = clonedRecord[field.name]['country'] || '';
+
+          formattedClonedRecord[`${field.name}_postalcode`] = clonedRecord[field.name]['postal_code'] || '';
+
+         
         }
         if (field.type === 'Date' && clonedRecord[field.name]) {
           // Format date to DD/MM/YYYY if the field is of Date type
@@ -445,11 +454,11 @@ const ObjectSetupDetail = () => {
       if (field.type === 'Address') {
         // Combine address fields into a JSON object
         updatedValues[fieldName] = {
-          street: values["street"],
-          city: values["city"],
-          state: values["state"],
-          country: values["country"],
-          postal_code: values["postal_code"]
+          street: values[`${field.name}_street`],
+          city: values[`${field.name}_city`],
+          state: values[`${field.name}_state`],
+          country: values[`${field.name}_country`],
+          postal_code: values[`${field.name}_postalcode`]
         };
       }
        else {
@@ -643,7 +652,7 @@ const fetchLookupName = async (objectName, id) => {
           return 'Loading...'; // Placeholder while fetching
         }
       }
-      }
+      } 
       else if (field.type === 'Address') {
         // Ensure the address is properly constructed from the record
         const address = record[field.name]; // Access the address object
