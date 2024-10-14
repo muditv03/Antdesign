@@ -311,7 +311,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                       pattern: /^[^\{\}]*\{0+\}$/,
                       message: 'Format should follow the pattern INV-{0000}!'
                     }
-                  ]}
+                  ]} 
                 >  
                   <Input placeholder="Enter format" />
                 </Form.Item>

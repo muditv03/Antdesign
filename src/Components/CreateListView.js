@@ -17,7 +17,7 @@ const CreateListView = ({ object }) => {
 
     const showCreateListDrawer = (listView) => {
       setSelectedListView(listView); // Set the selected list view for editing
-        setDrawerVisible(true); // Show the drawer
+      setDrawerVisible(true); // Show the drawer
     };
 
     const closeCreateListDrawer = () => {
@@ -130,7 +130,7 @@ const CreateListView = ({ object }) => {
           Create List View
         </Button>
       </Col>
-    </Row>
+    </Row> 
       
     <CreateListViewDrawer
         visible={drawerVisible}

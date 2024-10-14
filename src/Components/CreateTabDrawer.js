@@ -124,7 +124,7 @@ const CreateTabDrawer = ({ visible, onClose }) => {
 
     return (
         <Drawer
-            title={
+            title={ 
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <CloseOutlined style={{ cursor: 'pointer', marginRight: '10px' }} onClick={onClose} />
                     <span>Create New Tab</span>

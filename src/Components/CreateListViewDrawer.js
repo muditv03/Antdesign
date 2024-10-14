@@ -180,7 +180,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
 
     console.log(body);
 
-    try {
+    try { 
       console.log('selected list view');
       console.log(selectedListView);
       if (selectedListView._id) {

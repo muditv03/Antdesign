@@ -3,13 +3,15 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Table, Typography, Button,Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker,Spin, Modal,Space } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined  } from '@ant-design/icons';
+import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined , SettingOutlined,CaretDownOutlined} from '@ant-design/icons';
 import { BASE_URL,DateFormat } from './Constant';
 import dayjs from 'dayjs';
 import CreateRecordDrawer from './CreateRecordDrawer';
 import CreateListViewDrawer from './Components/CreateListViewDrawer';
 import ApiService from './apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import { generateBody } from './Components/utility';
+
 dayjs.extend(customParseFormat);      
            
 const { Title } = Typography;
@@ -439,41 +441,9 @@ const ObjectSetupDetail = () => {
   
 
   const handleFinish = async (values) => {
-    const updatedValues = {};
-  
-    // Iterate through the fields data to check if the field is a lookup
-    fieldsDataDrawer.forEach((field) => {
-      const fieldName = field.name;
-      if (field.type === 'lookup') {
-        if(field.name=='User'){
-          updatedValues[`${fieldName}`] = values[fieldName];
 
-        }
-       
-        else{
-          updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
- 
-        }
-      }
-      
-      if (field.type === 'Address') {
-        // Combine address fields into a JSON object
-        updatedValues[fieldName] = {
-          street: values[`${field.name}_street`],
-          city: values[`${field.name}_city`],
-          state: values[`${field.name}_state`],
-          country: values[`${field.name}_country`],
-          postal_code: values[`${field.name}_postalcode`]
-        };
-      }
-       else {
-        // Keep other fields unchanged
-        updatedValues[fieldName] = values[fieldName];
-      }
-    });
-  
-    console.log('object is '+objectName)
-
+    const updatedValues=generateBody(fieldsDataDrawer,values);
+    
     const body = {
       object_name: objectName,
       data: {
@@ -481,6 +451,8 @@ const ObjectSetupDetail = () => {
         ...updatedValues // Use the updated values
       }
     }; 
+    console.log('body before is ');
+    console.log(body);
   
     try {
       //setLoading(true);
@@ -717,6 +689,8 @@ const fetchLookupName = async (objectName, id) => {
   });
 
   const showCreateListDrawer = (listView) => {
+    console.log('list view in edit is ');
+    console.log(listView);
     setSelectedListView(listView); // Set the selected list view for editing
     setIsListViewDrawerVisible(true); // Show the drawer
   };
@@ -724,6 +698,30 @@ const fetchLookupName = async (objectName, id) => {
   const closeCreateListDrawer = () => {
     setIsListViewDrawerVisible(false); // Hide the drawer
   };
+
+  const handleListViewMenuClick = ({ key }) => {
+    if (key === 'create') {
+      showCreateListDrawer();
+    } else if (key === 'edit') {
+      console.log('selected view in editing is');
+      ///showCreateListDrawer(selectedView);
+    } else if (key === 'clone') {
+      console.log('Clone clicked');
+    }
+    else if (key === 'delete') {
+      console.log('Clone clicked');
+    }
+  };
+
+  const listViewMenu = (
+    <Menu onClick={handleListViewMenuClick}>
+      <Menu.Item key="create">Create</Menu.Item>
+      <Menu.Item key="edit">Edit</Menu.Item>
+      <Menu.Item key="clone">Clone</Menu.Item>
+      <Menu.Item key="delete">Delete</Menu.Item>
+
+    </Menu>
+  );
 
   
   return (
@@ -739,14 +737,24 @@ const fetchLookupName = async (objectName, id) => {
           <Option key={view._id} value={view._id}>{view.list_view_name}</Option>
         ))}
       </Select>
+
+      <Dropdown overlay={listViewMenu} trigger={['click']}>
+          <Button
+            type="text"
+            style={{ marginLeft: 10, marginBottom: 16,border: '1px solid #d9d9d9', 
+            }}
+          >
+            <SettingOutlined />
+            <CaretDownOutlined style={{ marginLeft: 4 }} />
+          </Button>
+        </Dropdown>
+
       </Col>
       <Col  style={{ marginTop:'10px' }}>
         <Button type="primary" onClick={handleCreateClick} style={{ marginBottom: 5,marginRight:'5px' }}>
           Create Record
         </Button>
-        <Button type="primary" onClick={showCreateListDrawer} style={{ marginBottom: 5 }}>
-          Create List View
-        </Button>
+        
       </Col>
     </Row>
     <div style={{ flex: 1, overflow: 'auto' }}>

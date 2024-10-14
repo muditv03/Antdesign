@@ -34,7 +34,7 @@ const AppHeader = () => {
     Cookies.remove('username');
     Cookies.remove('tokenRes');
     navigate('/login'); // Redirect to the login page
-  };
+  }; 
 
   const profileMenu = (
     <Menu>

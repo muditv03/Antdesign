@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Spin,Tooltip,Popconfirm  } from 'antd';
+import { Table, Spin,Tooltip,Popconfirm,message  } from 'antd';
 import { BASE_URL } from '../Constant';
 import ApiService from '../apiService'; 
 import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined  } from '@ant-design/icons';
-
+ 
 
 const UserComponent = () => {
   const [users, setUsers] = useState([]);
@@ -29,6 +29,25 @@ const UserComponent = () => {
   useEffect(() => {
     fetchUsers(); // Call fetchUsers when the component mounts
   }, []); // Dependency array to re-fetch if lookupField.name changes
+
+  
+  const deleteRecord = async (record) => {
+    try {
+      // Create ApiService instance for DELETE request
+      const apiService = new ApiService(
+        `${BASE_URL}/delete_record/User/${record._id}`,
+        {}, // Headers (if any)
+        'DELETE'
+      );
+  
+      await apiService.makeCall();
+      message.success('Record deleted successfully.');
+      fetchUsers();
+    } catch (error) {
+      message.error('Failed to delete record.');
+      console.error('Error deleting record:', error);
+    }
+  };
 
   const columns = [
     {
@@ -63,6 +82,8 @@ const UserComponent = () => {
         <Tooltip title="Delete">
           <Popconfirm
             title="Are you sure you want to delete this item?"
+            onConfirm={() =>deleteRecord(record)}
+            
             
             okText="Yes"
             cancelText="No"
