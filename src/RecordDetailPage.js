@@ -76,16 +76,13 @@ const RecordDetail = () => {
      
       // Process lookup fields to fetch names
       const lookupPromises = fieldsResponse
-        .filter(field => field.type === 'lookup' &&(recordData[field.name+ '_id'] || recordData[field.name.toLowerCase()+ '_id']))
+        .filter(field => field.type === 'lookup' && recordData[field.name.toLowerCase()+ '_id'])
         .map(async field => {
           let lookupId;
-        if(field.name==='User'){
-          lookupId = recordData[field.name+ '_id'];
-          console.log('lookup id after updating is '+lookupId);
-        }else{
+        
           lookupId = recordData[field.name.toLowerCase() + '_id'];
 
-        }
+        
           // const lookupResponse = await axios.get(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`);
 
           const fetchSingleRec = new ApiService(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`, {}, 'GET');
@@ -139,11 +136,9 @@ const RecordDetail = () => {
       fields.forEach(field => {
         if (field.type === 'lookup') {
           let lookupFieldName;
-          if(field.name==='User'){
-            lookupFieldName = field.name + '_id';
-          }else{  
+          
           lookupFieldName = field.name.toLowerCase() + '_id';
-          }
+          
           bodyData[lookupFieldName] = bodyData[field.name];
           delete bodyData[field.name];
             

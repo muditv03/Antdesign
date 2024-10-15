@@ -19,7 +19,7 @@ const CreateListView = ({ object }) => {
       setSelectedListView(listView); // Set the selected list view for editing
       setDrawerVisible(true); // Show the drawer
     };
-
+ 
     const closeCreateListDrawer = () => {
         setDrawerVisible(false); // Hide the drawer
     };
@@ -44,6 +44,22 @@ const CreateListView = ({ object }) => {
     useEffect(() => {
         fetchListViews(); // Call the fetch function
     }, [object.name]); // Run effect when the object name changes
+
+    const handleCloneClick =(record)=>{
+      if (record) {
+        // Clone the selected list view without the id and modify the name
+        const clonedListView = {
+          ...record, // clone the selected list view
+          _id: undefined, // remove the id
+          list_view_name: `Cloned by ${record.list_view_name}`, // replace name with the cloned name
+        };
+        console.log('Cloning selected list view:');
+        console.log(clonedListView);
+  
+        // Show the drawer with the cloned list view
+        showCreateListDrawer(clonedListView);
+      }
+    }
 
     // Define columns for the Ant Design Table
     const columns = [
@@ -103,6 +119,12 @@ const CreateListView = ({ object }) => {
 >
               <EditOutlined
             
+                style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
+              />
+            </Tooltip>
+            <Tooltip title="Clone">
+              <CopyOutlined
+                onClick={() => handleCloneClick(record)}
                 style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
               />
             </Tooltip>

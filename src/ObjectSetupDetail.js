@@ -171,11 +171,18 @@ const ObjectSetupDetail = () => {
   
 
   const handleViewChange = (value) => {
+    console.log('id of view is ');
+    console.log(value);
+    console.log(listViews);
+    const matchedView = listViews.find(view => view._id === value);
+    console.log(matchedView);
+   
+    setSelectedListView(matchedView);
+    
     setSelectedView(value);
     console.log(value);
     if (value) {
       console.log('console in handle view change');
-      //console.log(selectedListView._id);
       fetchRecords(value); // Fetch records for the selected list view
     } else {
       fetchRecords(); // Fetch all records if "All Records" is selected
@@ -298,13 +305,10 @@ const ObjectSetupDetail = () => {
       for (const lookupField of lookupFields) {
         const ob = lookupField.name;
         let objectName='';
-        if(lookupField.name=='User'){
-        objectName = lookupField.name;
+        
+        objectName = lookupField.name.toLowerCase();
 
-        }else{
-          objectName = lookupField.name.toLowerCase();
-
-        }        
+             
         const recordId = recordResponse[`${objectName}_id`];
   
         if (recordId) {
@@ -399,13 +403,10 @@ const ObjectSetupDetail = () => {
       for (const lookupField of lookupFields) {
         const ob = lookupField.name;
         let objectName='';
-        if(lookupField.name=='User'){
-        objectName = lookupField.name;
-
-        }else{
+       
           objectName = lookupField.name.toLowerCase();
 
-        }
+        
         const recordId = record[`${objectName}_id`];
   
         if (recordId) {
@@ -610,12 +611,10 @@ const ObjectSetupDetail = () => {
         ) : '';
       }else if (field.type === 'lookup') {
         let lookupId='';
-        if(field.name==='User'){
-          lookupId = record[field.name + '_id'];
-        }else{
-          lookupId = record[field.name.toLowerCase() + '_id'];
+        
+        lookupId = record[field.name.toLowerCase() + '_id'];
 
-        }
+        
         const objectName = field.name;
         if(lookupId){
         // Check if the name has already been fetched and stored
@@ -703,9 +702,22 @@ const ObjectSetupDetail = () => {
       showCreateListDrawer();
     } else if (key === 'edit') {
       console.log('selected view in editing is');
-      ///showCreateListDrawer(selectedView);
+      console.log(selectedListView);
+      showCreateListDrawer(selectedListView);
     } else if (key === 'clone') {
-      console.log('Clone clicked');
+      if (selectedListView) {
+        // Clone the selected list view without the id and modify the name
+        const clonedListView = {
+          ...selectedListView, // clone the selected list view
+          _id: undefined, // remove the id
+          list_view_name: `Cloned by ${selectedListView.list_view_name}`, // replace name with the cloned name
+        };
+        console.log('Cloning selected list view:');
+        console.log(clonedListView);
+  
+        // Show the drawer with the cloned list view
+        showCreateListDrawer(clonedListView);
+      }
     }
     else if (key === 'delete') {
       console.log('Clone clicked');
