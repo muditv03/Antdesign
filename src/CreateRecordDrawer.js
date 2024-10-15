@@ -224,9 +224,8 @@ const CreateRecordDrawer = ({
               placeholder={`Select ${field.label}`}
               showSearch
               allowClear
-              filterOption={(input, option) =>
-                option.children.toLowerCase().includes(input.toLowerCase())
-              }
+              onChange={(value) => console.log('Selected value:', value)} // onChange handler
+
             > 
               {lookupOptions[field.name]?.map((option) => (
                 <Select.Option key={option._id} value={option._id}>
@@ -270,7 +269,7 @@ const CreateRecordDrawer = ({
                 key={`${field.name}_country`}
                 name={`${field.name}_country`}
                 label="Country"
-              >
+              > 
                 <Input placeholder="Enter Country" />
               </Form.Item>
               <Form.Item
