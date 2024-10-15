@@ -4,9 +4,7 @@ export const generateBody = (fieldsDataDrawer, values) => {
     fieldsDataDrawer.forEach((field) => {
         const fieldName = field.name;
         if (field.type === 'lookup') {
-           
-            updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
-            
+            updatedValues[`${fieldName}_id`] = values[fieldName];
         }
         else if (field.type === 'Address') {
             updatedValues[fieldName] = {

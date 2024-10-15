@@ -90,8 +90,13 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       iseditable: values.iseditable || true,
       iswriteable: values.iswriteable || true,
       is_auto_number: isAutoNumber, // Include isAutoNumber in the new field data
+      
     };
 
+    if(values.type=='lookup'){
+      newField.parent_object_name=values.parent_object_name;
+      newField.relationship_name=values.relationship_name;
+    }
     // Include starting and ending points if isAutoNumber is true
     if (isAutoNumber) {
       newField.auto_number_format = values.format; // Add starting point
@@ -139,6 +144,11 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             decimal_places_before: values.length,
             decimal_places_after: values.decimal_places,
           }),
+          ...(values.type==='lookup' && {
+            parent_object_name:values.parent_object_name,
+            relationship_name:values.relationship_name
+           }) 
+         
         });
 
         message.success('Field created successfully');
@@ -199,7 +209,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         </div>
       }
       footerStyle={{ textAlign: 'right', padding: '0' }}
-    >
+    > 
       <Spin spinning={loading}> {/* Spinner */}
         <Card style={{ margin: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}>
           <Form
@@ -269,17 +279,9 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                 },
               ]}
             >
-              {fieldType === 'lookup' ? (
-                <Select placeholder="Select an object" disabled={isEditMode}>
-                  {availableObjects.map((object) => (
-                    <Option key={object.id} value={object.name}>
-                      {object.name}
-                    </Option>
-                  ))}
-                </Select>
-              ) : (
-                <Input placeholder="Please enter the name" disabled={isEditMode} /> // Read-only in edit mode
-              )}
+             
+            <Input placeholder="Please enter the name" disabled={isEditMode} /> 
+              
             </Form.Item>
 
             {fieldType === 'String' && ( // Only show for String type
@@ -354,6 +356,36 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
               </>
             ) : null}
 
+            {fieldType==='lookup' && (
+              <>
+            <Form.Item
+            name="parent_object_name"
+            label="Parent Object Name"
+            rules={[{ required: true, message: 'Please enter parent object name' }]}
+            
+              >
+                <Select placeholder="Select an object" disabled={isEditMode}>
+                  {availableObjects.map((object) => (
+                    <Option key={object.id} value={object.name}>
+                      {object.name}
+                    </Option>
+                  ))}
+                </Select>
+              
+              
+                </Form.Item>
+
+            <Form.Item
+              name="relationship_name"
+              label="Relationship Name"
+              rules={[{ required: true, message: 'Please enter parent object name' }]}>
+              <Input placeholder="Please enter relationship name" /> 
+
+              </Form.Item>
+
+            </>
+            )}
+           
 
           </Form>
         </Card>

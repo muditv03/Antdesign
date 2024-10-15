@@ -11,7 +11,6 @@ import CreateListViewDrawer from './Components/CreateListViewDrawer';
 import ApiService from './apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { generateBody } from './Components/Utility';
-
 dayjs.extend(customParseFormat);      
            
 const { Title } = Typography;
@@ -109,7 +108,7 @@ const ObjectSetupDetail = () => {
             // Check if the field name is 'User', then match with fieldName + '_id'
            
             // Otherwise, match with fieldName.toLowerCase() + '_id'
-            return recordFieldNames.includes(field.name.toLowerCase() + '_id');
+            return recordFieldNames.includes(field.name + '_id');
           }
           // If not a lookup field, match directly by field name
           return recordFieldNames.includes(field.name);
@@ -402,7 +401,7 @@ const ObjectSetupDetail = () => {
         const ob = lookupField.name;
         let objectName='';
        
-          objectName = lookupField.name.toLowerCase();
+        objectName = lookupField.name.toLowerCase();
 
         
         const recordId = record[`${objectName}_id`];
@@ -561,7 +560,6 @@ const ObjectSetupDetail = () => {
 
   // Separate the "Name" and "Auto-number" fields
   const nameField = filteredFieldsData.find(field => field.name === 'Name');
-  const autoNumberField = filteredFieldsData.find(field => field.is_auto_number);
 
   // Get other fields, excluding "Name" and "Auto-number" fields
   const otherFields = filteredFieldsData
@@ -569,7 +567,7 @@ const ObjectSetupDetail = () => {
     .slice(0, numberOfFieldsToShow);
 
   // Combine columns in the desired sequence: Name, Auto-number, other fields
-  const fieldsToShow = [nameField, autoNumberField, ...otherFields].filter(Boolean); // filter(Boolean) removes undefined
+  const fieldsToShow = [nameField, ...otherFields].filter(Boolean); // filter(Boolean) removes undefined
 
     
   const fetchLookupName = async (objectName, id) => {
@@ -612,7 +610,7 @@ const ObjectSetupDetail = () => {
       }else if (field.type === 'lookup') {
         let lookupId='';
         
-        lookupId = record[field.name.toLowerCase() + '_id'];
+        lookupId = record[field.name + '_id'];
 
         
         const objectName = field.name;
