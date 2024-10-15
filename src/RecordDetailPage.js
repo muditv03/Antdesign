@@ -76,11 +76,11 @@ const RecordDetail = () => {
      
       // Process lookup fields to fetch names
       const lookupPromises = fieldsResponse
-        .filter(field => field.type === 'lookup' && recordData[field.name.toLowerCase()+ '_id'])
+        .filter(field => field.type === 'lookup' && recordData[field.name+ '_id'])
         .map(async field => {
           let lookupId;
         
-          lookupId = recordData[field.name.toLowerCase() + '_id'];
+          lookupId = recordData[field.name + '_id'];
 
         
           // const lookupResponse = await axios.get(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`);
@@ -137,7 +137,7 @@ const RecordDetail = () => {
         if (field.type === 'lookup') {
           let lookupFieldName;
           
-          lookupFieldName = field.name.toLowerCase() + '_id';
+          lookupFieldName = field.name + '_id';
           
           bodyData[lookupFieldName] = bodyData[field.name];
           delete bodyData[field.name];
