@@ -443,7 +443,7 @@ const ObjectSetupDetail = () => {
     console.log('values are ');
     console.log(values);
     const updatedValues=generateBody(fieldsDataDrawer,values);
-    console.log('value of lookup is');
+    console.log('value of lookup is');  
     console.log(values['lookup']);
     const body = {
       object_name: objectName,
