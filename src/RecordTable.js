@@ -8,7 +8,7 @@ import { BASE_URL, DateFormat } from './Constant';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import ApiService from './apiService'; // Import ApiService class
 import CreateRecordDrawer from './CreateRecordDrawer';
-import { generateBody } from './Components/utility';
+import { generateBody } from './Components/Utility';
 dayjs.extend(customParseFormat);
  
 const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, onClone, onDelete,relatedListId,currentRecordId,currentObjectName ,refreshRecords}) => {

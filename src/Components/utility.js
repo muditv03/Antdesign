@@ -8,7 +8,7 @@ export const generateBody = (fieldsDataDrawer, values) => {
             updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
             
         }
-        if (field.type === 'Address') {
+        else if (field.type === 'Address') {
             updatedValues[fieldName] = {
                 street: values[`${field.name}_street`],
                 city: values[`${field.name}_city`],
