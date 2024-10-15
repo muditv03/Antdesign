@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Drawer, Button, Form, Card, Spin, Input, Checkbox, DatePicker, Space, Select } from 'antd';
-import {MailOutlined } from '@ant-design/icons';
-
+import { MailOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import ApiService from './apiService'; // Import ApiService class
-import {BASE_URL,DateFormat} from './Constant' // Define the date format
+import { BASE_URL, DateFormat } from './Constant'; // Define the date format
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat); 
 
@@ -19,16 +18,13 @@ const CreateRecordDrawer = ({
   setSelectedDate,
   form 
 }) => { 
-  // Function to render form items based on field type
-   
   const [lookupOptions, setLookupOptions] = useState([]);
 
-//console.log('fields'+ JSON.stringify(fieldsData));
   useEffect(() => {
     const fetchAllLookupOptions = async () => {
       const lookupFields = fieldsData.filter(field => field.type === 'lookup');
       const lookupOptionsObj = {};
-  
+
       for (const lookupField of lookupFields) {
         try {
           const apiServiceForLookup = new ApiService(
@@ -44,22 +40,49 @@ const CreateRecordDrawer = ({
       }
       setLookupOptions(lookupOptionsObj); // Store all lookup options in state
     };
-  
+
     if (fieldsData.some(field => field.type === 'lookup')) {
       fetchAllLookupOptions();
     }
   }, [fieldsData]);
 
+  useEffect(() => {
+    if (selectedRecord) {
+      // Populate the form with selected record's data
+      const formValues = {};
+      fieldsData.forEach(field => {
+        if (field.type === 'Date' || field.type === 'DateTime') {
+          formValues[field.name] = selectedRecord[field.name] 
+            ? dayjs(selectedRecord[field.name], field.type === 'Date' ? DateFormat : "DD/MM/YYYY HH:mm:ss") 
+            : null;
+        } else if (field.type === 'boolean') {
+          formValues[field.name] = selectedRecord[field.name] || false;
+        } else if (field.type === 'Address') {
+          // Assuming address fields are stored as separate properties
+          formValues[`${field.name}_street`] = selectedRecord[`${field.name}_street`] || '';
+          formValues[`${field.name}_city`] = selectedRecord[`${field.name}_city`] || '';
+          formValues[`${field.name}_state`] = selectedRecord[`${field.name}_state`] || '';
+          formValues[`${field.name}_country`] = selectedRecord[`${field.name}_country`] || '';
+          formValues[`${field.name}_postalcode`] = selectedRecord[`${field.name}_postalcode`] || '';
+        } else {
+          formValues[field.name] = selectedRecord[field.name] || '';
+        }
+      });
+      form.setFieldsValue(formValues);
+    } else {
+      form.resetFields(); // Reset the form if no record is selected (for new record)
+    }
+  }, [selectedRecord, form, fieldsData]);
 
-  const renderFormItem = (field, selectedDate, setSelectedDate) => {
+  const renderFormItem = (field) => {
 
     if (field.is_auto_number) {
       return null; // Don't render the field if it's an auto-number field
     }
- 
-   if(field.name=='recordCount'){
-    return null;
-   }
+
+    if(field.name === 'recordCount'){
+      return null;
+    }
 
     switch (field.type) {
       case 'String':
@@ -68,6 +91,7 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
+            rules={[{ required: true, message: `Please enter the ${field.label.toLowerCase()}` }]}
           >
             <Input placeholder={`Enter ${field.label}`} />
           </Form.Item>
@@ -79,6 +103,7 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
+            rules={[{ required: true, message: `Please enter the ${field.label.toLowerCase()}` }]}
           >
             <Input type="number" placeholder={`Enter ${field.label}`} />
           </Form.Item>
@@ -90,13 +115,15 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
-          rules={[
-            { type: 'email', message: 'The input is not valid E-mail!' },
-          ]}
-        >
-          <Input type='email' prefix={<MailOutlined />} />
+            rules={[
+              { type: 'email', message: 'The input is not valid E-mail!' },
+              { required: true, message: 'Please enter the email' }
+            ]}
+          >
+            <Input type='email' prefix={<MailOutlined />} placeholder="Enter email" />
           </Form.Item>
         );
+
       case 'boolean':
         return (
           <Form.Item
@@ -109,13 +136,13 @@ const CreateRecordDrawer = ({
           </Form.Item>
         );
 
-
       case 'Date':
         return (
           <Form.Item
             key={field.name}
             name={field.name}
             label={field.label}
+            rules={[{ required: true, message: `Please select the ${field.label.toLowerCase()}` }]}
           >
             <Space>
               <DatePicker
@@ -132,14 +159,15 @@ const CreateRecordDrawer = ({
           </Form.Item>
         );
 
-        case 'DateTime':
-          return (
-            <Form.Item
-              key={field.name}
-              name={field.name}
-              label={field.label}
-            >
-              <Space>
+      case 'DateTime':
+        return (
+          <Form.Item
+            key={field.name}
+            name={field.name}
+            label={field.label}
+            rules={[{ required: true, message: `Please select the ${field.label.toLowerCase()}` }]}
+          >
+            <Space>
               <DatePicker
                 showTime
                 placeholder={`Select ${field.label}`}
@@ -151,23 +179,25 @@ const CreateRecordDrawer = ({
                   form.setFieldsValue({ [field.name]: dateString });
                 }}
               />
-              </Space>
-            </Form.Item>
-          );
-    
-        case 'URL':
-          return (
-            <Form.Item
-              key={field.name}
-              name={field.name}
-              label={field.label}
-              rules={[
-                { type: 'url', message: 'Please enter a valid URL!' },
-              ]}
-            >
-              <Input type="url" placeholder={`Enter ${field.label}`} />
-            </Form.Item>
-          );
+            </Space>
+          </Form.Item>
+        );
+
+      case 'URL':
+        return (
+          <Form.Item
+            key={field.name}
+            name={field.name}
+            label={field.label}
+            rules={[
+              { type: 'url', message: 'Please enter a valid URL!' },
+              { required: true, message: `Please enter the ${field.label.toLowerCase()}` }
+            ]}
+          >
+            <Input type="url" placeholder={`Enter ${field.label}`} />
+          </Form.Item>
+        );
+
       case 'currency':
         const currencyDecimalPlacesBefore = field.decimal_places_before;
         const currencyDecimalPlacesAfter = field.decimal_places_after;
@@ -184,6 +214,7 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
+            rules={[{ required: true, message: `Please enter the ${field.label.toLowerCase()}` }]}
           >
             <Input
               addonBefore="$"
@@ -200,9 +231,11 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
+            rules={[{ required: true, message: `Please select the ${field.label.toLowerCase()}` }]}
           >
-            <Select placeholder={`Select ${field.label}`}    
-            allowClear 
+            <Select 
+              placeholder={`Select ${field.label}`}    
+              allowClear 
             >
               {field.picklist_values.map((value) => (
                 <Select.Option key={value} value={value}>
@@ -219,13 +252,15 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
+            rules={[{ required: true, message: `Please select the ${field.label.toLowerCase()}` }]}
           > 
             <Select
               placeholder={`Select ${field.label}`}
               showSearch
               allowClear
-              onChange={(value) => console.log('Selected value:', value)} // onChange handler
-
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
             > 
               {lookupOptions[field.name]?.map((option) => (
                 <Select.Option key={option._id} value={option._id}>
@@ -236,7 +271,7 @@ const CreateRecordDrawer = ({
           </Form.Item>
         );
 
-        case 'Address':
+      case 'Address':
         return (
           <Form.Item 
             key={field.name}
@@ -248,13 +283,15 @@ const CreateRecordDrawer = ({
                 key={`${field.name}_street`}
                 name={`${field.name}_street`}
                 label="Street"
+                rules={[{ required: true, message: 'Please enter the street' }]}
               >
                 <Input placeholder="Enter Street" />
               </Form.Item>
               <Form.Item 
-               key={`${field.name}_city`}
-               name={`${field.name}_city`}
+                key={`${field.name}_city`}
+                name={`${field.name}_city`}
                 label="City"
+                rules={[{ required: true, message: 'Please enter the city' }]}
               >
                 <Input placeholder="Enter City" />
               </Form.Item>
@@ -262,6 +299,7 @@ const CreateRecordDrawer = ({
                 key={`${field.name}_state`}
                 name={`${field.name}_state`}
                 label="State"
+                rules={[{ required: true, message: 'Please enter the state' }]}
               >
                 <Input placeholder="Enter State" />
               </Form.Item>
@@ -269,21 +307,21 @@ const CreateRecordDrawer = ({
                 key={`${field.name}_country`}
                 name={`${field.name}_country`}
                 label="Country"
-              > 
+                rules={[{ required: true, message: 'Please enter the country' }]}
+              >
                 <Input placeholder="Enter Country" />
               </Form.Item>
               <Form.Item
-               key={`${field.name}_postalcode`}
-               name={`${field.name}_postalcode`}
+                key={`${field.name}_postalcode`}
+                name={`${field.name}_postalcode`}
                 label="Postal Code"
+                rules={[{ required: true, message: 'Please enter the postal code' }]}
               >
                 <Input placeholder="Enter Postal Code" />
               </Form.Item>
             </Card>
           </Form.Item>
         );
-
-        
 
       case 'decimal':
         const decimalPlacesBefore = field.decimal_places_before;
@@ -295,10 +333,17 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
+            rules={[{ required: true, message: `Please enter the ${field.label.toLowerCase()}` }]}
           >
             <Input
               placeholder={`Enter ${field.label}`}
               maxLength={decimalPlacesBefore + decimalPlacesAfter + 1}
+              onInput={(e) => {
+                const value = e.target.value;
+                if (!decimalPattern.test(value)) {
+                  e.preventDefault();
+                }
+              }}
             />
           </Form.Item>
         );
@@ -309,6 +354,7 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
+            rules={[{ required: true, message: `Please enter the ${field.label.toLowerCase()}` }]}
           >
             <Input.TextArea
               placeholder={`Enter ${field.label}`}
@@ -320,7 +366,7 @@ const CreateRecordDrawer = ({
         return null;
     }
   };
- 
+
   return (
     <Drawer
       title={<div style={{ fontSize: '20px', fontWeight: 'bold' }}>
@@ -332,7 +378,6 @@ const CreateRecordDrawer = ({
       bodyStyle={{ paddingBottom: 80 }}
       headerStyle={{
         padding: '20px 16px',
-        //background: '#20b2aa',
         background: '#f0f2f5',
         borderBottom: '1px solid #e8e8e8',
       }}
@@ -347,22 +392,21 @@ const CreateRecordDrawer = ({
             borderTop: '1px solid #e8e8e8',
           }}
         >
-          <Button onClick={onClose}             
-          disabled={loading} // Disable save button when loading is true
-          style={{ height: '34px', width: '90px', fontSize: '14px' }}>
+          <Button 
+            onClick={onClose}             
+            disabled={loading} // Disable cancel button when loading is true
+            style={{ height: '34px', width: '90px', fontSize: '14px' }}
+          >
             Cancel
           </Button>
           <Button
             onClick={() => form.submit()}
             disabled={loading} // Disable save button when loading is true
-
             type="primary"
             style={{
               height: '34px',
               width: '90px',
               fontSize: '14px',
-              // backgroundColor: 'white',
-              // color: '#1890ff',
               border: '1px solid #1890ff',
             }}
           >
@@ -383,7 +427,7 @@ const CreateRecordDrawer = ({
             onFinish={onFinish}
             style={{ fontSize: '16px' }}
           >
-            {fieldsData?.map((field) => renderFormItem(field, selectedDate, setSelectedDate))}
+            {fieldsData?.map((field) => renderFormItem(field))}
           </Form>
         </Card>
       </Spin>
