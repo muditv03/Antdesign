@@ -159,9 +159,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
     const adjustedFields = selectedFields.map((field) => {
       const selectedField = fields.find((f) => f.name === field);
       if (selectedField && selectedField.type === 'lookup') {
-        return selectedField.name.toLowerCase() === 'user' 
-          ? `${selectedField.name}_id` 
-          : `${selectedField.name.toLowerCase()}_id`; 
+        return `${selectedField.name.toLowerCase()}_id`; 
       }
       return field;
     });
@@ -231,7 +229,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
 
   return (
     <Drawer
-    title={"Create List View"}
+    title={selectedListView?._id ? 'Edit List View' : 'Create List View'}
     width="40%"
       onClose={onClose}
       visible={visible}
@@ -245,7 +243,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
             Submit
           </Button>
         </div>
-      }
+      } 
     >
     <Card 
         style={{ margin: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
