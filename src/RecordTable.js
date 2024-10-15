@@ -8,7 +8,7 @@ import { BASE_URL, DateFormat } from './Constant';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import ApiService from './apiService'; // Import ApiService class
 import CreateRecordDrawer from './CreateRecordDrawer';
- 
+import { generateBody } from './Components/utility';
 dayjs.extend(customParseFormat);
  
 const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, onClone, onDelete,relatedListId,currentRecordId,currentObjectName ,refreshRecords}) => {
@@ -152,15 +152,20 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       const formattedRecord = { ...record };
 
       fieldsResponse.forEach(field => {
-        if (field.type === 'Address' && record.Address) {
-          const { Address } = record;
-          // Set individual address fields
-          formattedRecord.street = Address.street || '';
-          formattedRecord.city = Address.city || '';
-          formattedRecord.state = Address.state || '';
-          formattedRecord.country = Address.country || '';
-          formattedRecord.postal_code = Address.postal_code || '';
+       
+        if (field.type === 'Address' && formattedRecord[field.name]) {
+          formattedRecord[`${field.name}_street`] = record[field.name]['street'] || '';
+          formattedRecord[`${field.name}_city`] = record[field.name]['city'] || '';
+
+          formattedRecord[`${field.name}_state`] = record[field.name]['state'] || '';
+
+          formattedRecord[`${field.name}_country`] = record[field.name]['country'] || '';
+
+          formattedRecord[`${field.name}_postalcode`] = record[field.name]['postal_code'] || '';
+
+         
         }
+
 
         if (field.type === 'Date' && record[field.name]) {
           formattedRecord[field.name] = dayjs(record[field.name]).format(DateFormat);
@@ -227,15 +232,18 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       const formattedClonedRecord = { ...clonedRecord };
 
       fieldsResponse.forEach(field => {
-        
-        if (field.type === 'Address' && clonedRecord.Address) {
-          const { Address } = clonedRecord;
+        if (field.type === 'Address' && clonedRecord[field.name]) {
           // Set individual address fields
-          formattedClonedRecord.street = Address.street || '';
-          formattedClonedRecord.city = Address.city || '';
-          formattedClonedRecord.state = Address.state || '';
-          formattedClonedRecord.country = Address.country || '';
-          formattedClonedRecord.postal_code = Address.postal_code || '';
+          formattedClonedRecord[`${field.name}_street`] = clonedRecord[field.name]['street'] || '';
+          formattedClonedRecord[`${field.name}_city`] = clonedRecord[field.name]['city'] || '';
+
+          formattedClonedRecord[`${field.name}_state`] = clonedRecord[field.name]['state'] || '';
+
+          formattedClonedRecord[`${field.name}_country`] = clonedRecord[field.name]['country'] || '';
+
+          formattedClonedRecord[`${field.name}_postalcode`] = clonedRecord[field.name]['postal_code'] || '';
+
+           
         }
 
         if (field.type === 'Date' && clonedRecord[field.name]) {
@@ -306,39 +314,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
   };
 
   const handleFinish = async (values) => {
-    const updatedValues = {};
-   
-    // Iterate through the fields data to check if the field is a lookup
-    fieldsDataState.forEach((field) => {
-      const fieldName = field.name;
-      if (field.type === 'lookup') {
-        if(field.name=='User'){
-          updatedValues[`${fieldName}`] = values[fieldName];
-
-        }else{
-          updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
-
-        }      
-      } 
-
-      if (field.type === 'Address') {
-        // Combine address fields into a JSON object
-        updatedValues[fieldName] = {
-          street: values["street"],
-          city: values["city"],
-          state: values["state"],
-          country: values["country"],
-          postal_code: values["postal_code"]
-        };
-      }
-      else {
-        // Keep other fields unchanged
-        updatedValues[fieldName] = values[fieldName];
-      }
-    });
-  
-    console.log('object is '+objectName)
-
+    const updatedValues=generateBody(fieldsDataState,values);
     const body = {
       object_name: childObjectName,
       data: {

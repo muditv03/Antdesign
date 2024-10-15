@@ -50,7 +50,9 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
         const api = new apiService(`${BASE_URL}/mt_fields/object/${selectedChild}`, {}, 'GET');
         try {
           const res = await api.makeCall();
-          setChildObjectFields(res);
+          setChildObjectFields(res
+            .filter((field) => field.name !== 'recordCount')
+          );
         } catch (error) {
           message.error('Error fetching child object fields');
         }
@@ -75,7 +77,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
     }
     setSelectedFields(value);
   };
-
+ 
   // Submit form handler
   const handleFinish = (values) => {
     const { relatedListName, parentObject } = values;
@@ -89,7 +91,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
       child_object_name: selectedChild,
       related_list_name: relatedListName,
       fields_to_display: selectedFields,
-    };
+    }; 
 
     const api = new apiService(`${BASE_URL}/create_related_list`, {}, 'POST', data);
     api.makeCall()
@@ -99,9 +101,12 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
         onClose(); // Close the drawer after successful creation
         onAddRelatedList(); // Callback to refresh related lists
       })
-      .catch(() => {
-        message.error('Error creating related list');
-      });
+   
+      .catch(err => {
+        if(err){
+          message.error('Error creating related list');
+        }
+      })
   };
 
   return (

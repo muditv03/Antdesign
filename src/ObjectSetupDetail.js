@@ -99,7 +99,7 @@ const ObjectSetupDetail = () => {
           console.log(fieldsResponse);
           console.log(recordsResponse);
           
-          
+           
        // Get the field names from the recordsResponse
       const recordFieldNames = Object.keys(recordsResponse[0] || {}); // First record as an example
 
@@ -553,29 +553,29 @@ const ObjectSetupDetail = () => {
 
   const numberOfFieldsToShow = 5;
 
-// Filter fields, but always include the auto-number field
-const filteredFieldsData = fieldsData.filter(field => 
-  field.name !== 'recordCount'
-);
+  // Filter fields, but always include the auto-number field
+  const filteredFieldsData = fieldsData.filter(field => 
+    field.name !== 'recordCount'
+  );
 
-// Separate the "Name" and "Auto-number" fields
-const nameField = filteredFieldsData.find(field => field.name === 'Name');
-const autoNumberField = filteredFieldsData.find(field => field.is_auto_number);
+  // Separate the "Name" and "Auto-number" fields
+  const nameField = filteredFieldsData.find(field => field.name === 'Name');
+  const autoNumberField = filteredFieldsData.find(field => field.is_auto_number);
 
-// Get other fields, excluding "Name" and "Auto-number" fields
-const otherFields = filteredFieldsData
-  .filter(field => field.name !== 'Name' && !field.is_auto_number)
-  .slice(0, numberOfFieldsToShow);
+  // Get other fields, excluding "Name" and "Auto-number" fields
+  const otherFields = filteredFieldsData
+    .filter(field => field.name !== 'Name' && !field.is_auto_number)
+    .slice(0, numberOfFieldsToShow);
 
-// Combine columns in the desired sequence: Name, Auto-number, other fields
-const fieldsToShow = [nameField, autoNumberField, ...otherFields].filter(Boolean); // filter(Boolean) removes undefined
+  // Combine columns in the desired sequence: Name, Auto-number, other fields
+  const fieldsToShow = [nameField, autoNumberField, ...otherFields].filter(Boolean); // filter(Boolean) removes undefined
 
-  
-const fetchLookupName = async (objectName, id) => {
-  const apiService = new ApiService(`${BASE_URL}/fetch_single_record/${objectName}/${id}`, {}, 'GET');
-  const responseData = await apiService.makeCall();
-  return responseData.Name || '';
-};
+    
+  const fetchLookupName = async (objectName, id) => {
+    const apiService = new ApiService(`${BASE_URL}/fetch_single_record/${objectName}/${id}`, {}, 'GET');
+    const responseData = await apiService.makeCall();
+    return responseData.Name || '';
+  };
 
 
   const columns =  fieldsToShow.map((field, index)  => ({
@@ -689,7 +689,6 @@ const fetchLookupName = async (objectName, id) => {
   });
 
   const showCreateListDrawer = (listView) => {
-    console.log('list view in edit is ');
     console.log(listView);
     setSelectedListView(listView); // Set the selected list view for editing
     setIsListViewDrawerVisible(true); // Show the drawer
