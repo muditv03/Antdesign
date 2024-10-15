@@ -38,7 +38,7 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
         parentObject: record.parent_object_name || parentObjectName,
         childObject: record.child_object_name,
         fieldsToDisplay: record.fields_to_display || [],
-      });
+      }); 
       setSelectedChild(record.child_object_name);
       setSelectedFields(record.fields_to_display || []);
     }
