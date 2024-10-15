@@ -51,7 +51,7 @@ const ObjectFieldTab = () => {
           `${BASE_URL}/mt_fields/object/${record.name}`,
           { 'Content-Type': 'application/json' },
           'GET'
-        );
+        ); 
         const response = await apiService.makeCall();
         setFieldsData(response
           .filter((field) => field.name !== 'recordCount')
@@ -81,7 +81,7 @@ const ObjectFieldTab = () => {
       key: 'label',
     },
     {
-      title: 'Name',
+      title: 'API Name',
       dataIndex: 'name',
       key: 'name',
     },
@@ -91,18 +91,6 @@ const ObjectFieldTab = () => {
       key: 'type',
       render: (value) =>
         value ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : '',
-    },
-    {
-      title: 'Is Editable',
-      dataIndex: 'iseditable',
-      key: 'iseditable',
-      render: (value) => (value ? 'Yes' : 'No'),
-    },
-    {
-      title: 'Is Writeable',
-      dataIndex: 'iswriteable',
-      key: 'iswriteable',
-      render: (value) => (value ? 'Yes' : 'No'),
     },
     {
       title: 'Action',

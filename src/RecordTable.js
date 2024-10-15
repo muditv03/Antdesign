@@ -93,8 +93,8 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
      if(field.name==='recordCount'){
       return null;
      }
-     if (field.type === 'lookup' && record[`${field.name === 'User' ? 'User_id' : `${field.name.toLowerCase()}_id`}`]) {
-      const lookupId = record[`${field.name === 'User' ? 'User_id' : `${field.name.toLowerCase()}_id`}`];
+     if (field.type === 'lookup' && record[`${field.name.toLowerCase()}_id`]) {
+      const lookupId = record[ `${field.name.toLowerCase()}_id`];
       return lookupNames[lookupId] || 'Loading...';
       }
        if (field.type === 'Address') {
@@ -184,13 +184,10 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       for (const lookupField of lookupFields) {
         const ob = lookupField.name;
         let objectName='';
-        if(lookupField.name=='User'){
-        objectName = lookupField.name;
+       
+        objectName = lookupField.name.toLowerCase();
 
-        }else{
-          objectName = lookupField.name.toLowerCase();
-
-        }const recordId = record[`${objectName}_id`];
+        const recordId = record[`${objectName}_id`];
 
         if (recordId) {
           const apiServiceForRecord = new ApiService(
@@ -262,13 +259,10 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       for (const lookupField of lookupFields) {
         const ob = lookupField.name;
         let objectName='';
-        if(lookupField.name=='User'){
-        objectName = lookupField.name;
+       
+        objectName = lookupField.name.toLowerCase();
 
-        }else{
-          objectName = lookupField.name.toLowerCase();
-
-        }       
+            
         const recordId = record[`${objectName}_id`];
         console.log('REc')
         console.log(record)
@@ -321,7 +315,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
         _id: selectedRecord?._id && !selectedRecord?.isClone ? selectedRecord._id : undefined, // If cloning, exclude the ID
         ...updatedValues // Use the updated values
       }
-    };
+    }; 
   
     try {
       //setLoading(true);
