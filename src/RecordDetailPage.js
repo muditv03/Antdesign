@@ -142,7 +142,7 @@ const RecordDetail = () => {
           bodyData[lookupFieldName] = bodyData[field.name];
           delete bodyData[field.name];
             
-          
+           
         }
 
         if(field.type==='Address'){

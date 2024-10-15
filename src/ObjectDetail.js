@@ -75,7 +75,7 @@ const ObjectFieldDetail = () => {
                         style={{ marginBottom: '8px' ,borderBottom: '1px solid  #ddd'}}
                       >
                         <span style={{ fontWeight: 500 }}>{field.name}</span>
-                      </Form.Item>
+                       </Form.Item>
                     </Col>
                     <Col xs={24} sm={12}>
                       <Form.Item

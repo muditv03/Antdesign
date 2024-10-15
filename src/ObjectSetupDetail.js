@@ -107,9 +107,7 @@ const ObjectSetupDetail = () => {
         const matchingFields = fieldsResponse.filter(field => {
           if (field.type === 'lookup') {
             // Check if the field name is 'User', then match with fieldName + '_id'
-            if (field.name === 'User') {
-              return recordFieldNames.includes(field.name + '_id');
-            }
+           
             // Otherwise, match with fieldName.toLowerCase() + '_id'
             return recordFieldNames.includes(field.name.toLowerCase() + '_id');
           }
@@ -442,9 +440,11 @@ const ObjectSetupDetail = () => {
   
 
   const handleFinish = async (values) => {
-
+    console.log('values are ');
+    console.log(values);
     const updatedValues=generateBody(fieldsDataDrawer,values);
-    
+    console.log('value of lookup is');
+    console.log(values['lookup']);
     const body = {
       object_name: objectName,
       data: {
@@ -454,7 +454,7 @@ const ObjectSetupDetail = () => {
     }; 
     console.log('body before is ');
     console.log(body);
-  
+   
     try {
       //setLoading(true);
       console.log('object name is '+objectName)
