@@ -10,7 +10,7 @@ import CreateRecordDrawer from './CreateRecordDrawer';
 import CreateListViewDrawer from './Components/CreateListViewDrawer';
 import ApiService from './apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { generateBody } from './Components/utility';
+import { generateBody } from './Components/Utility';
 
 dayjs.extend(customParseFormat);      
            
