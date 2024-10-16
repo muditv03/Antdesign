@@ -303,7 +303,7 @@ const ObjectSetupDetail = () => {
         const ob = lookupField.name;
         let objectName='';
         
-        objectName = lookupField.name.toLowerCase();
+        objectName = lookupField.name;
 
              
         const recordId = recordResponse[`${objectName}_id`];
@@ -401,7 +401,7 @@ const ObjectSetupDetail = () => {
         const ob = lookupField.name;
         let objectName='';
        
-        objectName = lookupField.name.toLowerCase();
+        objectName = lookupField.name;
 
         
         const recordId = record[`${objectName}_id`];
@@ -708,7 +708,7 @@ const ObjectSetupDetail = () => {
         const clonedListView = {
           ...selectedListView, // clone the selected list view
           _id: undefined, // remove the id
-          list_view_name: `Cloned by ${selectedListView.list_view_name}`, // replace name with the cloned name
+          list_view_name: `Cloned by ${selectedListView?.list_view_name}`, // replace name with the cloned name
         };
         console.log('Cloning selected list view:');
         console.log(clonedListView);
