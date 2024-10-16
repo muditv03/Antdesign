@@ -564,8 +564,11 @@ const RecordDetail = () => {
                       </a>
                     )
                   : type === 'Address'
-                  ?form.getFieldValue(name) && ( `${form.getFieldValue(name).street}, ${form.getFieldValue(name).city}, ${form.getFieldValue(name).state}, ${form.getFieldValue(name).postal_code}, ${form.getFieldValue(name).country}`)
-                : lookupNames[name] || form.getFieldValue(name)}
+                  ? form.getFieldValue(name) && 
+                    [form.getFieldValue(name).street, form.getFieldValue(name).city, form.getFieldValue(name).state, form.getFieldValue(name).postal_code, form.getFieldValue(name).country]
+                      .filter(Boolean) // This removes undefined or empty values
+                      .join(', ') // Joins non-empty values with a comma and space
+                  : lookupNames[name] || form.getFieldValue(name) }
           </div>
         )}
         {!isEditable && (
