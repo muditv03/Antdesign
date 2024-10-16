@@ -67,12 +67,20 @@ console.log(values);
     try {
       if (selectedUser) {
         // Update existing record
+
+        const body = {
+          user: {
+            username: values.username,
+            email: values.email,
+            Name: values.Name,
+          },
+        };
         
         const apiService = new ApiService(
-          `${BASE_URL}/insert_or_update_records`,
+          `${BASE_URL}/edit_user/${selectedUser._id}`,  // Use the ID of the selected user
           { 'Content-Type': 'application/json' },
-          'PUT',
-          JSON.stringify(values)
+          'PATCH',  // Use PATCH as per the API requirement
+          JSON.stringify(body)  // Correct structure for the body
         );
         await apiService.makeCall();
         message.success('Record updated successfully.');
