@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from 'react';
-import { Drawer, Form, Input, Button, Select,message,Card,Row,Col } from 'antd';
+import { Drawer, Form, Input, Button, Select,message,Card,Row,Col,Cascader } from 'antd';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 
 import ApiService from '../apiService'; 
@@ -14,11 +14,10 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
   const [selectedFields, setSelectedFields] = useState([]); 
   const [filters, setFilters] = useState([{ field: '', value: '' }]); // For managing filters
   const [lookupOptions, setLookupOptions] = useState([]); // For storing lookup options
- 
 
   useEffect(() => {
-
-    console.log('selected list view is '+selectedListView);
+    console.log('selected list view in editing   ');
+    console.log(fields);
     if (selectedListView) {
       // Set form values if editing an existing list view
       const transformedFields = (selectedListView.fields_to_display || []).map((field) => {
@@ -60,15 +59,18 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
 
   const fetchFields = async () => {
     try {
+      console.log('calling api for fields ');
+
       const apiService = new ApiService(
         `${BASE_URL}/mt_fields/object/${object.name}`,
         { 'Content-Type': 'application/json' },
         'GET'
       );
       const response = await apiService.makeCall();
-      
+      console.log('response is ');
+      console.log(response);
       // Assuming the API returns an array of field objects with 'name' and 'label' keys
-        const filteredFields = response.filter(field => field.name !== 'recordCount'); // Filter out 'recordCount'
+      const filteredFields = response.filter(field => field.name !== 'recordCount'); // Filter out 'recordCount'
 
       // Update the state with the filtered fields
       setFields(filteredFields); // Adjust as per API response structure
@@ -81,9 +83,17 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
 
   // New function to fetch lookup records based on existing filters
   const fetchLookupRecordsForExistingFilters = (existingFilters) => {
+    console.log('filters are');
+    console.log(existingFilters);
+    console.log('fields are');
+    console.log(fields);
     existingFilters.forEach(filter => {
+      console.log('console in filtering fields');
       const selectedField = fields.find(field => field.name === filter.field);
+      console.log(selectedField);
       if (selectedField && selectedField.type === 'lookup') {
+        console.log('filtering lookup fields');
+        console.log(selectedField.name);
         fetchLookupRecords(selectedField.name); // Fetch records for lookup fields
       }
     });
@@ -129,6 +139,8 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
   // Handle value change for filters
   const handleValueChange = (index, value) => {
     const updatedFilters = [...filters];
+    console.log('filters');
+    console.log(filters);
     updatedFilters[index].value = value;
     setFilters(updatedFilters);
   };
@@ -139,6 +151,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
 
     // If field type is 'lookup', fetch records for that field's object
     const selectedField = fields.find(field => field.name === value);
+    
     if (selectedField && selectedField.type === 'lookup') {
       fetchLookupRecords(selectedField.name); // Pass object name to fetch records
     }
@@ -149,12 +162,23 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
   const onFinish = async (values) => {
     const filterObj = filters.reduce((acc, filter) => {
       if (filter.field && filter.value) {
-        acc[filter.field] = filter.value;
+        const length=filter.field.length;
+        console.log(length);
+        console.log(filter.field);
+       
+        acc[filter.field[length-1]] = filter.value;
+
+        
       }
       return acc;
     }, {});
 
-    console.log('Form Values: ', values);
+
+    console.log('filter is ');
+    console.log(filterObj);
+
+    console.log('form values are ');
+    console.log( values);
 
     const adjustedFields = selectedFields.map((field) => {
       const selectedField = fields.find((f) => f.name === field);
@@ -176,6 +200,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       },
     };
 
+    console.log('body is ');
     console.log(body);
  
     try { 
@@ -216,16 +241,14 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
     onClose();
   }; 
 
+
   useEffect(() => {
     console.log(JSON.stringify(object));
     console.log('object name is ');
     console.log(object.name);
     setObjectName(object.name);
     fetchFields(); // Call to fetch fields on object name change
-    
-
-    
-  },[]);
+  },[object]);
 
   return (
     <Drawer
@@ -250,7 +273,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       >
       <Form form={form} layout="vertical" onFinish={onFinish} >
         <Form.Item name="object_name" label="Object Name" >
-          <Input value={objectName} /> 
+          <Input defaultValue={object.name} /> 
         </Form.Item>
 
         <Form.Item name="list_view_name" label="List View Name" rules={[{ required: true, message: 'Please enter a list view name' }]}>
@@ -293,13 +316,32 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
           {filters.map((filter, index) => (
             <Row key={index} gutter={16} align="middle" style={{ marginBottom: '10px' }}>
               <Col span={10}>
-                <Select
+                <Cascader
                   allowClear
                   placeholder="Select field"
                   value={filter.field}
-                  onChange={(value) => handleFilterChange(index, 'field', value)}
+                  onChange={(value) =>{
+                     console.log(value)
+                     handleFilterChange(index, 'field', value)}
+                  }
                   style={{ width: '100%' }} // Ensuring full width for the select field
-                  options={fields.map((field) => ({ value: field.name, label: field.label }))}
+                  
+                  options={fields.map((field) =>
+                    field.type === 'Address'
+                      ? {
+                          label: field.label, // Show the Address field
+                          value: field.name, // Value is the field name
+                          children: [  // Add children options for Address fields
+                            { value: `${field.name}.street`, label: 'Street' },
+                            { value: `${field.name}.city`, label: 'City' },
+                            { value: `${field.name}.state`, label: 'State' },
+                            { value: `${field.name}.postalcode`, label: 'Postal Code' },
+                            { value: `${field.name}.country`, label: 'Country' },
+
+                          ],
+                        }
+                      : { value: field.name, label: field.label }
+                  )}            
                 />
               </Col> 
               <Col span={10}>

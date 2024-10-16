@@ -690,7 +690,7 @@ const ObjectSetupDetail = () => {
     setSelectedListView(listView); // Set the selected list view for editing
     setIsListViewDrawerVisible(true); // Show the drawer
   };
-
+ 
   const closeCreateListDrawer = () => {
     setIsListViewDrawerVisible(false); // Hide the drawer
   };
