@@ -250,7 +250,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       >
       <Form form={form} layout="vertical" onFinish={onFinish} >
         <Form.Item name="object_name" label="Object Name" >
-          <Input value={objectName} /> {/* Prefilled and disabled */}
+          <Input value={objectName}  disabled={true}/> 
         </Form.Item>
 
         <Form.Item name="list_view_name" label="List View Name" rules={[{ required: true, message: 'Please enter a list view name' }]}>

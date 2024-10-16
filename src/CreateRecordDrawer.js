@@ -91,7 +91,6 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: true, message: `Please enter the ${field.label.toLowerCase()}` }]}
           >
             <Input placeholder={`Enter ${field.label}`} />
           </Form.Item>
@@ -103,7 +102,6 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: true, message: `Please enter the ${field.label.toLowerCase()}` }]}
           >
             <Input type="number" placeholder={`Enter ${field.label}`} />
           </Form.Item>
@@ -117,7 +115,6 @@ const CreateRecordDrawer = ({
             label={field.label}
             rules={[
               { type: 'email', message: 'The input is not valid E-mail!' },
-              { required: true, message: 'Please enter the email' }
             ]}
           >
             <Input type='email' prefix={<MailOutlined />} placeholder="Enter email" />
@@ -142,7 +139,6 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: true, message: `Please select the ${field.label.toLowerCase()}` }]}
           >
             <Space>
               <DatePicker
@@ -165,7 +161,6 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: true, message: `Please select the ${field.label.toLowerCase()}` }]}
           >
             <Space>
               <DatePicker
@@ -191,7 +186,6 @@ const CreateRecordDrawer = ({
             label={field.label}
             rules={[
               { type: 'url', message: 'Please enter a valid URL!' },
-              { required: true, message: `Please enter the ${field.label.toLowerCase()}` }
             ]}
           >
             <Input type="url" placeholder={`Enter ${field.label}`} />
@@ -214,7 +208,6 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: true, message: `Please enter the ${field.label.toLowerCase()}` }]}
           >
             <Input
               addonBefore="$"
@@ -231,7 +224,6 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: true, message: `Please select the ${field.label.toLowerCase()}` }]}
           >
             <Select 
               placeholder={`Select ${field.label}`}    
@@ -252,7 +244,6 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: true, message: `Please select the ${field.label.toLowerCase()}` }]}
           > 
             <Select
               placeholder={`Select ${field.label}`}
@@ -283,7 +274,6 @@ const CreateRecordDrawer = ({
                 key={`${field.name}_street`}
                 name={`${field.name}_street`}
                 label="Street"
-                rules={[{ required: true, message: 'Please enter the street' }]}
               >
                 <Input placeholder="Enter Street" />
               </Form.Item>
@@ -291,7 +281,6 @@ const CreateRecordDrawer = ({
                 key={`${field.name}_city`}
                 name={`${field.name}_city`}
                 label="City"
-                rules={[{ required: true, message: 'Please enter the city' }]}
               >
                 <Input placeholder="Enter City" />
               </Form.Item>
@@ -299,7 +288,6 @@ const CreateRecordDrawer = ({
                 key={`${field.name}_state`}
                 name={`${field.name}_state`}
                 label="State"
-                rules={[{ required: true, message: 'Please enter the state' }]}
               >
                 <Input placeholder="Enter State" />
               </Form.Item>
@@ -307,7 +295,6 @@ const CreateRecordDrawer = ({
                 key={`${field.name}_country`}
                 name={`${field.name}_country`}
                 label="Country"
-                rules={[{ required: true, message: 'Please enter the country' }]}
               >
                 <Input placeholder="Enter Country" />
               </Form.Item>
@@ -315,7 +302,6 @@ const CreateRecordDrawer = ({
                 key={`${field.name}_postalcode`}
                 name={`${field.name}_postalcode`}
                 label="Postal Code"
-                rules={[{ required: true, message: 'Please enter the postal code' }]}
               >
                 <Input placeholder="Enter Postal Code" />
               </Form.Item>
@@ -333,7 +319,6 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: true, message: `Please enter the ${field.label.toLowerCase()}` }]}
           >
             <Input
               placeholder={`Enter ${field.label}`}
@@ -354,7 +339,6 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={field.label}
-            rules={[{ required: true, message: `Please enter the ${field.label.toLowerCase()}` }]}
           >
             <Input.TextArea
               placeholder={`Enter ${field.label}`}

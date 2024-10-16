@@ -725,9 +725,9 @@ const ObjectSetupDetail = () => {
   const listViewMenu = (
     <Menu onClick={handleListViewMenuClick}>
       <Menu.Item key="create">Create</Menu.Item>
-      <Menu.Item key="edit">Edit</Menu.Item>
-      <Menu.Item key="clone">Clone</Menu.Item>
-      <Menu.Item key="delete">Delete</Menu.Item>
+      <Menu.Item key="edit" disabled={!selectedListView}>Edit</Menu.Item>
+      <Menu.Item key="clone" disabled={!selectedListView}>Clone</Menu.Item>
+      <Menu.Item key="delete" disabled={!selectedListView}>Delete</Menu.Item>
 
     </Menu>
   );
@@ -770,7 +770,7 @@ const ObjectSetupDetail = () => {
 
       <Table columns={columns} dataSource={records} rowKey="_id" />
       </div>
-     
+      
       <CreateRecordDrawer
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}
