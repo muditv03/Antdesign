@@ -38,13 +38,16 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       setSelectedFields(transformedFields || []);
       
       // Populate filters
+      console.log(selectedListView.filters);
       const existingFilters = selectedListView.filters 
         ? Object.keys(selectedListView.filters).map((key) => ({
-            field: key,
+            field: [key],
             value: selectedListView.filters[key],
           }))
         : [{ field: '', value: '' }]; // Default filter structure if no filters exist
   
+        console.log('filters while editing ');
+        console.log(existingFilters);
       setFilters(existingFilters); // Set filters state here
       fetchLookupRecordsForExistingFilters(existingFilters); // Fetch lookup records for existing filters
 
@@ -89,7 +92,8 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
     console.log(fields);
     existingFilters.forEach(filter => {
       console.log('console in filtering fields');
-      const selectedField = fields.find(field => field.name === filter.field);
+      const selectedField = fields.find(field => Array.isArray(filter.field) &&  (filter.field).includes(field.name));
+
       console.log(selectedField);
       if (selectedField && selectedField.type === 'lookup') {
         console.log('filtering lookup fields');
@@ -112,6 +116,8 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
             value: record._id, // Set _id as value
             label: record.Name, // Set Name as label
           }));
+          console.log('lookup response are ');
+          console.log(records);
           setLookupOptions(records); // Set options for the lookup field
         } catch (error) {
           console.error('Error fetching lookup records:', error);
@@ -142,17 +148,26 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
     console.log('filters');
     console.log(filters);
     updatedFilters[index].value = value;
+    console.log(updatedFilters);
     setFilters(updatedFilters);
   };
 
   const handleFilterChange = (index, key, value) => {
+
+    console.log('handle filter change is called');
     const updatedFilters = [...filters];
     updatedFilters[index][key] = value;
-
+    console.log('field while consoling value is ');
     // If field type is 'lookup', fetch records for that field's object
-    const selectedField = fields.find(field => field.name === value);
-    
+    console.log('fields in handle filter change is ');
+    console.log(fields);
+
+    const selectedField = fields.find(field => Array.isArray(value) &&  value.includes(field.name));
+    console.log('selected field is ');
+    console.log(selectedField);
     if (selectedField && selectedField.type === 'lookup') {
+      console.log('lookup field is selected');
+      console.log(selectedField);
       fetchLookupRecords(selectedField.name); // Pass object name to fetch records
     }
     setFilters(updatedFilters);
@@ -345,7 +360,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
                 />
               </Col> 
               <Col span={10}>
-              {fields.find((f) => f.name === filter.field)?.type === 'lookup' ? (
+              {Array.isArray(filter.field) && fields.some((f) => filter.field.includes(f.name) && f.type === 'lookup') ? (
                   <Select
                     allowClear
                     placeholder="Select value"
@@ -354,7 +369,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
                     onChange={(value) => handleValueChange(index, value)}
                     options={lookupOptions}
                   />
-                ) : (
+                ) : ( 
                   <Input
                     placeholder="Enter value"
                     value={filter.value}
