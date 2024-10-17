@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Row, Col, Table, Button, message, Spin, Tooltip,Typography } from 'antd';
+import { Row, Col, Table, Button, message, Spin, Tooltip,Typography,Popconfirm } from 'antd';
 import CreateFieldDrawer from '../CreateFieldDrawer'; 
 import ApiService from '../apiService'; 
 import { BASE_URL } from '../Constant';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined,DeleteOutlined } from '@ant-design/icons';
 
 const {Title}=Typography;
 
@@ -74,6 +74,29 @@ const ObjectFieldTab = () => {
     }
   }, [record?.name]);
 
+  const deleteField= async (record)=>{
+
+    console.log('id is ');
+    console.log(record._id);
+
+    try {
+      // Create ApiService instance for DELETE request
+      const apiService = new ApiService(
+        `${BASE_URL}/mt_fields/${record._id}`,
+        {}, // Headers (if any)
+        'DELETE'
+      );
+  
+      await apiService.makeCall();
+      fetchFieldsData();
+      message.success('Record deleted successfully.');
+    } catch (error) {
+      message.error('Failed to delete record.');
+      console.error('Error deleting record:', error);
+    }
+
+  }
+
   const fieldColumns = [
     {
       title: 'Label',
@@ -97,14 +120,32 @@ const ObjectFieldTab = () => {
       key: 'action',
       width: 100,
       render: (text, record) => (
+        <>
         <Tooltip title="Edit">
           <EditOutlined
             onClick={() => handleEdit(record)}
             style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
           />
+        </Tooltip> 
+
+        <Tooltip title="Delete">
+          <Popconfirm
+            title="Are you sure you want to delete this item?"
+            onConfirm={() => deleteField(record)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <DeleteOutlined style={{ color: 'red', marginRight: 8, fontSize: '14px', cursor: 'pointer' }} />
+          </Popconfirm>
         </Tooltip>
+
+        </>
+
+        
       ),
+
     },
+   
   ];
 
   console.log(fieldsData);
