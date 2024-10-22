@@ -3,6 +3,7 @@ import React from 'react';
 import OrganisationSetup from './OrganisationSetup'; // Import the new component
 import CustomTabs from './CustomTabs';
 import UserComponent from './User';
+import Recyclebin from './RecycleBin';
 
 const MenuContent = ({ selectedItem }) => {
   switch (selectedItem) {
@@ -12,6 +13,8 @@ const MenuContent = ({ selectedItem }) => {
       return <UserComponent />; // Component for Settings
     case 'Custom Tabs':
       return <Tabs />; // Component for Reports
+    case 'Recycle bin':
+      return <Recyclebin/>  
     default:
       return <div>Select an item from the sidebar</div>;
   }

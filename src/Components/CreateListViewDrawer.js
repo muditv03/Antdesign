@@ -12,12 +12,49 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
   const [objectName, setObjectName] = useState([]);
   const [fields, setFields] = useState([]); // State to store fetched fields
   const [selectedFields, setSelectedFields] = useState([]); 
-  const [filters, setFilters] = useState([{ field: '', value: '' }]); // For managing filters
   const [lookupOptions, setLookupOptions] = useState([]); // For storing lookup options
+  const [logic, setLogic] = useState('');
+  const [operator, setOperator] = useState('AND');
+  const [isLogicEditable, setIsLogicEditable] = useState(false);
+  const [filters, setFilters] = useState([{ 1 :{field: '', value: '',displayValue:'' }}]); // For managing filters
+  const [valueOperator,SetValueOperator]=useState('');
+
+
+  const generateLogic = (filtersArray, operatorType) => {
+   
+    const logicstr=filtersArray.map((filter, index) => index + 1).join(` ${operatorType} `);
+    return logicstr;
+  };
 
   useEffect(() => {
-    console.log('selected list view in editing   ');
-    console.log(fields);
+    setObjectName(object.name);
+    fetchFields();
+  },[object]);
+ 
+
+  const isValidParentheses = (logic) => {
+    let stack = [];
+    for (let char of logic) {
+      if (char === '(') {
+        stack.push(char);
+      } else if (char === ')') {
+        if (stack.length === 0) {
+          return false; // Unmatched closing parenthesis
+        }
+        stack.pop(); // Match found, pop the last open parenthesis
+      }
+    }
+    return stack.length === 0; // Ensure all parentheses are closed
+  };
+
+  useEffect(() => {
+    form.setFieldsValue({
+        logic: logic, // Setting the field value whenever logic updates
+    });
+}, [logic]);
+
+  useEffect(() => {
+   
     if (selectedListView) {
       // Set form values if editing an existing list view
       const transformedFields = (selectedListView.fields_to_display || []).map((field) => {
@@ -28,33 +65,61 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
         return field; // Return the field as is if no '_id' suffix
       });
      
+     
       form.setFieldsValue({
         list_view_name: selectedListView.list_view_name,
         object_name: selectedListView.object_name,
+        logic:selectedListView.logic_string,
         fieldsToDisplay: transformedFields || [],
         sort_by: selectedListView.sort_by,
         sort_order: selectedListView.sort_order,
       });
       setSelectedFields(transformedFields || []);
+      setLogic(selectedListView.logic_string);
       
       // Populate filters
-      console.log(selectedListView.filters);
-      const existingFilters = selectedListView.filters 
-        ? Object.keys(selectedListView.filters).map((key) => ({
-            field: [key],
-            value: selectedListView.filters[key],
-          }))
-        : [{ field: '', value: '' }]; // Default filter structure if no filters exist
-  
-        console.log('filters while editing ');
-        console.log(existingFilters);
+      
+      const existingFilters = selectedListView.conditions
+      ? Object.entries(selectedListView.conditions).map(([key, { field, value }]) => {
+       
+          let operator='';
+          let actualValue='';
+         
+          if(Object.keys(value)[0]!=="0"){
+            operator = Object.keys(value)[0]; 
+            actualValue = value[operator]; 
+
+          }else{
+             actualValue = value; // Extract the actual value (e.g., '50')
+            
+          }
+          let op='';
+          if(operator!==''){
+            try{
+            SetValueOperator(operator.replace('$', '')); 
+            op=operator.replace('$', '');
+            }catch (error) {
+              // Handle the error gracefully
+              SetValueOperator(''); // or any default value
+          }
+          }else{
+            op='';
+          }
+          return {
+            field, 
+            value: value, 
+            displayValue: actualValue, 
+            operator:op
+          };
+      })
+      : [{ field: '', value: '', operator: '' }];
       setFilters(existingFilters); // Set filters state here
       fetchLookupRecordsForExistingFilters(existingFilters); // Fetch lookup records for existing filters
-
     } else {
       // Reset form and filters if creating a new list view
       form.resetFields();
-      setFilters([{ field: '', value: '' }]); // Reset filters state
+      setFilters([{ field: '', value: '',displayValue:'' }]); // Reset filters state
+      setLogic(''); // Reset logic when creating a new view
     }
   }, [selectedListView, form]);
   
@@ -69,15 +134,17 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
         { 'Content-Type': 'application/json' },
         'GET'
       );
-      const response = await apiService.makeCall();
-      console.log('response is ');
-      console.log(response);
-      // Assuming the API returns an array of field objects with 'name' and 'label' keys
-      const filteredFields = response.filter(field => field.name !== 'recordCount'); // Filter out 'recordCount'
+      apiService.makeCall()
+      .then(response =>{
+        console.log('response is ');
+        console.log(response);
+        // Assuming the API returns an array of field objects with 'name' and 'label' keys
+        const filteredFields = response.filter(field => field.name !== 'recordCount'); // Filter out 'recordCount'
 
-      // Update the state with the filtered fields
-      setFields(filteredFields); // Adjust as per API response structure
-      console.log(fields);
+        // Update the state with the filtered fields
+        setFields(filteredFields); // Adjust as per API response structure
+
+    })
     } catch (error) {
       console.error('Error fetching fields:', error);
     }
@@ -86,22 +153,16 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
 
   // New function to fetch lookup records based on existing filters
   const fetchLookupRecordsForExistingFilters = (existingFilters) => {
-    console.log('filters are');
-    console.log(existingFilters);
-    console.log('fields are');
-    console.log(fields);
+   
     existingFilters.forEach(filter => {
-      console.log('console in filtering fields');
-      const selectedField = fields.find(field => Array.isArray(filter.field) &&  (filter.field).includes(field.name));
-
-      console.log(selectedField);
+      const selectedField = fields.find(field =>   field.name === filter.field);
       if (selectedField && selectedField.type === 'lookup') {
-        console.log('filtering lookup fields');
-        console.log(selectedField.name);
+     
         fetchLookupRecords(selectedField.name); // Fetch records for lookup fields
       }
     });
   };
+
     // Function to fetch records for the lookup field
     const fetchLookupRecords = async (objectName) => {
         try {
@@ -116,8 +177,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
             value: record._id, // Set _id as value
             label: record.Name, // Set Name as label
           }));
-          console.log('lookup response are ');
-          console.log(records);
+        
           setLookupOptions(records); // Set options for the lookup field
         } catch (error) {
           console.error('Error fetching lookup records:', error);
@@ -133,22 +193,43 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
   };
 
   const handleAddFilter = () => {
-    setFilters([...filters, { field: '', value: '' }]);
+    const len=filters.length + 1;
+    SetValueOperator('');
+    setFilters([...filters, { len:{ field: '', value: '',displayValue:'' }}]);
+    setLogic(generateLogic(filters,operator));
   };
 
   const handleRemoveFilter = (index) => {
+    console.log('index after removing is ');
+    console.log(index);
     const updatedFilters = [...filters];
     updatedFilters.splice(index, 1);
+    SetValueOperator('');
     setFilters(updatedFilters);
+    setLogic(generateLogic(updatedFilters,operator));
   };
 
-  // Handle value change for filters
+  const handleValueOpertorChange =(index,value)=>{
+    const updatedFilters = [...filters];
+    updatedFilters[index]["operator"]=value;
+    updatedFilters[index]["value"]='';
+    updatedFilters[index]["displayValue"]='';
+    SetValueOperator(value);
+    setFilters(updatedFilters);
+  }
+
+  // Handle value change for flters
   const handleValueChange = (index, value) => {
     const updatedFilters = [...filters];
-    console.log('filters');
-    console.log(filters);
-    updatedFilters[index].value = value;
-    console.log(updatedFilters);
+     if (valueOperator) {
+      updatedFilters[index]["value"] = { [`$${valueOperator}`]: value }; 
+      updatedFilters[index]["displayValue"]=value;
+      updatedFilters[index]["operator"]=valueOperator;
+      }else {
+          updatedFilters[index]["value"] =value; 
+          updatedFilters[index]["displayValue"]=value;
+          updatedFilters[index]["operator"]='';
+      }
     setFilters(updatedFilters);
   };
 
@@ -156,13 +237,17 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
 
     console.log('handle filter change is called');
     const updatedFilters = [...filters];
-    updatedFilters[index][key] = value;
+    console.log(updatedFilters);
+    console.log(value);
+    console.log(updatedFilters[index][key]);
+    updatedFilters[index][key] = value[value.length-1];
+    console.log(updatedFilters);
     console.log('field while consoling value is ');
+
     // If field type is 'lookup', fetch records for that field's object
     console.log('fields in handle filter change is ');
     console.log(fields);
-
-    const selectedField = fields.find(field => Array.isArray(value) &&  value.includes(field.name));
+    const selectedField = fields.find(field => value.includes(field.name));
     console.log('selected field is ');
     console.log(selectedField);
     if (selectedField && selectedField.type === 'lookup') {
@@ -171,30 +256,62 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       fetchLookupRecords(selectedField.name); // Pass object name to fetch records
     }
     setFilters(updatedFilters);
+    setLogic(generateLogic(filters,operator));
+
   };
 
+  const handleOperatorChange = (value) => {
+    setOperator(value);
+    if (value !== 'custom') {
+      setLogic(generateLogic(filters, value));
+   
+      setIsLogicEditable(false);
+    } else {
+      setIsLogicEditable(true);
+    }
+  };
 
   const onFinish = async (values) => {
-    const filterObj = filters.reduce((acc, filter) => {
-      if (filter.field && filter.value) {
-        const length=filter.field.length;
-        console.log(length);
-        console.log(filter.field);
-       
-        acc[filter.field[length-1]] = filter.value;
+     //Check if any filter is missing either field or value
 
-        
+     if (!isValidParentheses(logic)) {
+      message.error('Invalid logic: Parentheses are not balanced.');
+      return; // Stop submission if parentheses are not balanced
+    }
+  
+
+     let isValid = true;
+     filters.forEach((filter, index) => {
+       if (!filter.field) {
+         isValid = false;
+         // Show error message for the respective filter
+         message.error(`Please enter field for filter ${index + 1}`);
+       }
+       else if(filter.operator && !filter.value){
+        isValid = false;
+        // Show error message for the respective filter
+        message.error(`Please enter value for filter ${index + 1}`);
+       }
+     });
+   
+     if (!isValid) {
+       return; // Stop the submission if validation fails
+     }
+
+
+    
+    const filterObj = filters.reduce((acc, filter, index) => {
+      if (filter.field) {
+        acc[index + 1] = {
+          field: filter.field,
+          value: filter.value
+        };
       }
       return acc;
     }, {});
 
 
-    console.log('filter is ');
-    console.log(filterObj);
-
-    console.log('form values are ');
-    console.log( values);
-
+   
     const adjustedFields = selectedFields.map((field) => {
       const selectedField = fields.find((f) => f.name === field);
       if (selectedField && selectedField.type === 'lookup') {
@@ -203,12 +320,12 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       return field;
     });
 
-    console.log('object name in body is'+ objectName);
     const body = {
       mt_list_view: {
         object_name: objectName,
         list_view_name: values.list_view_name,
-        filters: filterObj,
+        logic_string:logic,
+        conditions: filterObj,
         fields_to_display: adjustedFields,
         sort_by: values.sort_by,
         sort_order: values.sort_order,
@@ -219,12 +336,11 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
     console.log(body);
  
     try { 
-      console.log('selected list view');
-      console.log(selectedListView);
+     
       if (selectedListView?._id) {
         // For updating an existing list view
         const apiServiceEdit = new ApiService(
-          `${BASE_URL}/edit_list_view/${selectedListView?._id}`,  // Use the selected record's ID
+          `${BASE_URL}/edit_list_view/${selectedListView?._id}`,  
           { 'Content-Type': 'application/json' },
           'PATCH', 
           body // Pass the request body
@@ -234,8 +350,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       } 
       else {
         // For creating a new list view
-        console.log('request while creating ')
-        console.log(JSON.stringify(body));
+    
         const apiService = new ApiService(
           `${BASE_URL}/create_list_view`, 
           { 'Content-Type': 'application/json' },
@@ -248,22 +363,12 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       }
        fetchListViews(); // Refresh the list views
     } catch (error) {
-      console.error('Error creating/updating list view:', error);
       message.error('Failed to process the list view. Please try again.');
     }
     
     form.resetFields();
     onClose();
   }; 
-
-
-  useEffect(() => {
-    console.log(JSON.stringify(object));
-    console.log('object name is ');
-    console.log(object.name);
-    setObjectName(object.name);
-    fetchFields(); // Call to fetch fields on object name change
-  },[object]);
 
   return (
     <Drawer
@@ -274,7 +379,10 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       bodyStyle={{ paddingBottom: 80 }}
       footer={
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-          <Button onClick={onClose}>
+          <Button onClick={() => {
+            form.resetFields(); // Reset form fields when Cancel is clicked
+            onClose(); // Close the drawer
+          }}>
             Cancel
           </Button>
           <Button onClick={() => form.submit()} type="primary">
@@ -330,17 +438,16 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
           <h3>Filters</h3>
           {filters.map((filter, index) => (
             <Row key={index} gutter={16} align="middle" style={{ marginBottom: '10px' }}>
-              <Col span={10}>
+              <Col span={1} style={{width:'100%'}}>{index + 1}.</Col> {/* Display the filter number */}
+              <Col span={7}>
                 <Cascader
-                  allowClear
+                  
                   placeholder="Select field"
                   value={filter.field}
-                  onChange={(value) =>{
-                     console.log(value)
+                  onChange={(value) =>
+                    
                      handleFilterChange(index, 'field', value)}
-                  }
-                  style={{ width: '100%' }} // Ensuring full width for the select field
-                  
+                  style={{ width: '100%' }}
                   options={fields.map((field) =>
                     field.type === 'Address'
                       ? {
@@ -352,19 +459,36 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
                             { value: `${field.name}.state`, label: 'State' },
                             { value: `${field.name}.postalcode`, label: 'Postal Code' },
                             { value: `${field.name}.country`, label: 'Country' },
-
                           ],
                         }
                       : { value: field.name, label: field.label }
-                  )}            
-                />
-              </Col> 
-              <Col span={10}>
-              {Array.isArray(filter.field) && fields.some((f) => filter.field.includes(f.name) && f.type === 'lookup') ? (
+                  )}                    
+                   />
+              </Col>
+              <Col span={7}>
+                  <Select 
+                  name="ValueOperator"
+                  Label="Select operator"
+                  placeholder="Select operator"
+                  style={{ width: '100%' }}
+                  onChange={(e)=>handleValueOpertorChange(index,e)}
+                  value={filter.operator}
+
+                  >
+                  <Option value='gt'>Greater than</Option>
+                  <Option value='gte'>Greater than equal to</Option>
+                  <Option value='lt'>Less than</Option>
+                  <Option value='lte'>Less than equal to</Option>
+                  <Option value=''>Equal to</Option>
+                  <Option value='ne'>Not Equal to</Option>
+                  </Select>
+                  </Col>
+              <Col span={7}>
+              {fields.find((f) => f.name === filter.field)?.type === 'lookup' ? (
                   <Select
                     allowClear
                     placeholder="Select value"
-                    value={filter.value}
+                    value={filter.displayValue}
                     style={{ width: '100%' }} // Ensuring full width for the select field
                     onChange={(value) => handleValueChange(index, value)}
                     options={lookupOptions}
@@ -372,22 +496,41 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
                 ) : ( 
                   <Input
                     placeholder="Enter value"
-                    value={filter.value}
+                    value={filter.displayValue}
                     onChange={(e) => handleValueChange(index, e.target.value)}
                   />
                 )}
               </Col>
-              <Col span={4}>
+             
+              <Col span={1}>
                 <MinusCircleOutlined onClick={() => handleRemoveFilter(index)} />
               </Col>
+             
             </Row>
           ))}
+
           <Button type="dashed" onClick={handleAddFilter} block icon={<PlusOutlined />}>
             Add Filter
           </Button>
 
 
-       
+        <h3>Operator</h3>
+          <Form.Item name="operator" label="Operator">
+            <Select defaultValue="AND"  onChange={handleOperatorChange}>
+              <Option value="AND">AND</Option>
+              <Option value="OR">OR</Option>
+              <Option value="custom">Custom</Option>
+            </Select>
+          </Form.Item>
+
+            <Input
+              label="Enter logic"
+              defaultValue={logic}
+              value={logic}
+              onChange={(e) => setLogic(e.target.value)} 
+              disabled={!isLogicEditable}
+              placeholder="Logic"
+            />
       </Form>
       </Card>
     </Drawer>
