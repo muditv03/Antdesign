@@ -41,7 +41,7 @@ const CreateListView = ({ object }) => {
             setLoading(false); // Set loading to false after the API call
         }
     };
-    useEffect(() => {
+    useEffect(() => { 
         fetchListViews(); // Call the fetch function
     }, [object.name]); // Run effect when the object name changes
 
@@ -82,15 +82,23 @@ const CreateListView = ({ object }) => {
           },
         {
             title: 'Filters',
-            dataIndex: 'filters', // Display filters
-            key: 'filters',
+            dataIndex: 'conditions', // Display filters
+            key: 'conditions',
             render: (filters) => {
-                // Render filters as a string
-                return Object.entries(filters)
-                    .map(([key, value]) => `${key}: ${value}`)
-                    .join(', ');
-            }
+              // Check if filters is an object and has entries
+              if (filters && typeof filters === 'object') {
+                  return Object.entries(filters)
+                      .map(([key, { field, value }]) => `${key}: ${field} : ${JSON.stringify(value)}`) // Adjusted to access field and value
+                      .join(', ');
+              }
+              return ''; // Return an empty string if there are no filters
+          }
         },
+        {
+          title: 'Logic for filters',
+          dataIndex: 'logic_string', // Using sort_by from the response
+          key: 'logic_string',
+      },
         {
             title: 'Sort By',
             dataIndex: 'sort_by', // Using sort_by from the response

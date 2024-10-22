@@ -44,6 +44,7 @@ const ObjectSetupDetail = () => {
   const [selectedListView, setSelectedListView] = useState(null); // State to store the selected list view for editing
   const[isListViewDrawerVisible,setIsListViewDrawerVisible]=useState(false);
   const[objectForListView,setObjectForListView]=useState();
+  const [ListViewInDrawer,SetListViewInDrawer]=useState();
 
 
   const fetchRecords = (selectedViewId) => {
@@ -63,16 +64,17 @@ const ObjectSetupDetail = () => {
         console.log('Object name:', objName);
          setObjectName(objName); 
         let apiServiceForRecords;
-      console.log('selected view id is '+selectedViewId);
+        console.log('selected view id is '+selectedViewId);
         // Check if a selected list view exists
         if (selectedViewId) {
           console.log('id of list view is '+selectedViewId);
           // If selected list view is present, use the new API call
           apiServiceForRecords = new ApiService(
-            `${BASE_URL}/mt_list_views/${selectedViewId}/records`,
+            `${BASE_URL}/mt_list_views/${selectedViewId?._id}/records`,
             { 'Content-Type': 'application/json' },
             'GET' 
           ); 
+
         } else {
           console.log('object name in else object')
           // Otherwise, use the default records API call
@@ -98,25 +100,36 @@ const ObjectSetupDetail = () => {
           console.log(fieldsResponse);
           console.log(recordsResponse);
           
-           
-       // Get the field names from the recordsResponse
-      const recordFieldNames = Object.keys(recordsResponse[0] || {}); // First record as an example
-
+        
+         if(selectedViewId?._id){ 
+        // Get the field names from the recordsResponse
+        const recordFieldNames = Object.keys(recordsResponse[0] || {}); // First record as an example
+        console.log('record field names are');
+        console.log(recordFieldNames);
+        console.log('fields to display of selected list view');
+        console.log(selectedViewId?.fields_to_display);
+        const fieldOfListView=selectedViewId?.fields_to_display;
+        console.log('fields of list view are');
+        
         // Filter fields from fieldsResponse based on whether their name exists in the recordFieldNames
         const matchingFields = fieldsResponse.filter(field => {
           if (field.type === 'lookup') {
             // Check if the field name is 'User', then match with fieldName + '_id'
            
             // Otherwise, match with fieldName.toLowerCase() + '_id'
-            return recordFieldNames.includes(field.name + '_id');
+            return fieldOfListView.includes(field.name + '_id');
           }
           // If not a lookup field, match directly by field name
-          return recordFieldNames.includes(field.name);
+          return fieldOfListView.includes(field.name);
         });
 
-        // Set only the matching fields
-        setFieldsData(matchingFields);
-  
+          // Set only the matching fields
+          setFieldsData(matchingFields);
+        }
+        else{
+          setFieldsData(fieldsResponse);
+
+        }
           // Identify and set the lookup field name
           const lookupField = fieldsResponse.find(field => field.type === 'lookup');
           if (lookupField) {
@@ -172,15 +185,16 @@ const ObjectSetupDetail = () => {
     console.log(value);
     console.log(listViews);
     const matchedView = listViews.find(view => view._id === value);
+    console.log('list view');
     console.log(matchedView);
-   
+
     setSelectedListView(matchedView);
     
     setSelectedView(value);
     console.log(value);
     if (value) {
       console.log('console in handle view change');
-      fetchRecords(value); // Fetch records for the selected list view
+      fetchRecords(matchedView); // Fetch records for the selected list view
     } else {
       fetchRecords(); // Fetch all records if "All Records" is selected
     }
@@ -687,7 +701,7 @@ const ObjectSetupDetail = () => {
 
   const showCreateListDrawer = (listView) => {
     console.log(listView);
-    setSelectedListView(listView); // Set the selected list view for editing
+    SetListViewInDrawer(listView); // Set the selected list view for editing
     setIsListViewDrawerVisible(true); // Show the drawer
   };
  
@@ -788,7 +802,7 @@ const ObjectSetupDetail = () => {
         onClose={closeCreateListDrawer}
         object={objectForListView}
         fetchListViews={fetchListViews}
-        selectedListView={selectedListView} // Pass selected list view for editing
+        selectedListView={ListViewInDrawer} // Pass selected list view for editing
 
       />
 
@@ -811,13 +825,3 @@ const ObjectSetupDetail = () => {
 };
 
 export default ObjectSetupDetail;
-
-
-
-
-
-
-
-
-
-

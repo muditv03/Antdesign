@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Drawer, Form, Input, Button, message, Select, Card, Spin, Checkbox,Tooltip } from 'antd';
+import { Drawer, Form, Input, Button, message, Select, Card, Spin, Checkbox,Tooltip,Row,Col } from 'antd';
 import { BASE_URL } from './Constant';
 import { InfoCircleOutlined } from '@ant-design/icons'; // Import the InfoCircle icon
 
 import ApiService from './apiService'; // Import ApiService class
 import pluralize from 'pluralize';
+import TextArea from 'antd/es/input/TextArea';
 
 const { Option } = Select;
 
@@ -12,10 +13,17 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   const [form] = Form.useForm();
   const [fieldType, setFieldType] = useState('');
   const [isAutoNumber, setIsAutoNumber] = useState(false); // State for auto number checkbox
+  const [isFormula, setIsFormula] = useState(false); // State for auto number checkbox
   const [picklistValues, setPicklistValues] = useState([]);
   const [availableObjects, setAvailableObjects] = useState([]);
   const [loading, setLoading] = useState(false); // Spinner state
   const isEditMode = !!editField; // Check if it's edit mode
+  const [fieldForFormula,setFieldsforFormula]=useState([]);
+  const [formula,setFormula]=useState('');
+  const [isValidFormula, setIsValidFormula] = useState(null); // null means not checked yet
+  const [validationMessage, setValidationMessage] = useState('');
+
+
 
   // Utility function to sanitize label and create API name
   const generateApiName = (label) => {
@@ -28,9 +36,11 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   // Handle label change and update API name
   const handleLabelChange = (e) => {
     const label = e.target.value;
+    const currentApiName = form.getFieldValue('name');
+
 
     // Only set the name if the field is not a lookup
-    if (!isEditMode && fieldType !== 'lookup') {
+    if (!isEditMode && !currentApiName) {
         form.setFieldsValue({
             name: generateApiName(label), // Set the API name based on the sanitized label
         });
@@ -39,7 +49,6 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
 
   // Fetch available objects for the lookup field
   useEffect(() => {
-    if (fieldType === 'lookup') {
       const fetchAvailableObjects = async () => {
         try {
           const objectService = new ApiService(`${BASE_URL}/mt_objects`, {}, 'GET');
@@ -51,11 +60,10 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         }
       };
       fetchAvailableObjects();
-    } else {
-      setAvailableObjects([]);
-    }
-  }, [fieldType]);
+    
+  }, [fieldType]); 
 
+ 
   // Initialize the form in edit mode
   useEffect(() => {
     if (editField) {
@@ -81,7 +89,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
 
   const handleFinish = async (values) => {
     setLoading(true); // Show spinner
-
+ 
     const newField = {
       label: values.label,
       name: values.name,
@@ -89,7 +97,8 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       mt_object_id: mtObjectId,
       iseditable: values.iseditable || true,
       iswriteable: values.iswriteable || true,
-      is_auto_number: isAutoNumber, // Include isAutoNumber in the new field data
+      is_auto_number: isAutoNumber, 
+      is_formula:isFormula
       
     };
 
@@ -101,6 +110,12 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
     if (isAutoNumber) {
       newField.auto_number_format = values.format; // Add starting point
       newField.auto_number_starting = values.startingPoint;     // Add ending point
+    }
+
+    console.log('formula is ');
+    console.log(isFormula);
+    if(isFormula){
+      newField.formula=formula;
     }
 
     if (values.type === 'Picklist') {
@@ -130,6 +145,8 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
           mt_field: newField,
         });
         const response = await fieldService.makeCall();
+        console.log('is formula before sending is ');
+        console.log(isFormula);
         onAddField({
           key: Date.now(),
           label: values.label,
@@ -137,6 +154,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
           type: values.type,
           iseditable: values.iseditable,
           iswriteable: values.iswriteable,
+          is_formula:isFormula,
           is_auto_number: isAutoNumber,
           ...(isAutoNumber && { auto_number_format: values.format, auto_number_starting: values.startingPoint }),
           ...(values.type === 'Picklist' && { picklist_values: picklistValues }),
@@ -147,7 +165,8 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
           ...(values.type==='lookup' && {
             parent_object_name:values.parent_object_name,
             relationship_name:values.relationship_name
-           }) 
+           }), 
+          ...(isFormula  && {formula:formula}) 
          
         });
 
@@ -167,6 +186,28 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
     }
   };
 
+  const handleFetchFeildsFromOjbect =async (object)=>{
+    console.log(object);
+    const fieldCallout = new ApiService(`${BASE_URL}/mt_fields/object/${object}`, {}, 'GET');
+    const fieldsResponse = await fieldCallout.makeCall();
+    const filteredFields = fieldsResponse.filter(field => field.name !== 'recordCount');
+    console.log(filteredFields);
+    setFieldsforFormula(filteredFields);
+  };
+
+  
+  const handleFormulaChange = (value)=>{
+    console.log(value);
+    console.log(formula.concat(value));
+    setFormula(formula.concat(value));
+  };
+
+  const validateFormula = (value) => {
+    console.log('final formula is ');
+    console.log(value);
+  };
+
+
   return (
     <Drawer
       title={<div style={{ fontSize: '20px', fontWeight: 'bold' }}>{isEditMode ? 'Edit Field' : 'Create New Field'}</div>}
@@ -175,7 +216,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       visible={visible}
       bodyStyle={{ paddingBottom: 80 }}
       headerStyle={{
-        padding: '20px 16px',
+        padding: '20px 16px', 
         background: '#f0f2f5',
         borderBottom: '1px solid #e8e8e8',
       }}
@@ -285,6 +326,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             </Form.Item>
 
             {fieldType === 'String' && ( // Only show for String type
+            <>
               <Form.Item
               name="autoNumber">
                 <Checkbox
@@ -294,6 +336,78 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                   Auto Number
                 </Checkbox>
               </Form.Item>
+
+              <Form.Item
+                name="is_formula">
+                <Checkbox
+                  checked={isFormula}
+                  onChange={(e) => setIsFormula(e.target.checked)}
+                >
+                  Is Formula
+                </Checkbox>
+              </Form.Item>
+             
+              </>
+            )}
+
+            {isFormula && (
+              <>
+              <Row gutter={16}>
+              <Col span={8}> 
+              <Form.Item
+              name="object_for_formula"
+              label="Select Object">
+               <Select placeholder="Select an object" onChange={(e) => handleFetchFeildsFromOjbect(e)}>
+                  {availableObjects.map((object) => (
+                    <Option key={object.id} value={object.name}>
+                      {object.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              </Col>
+              <Col span={8}> 
+              <Form.Item
+              name="field_for_formula"
+              label="Insert field"
+             >
+              <Select placeholder="Insert Field" onChange={(e)=> handleFormulaChange(e)}>
+              {fieldForFormula.map((field) => (
+                    <Option key={field.id} value={field.name}>
+                      {field.name}
+                    </Option>
+                  ))}
+
+              </Select>
+              </Form.Item>
+              </Col>
+              <Col span={8}> 
+              <Form.Item
+              name="operator_for_formula"
+              label="Insert Operator"
+              >
+
+                <Select  placeholder="Inset Operator" onChange={(e)=> handleFormulaChange(e)}>
+                <Option value="+">+ Add</Option>
+                <Option value="-">- Subtract</Option>
+                <Option value="*">* Multiply</Option>
+                <Option value="/">/ Divide</Option>
+                <Option value="^">^ Exponentiation</Option>
+                <Option value="(">( Open Paranthesis</Option>
+                <Option value=")">) Close Paranthesis</Option>
+                </Select>
+              </Form.Item>
+              </Col>
+
+              </Row>
+
+               
+              <TextArea label="Formula" value={formula} onChange={e=> setFormula(e.target.value)} placeholder="Enter formula" />
+                <Button type="primary" onClick={validateFormula(formula)} style={{ marginRight: 8 }}>
+                  Check Status
+                </Button>
+
+              </>
             )}
 
             {isAutoNumber && ( // Only show these fields if isAutoNumber is checked
@@ -362,7 +476,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             name="parent_object_name"
             label="Parent Object Name"
             rules={[{ required: true, message: 'Please enter parent object name' }]}
-            
+             
               >
                 <Select placeholder="Select an object" disabled={isEditMode}>
                   {availableObjects.map((object) => (

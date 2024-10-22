@@ -61,7 +61,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       addObjectTab: values.addObjectTab,
       icon: values.icon,
     };
-
+ 
     try {
       let response;
       if (editingRecord && editingRecord.key) {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Card,Input, Button, Row, Col, Typography, Avatar, Select, Tabs, Checkbox, message, Space, DatePicker } from 'antd';
+import { Form, Card,Input, Button, Row, Col, Typography, Avatar, Select, Tabs, Checkbox, message, Space, DatePicker,Collapse } from 'antd';
 import { useParams } from 'react-router-dom';
 import { EditOutlined } from '@ant-design/icons';
 import RelatedRecord from './RelatedRecords';
@@ -18,6 +18,8 @@ const { TextArea } = Input;
 const { Option } = Select;
 const { Title } = Typography;
 const { TabPane } = Tabs;
+const { Panel } = Collapse;
+
  
 const RecordDetail = () => {
   const { id, objectid, objectName } = useParams();
@@ -33,96 +35,96 @@ const RecordDetail = () => {
 
  
  
-  const fetchRecords = async () => {
-    try {
-      // Fetch the record data
-      const apiService = new ApiService(`${BASE_URL}/fetch_single_record/${objectName}/${id}`, {}, 'GET');
-      const responseData = await apiService.makeCall();
-      console.log('record fetched is '+JSON.stringify(responseData)); // Process the data as needed
-      const recordData = responseData;
-      setRecordName(responseData.Name);
+    const fetchRecords = async () => {
+      try {
+        // Fetch the record data
+        const apiService = new ApiService(`${BASE_URL}/fetch_single_record/${objectName}/${id}`, {}, 'GET');
+        const responseData = await apiService.makeCall();
+        console.log('record fetched is '+JSON.stringify(responseData)); // Process the data as needed
+        const recordData = responseData;
+        setRecordName(responseData.Name);
 
 
-      const fieldCallout = new ApiService(`${BASE_URL}/mt_fields/object/${objectName}`, {}, 'GET');
-      const fieldsResponse = await fieldCallout.makeCall();
-      const filteredFields = fieldsResponse.filter(field => field.name !== 'recordCount');
+        const fieldCallout = new ApiService(`${BASE_URL}/mt_fields/object/${objectName}`, {}, 'GET');
+        const fieldsResponse = await fieldCallout.makeCall();
+        const filteredFields = fieldsResponse.filter(field => field.name !== 'recordCount');
 
-      console.log('fieldresponse :', fieldsResponse);
-      setFields(filteredFields);
-      console.log(JSON.stringify(responseData));
-      // Format date fields in recordData
-      fieldsResponse.forEach(field => {
-        if (field.type === 'Date' && recordData[field.name]) {
-          // Format the date using dayjs to 'DD/MM/YYYY'
-          recordData[field.name] = dayjs(recordData[field.name]).format(DateFormat);
+        console.log('fieldresponse :', fieldsResponse);
+        setFields(filteredFields);
+        console.log(JSON.stringify(responseData));
+        // Format date fields in recordData
+        fieldsResponse.forEach(field => {
+          if (field.type === 'Date' && recordData[field.name]) {
+            // Format the date using dayjs to 'DD/MM/YYYY'
+            recordData[field.name] = dayjs(recordData[field.name]).format(DateFormat);
+          }
+          if (field.type === 'DateTime' && recordData[field.name]) {
+            // Assuming recordData[field.name] is in UTC
+            console.log(recordData[field.name]);
+            const localDateTime = dayjs(recordData[field.name]).utc().format('DD/MM/YYYY HH:mm:ss'); // Convert to local time
+            //console.log('formatted date time is ' + localDateTime.format('DD/MM/YYYY HH:mm:ss'));
+            recordData[field.name] = localDateTime; // Store formatted date-time
         }
-        if (field.type === 'DateTime' && recordData[field.name]) {
-          // Assuming recordData[field.name] is in UTC
-          console.log(recordData[field.name]);
-          const localDateTime = dayjs(recordData[field.name]).utc().format('DD/MM/YYYY HH:mm:ss'); // Convert to local time
-          //console.log('formatted date time is ' + localDateTime.format('DD/MM/YYYY HH:mm:ss'));
-          recordData[field.name] = localDateTime; // Store formatted date-time
+        // if(field.type==='Address'){
+        //   const address=recordData[field.name];
+        //   console.log('helu');
+        //   console.log(address);
+        //   console.log(address.street);
+          
+        // }
+        
+        }); 
+
+      
+        // Process lookup fields to fetch names
+        const lookupPromises = fieldsResponse
+          .filter(field => field.type === 'lookup' && recordData[field.name+ '_id'])
+          .map(async field => {
+            let lookupId;
+          
+            lookupId = recordData[field.name + '_id'];
+
+          
+            // const lookupResponse = await axios.get(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`);
+
+            const fetchSingleRec = new ApiService(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`, {}, 'GET');
+            const lookupResponse = await fetchSingleRec.makeCall();
+
+            return { [field.name]: lookupResponse.Name };
+          });
+
+        const lookupResults = await Promise.all(lookupPromises);
+        const lookupNamesMap = lookupResults.reduce((acc, lookupName) => ({ ...acc, ...lookupName }), {});
+        setLookupNames(lookupNamesMap);
+
+        // Set the form values with transformed data
+        setRecord(recordData);
+        form.setFieldsValue(recordData);
+
+        // Store initial values
+        setInitialValues(recordData);
+
+        // Fetch lookup field options
+        const lookupFieldPromises = fieldsResponse
+          .filter(field => field.type === 'lookup' )
+          .map(async field => {
+            const lookupFieldName = field.name;
+            // const lookupResponse = await axios.get(`${BASE_URL}/fetch_records/${lookupFieldName}`);
+
+            const fetchRec = new ApiService(`${BASE_URL}/fetch_records/${lookupFieldName}`, {}, 'GET');
+            const lookupResponse = await fetchRec.makeCall();
+
+            return { [lookupFieldName]: lookupResponse };
+          });
+
+        const lookupOptionsResults = await Promise.all(lookupFieldPromises);
+        const lookupOptionsMap = lookupOptionsResults.reduce((acc, lookupOption) => ({ ...acc, ...lookupOption }), {});
+        setLookupOptions(lookupOptionsMap);
+
+      } catch (err) {
+        console.error('Error fetching records', err);
       }
-      // if(field.type==='Address'){
-      //   const address=recordData[field.name];
-      //   console.log('helu');
-      //   console.log(address);
-      //   console.log(address.street);
-        
-      // }
-       
-      }); 
-
-     
-      // Process lookup fields to fetch names
-      const lookupPromises = fieldsResponse
-        .filter(field => field.type === 'lookup' && recordData[field.name+ '_id'])
-        .map(async field => {
-          let lookupId;
-        
-          lookupId = recordData[field.name + '_id'];
-
-        
-          // const lookupResponse = await axios.get(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`);
-
-          const fetchSingleRec = new ApiService(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`, {}, 'GET');
-          const lookupResponse = await fetchSingleRec.makeCall();
-
-          return { [field.name]: lookupResponse.Name };
-        });
-
-      const lookupResults = await Promise.all(lookupPromises);
-      const lookupNamesMap = lookupResults.reduce((acc, lookupName) => ({ ...acc, ...lookupName }), {});
-      setLookupNames(lookupNamesMap);
-
-      // Set the form values with transformed data
-      setRecord(recordData);
-      form.setFieldsValue(recordData);
-
-      // Store initial values
-      setInitialValues(recordData);
-
-      // Fetch lookup field options
-      const lookupFieldPromises = fieldsResponse
-        .filter(field => field.type === 'lookup' )
-        .map(async field => {
-          const lookupFieldName = field.name;
-          // const lookupResponse = await axios.get(`${BASE_URL}/fetch_records/${lookupFieldName}`);
-
-          const fetchRec = new ApiService(`${BASE_URL}/fetch_records/${lookupFieldName}`, {}, 'GET');
-          const lookupResponse = await fetchRec.makeCall();
-
-          return { [lookupFieldName]: lookupResponse };
-        });
-
-      const lookupOptionsResults = await Promise.all(lookupFieldPromises);
-      const lookupOptionsMap = lookupOptionsResults.reduce((acc, lookupOption) => ({ ...acc, ...lookupOption }), {});
-      setLookupOptions(lookupOptionsMap);
-
-    } catch (err) {
-      console.error('Error fetching records', err);
-    }
-  };
+    };
 
   useEffect(() => {
     fetchRecords();
@@ -200,6 +202,7 @@ const RecordDetail = () => {
     setIsEditable(false);
   };
 
+
   const renderFieldWithEdit = (field, selectedDate, setSelectedDate) => {
     const { name, label, type, picklist_values, isTextArea } = field;
   
@@ -260,6 +263,7 @@ const RecordDetail = () => {
       // form.setFieldValue({parentField:newAddress, childField: undefined});
     }
    
+    
     return (
       <div
         className="editable-field-container"
@@ -571,6 +575,7 @@ const RecordDetail = () => {
                   : lookupNames[name] || form.getFieldValue(name) }
           </div>
         )}
+       
         {!isEditable && (
           <Avatar
             icon={<EditOutlined />}
@@ -585,6 +590,7 @@ const RecordDetail = () => {
             onClick={handleEditClick}
           />
         )}
+
       </div>
     );
   };
@@ -608,6 +614,7 @@ const RecordDetail = () => {
                 <Col key={index} xs={24} sm={12} style={{marginBottom:-5}}>
                   <Form.Item label={field.label} style={{ marginBottom: -1,padding:'0px' }}>
                     {renderFieldWithEdit(field,selectedDate, setSelectedDate)}
+                    {/* {renderSystemInformation(record.created_at, record.updated_at)} */}
                     </Form.Item>
                   
                 </Col>
@@ -623,9 +630,30 @@ const RecordDetail = () => {
                   Cancel
                 </Button>
               </Row>
-              
-               
             )}
+
+          <div className="system-info-section" style={{ 
+            marginTop: '20px' ,
+            wdith:'100%',          
+            display: 'flex',
+            position:'relative',
+            flexDirection:'column',
+
+            }}>
+            <Title level={3} style={{ marginTop: '0px' }}>System Information</Title>
+            <Row gutter={16}> {/* Add gutter for spacing between columns */}
+              <Col span={12}> {/* Set span to 12 for half width */}
+                <Form.Item label="Created At" style={{ marginBottom: 0 }}> {/* Prevent extra space below */}
+                  <Input style={{ border: 'none',borderBottom: '1px solid #ddd' , fontWeight: '500',padding:0 }} value={dayjs(record.created_at).format('DD/MM/YYYY HH:mm:ss')} />
+                </Form.Item>
+              </Col>
+              <Col span={12}> {/* Set span to 12 for half width */}
+                <Form.Item label="Updated At" style={{ marginBottom: 0 }}> {/* Prevent extra space below */}
+                  <Input style={{ border: 'none',borderBottom: '1px solid #ddd' , fontWeight: '500',padding:0  }} value={dayjs(record.updated_at).format('DD/MM/YYYY HH:mm:ss')} />
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
           </Form>
           </Card>
         </TabPane>

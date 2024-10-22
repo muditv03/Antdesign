@@ -6,6 +6,8 @@ const Menubar = ({ onSelect,selectedItem }) => {
     { key: 'Organisation Setup', label: 'Setup Home' },
     { key: 'Users', label: 'Users' },
     { key: 'Custom Tabs', label: 'Custom Tabs' },
+    { key: 'Recycle bin', label: 'Recycle bin' },
+
   ]; 
  
   return (

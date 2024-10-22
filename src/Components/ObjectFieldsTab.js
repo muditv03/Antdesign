@@ -4,7 +4,7 @@ import { Row, Col, Table, Button, message, Spin, Tooltip,Typography,Popconfirm }
 import CreateFieldDrawer from '../CreateFieldDrawer'; 
 import ApiService from '../apiService'; 
 import { BASE_URL } from '../Constant';
-import { EditOutlined,DeleteOutlined } from '@ant-design/icons';
+import { EditOutlined,DeleteOutlined,InfoCircleOutlined } from '@ant-design/icons';
 
 const {Title}=Typography;
 
@@ -130,11 +130,13 @@ const ObjectFieldTab = () => {
 
         <Tooltip title="Delete">
           <Popconfirm
-            title="Are you sure you want to delete this item?"
+            title="Are you sure you want to delete this field?"
             onConfirm={() => deleteField(record)}
             okText="Yes"
             cancelText="No"
           >
+            
+           
             <DeleteOutlined style={{ color: 'red', marginRight: 8, fontSize: '14px', cursor: 'pointer' }} />
           </Popconfirm>
         </Tooltip>
