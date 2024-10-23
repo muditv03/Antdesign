@@ -183,10 +183,10 @@ const RecordDetail = () => {
       fetchRecords();
     } catch (error) {
       //console.error('Error saving record'+ error.response.data[0]);
-      const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Failed to update record due to an unknown error';
-      console.log('Full error:', JSON.stringify(error));
-
-      message.error(errorMessage);  
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to save record due to an unknown error';
+      message.error(errorMessage);
     }
      
   };

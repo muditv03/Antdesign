@@ -180,8 +180,10 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
         
           setLookupOptions(records); // Set options for the lookup field
         } catch (error) {
-          console.error('Error fetching lookup records:', error);
-        }
+          const errorMessage = error && typeof error === 'object'
+          ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+          : 'Failed to save field due to an unknown error';
+          message.error(errorMessage);        }
       };
 
   const handleFieldChange = (value) => {
@@ -363,8 +365,10 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       }
        fetchListViews(); // Refresh the list views
     } catch (error) {
-      message.error('Failed to process the list view. Please try again.');
-    }
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to save list view due to an unknown error';
+      message.error(errorMessage);    }
     
     form.resetFields();
     onClose();

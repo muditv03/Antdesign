@@ -24,8 +24,11 @@ const UserComponent = () => {
       const response = await apiServiceForLookup.makeCall();
       setUsers(response);
     } catch (error) {
-      console.error("Error fetching users:", error);
-    } finally {
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to fetch users due to an unknown error';
+      message.error(errorMessage);
+        } finally {
       setLoading(false);
     }
   };
@@ -106,7 +109,10 @@ console.log(values);
       fetchUsers();
       handleCloseDrawer();
     } catch (error) {
-      message.error('Failed to save record.');
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to save record due to an unknown error';
+      message.error(errorMessage);     
       console.error('Error saving record:', error);
     } finally {
       setLoading(false);

@@ -37,7 +37,10 @@ const CreateTabDrawer = ({ visible, onClose }) => {
 
                 setObjects(filteredObjects); // Set the filtered objects
             } catch (error) {
-                message.error('Failed to fetch tabs or objects'); // Show error message
+                const errorMessage = error && typeof error === 'object'
+                ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+                : 'Failed to fetch tabs due to an unknown error';
+                message.error(errorMessage); 
             } finally {
                 setFetchingObjects(false); // Update loading status
             }
@@ -94,8 +97,10 @@ const CreateTabDrawer = ({ visible, onClose }) => {
             message.success('New tab created successfully'); // Show success message
             onClose(); // Close the drawer after successful creation
         } catch (error) {
-            message.error('Failed to create new tab'); // Show error message
-        } finally {
+            const errorMessage = error && typeof error === 'object'
+            ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+            : 'Failed to create new tab due to an unknown error';
+            message.error(errorMessage);        } finally {
             setLoading(false); // Stop loading
         }
     };

@@ -107,8 +107,10 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
       })
       .catch((error) => {
         console.error('Error updating related list:', error);
-        message.error('Error updating related list');
-      });
+        const errorMessage = error && typeof error === 'object'
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to updated related list due to an unknown error';
+        message.error(errorMessage);      });
   };
 
   return (

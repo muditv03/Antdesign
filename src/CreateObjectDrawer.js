@@ -50,7 +50,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       });
     }
   };
-   
+    
 
   const handleFinish = async (values) => {
     setLoading(true); // Start the spinner
@@ -156,10 +156,9 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       onClose(); // Close the drawer upon success
       form.resetFields();
     } catch (error) {
-      console.error('Error creating/updating object:', error);
-      const errorMessage = error.response?.data?.name
-        ? `Failed to create object because ${error.response.data.name[0]}`
-        : `Failed to create object due to an unknown error`;
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to save object due to an unknown error';
       message.error(errorMessage);
     } finally {
       setLoading(false); // Stop the spinner

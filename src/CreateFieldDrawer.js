@@ -31,7 +31,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       .replace(/[^a-zA-Z]/g, '') // Remove all characters except letters (a-z, A-Z)
       .replace(/\s+/g, '')       // Remove all spaces
       .trim();     
-  };
+  }; 
 
   // Handle label change and update API name
   const handleLabelChange = (e) => {
@@ -176,10 +176,12 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       onClose();
       form.resetFields();
     } catch (error) {
+      console.log('error while creating field is')
+      console.log(error);
       console.error('Error creating/updating field:', error);
-      const errorMessage = error.response?.data?.name
-        ? `Failed to save field because ${error.response.data.name[0]}`
-        : 'Failed to save field due to an unknown error';
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to save field due to an unknown error';
       message.error(errorMessage);
     } finally {
       setLoading(false); // Hide spinner

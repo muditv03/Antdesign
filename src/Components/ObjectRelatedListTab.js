@@ -76,8 +76,10 @@ const ObjectRelatedListTab = () => {
 
       setRelatedLists(formattedData);
     } catch (error) {
-      console.error('Error fetching related lists:', error);
-      message.error('Error fetching related lists');
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to fetch related lists due to an unknown error';
+      message.error(errorMessage);      
     } finally {
       setLoadingRelatedLists(false);
     }

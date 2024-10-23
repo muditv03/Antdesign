@@ -36,15 +36,12 @@ class ApiService {
         throw new Error(`API call failed with status code ${response.status}`);
       }
     } catch (error) {
-      console.log(error.response.data);
-      if (error.response) {
-        console.error(`API call failed: ${error.response.status} - ${error.response.statusText}`);
-        throw new Error(`API call failed with status code ${error.response.status}`);
+      if (error.response && error.response.data) {
+        // Pass the error message from the response back to the caller
+        throw error.response.data;  // Instead of just error.message
       } else if (error.request) {
-        console.error('API call failed: No response received');
         throw new Error('API call failed: No response received');
       } else {
-        console.error('API call failed:', error.message);
         throw new Error(`API call failed: ${error.message}`);
       }
     }
