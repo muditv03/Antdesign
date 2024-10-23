@@ -87,7 +87,7 @@ const RecordDetail = () => {
           
             // const lookupResponse = await axios.get(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`);
 
-            const fetchSingleRec = new ApiService(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`, {}, 'GET');
+            const fetchSingleRec = new ApiService(`${BASE_URL}/fetch_single_record/${field.parent_object_name}/${lookupId}`, {}, 'GET');
             const lookupResponse = await fetchSingleRec.makeCall();
 
             return { [field.name]: lookupResponse.Name };
@@ -108,7 +108,7 @@ const RecordDetail = () => {
         const lookupFieldPromises = fieldsResponse
           .filter(field => field.type === 'lookup' )
           .map(async field => {
-            const lookupFieldName = field.name;
+            const lookupFieldName = field.parent_object_name;
             // const lookupResponse = await axios.get(`${BASE_URL}/fetch_records/${lookupFieldName}`);
 
             const fetchRec = new ApiService(`${BASE_URL}/fetch_records/${lookupFieldName}`, {}, 'GET');
@@ -143,8 +143,6 @@ const RecordDetail = () => {
           
           bodyData[lookupFieldName] = bodyData[field.name];
           delete bodyData[field.name];
-            
-           
         }
 
         if(field.type==='Address'){
@@ -311,31 +309,31 @@ const RecordDetail = () => {
               </Form.Item>
             ) : type === 'lookup' ? (
               <Form.Item
-            name={name}
-            label={label}
-            key={name}
-            valuePropName={type === 'boolean' ? 'checked' : 'value'}
-            initialValue={form.getFieldValue(name)}
-            rules={validationRules}
-            noStyle
-          >
-              <Select 
-                allowClear 
-                placeholder={label} 
-                defaultValue={form.getFieldValue(name) || lookupNames[name]}
-                onChange={(value) => {
-                  // If cleared, set the value to null for this specific field
-                  if (!value) {
-                    form.setFieldsValue({ [name]: null });
-                  } else {
-                    form.setFieldsValue({ [name]: value });
-                  }
-                }}>
-                {lookupOptions[name]?.map((option) => (
-                  <Option key={option._id} value={option._id}>
-                    {option.Name}
-                  </Option>
-                ))}
+                name={name}
+                label={label}
+                key={name}
+                valuePropName={type === 'boolean' ? 'checked' : 'value'}
+                initialValue={form.getFieldValue(name)}
+                rules={validationRules}
+                noStyle
+              >
+                  <Select 
+                    allowClear 
+                    placeholder={label} 
+                    defaultValue={form.getFieldValue(name) || lookupNames[name]}
+                    onChange={(value) => {
+                      // If cleared, set the value to null for this specific field
+                      if (!value) {
+                        form.setFieldsValue({ [name]: null });
+                      } else {
+                        form.setFieldsValue({ [name]: value });
+                      }
+                    }}>
+                    {lookupOptions[name]?.map((option) => (
+                      <Option key={option._id} value={option._id}>
+                        {option.Name}
+                      </Option>
+                    ))}
               </Select>
               </Form.Item>
             ) : type === 'Date' ? (
@@ -629,7 +627,7 @@ const RecordDetail = () => {
                 <Button onClick={handleCancelClick}>
                   Cancel
                 </Button>
-              </Row>
+              </Row> 
             )}
 
           <div className="system-info-section" style={{ 

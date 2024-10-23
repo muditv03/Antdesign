@@ -620,14 +620,15 @@ const ObjectSetupDetail = () => {
           <a href={text.startsWith('http') ? text : `http://${text}`} target="_blank" rel="noopener noreferrer">
             {text}
           </a>
-        ) : '';
+        ) : '';  
       }else if (field.type === 'lookup') {
         let lookupId='';
         
         lookupId = record[field.name + '_id'];
-
+        console.log('lookup is ');
+        console.log(field.name);
         
-        const objectName = field.name;
+        const objectName = field.parent_object_name;
         if(lookupId){
         // Check if the name has already been fetched and stored
         if (lookupNames[lookupId]) {

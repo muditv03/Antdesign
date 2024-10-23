@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Form, Input, Button, Layout, Typography } from 'antd';
-import { MailOutlined } from '@ant-design/icons';
+import { MailOutlined,LockOutlined,KeyOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
 const ForgotPassword = () => {
-  const onFinish = (values) => {
-    console.log('Success:', values);
-    // Handle the password reset logic here
-  };
 
+  const [isOTP,SetIsOTP]=useState(false);
+
+
+  const onFinish = (values) => {
+    console.log('values are');
+    console.log( values);
+  };
+ 
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
@@ -80,6 +84,10 @@ const ForgotPassword = () => {
     marginTop: '16px',
   };
 
+  const handlesendOTP=()=>{
+    SetIsOTP(true);
+  }
+
   return (
     <Layout style={layoutStyle}>
       <Content style={contentStyle}>
@@ -99,6 +107,9 @@ const ForgotPassword = () => {
               onFinishFailed={onFinishFailed}
               layout="vertical"
             >
+
+              {!isOTP && (
+                <>
               <Form.Item
                 label="Email"
                 name="email"
@@ -112,14 +123,88 @@ const ForgotPassword = () => {
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit" block style={submitButtonStyle}>
-                  Reset Password
+                <Button type="primary" onClick={handlesendOTP} block style={submitButtonStyle}>
+                  Send OTP
                 </Button>
+
               </Form.Item>
+              </>
+            )}
+
+            {isOTP && (
+              <>
+
+              <Form.Item
+                label="Enter OTP"
+                name="OTP"
+                style={formItemStyle}
+                rules={[{ required: true, message: 'Please enter OTP' }]}
+
+              >
+                <Input prefix={<KeyOutlined />}  />
+              </Form.Item>  
+
+              <Form.Item
+                label="New Password"
+                name="newpassword"
+                rules={[{ required: true, message: 'Please input your password!' }]}
+                style={formItemStyle}
+              >
+                <Input.Password prefix={<LockOutlined />} />
+              </Form.Item>
+
+              {/* Confirm Password Field */}
+              <Form.Item
+                label="Confirm New Password"
+                name="confirmnew"
+                rules={[
+                  { required: true, message: 'Please confirm your new password!' },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue('newpassword') === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(new Error('The two passwords do not match!'));
+                    },
+                  }),
+                ]}
+                style={formItemStyle}
+              >
+                <Input.Password prefix={<LockOutlined />} />
+              </Form.Item>
+
+              <Form.Item>
+                <Button type="primary" htmlType='submit'  block style={submitButtonStyle}>
+                  Set New Password
+                </Button>
+
+              </Form.Item>
+              </>
+            )}
             </Form>
+
+            {isOTP &&( 
+            <div style={{ position: 'relative' }}> 
+              <Text>
+                Didn't received OTP?   
+              </Text>
+              <Button
+                type="text"
+                style={{color:'#4096ff',padding:2}}
+                onClick={() => SetIsOTP(false)}
+                >
+                Resend OTP
+              </Button>
+            </div>
+            )}
+
+           
             <Text>
               Remembered your password? <Link to="/login">Login</Link>
             </Text>
+
+            
+           
           </div>
         </div>
       </Content>

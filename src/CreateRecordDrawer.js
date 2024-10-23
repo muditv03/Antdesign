@@ -24,11 +24,11 @@ const CreateRecordDrawer = ({
     const fetchAllLookupOptions = async () => {
       const lookupFields = fieldsData.filter(field => field.type === 'lookup');
       const lookupOptionsObj = {};
-
+  
       for (const lookupField of lookupFields) {
         try {
           const apiServiceForLookup = new ApiService(
-            `${BASE_URL}/fetch_records/${lookupField.name}`,
+            `${BASE_URL}/fetch_records/${lookupField.parent_object_name}`,
             { 'Content-Type': 'application/json' },
             'GET'
           );

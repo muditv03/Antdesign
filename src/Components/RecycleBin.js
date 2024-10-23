@@ -6,7 +6,7 @@ import { Table, Form, Card, Button, Row, Col, Typography, Tabs, Tooltip,Popconfi
 import {RedoOutlined,DeleteOutlined,QuestionCircleOutlined,QuestionOutlined} from '@ant-design/icons';
 const {Title}=Typography;
 
-
+ 
 const Recyclebin =()=>{
 
     const [deletedFields,setDeletedFields]=useState([]);

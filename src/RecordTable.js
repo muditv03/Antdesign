@@ -52,7 +52,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
         for (const field of fieldsData) {
           if (field.type === 'lookup' && childRecord[`${field.name}_id`]) {
             const lookupId = childRecord[`${field.name}_id`];
-            const lookupName = await fetchLookupName(field.name, lookupId);
+            const lookupName = await fetchLookupName(field.parent_object_name, lookupId);
             newLookupNames[lookupId] = lookupName;
           }
         }
@@ -88,7 +88,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
             {value}
           </a>
         );
-      }
+      } 
 
      if(field.name==='recordCount'){
       return null;
