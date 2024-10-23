@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Layout, Typography } from 'antd';
+import { Form, Input, Button, Layout, Typography,message,Spin } from 'antd';
 import { MailOutlined,LockOutlined,KeyOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
+import { BASE_URL } from './Constant';
+import ApiService from './apiService'; // Import ApiService class
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -9,11 +12,38 @@ const { Title, Text } = Typography;
 const ForgotPassword = () => {
 
   const [isOTP,SetIsOTP]=useState(false);
+  const [email,setEmail]=useState('');
+  const [form] = Form.useForm();
+  const navigate = useNavigate(); 
+  const [loading, setLoading] = useState(false); // Loading state for spinner
 
-
-  const onFinish = (values) => {
+  const onFinish = async(values) => {
     console.log('values are');
     console.log( values);
+
+    setLoading(true);
+
+    const apiService = new ApiService(`${BASE_URL}/reset_password`, {
+      'Content-Type': 'application/json', 
+    }, 'POST', {
+      email: email,
+      otp:values.OTP,
+      new_password:values.newpassword
+    });
+
+    try {
+      const response = await apiService.makeCall();
+      message.success('Password reset successfully!');
+      setLoading(false);
+      form.resetFields(); // Reset form fields after successful response
+      navigate('/login'); // Navigate to login page
+
+    } catch (error) {
+      message.error('Failed to reset password. Try again.');
+      setLoading(false);
+    }
+
+
   };
  
   const onFinishFailed = (errorInfo) => {
@@ -75,7 +105,7 @@ const ForgotPassword = () => {
   const forgotPasswordTextStyle = {
     marginBottom: '24px',
   };
-
+ 
   const formItemStyle = {
     marginBottom: '16px',
   };
@@ -84,8 +114,33 @@ const ForgotPassword = () => {
     marginTop: '16px',
   };
 
-  const handlesendOTP=()=>{
-    SetIsOTP(true);
+  const handleEmailChange =(value)=>{
+    console.log(value);
+    setEmail(value);
+  }
+  const handlesendOTP=async()=>{
+
+    setLoading(true); // Start loading
+    console.log(email);
+    const apiService = new ApiService(`${BASE_URL}/forgot_password`, {
+      'Content-Type': 'application/json', 
+    }, 'POST', {
+      email: email,
+    });
+
+    try {
+      const response = await apiService.makeCall();
+      console.log(response);
+      message.success('OTP sent successfully');
+      SetIsOTP(true);
+    } catch (error) {
+      message.error('Failed to send OTP. Try again.');
+    } finally {
+      setLoading(false); // Stop loading
+    }
+
+
+
   }
 
   return (
@@ -98,6 +153,8 @@ const ForgotPassword = () => {
             </Title>
           </div>
           <div style={forgotPasswordSectionStyle}>
+          <Spin spinning={loading}>
+
             <Title level={2}>Reset Password</Title>
             <Text style={forgotPasswordTextStyle}>Please enter your email to reset your password.</Text>
             <Form
@@ -113,6 +170,7 @@ const ForgotPassword = () => {
               <Form.Item
                 label="Email"
                 name="email"
+                onChange={(e)=>handleEmailChange(e.target.value)}
                 rules={[
                   { required: true, message: 'Please input your email!' },
                   { type: 'email', message: 'The input is not valid E-mail!' },
@@ -204,7 +262,7 @@ const ForgotPassword = () => {
             </Text>
 
             
-           
+            </Spin>
           </div>
         </div>
       </Content>

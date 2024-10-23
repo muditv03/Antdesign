@@ -1,5 +1,5 @@
-import React from 'react';
-import { Form, Input, Button, Layout, Typography, message } from 'antd';
+import React,{useState} from 'react';
+import { Form, Input, Button, Layout, Typography, message,Spin } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -12,8 +12,12 @@ const { Title, Text } = Typography;
 
 const Signup = () => {
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false); // Loading state for spinner
+
 
   const onFinish = async (values) => {
+
+    setLoading(true);
     const body = {
       username: values.username,
       password: values.password,
@@ -38,13 +42,14 @@ const Signup = () => {
       // Handle successful registration
       message.success('Registration successful!');
       console.log('Success:', response);
-
+      setLoading(false);
       // Clear the form fields
       form.resetFields();
     } catch (error) {
       // Handle registration failure
       message.error('Registration failed. Please try again.');
       console.log('Error:', error.response?.data || error.message);
+      setLoading(false);
     }
   };
 
@@ -130,6 +135,8 @@ const Signup = () => {
             </Title>
           </div>
           <div style={signupSectionStyle}>
+          <Spin spinning={loading}>
+
             <Title level={2} style={titleStyle}>Signup</Title>
             <Form
               form={form} // Attach the form instance here
@@ -212,6 +219,8 @@ const Signup = () => {
             <Text>
               Already have an account? <Link to="/login">Login</Link>
             </Text>
+
+            </Spin>
           </div>
         </div>
       </Content>
