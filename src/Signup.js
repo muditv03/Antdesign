@@ -28,8 +28,6 @@ const Signup = () => {
     };
 
     try {
-      
-
       const apiService = new ApiService(`${BASE_URL}/register`, {
         'Content-Type': 'application/json', 
       }, 'POST', {
@@ -47,8 +45,10 @@ const Signup = () => {
       form.resetFields();
     } catch (error) {
       // Handle registration failure
-      message.error('Registration failed. Please try again.');
-      console.log('Error:', error.response?.data || error.message);
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to save field due to an unknown error';
+      message.error(errorMessage);
       setLoading(false);
     }
   };

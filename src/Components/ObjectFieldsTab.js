@@ -57,7 +57,10 @@ const ObjectFieldTab = () => {
           .filter((field) => field.name !== 'recordCount')
           .map((field) => ({ ...field, key: field._id })));
       } catch (error) {
-        console.error('Error fetching fields:', error);
+        const errorMessage = error && typeof error === 'object'
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to fetch fields due to an unknown error';
+        message.error(errorMessage);
       } finally {
         setLoadingFields(false);
         setLoading(false);

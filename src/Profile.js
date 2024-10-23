@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 import React, { useState, useEffect } from 'react';
 import { Layout, Input, Button, Form, Avatar, Typography, Divider } from 'antd';
 import { UserOutlined } from '@ant-design/icons';

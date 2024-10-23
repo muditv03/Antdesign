@@ -23,8 +23,12 @@ const CustomTabs = () => {
       setData(enrichedData);
     } catch (err) {
       setError(err);
-      message.error('Failed to fetch data.'); // Show an error message
-    } finally {
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to fetch tabs due to an unknown error';
+      message.error(errorMessage);    
+    } 
+      finally {
       setLoading(false);
     }
   };

@@ -24,8 +24,11 @@ const Recyclebin =()=>{
             const response = await apiService.makeCall();
             setDeletedFields(response); // Update state with fetched data
         } catch (error) {
-            console.error("Error fetching list views:", error); // Log any errors
-        } finally {
+          const errorMessage = error && typeof error === 'object'
+          ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+          : 'Failed to fetch fields due to an unknown error';
+          message.error(errorMessage);  
+              } finally {
             setLoading(false); // Set loading to false after the API call
         }
     };
@@ -50,7 +53,10 @@ const Recyclebin =()=>{
             message.success('Field restored successfully.');
             fetchDeleteFields();
           } catch (error) {
-            message.error('Failed to restore field.');
+            const errorMessage = error && typeof error === 'object'
+            ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+            : 'Failed to restore field due to an unknown error';
+            message.error(errorMessage); 
             console.error('Error deleting record:', error);
           }
 

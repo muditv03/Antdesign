@@ -102,10 +102,11 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
         onAddRelatedList(); // Callback to refresh related lists
       })
    
-      .catch(err => {
-        if(err){
-          message.error('Error creating related list');
-        }
+      .catch(error => {
+        const errorMessage = error && typeof error === 'object'
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to save related lists due to an unknown error';
+        message.error(errorMessage);
       })
   };
 

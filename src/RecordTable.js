@@ -341,10 +341,9 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
     } catch (error) {
       console.error('Error saving record:', error);
   
-      const errorMessage = error.response?.data?.name
-        ? `Failed to create record because ${error.response.data.name[0]}`
-        : `Failed to create record due to an unknown error`;
-  
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to save record due to an unknown error';
       message.error(errorMessage);
     } finally {
       setLoading(false); // Ensure loading is stopped regardless of success or failure

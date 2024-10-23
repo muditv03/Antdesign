@@ -1,5 +1,5 @@
 import React,{ useState,useEffect } from 'react';
-import { Table, Form, Card, Button, Row, Col, Typography, Tabs, Tooltip,Popconfirm } from 'antd';
+import { Table, Form, Card, Button, Row, Col, Typography, Tabs, Tooltip,Popconfirm,message } from 'antd';
 import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined  } from '@ant-design/icons';
 import CreateListViewDrawer from './CreateListViewDrawer';
 import ApiService from '../apiService'; 
@@ -36,8 +36,10 @@ const CreateListView = ({ object }) => {
             const response = await apiService.makeCall();
             setListViews(response.list_views); // Update state with fetched data
         } catch (error) {
-            console.error("Error fetching list views:", error); // Log any errors
-        } finally {
+          const errorMessage = error && typeof error === 'object'
+          ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+          : 'Failed to fetch list views due to an unknown error';
+          message.error(errorMessage);        } finally {
             setLoading(false); // Set loading to false after the API call
         }
     };

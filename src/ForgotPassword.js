@@ -39,7 +39,11 @@ const ForgotPassword = () => {
       navigate('/login'); // Navigate to login page
 
     } catch (error) {
-      message.error('Failed to reset password. Try again.');
+
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to save field due to an unknown error';
+      message.error(errorMessage);
       setLoading(false);
     }
 
@@ -134,7 +138,10 @@ const ForgotPassword = () => {
       message.success('OTP sent successfully');
       SetIsOTP(true);
     } catch (error) {
-      message.error('Failed to send OTP. Try again.');
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to save field due to an unknown error';
+      message.error(errorMessage);
     } finally {
       setLoading(false); // Stop loading
     }
