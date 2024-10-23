@@ -158,7 +158,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       const selectedField = fields.find(field =>   field.name === filter.field);
       if (selectedField && selectedField.type === 'lookup') {
      
-        fetchLookupRecords(selectedField.name); // Fetch records for lookup fields
+        fetchLookupRecords(selectedField.parent_object_name); // Fetch records for lookup fields
       }
     });
   };
@@ -253,7 +253,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
     if (selectedField && selectedField.type === 'lookup') {
       console.log('lookup field is selected');
       console.log(selectedField);
-      fetchLookupRecords(selectedField.name); // Pass object name to fetch records
+      fetchLookupRecords(selectedField.parent_object_name); // Pass object name to fetch records
     }
     setFilters(updatedFilters);
     setLogic(generateLogic(filters,operator));
