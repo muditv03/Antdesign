@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Card,Input, Button, Row, Col, Typography, Avatar, Select, Tabs, Checkbox, message, Space, DatePicker,Collapse } from 'antd';
+import { Form, Card,Input, Button, Row, Col, Typography, Avatar, Select, Tabs, Checkbox, message, Space, DatePicker,Collapse,Affix } from 'antd';
 import { useParams } from 'react-router-dom';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined,UnorderedListOutlined } from '@ant-design/icons';
 import RelatedRecord from './RelatedRecords';
 import { BASE_URL,DateFormat } from './Constant';
 import dayjs from 'dayjs';
@@ -32,6 +32,8 @@ const RecordDetail = () => {
   const [lookupNames, setLookupNames] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
   const [recordName, setRecordName] = useState('');
+  const [bottom, setBottom] = useState(100);
+
 
  
  
@@ -48,7 +50,7 @@ const RecordDetail = () => {
         const fieldCallout = new ApiService(`${BASE_URL}/mt_fields/object/${objectName}`, {}, 'GET');
         const fieldsResponse = await fieldCallout.makeCall();
         const filteredFields = fieldsResponse.filter(field => field.name !== 'recordCount');
-
+ 
         console.log('fieldresponse :', fieldsResponse);
         setFields(filteredFields);
         console.log(JSON.stringify(responseData));
@@ -83,8 +85,6 @@ const RecordDetail = () => {
             let lookupId;
           
             lookupId = recordData[field.name + '_id'];
-
-          
             // const lookupResponse = await axios.get(`${BASE_URL}/fetch_single_record/${field.name}/${lookupId}`);
 
             const fetchSingleRec = new ApiService(`${BASE_URL}/fetch_single_record/${field.parent_object_name}/${lookupId}`, {}, 'GET');
@@ -109,16 +109,19 @@ const RecordDetail = () => {
           .filter(field => field.type === 'lookup' )
           .map(async field => {
             const lookupFieldName = field.parent_object_name;
-            // const lookupResponse = await axios.get(`${BASE_URL}/fetch_records/${lookupFieldName}`);
 
             const fetchRec = new ApiService(`${BASE_URL}/fetch_records/${lookupFieldName}`, {}, 'GET');
             const lookupResponse = await fetchRec.makeCall();
 
+            console.log('records for parent lookup');
+            console.log(lookupResponse);
             return { [lookupFieldName]: lookupResponse };
           });
 
         const lookupOptionsResults = await Promise.all(lookupFieldPromises);
         const lookupOptionsMap = lookupOptionsResults.reduce((acc, lookupOption) => ({ ...acc, ...lookupOption }), {});
+        console.log('lookup');
+        console.log(lookupOptionsMap['user']);
         setLookupOptions(lookupOptionsMap);
 
       } catch (err) {
@@ -189,7 +192,7 @@ const RecordDetail = () => {
       message.error(errorMessage);
     }
      
-  };
+  }; 
 
   const handleEditClick = () => {
     setIsEditable(true);
@@ -329,7 +332,7 @@ const RecordDetail = () => {
                         form.setFieldsValue({ [name]: value });
                       }
                     }}>
-                    {lookupOptions[name]?.map((option) => (
+                    {lookupOptions[field.parent_object_name]?.filter(option => option._id !== record?._id).map((option) => (
                       <Option key={option._id} value={option._id}>
                         {option.Name}
                       </Option>
@@ -597,74 +600,119 @@ const RecordDetail = () => {
     return <p>Loading...</p>;
   }
 
+
+
   return (
-    <div style={{ padding: '20px', overflowY: 'auto', }}>
-      <Title level={2} style={{  marginTop: '0px' }}>
-        {recordName}
-      </Title>
-      <Tabs defaultActiveKey="1" >
-        <TabPane tab="Detail" key="1">
-          <Card>
-          <Form form={form} layout="vertical" onFinish={onFinish} style={{position: 'relative'}}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Title level={2} style={{ marginTop: '0px' }}>
+      {recordName}
+    </Title>
+  
+    <Tabs defaultActiveKey="1" style={{ flex: 1, overflow: 'hidden' }}>
+      <TabPane tab="Detail" key="1">
+        <Card style={{ display: 'flex', flexDirection: 'column' }}>
+          <Form form={form} layout="vertical" onFinish={onFinish} style={{ flex: 1, overflow: 'auto' }}>
             <Title level={3} style={{ marginTop: '0px' }}>Record Details</Title>
-            <Row gutter={24} style={{marginBottom:'0px'}}>
-              {fields.map((field, index) => (
-                <Col key={index} xs={24} sm={12} style={{marginBottom:-5}}>
-                  <Form.Item label={field.label} style={{ marginBottom: -1,padding:'0px' }}>
-                    {renderFieldWithEdit(field,selectedDate, setSelectedDate)}
-                    {/* {renderSystemInformation(record.created_at, record.updated_at)} */}
-                    </Form.Item>
-                  
-                </Col>
-              ))}
-            </Row>
-            {isEditable && (
-              
-              <Row justify="end" style={{ marginTop: 24 }}>
-                <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
-                  Save
-                </Button>
-                <Button onClick={handleCancelClick}>
-                  Cancel
-                </Button>
-              </Row> 
-            )}
-
-          <div className="system-info-section" style={{ 
-            marginTop: '20px' ,
-            wdith:'100%',          
-            display: 'flex',
-            position:'relative',
-            flexDirection:'column',
-
+            <div style={{
+              overflow: 'auto',
+              paddingRight: '15px',
+              height: 'calc(100vh - 300px)', // Adjust this value based on your layout
+              flex: 1
             }}>
-            <Title level={3} style={{ marginTop: '0px' }}>System Information</Title>
-            <Row gutter={16}> {/* Add gutter for spacing between columns */}
-              <Col span={12}> {/* Set span to 12 for half width */}
-                <Form.Item label="Created At" style={{ marginBottom: 0 }}> {/* Prevent extra space below */}
-                  <Input style={{ border: 'none',borderBottom: '1px solid #ddd' , fontWeight: '500',padding:0 }} value={dayjs(record.created_at).format('DD/MM/YYYY HH:mm:ss')} />
-                </Form.Item>
-              </Col>
-              <Col span={12}> {/* Set span to 12 for half width */}
-                <Form.Item label="Updated At" style={{ marginBottom: 0 }}> {/* Prevent extra space below */}
-                  <Input style={{ border: 'none',borderBottom: '1px solid #ddd' , fontWeight: '500',padding:0  }} value={dayjs(record.updated_at).format('DD/MM/YYYY HH:mm:ss')} />
-                </Form.Item>
-              </Col>
+           
+              <Row gutter={24} style={{ marginBottom: '0px' }}>
+                {fields.map((field, index) => (
+                  <Col key={index} xs={24} sm={12} style={{ marginBottom: -5 }}>
+                    <Form.Item label={field.label} style={{ marginBottom: -1, padding: '0px' }}>
+                      {renderFieldWithEdit(field, selectedDate, setSelectedDate)}
+                    </Form.Item>
+                  </Col>
+                ))}
+              </Row>
+  
+              <div className="system-info-section" style={{
+                marginTop: '20px',
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+               
+              }}>
+                <Title level={3} style={{ marginTop: '0px' }}>System Information</Title>
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item label="Created At" style={{ marginBottom: 0 }}>
+                      <Input
+                        style={{ border: 'none', borderBottom: '1px solid #ddd', fontWeight: '500', padding: 0 }}
+                        value={dayjs(record.created_at).format('DD/MM/YYYY HH:mm:ss')}
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item label="Updated At" style={{ marginBottom: 0 }}>
+                      <Input
+                        style={{ border: 'none', borderBottom: '1px solid #ddd', fontWeight: '500', padding: 0 }}
+                        value={dayjs(record.updated_at).format('DD/MM/YYYY HH:mm:ss')}
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </div>
+            </div>
+  
+            {isEditable && (
+              <Affix  offsetBottom={50} >
+              <div style={{ 
+                 width: '90%',
+                 padding: '10px 0',
+                 background: '#f0f2f5',
+                 position:'fixed',
+                 bottom:'50px',
+                 left:110
+              
+                 }}>
+                <Row justify="center" >
+                 
+                  <Button onClick={handleCancelClick} style={{ marginRight: 8 }}>
+                    Cancel
+                  </Button>
+                  <Button type="primary" htmlType="submit" >
+                    Save
+                  </Button>
+                </Row>
+              </div>
+              </Affix>
+            )}
+          </Form>
+        </Card>
+        <Affix  offsetBottom={0} >
+          <div style={{ 
+                width: '100%',
+                padding: '10px 0', 
+                background: '#FFFFFF',
+                boxShadow: '0px -2px 10px rgba(0, 0, 0, 0.1)', // Add shadow effect
+          }}>
+            <Row justify="start" >
+            
+              <Button type="text"  style={{ margin: 'auto',marginLeft:'20px',fontWeight:500}}>
+              <UnorderedListOutlined />
+                To Do List
+              </Button>
             </Row>
           </div>
-          </Form>
-          </Card>
-        </TabPane>
-        <TabPane tab="Related" key="2">
-          <RelatedRecord objectName={objectName} recordId={id} />
-        </TabPane>
-        <TabPane tab="Activity" key="3">
-          <ActivityComponent/>
-        </TabPane>
-
-      </Tabs>
-    </div>
+          </Affix>
+      </TabPane>
+      <TabPane tab="Related" key="2">
+        <RelatedRecord objectName={objectName} recordId={id} />
+      </TabPane>
+      <TabPane tab="Activity" key="3">
+        <ActivityComponent />
+      </TabPane>
+    </Tabs>
+  </div>
+  
+  
   );
+  
 };
 
 export default RecordDetail;

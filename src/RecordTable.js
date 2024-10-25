@@ -182,10 +182,10 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       const lookupFields = fieldsResponse.filter(field => field.type === 'lookup');
 
       for (const lookupField of lookupFields) {
-        const ob = lookupField.name;
+        const ob = lookupField.parent_object_name;
         let objectName='';
        
-        objectName = lookupField.name.toLowerCase();
+        objectName = lookupField.name;
 
         const recordId = record[`${objectName}_id`];
 
@@ -257,10 +257,10 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       const lookupFields = fieldsResponse.filter(field => field.type === 'lookup');
 
       for (const lookupField of lookupFields) {
-        const ob = lookupField.name;
+        const ob = lookupField.parent_object_name;
         let objectName='';
        
-        objectName = lookupField.name.toLowerCase();
+        objectName = lookupField.name;
 
             
         const recordId = record[`${objectName}_id`];

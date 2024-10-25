@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Table, Typography, Button,Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker,Spin, Modal,Space } from 'antd';
+import { Table, Typography, Button,Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker,Spin, Modal,Space,Upload } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined , SettingOutlined,CaretDownOutlined} from '@ant-design/icons';
+import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined ,ImportOutlined, SettingOutlined,CaretDownOutlined} from '@ant-design/icons';
 import { BASE_URL,DateFormat } from './Constant';
 import dayjs from 'dayjs';
 import CreateRecordDrawer from './CreateRecordDrawer';
@@ -11,6 +11,7 @@ import CreateListViewDrawer from './Components/CreateListViewDrawer';
 import ApiService from './apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { generateBody } from './Components/Utility';
+
 dayjs.extend(customParseFormat);      
            
 const { Title } = Typography;
@@ -45,6 +46,7 @@ const ObjectSetupDetail = () => {
   const[isListViewDrawerVisible,setIsListViewDrawerVisible]=useState(false);
   const[objectForListView,setObjectForListView]=useState();
   const [ListViewInDrawer,SetListViewInDrawer]=useState();
+
 
 
   const fetchRecords = (selectedViewId) => {
@@ -89,7 +91,7 @@ const ObjectSetupDetail = () => {
           `${BASE_URL}/mt_fields/object/${objName}`,
           { 'Content-Type': 'application/json' },
           'GET'
-        );
+        ); 
   
         return Promise.all([
           apiServiceForRecords.makeCall(),
@@ -314,7 +316,7 @@ const ObjectSetupDetail = () => {
       const lookupFields = fieldsResponse.filter(field => field.type === 'lookup');
   
       for (const lookupField of lookupFields) {
-        const ob = lookupField.name;
+        const ob = lookupField.parent_object_name;
         let objectName='';
         
         objectName = lookupField.name;
@@ -412,7 +414,7 @@ const ObjectSetupDetail = () => {
       const lookupFields = fieldsResponse.filter(field => field.type === 'lookup');
   
       for (const lookupField of lookupFields) {
-        const ob = lookupField.name;
+        const ob = lookupField.parent_object_name;
         let objectName='';
        
         objectName = lookupField.name;
@@ -625,14 +627,16 @@ const ObjectSetupDetail = () => {
         console.log('lookup is ');
         console.log(field.name);
         
-        const objectName = field.parent_object_name;
+        const ob = field.parent_object_name;
+        console.log('parent object name is ');
+        console.log(ob);
         if(lookupId){
         // Check if the name has already been fetched and stored
         if (lookupNames[lookupId]) {
           return lookupNames[lookupId]; // Return the cached name if available
         } else {
           // Fetch the name if not cached
-          fetchLookupName(objectName, lookupId).then(name => {
+          fetchLookupName(ob, lookupId).then(name => {
             setLookupNames(prevState => ({ ...prevState, [lookupId]: name }));
           });
           return 'Loading...'; // Placeholder while fetching
@@ -744,6 +748,10 @@ const ObjectSetupDetail = () => {
     </Menu>
   );
 
+  const handleFileUpload = () => {
+    navigate(`/record/${objectName}/UploadCsv`);
+  };
+
   
   return (
     <Card>
@@ -771,7 +779,11 @@ const ObjectSetupDetail = () => {
         </Dropdown>
 
       </Col>
+     
       <Col  style={{ marginTop:'10px' }}>
+          <Button icon={<ImportOutlined />} onClick={handleFileUpload} style={{ marginBottom: 5, marginRight: '5px' }}>
+            Import Records
+          </Button>
         <Button type="primary" onClick={handleCreateClick} style={{ marginBottom: 5,marginRight:'5px' }}>
           Create Record
         </Button>
@@ -815,6 +827,9 @@ const ObjectSetupDetail = () => {
       >
         <p>Are you sure you want to delete this record?</p>
       </Modal>
+
+     
+
 
     </div>
     </Card>

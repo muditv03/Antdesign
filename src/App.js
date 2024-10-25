@@ -11,8 +11,9 @@ import AppSidebar from './Sidebar';
 import DataTable from './ObjectSetupView';
 import ObjectSetupDetail from './ObjectSetupDetail';
 import ObjectFieldDetail from './ObjectDetail';
-import AppFooter from './Footer';  // Import the footer component
-import Profile from './Profile';  // Import the Profile component
+import UploadRecords from './Components/UploadCsvRecords';
+import AppFooter from './Footer';  
+import Profile from './Profile';  
 import RecordDetail from './RecordDetailPage';
 import ErrorPage from './Error'
 import ForbiddenError from './Error-403'
@@ -103,6 +104,7 @@ const App = () => {
             <Route path="setup/objectManager" element={<DataTable />} />
             <Route path="/object-setup/:id" element={<ObjectFieldDetail />} />
             <Route path="/record/:objectName/:id" element={<RecordDetail />} />
+            <Route path="/record/:objectName/UploadCsv" element={<UploadRecords />} />
             <Route path="/object/:id" element={<ObjectSetupDetail />} />
             <Route path="/object-profile" element={<Profile />} />
             <Route path="/setup" element={<SetupPage />} />
@@ -112,6 +114,7 @@ const App = () => {
             <Route path ="/Error/500" element={<InternalServerError/>}/>
             <Route path ="/Error/422" element={<UnprocessableEntity/>}/>
 
+ 
 
             {/* Add more routes as needed */}
           </Routes>

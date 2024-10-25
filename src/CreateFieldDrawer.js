@@ -85,7 +85,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   const handlePicklistChange = (event) => {
     const values = event.target.value.split(',').map(value => value.trim());
     setPicklistValues(values);
-  };
+  }; 
 
   const handleFinish = async (values) => {
     setLoading(true); // Show spinner
@@ -329,24 +329,30 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
 
             {fieldType === 'String' && ( // Only show for String type
             <>
+
               <Form.Item
               name="autoNumber">
                 <Checkbox
                   checked={isAutoNumber}
                   onChange={(e) => setIsAutoNumber(e.target.checked)}
+                  disabled={isFormula}
+
                 >
                   Auto Number
                 </Checkbox>
               </Form.Item>
+              
 
+              
               <Form.Item
                 name="is_formula">
                 <Checkbox
                   checked={isFormula}
                   onChange={(e) => setIsFormula(e.target.checked)}
+                  disabled={isAutoNumber}
                 >
                   Is Formula
-                </Checkbox>
+                </Checkbox >
               </Form.Item>
              
               </>

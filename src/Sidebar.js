@@ -48,7 +48,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
               icon: IconComponent ? <IconComponent /> : null,
               objectName: item.object_name || item.label.toLowerCase(),
             };
-          });
+          }); 
 
         setItems(filteredItems);
       } catch (error) {
