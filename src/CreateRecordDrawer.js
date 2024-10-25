@@ -34,6 +34,7 @@ const CreateRecordDrawer = ({
           );
           const response = await apiServiceForLookup.makeCall();
           lookupOptionsObj[lookupField.name] = response; // Store options for each lookup field
+        
         } catch (error) {
           console.error(`Error fetching lookup options for ${lookupField.name}:`, error);
         }
@@ -253,7 +254,7 @@ const CreateRecordDrawer = ({
                 option.children.toLowerCase().includes(input.toLowerCase())
               }
             > 
-              {lookupOptions[field.name]?.map((option) => (
+              {lookupOptions[field.name]?.filter(option => option._id !== selectedRecord?._id).map((option) => (
                 <Select.Option key={option._id} value={option._id}>
                   {option.Name}
                 </Select.Option>
@@ -364,7 +365,7 @@ const CreateRecordDrawer = ({
         padding: '20px 16px',
         background: '#f0f2f5',
         borderBottom: '1px solid #e8e8e8',
-      }}
+      }} 
       footer={
         <div
           style={{
