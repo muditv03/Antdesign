@@ -284,7 +284,6 @@ const ObjectSetupDetail = () => {
       fieldsResponse.forEach(field => {
 
         if (field.type === 'Address' && formattedRecord[field.name]) {
-          console.log(recordResponse[field.name]['street']);
           // Set individual address fields
           formattedRecord[`${field.name}_street`] = recordResponse[field.name]['street'] || '';
           formattedRecord[`${field.name}_city`] = recordResponse[field.name]['city'] || '';
@@ -333,7 +332,6 @@ const ObjectSetupDetail = () => {
           );
   
           const response = await apiServiceForRecord.makeCall();
-          console.log('lookup record name is ' + response.Name);
   
           // Store the name in a state to display it in the UI
           setLookupName(prev => ({ ...prev, [lookupField.name]: response.Name }));
@@ -431,8 +429,9 @@ const ObjectSetupDetail = () => {
           );
   
           const response = await apiServiceForRecord.makeCall();
-          console.log('lookup record name is ' + response.Name);
-  
+
+          
+
           // Store the name in a state to display it in the UI
           setLookupName(prev => ({ ...prev, [lookupField.name]: response.Name }));
   
@@ -455,11 +454,7 @@ const ObjectSetupDetail = () => {
   
 
   const handleFinish = async (values) => {
-    console.log('values are ');
-    console.log(values);
     const updatedValues=generateBody(fieldsDataDrawer,values);
-    console.log('value of lookup is');  
-    console.log(values['lookup']);
     const body = {
       object_name: objectName,
       data: {
@@ -467,14 +462,10 @@ const ObjectSetupDetail = () => {
         ...updatedValues // Use the updated values
       }
     }; 
-    console.log('body before is ');
-    console.log(body);
    
     try {
       //setLoading(true);
-      console.log('object name is '+objectName)
 
-      console.log('body while updating is ' + JSON.stringify(body));
   
       // Create an instance of ApiService for the POST request
       const apiService = new ApiService(
@@ -624,12 +615,10 @@ const ObjectSetupDetail = () => {
         let lookupId='';
         
         lookupId = record[field.name + '_id'];
-        console.log('lookup is ');
-        console.log(field.name);
+       
         
         const ob = field.parent_object_name;
-        console.log('parent object name is ');
-        console.log(ob);
+       
         if(lookupId){
         // Check if the name has already been fetched and stored
         if (lookupNames[lookupId]) {
@@ -702,7 +691,6 @@ const ObjectSetupDetail = () => {
   });
 
   const showCreateListDrawer = (listView) => {
-    console.log(listView);
     SetListViewInDrawer(listView); // Set the selected list view for editing
     setIsListViewDrawerVisible(true); // Show the drawer
   };
@@ -715,8 +703,6 @@ const ObjectSetupDetail = () => {
     if (key === 'create') {
       showCreateListDrawer();
     } else if (key === 'edit') {
-      console.log('selected view in editing is');
-      console.log(selectedListView);
       showCreateListDrawer(selectedListView);
     } else if (key === 'clone') {
       if (selectedListView) {
@@ -726,7 +712,6 @@ const ObjectSetupDetail = () => {
           _id: undefined, // remove the id
           list_view_name: `Cloned by ${selectedListView?.list_view_name}`, // replace name with the cloned name
         };
-        console.log('Cloning selected list view:');
         console.log(clonedListView);
   
         // Show the drawer with the cloned list view
@@ -734,7 +719,7 @@ const ObjectSetupDetail = () => {
       }
     }
     else if (key === 'delete') {
-      console.log('Clone clicked');
+      console.log('delete clicked');
     }
   };
 

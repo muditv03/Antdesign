@@ -7,7 +7,7 @@ import { BASE_URL } from '../Constant';
 import Papa from 'papaparse'; // Importing PapaParse for CSV parsing
 
 const { Title } = Typography;
-
+ 
 
 const UploadRecords = () => {
   const { objectName } = useParams(); // Extracting objectName from URL
@@ -15,6 +15,8 @@ const UploadRecords = () => {
   const [fieldsData, setFieldsData] = useState([]); // State to hold fields data
   const [csvColumns, setCsvColumns] = useState([]); // State to hold CSV column names
   const [mappings, setMappings] = useState({}); // State to hold column-field mappings
+  const [csvData, setCsvData] = useState([]); // State to store parsed CSV data
+
 
   // Sample picklist options for each field (ensure this matches actual field names)
   const picklistOptions = {
@@ -59,12 +61,18 @@ const UploadRecords = () => {
             console.log('columns are');
             console.log(Object.keys(results.data[0]));
             setCsvColumns(Object.keys(results.data[0]));
+            setCsvData(results.data); // Store the parsed CSV data
+
           }
         },
       });
     } else {
       setFileName(""); // Reset if no file is selected
       setCsvColumns([]); // Reset CSV columns
+      setCsvData([]); // Store the parsed CSV data
+      setMappings({}); // Clear mappings
+
+
     }
   };
 
@@ -73,15 +81,74 @@ const UploadRecords = () => {
     setFileName(""); // Clear the file name
     setCsvColumns([]); // Clear CSV columns
     setMappings({}); // Clear mappings
+
   };
 
   // Function to handle mapping button click
-  const handleMapping = () => {
-    console.log("Mappings:");
-    console.log(mappings);
-    message.success('Mapping initiated! Check console for details.');
-  };
+  const handleMapping =async () => {
+    // Assuming you have stored the parsed CSV data in a state variable (csvData)
+    const filteredData = csvData.map((row) => {
+      const filteredRow = {};
+      Object.keys(mappings).forEach((field) => {
+        const csvColumn = mappings[field]; // Get corresponding CSV column for each field
+        console.log('csv column is ');
+        console.log(csvColumn);
+        if (csvColumn) {
+          console.log('field is');
+          console.log(field);
+          console.log(row);
+          filteredRow[csvColumn] = row[csvColumn]; // Map CSV column value to field
+          console.log('filtered row of field');
+          console.log(filteredRow[csvColumn]);
+        }
+      });
+      return filteredRow;
+    })
+    .filter((row) => Object.values(row).some(value => value !== '' && value !== null && value !== undefined));
 
+    console.log("Filtered Data to be sent:");
+    console.log(filteredData);
+
+    
+    const requestBody = {
+      object_name: objectName, // Replace objectName with your actual object name if needed
+      records: filteredData,
+    };
+  
+    try{
+   
+    // Send the filtered data to the API
+    const apiServiceForInsert = new ApiService(
+      `${BASE_URL}/add_bulk_records`,
+      { 'Content-Type': 'application/json' },
+      'POST',
+      requestBody
+    );
+
+    console.log('body is ');
+    console.log(requestBody);
+
+    const response= await apiServiceForInsert.makeCall();
+    message.success('records inserted successfully');
+    console.log(response);
+    setFileName(""); 
+    setCsvColumns([]); 
+    setCsvData([]); 
+    setMappings({}); 
+
+  
+  }catch(error){
+    console.log('error while creating field is')
+    console.log(error);
+    console.error('Error creating/updating field:', error);
+    const errorMessage = error && typeof error === 'object'
+    ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+    : 'Failed to save field due to an unknown error';
+    message.error(errorMessage);
+  }
+    
+  };
+  
   // Function to handle fuzzy matching
   const handleFuzzyMatch = () => {
     const newMappings = {};
@@ -106,7 +173,7 @@ const UploadRecords = () => {
       ...newMappings
     }));
 
-    message.success('Fuzzy matching completed! Check the console for results.');
+    message.success('Fuzzy matching completed!');
     console.log("Updated Mappings after Fuzzy Match:", newMappings);
   };
 
