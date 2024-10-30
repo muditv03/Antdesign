@@ -289,11 +289,11 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
          // Show error message for the respective filter
          message.error(`Please enter field for filter ${index + 1}`);
        }
-       else if(filter.operator && !filter.value){
-        isValid = false;
-        // Show error message for the respective filter
-        message.error(`Please enter value for filter ${index + 1}`);
-       }
+      //  else if(filter.operator && !filter.value){
+      //   isValid = false;
+      //   // Show error message for the respective filter
+      //   message.error(`Please enter value for filter ${index + 1}`);
+      //  }
      });
    
      if (!isValid) {
