@@ -16,6 +16,7 @@ const UploadRecords = () => {
   const [csvColumns, setCsvColumns] = useState([]); // State to hold CSV column names
   const [mappings, setMappings] = useState({}); // State to hold column-field mappings
   const [csvData, setCsvData] = useState([]); // State to store parsed CSV data
+  const [isDataInserting,setIsDataInserting]=useState(false);
 
 
   // Sample picklist options for each field (ensure this matches actual field names)
@@ -127,6 +128,7 @@ const UploadRecords = () => {
 
     console.log('body is ');
     console.log(requestBody);
+    setIsDataInserting(true);
 
     const response= await apiServiceForInsert.makeCall();
     message.success('records inserted successfully');
@@ -138,6 +140,7 @@ const UploadRecords = () => {
 
   
   }catch(error){
+    setIsDataInserting(false);
     console.log('error while creating field is')
     console.log(error);
     console.error('Error creating/updating field:', error);
@@ -280,3 +283,7 @@ const UploadRecords = () => {
 };
 
 export default UploadRecords;
+
+
+
+

@@ -246,7 +246,7 @@ const RecordDetail = () => {
       );
     }
 
-    const isFieldEditable = !field.is_auto_number && isEditable;
+    const isFieldEditable = !field.is_auto_number && !field.is_formula && isEditable;
  
     const   handleAddressChange =(parentField, childField, value)  =>{
      

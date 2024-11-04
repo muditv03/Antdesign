@@ -72,13 +72,18 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         length: editField.decimal_places_before + editField.decimal_places_after, // Calculate total length
         decimal_places: editField.decimal_places_after, // Set decimal places
         format:editField.auto_number_format,
-        startingPoint:editField.auto_number_starting
+        startingPoint:editField.auto_number_starting,
+        formula:editField.formula
       });
+      console.log(editField.formula);
+      setFormula(editField.formula);
       setFieldType(editField.type); // Set field type for conditional rendering
       setIsAutoNumber(editField.is_auto_number || false); // Set auto number state if editing
+      setIsFormula(editField.is_formula || false);
     } else {
       form.resetFields(); // Reset fields for creating a new field
       setIsAutoNumber(false); // Reset auto number state
+      setIsFormula(false);
     }
   }, [editField, form]);
 
@@ -106,16 +111,17 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       newField.parent_object_name=values.parent_object_name;
       newField.relationship_name=values.relationship_name;
     }
-    // Include starting and ending points if isAutoNumber is true
     if (isAutoNumber) {
       newField.auto_number_format = values.format; // Add starting point
       newField.auto_number_starting = values.startingPoint;     // Add ending point
     }
 
-    console.log('formula is ');
-    console.log(isFormula);
+    console.log('formula while editing is ');
+    console.log(newField.formula);
     if(isFormula){
-      newField.formula=formula;
+      console.log('formula is ');
+      console.log(formula);
+      newField.formula=setFormula(formula);
     }
 
     if (values.type === 'Picklist') {
@@ -173,7 +179,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         message.success('Field created successfully');
       }
 
-      onClose();
+      onClose(); 
       form.resetFields();
     } catch (error) {
       console.log('error while creating field is')
@@ -410,7 +416,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
               </Row>
 
                
-              <TextArea label="Formula" value={formula} onChange={e=> setFormula(e.target.value)} placeholder="Enter formula" />
+              <TextArea name="Formula" label="Formula" value={formula} onChange={e=> setFormula(e.target.value)} placeholder="Enter formula" />
                 <Button type="primary" onClick={validateFormula(formula)} style={{ marginRight: 8 }}>
                   Check Status
                 </Button>

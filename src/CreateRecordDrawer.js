@@ -77,7 +77,7 @@ const CreateRecordDrawer = ({
 
   const renderFormItem = (field) => {
 
-    if (field.is_auto_number) {
+    if (field.is_auto_number || field.is_formula) {
       return null; // Don't render the field if it's an auto-number field
     }
 
