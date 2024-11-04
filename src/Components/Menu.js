@@ -7,7 +7,6 @@ const Menubar = ({ onSelect,selectedItem }) => {
     { key: 'Users', label: 'Users' },
     { key: 'Custom Tabs', label: 'Custom Tabs' },
     { key: 'Recycle bin', label: 'Recycle bin' },
-
   ]; 
  
   return (
