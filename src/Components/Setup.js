@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Tabs,Breadcrumb } from 'antd';
 import Home from './Home'; // Import your Home component
 import Datable from '../ObjectSetupView'; // Import your Object Setup component
-
+ 
 const { TabPane } = Tabs;
 
 const SetupPage = () => {

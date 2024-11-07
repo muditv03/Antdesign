@@ -8,7 +8,7 @@ import Papa from 'papaparse'; // Importing PapaParse for CSV parsing
 import MapContent from './MapContent';
 import StartImport from './StartImportJob';
 
-
+ 
 const { Step } = Steps;
 
 const UploadRecords = () => {
@@ -96,6 +96,7 @@ const UploadRecords = () => {
           }, {});
         const mappingPayload = {
           bulk_import_job: {
+            object_name:selectedObject,
             file_id: uploadedCSVID,
             mappings: filteredMappings
           }
@@ -193,10 +194,6 @@ const UploadRecords = () => {
     }
 
 };
-
-
-  
-
   const renderContent = () => {
     switch (currentStep) {
       case 0:
@@ -358,7 +355,7 @@ const UploadRecords = () => {
                         type="primary"
                         onClick={handleNext}
                         style={{marginRight:'10px'}}
-                        disabled={(currentStep === 0 && !selectedObject) || (currentStep === 1 && !fileName) || ((currentStep === 2 && !importReady))}
+                        disabled={(currentStep === 0 && !selectedObject) || (currentStep === 1 && !fileName) || ((currentStep === 2 && !importReady) || (currentStep===3))}
                     >
                         Next
                     </Button>

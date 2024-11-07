@@ -7,7 +7,7 @@ import ObjectRelatedListTab from './Components/ObjectRelatedListTab';
 import { useState } from 'react';
 import CreateObjectDrawer from './CreateObjectDrawer';
 
-
+ 
 const { Title } = Typography;
 const { TabPane } = Tabs;
 
