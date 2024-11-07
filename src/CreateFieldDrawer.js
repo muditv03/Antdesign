@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Drawer, Form, Input, Button, message, Select, Card, Spin, Checkbox,Tooltip,Row,Col } from 'antd';
-import { BASE_URL } from './Constant';
+import { BASE_URL,helpTextFormula } from './Constant';
 import { InfoCircleOutlined } from '@ant-design/icons'; // Import the InfoCircle icon
 
 import ApiService from './apiService'; // Import ApiService class
@@ -21,7 +21,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   const [fieldForFormula,setFieldsforFormula]=useState([]);
   const [formula,setFormula]=useState('');
   const [isValidFormula, setIsValidFormula] = useState(null); // null means not checked yet
-  const [validationMessage, setValidationMessage] = useState('');
+  const [validationMessage, setValidationMessage] = useState(null);
 
 
 
@@ -72,18 +72,13 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         length: editField.decimal_places_before + editField.decimal_places_after, // Calculate total length
         decimal_places: editField.decimal_places_after, // Set decimal places
         format:editField.auto_number_format,
-        startingPoint:editField.auto_number_starting,
-        formula:editField.formula
+        startingPoint:editField.auto_number_starting
       });
-      console.log(editField.formula);
-      setFormula(editField.formula);
       setFieldType(editField.type); // Set field type for conditional rendering
       setIsAutoNumber(editField.is_auto_number || false); // Set auto number state if editing
-      setIsFormula(editField.is_formula || false);
     } else {
       form.resetFields(); // Reset fields for creating a new field
       setIsAutoNumber(false); // Reset auto number state
-      setIsFormula(false);
     }
   }, [editField, form]);
 
@@ -93,7 +88,20 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   }; 
 
   const handleFinish = async (values) => {
+
+    console.log('finish');
+    console.log(isFormula);
+    if (isFormula) {
+      const error = validateFormulaSyntax(formula);
+      console.log(error);
+      if (error) {
+        message.error(`Formula syntax is invalid. ${error}`);
+        return;
+      }
+    }
+
     setLoading(true); // Show spinner
+
  
     const newField = {
       label: values.label,
@@ -111,17 +119,16 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       newField.parent_object_name=values.parent_object_name;
       newField.relationship_name=values.relationship_name;
     }
+    // Include starting and ending points if isAutoNumber is true
     if (isAutoNumber) {
       newField.auto_number_format = values.format; // Add starting point
       newField.auto_number_starting = values.startingPoint;     // Add ending point
     }
 
-    console.log('formula while editing is ');
-    console.log(newField.formula);
+    console.log('formula is ');
+    console.log(isFormula);
     if(isFormula){
-      console.log('formula is ');
-      console.log(formula);
-      newField.formula=setFormula(formula);
+      newField.formula=formula;
     }
 
     if (values.type === 'Picklist') {
@@ -179,7 +186,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         message.success('Field created successfully');
       }
 
-      onClose(); 
+      onClose();
       form.resetFields();
     } catch (error) {
       console.log('error while creating field is')
@@ -203,6 +210,38 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
     setFieldsforFormula(filteredFields);
   };
 
+
+  const validateFormulaSyntax = (formula) => {
+    // Check balanced parentheses
+    const stack = [];
+    for (const char of formula) {
+      if (char === '(') {
+        stack.push(char);
+      } else if (char === ')') {
+        if (stack.length === 0) {
+          return "Unbalanced parentheses.";
+        }
+        stack.pop();
+      }
+    }
+    if (stack.length > 0) {
+      return "Unbalanced parentheses.";
+    }
+
+    // Check for invalid operator placement
+    const operatorRegex = /[\+\-\*\/]/;
+    if (operatorRegex.test(formula[0]) || operatorRegex.test(formula[formula.length - 1])) {
+      return "Formula cannot start or end with an operator.";
+    }
+    if (/[\+\-\*\/]{2,}/.test(formula)) {
+      return "Operators cannot be consecutive.";
+    }
+
+    // If all checks pass
+    return null;
+  };
+
+
   
   const handleFormulaChange = (value)=>{
     console.log(value);
@@ -210,9 +249,15 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
     setFormula(formula.concat(value));
   };
 
-  const validateFormula = (value) => {
-    console.log('final formula is ');
-    console.log(value);
+  const validateFormula = () => {
+    const error = validateFormulaSyntax(formula);
+    if (error) {
+      setValidationMessage(error);
+      setIsValidFormula(false);
+    } else {
+      setValidationMessage("Formula syntax is correct.");
+      setIsValidFormula(true);
+    }
   };
 
 
@@ -415,11 +460,26 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
 
               </Row>
 
-               
-              <TextArea name="Formula" label="Formula" value={formula} onChange={e=> setFormula(e.target.value)} placeholder="Enter formula" />
-                <Button type="primary" onClick={validateFormula(formula)} style={{ marginRight: 8 }}>
+              <Row align="middle" gutter={8}>
+                <Col flex="auto">
+                  <TextArea value={formula} onChange={(e) => setFormula(e.target.value)} placeholder="Enter formula"/>
+                </Col>
+                <Col>
+                  <Tooltip title={helpTextFormula} placement="right">
+                    <InfoCircleOutlined style={{ color: '#1890ff', cursor: 'pointer' }} />
+                  </Tooltip>
+                </Col>
+              </Row>
+                <Button type="default" onClick={validateFormula} style={{ marginRight: 8,marginTop:4 }}>
                   Check Status
                 </Button>
+
+                {isValidFormula !== null && (
+                  <div style={{ marginTop: '10px', color: isValidFormula ? 'green' : 'red' }}>
+                    {validationMessage}
+                  </div>
+                )}
+
 
               </>
             )}

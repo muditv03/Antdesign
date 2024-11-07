@@ -83,7 +83,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
     });
     setSelectedKey(matchedItem ? matchedItem.key : null);  // Only select tab if match foundz
   }, [location.pathname, items]);
-
+ 
   const handleClick = (e) => {
 
     const clickedItem = items.find(item => item.key === e.key);
@@ -91,7 +91,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
 
     if (clickedItem && clickedItem.objectName) {
       setSelectedKey(e.key); // Update selected key in state
-      localStorage.setItem('selectedKey', e.key); // Store selected key in localStorage
+      localStorage.setItem('selectedKey', e.key); 
       navigate(`/object/${e.key}`);
     }
   };

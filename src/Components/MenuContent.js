@@ -5,14 +5,19 @@ import CustomTabs from './CustomTabs';
 import UserComponent from './User';
 import Recyclebin from './RecycleBin';
 import { Upload } from 'antd';
+import { useNavigate } from 'react-router-dom';
 
 const MenuContent = ({ selectedItem }) => {
+
+  const navigate = useNavigate();
+
   switch (selectedItem) {
     case 'Organisation Setup':
       return <OrganisationSetup />; // Use the new OrganisationSetup component
     case 'Users':
       return <UserComponent />; // Component for Settings
-    
+    case 'Import Wizard':
+      return  navigate(`/import`);
     case 'Custom Tabs':
       return <Tabs />; // Component for Reports
     case 'Recycle bin':

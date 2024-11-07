@@ -47,10 +47,10 @@ const ObjectSetupDetail = () => {
   const[objectForListView,setObjectForListView]=useState();
   const [ListViewInDrawer,SetListViewInDrawer]=useState();
 
-
-
+  
   const fetchRecords = (selectedViewId) => {
     setError('');
+
     setLoading(true);
     // Fetch object details using ApiService
     const apiServiceForObject = new ApiService(
@@ -169,17 +169,25 @@ const ObjectSetupDetail = () => {
         setLoading(false); // Set loading to false after the API call
     }
   };
+
+ 
   
-
-  useEffect(() => {
-    fetchRecords(selectedView);
-  }, [id]);
-
   useEffect(() => {
     if (objectName) {
+      console.log('fetching records .....');
       fetchListViews();
     }
   }, [objectName]); // Use only the necessary dependencies
+
+ 
+  useEffect(() => {
+    console.log('view chsnged and now selected view is  ');
+    console.log(selectedView);
+    console.log('id changed');
+    console.log(id);
+    setSelectedView('');
+    fetchRecords('');
+  }, [id]);
   
 
   const handleViewChange = (value) => {
@@ -734,7 +742,7 @@ const ObjectSetupDetail = () => {
   );
 
   const handleFileUpload = () => {
-    navigate(`/record/${objectName}/UploadCsv`);
+    navigate(`/import`);
   };
 
   

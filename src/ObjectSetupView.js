@@ -6,7 +6,7 @@ import { EditOutlined } from '@ant-design/icons';
 import CreateObjectDrawer from './CreateObjectDrawer';
 import { BASE_URL } from './Constant';
 import ApiService from './apiService'; 
-
+ 
 const { Title } = Typography;
 
 const DataTable = () => {

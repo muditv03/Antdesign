@@ -72,14 +72,12 @@ const ObjectRelatedListTab = () => {
         related_list_name: item.related_list.related_list_name,
         child_object_name: item.related_list.child_object_name,
         fields_to_display: item.related_list.fields_to_display,
+        field_api_name:item.related_list.field_api_name
       }));
 
       setRelatedLists(formattedData);
     } catch (error) {
-      const errorMessage = error && typeof error === 'object'
-      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-      : 'Failed to fetch related lists due to an unknown error';
-      message.error(errorMessage);      
+     console.log(error);      
     } finally {
       setLoadingRelatedLists(false);
     }
@@ -128,6 +126,11 @@ const ObjectRelatedListTab = () => {
       dataIndex: 'fields_to_display',
       key: 'fields_to_display',
       render: (fields) => fields.join(', '), // Join for display
+    },
+    {
+      title: 'Lookup Name',
+      dataIndex: 'field_api_name',
+      key: 'field_api_name',
     },
     {
       title: 'Actions',
