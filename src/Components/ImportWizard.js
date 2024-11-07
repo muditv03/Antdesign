@@ -1,61 +1,83 @@
 // UploadRecords.js
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Button, Typography, Table } from "antd";
+import { Card, Button, Typography, Table, Tooltip } from "antd";
 import { UploadOutlined, SyncOutlined } from "@ant-design/icons";
+import axios from "axios";
+import ApiService from '../apiService'; 
+import { BASE_URL } from '../Constant';
 
 const { Title } = Typography;
 
 const Import = () => {
   const navigate = useNavigate();
+  const [jobData, setJobData] = useState([]);
 
   const handleStartImport = () => {
     navigate("/import/new-import");
   };
 
-  const columns = [
-    { title: "Name", dataIndex: "name", key: "name" },
-    { title: "New Records", dataIndex: "newRecords", key: "newRecords" },
-    { title: "Updated Records", dataIndex: "updatedRecords", key: "updatedRecords" },
-    { title: "New Associations", dataIndex: "newAssociations", key: "newAssociations" },
-    { title: "Error Count", dataIndex: "errorCount", key: "errorCount" },
-    { title: "Source", dataIndex: "source", key: "source" },
-    { title: "User", dataIndex: "user", key: "user" },
-  ];
+  // Fetch job data from API
+  useEffect(() => {
+    const fetchJobData = async () => {
+      try {
+        const apiService = new ApiService(`${BASE_URL}/get_all_jobs`, {
+          'Content-Type':  "application/json"
+      }, 'GET'); 
 
-  const data = [
+      const response = await apiService.makeCall();
+
+      setJobData(response);
+      } catch (error) {
+        console.error("Error fetching job data:", error);
+      }
+    };
+
+    fetchJobData();
+  }, []);
+
+  const columns = [
+    { title: "Job ID", dataIndex: "job_id", key: "job_id" },
+    { title: "Status", dataIndex: "status", key: "status" },
+    { title: "Total Records", dataIndex: "total_records", key: "total_records" },
+    { title: "Successful Records", dataIndex: "successful_records", key: "successful_records" },
+    { title: "Pending Records", dataIndex: "pending_records", key: "pending_records" },
+    { title: "Total Chunks", dataIndex: "total_chunks", key: "total_chunks" },
+    { title: "Processed Chunks", dataIndex: "processed_chunks", key: "processed_chunks" },
+    { title: "Pending Chunks", dataIndex: "pending_chunks", key: "pending_chunks" },
     {
-      key: "1",
-      name: "",
-      newRecords: '',
-      updatedRecords: '',
-      newAssociations: '',
-      errorCount: '',
-      source: "",
-      user: "",
+      title: "Errors",
+      dataIndex: "errors",
+      key: "errors",
+      render: (errors) =>
+        errors.length ? (
+          <Tooltip
+            title={errors.map((error, index) => (
+              <div key={index}>
+                Row {error.row_number}: {error.messages.join(", ")}
+              </div>
+            ))}
+          >
+            <span>{errors.length} errors</span>
+          </Tooltip>
+        ) : (
+          "No errors"
+        ),
     },
-    // Add more rows as needed
   ];
 
   return (
     <div style={styles.container}>
       <Title level={3} style={styles.heading}>Imports</Title>
       <div style={styles.cardsContainer}>
-        <Card
-          style={styles.card}
-          hoverable
-          onClick={handleStartImport}
-        >
+        <Card style={styles.card} hoverable onClick={handleStartImport}>
           <UploadOutlined style={styles.icon} />
           <h3>Import</h3>
           <p>Import contact, company, deal, ticket, or product information into the CRM.</p>
           <Button type="primary" style={styles.button}>Start an Import</Button>
         </Card>
 
-        <Card
-          style={styles.card}
-          hoverable
-        >
+        <Card style={styles.card} hoverable>
           <SyncOutlined style={styles.icon} />
           <h3>Sync</h3>
           <p>Sync data between the CRM and other apps.</p>
@@ -65,7 +87,7 @@ const Import = () => {
 
       <div style={styles.tableContainer}>
         <Title level={4}>Past Imports</Title>
-        <Table columns={columns} dataSource={data} pagination={false} />
+        <Table columns={columns} dataSource={jobData} rowKey="job_id" pagination={false} />
       </div>
     </div>
   );
@@ -105,7 +127,7 @@ const styles = {
     marginTop: "20px",
   },
   tableContainer: {
-    width: "80%",
+    width: "100%",
     marginTop: "40px",
   },
 };
