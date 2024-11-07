@@ -93,7 +93,7 @@ const CreateTabDrawer = ({ visible, onClose }) => {
 
             await apiServiceForTab.makeCall();
             eventBus.emit('objectCreatedOrUpdated'); // Notify that object was created or updated
-
+ 
             message.success('New tab created successfully'); // Show success message
             onClose(); // Close the drawer after successful creation
         } catch (error) {

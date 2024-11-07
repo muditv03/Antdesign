@@ -11,6 +11,8 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
   const [childObjectFields, setChildObjectFields] = useState([]);
   const [selectedChild, setSelectedChild] = useState('');
   const [selectedFields, setSelectedFields] = useState([]); 
+  const [lookupFields, setLookupFields] = useState([]); // New state for lookup fields
+
   // Fetch parent objects
   useEffect(() => {
     const fetchParentObjects = async () => {
@@ -53,8 +55,13 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
           setChildObjectFields(res
             .filter((field) => field.name !== 'recordCount')
           );
+
+          const lookupFieldsFiltered = res.filter(
+            (field) => field.type === 'lookup' && field.parent_object_name === parentObjectName
+          );
+          setLookupFields(lookupFieldsFiltered);
         } catch (error) {
-          message.error('Error fetching child object fields');
+          console.log('Error fetching child object fields');
         }
       };
       fetchChildObjectFields();
@@ -70,7 +77,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
   };
 
   // Handle field selection with a maximum of 7 fields
-  const handleFieldChange = (value) => {
+  const handleFieldChange = async(value) => {
     if (value.length > 7) {
       message.error('You can select up to 7 fields.');
       return;
@@ -79,8 +86,8 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
   };
  
   // Submit form handler
-  const handleFinish = (values) => {
-    const { relatedListName, parentObject } = values;
+  const handleFinish =async (values) => {
+    const { relatedListName, parentObject,fieldapiname } = values;
     if (!relatedListName || !parentObject || !selectedChild) {
       message.error('Please complete all required fields.');
       return;
@@ -91,24 +98,32 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
       child_object_name: selectedChild,
       related_list_name: relatedListName,
       fields_to_display: selectedFields,
+      field_api_name:fieldapiname
+      
     }; 
 
-    const api = new apiService(`${BASE_URL}/create_related_list`, {}, 'POST', data);
-    api.makeCall()
-      .then(() => {
+
+      try {
+        const apiServiceForTab = new apiService(
+            `${BASE_URL}/create_related_list`,
+            { 'Content-Type': 'application/json' },
+            'POST',
+            data
+        );
+
+        await apiServiceForTab.makeCall();
         message.success('Related list created successfully!');
         form.resetFields();
         onClose(); // Close the drawer after successful creation
         onAddRelatedList(); // Callback to refresh related lists
-      })
-   
-      .catch(error => {
+    } catch (error) {
         const errorMessage = error && typeof error === 'object'
         ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-        : 'Failed to save related lists due to an unknown error';
-        message.error(errorMessage);
-      })
+        : 'Failed to create new related list due to an unknown error';
+        message.error(errorMessage);       
+      } 
   };
+
 
   return (
     <Drawer
@@ -167,6 +182,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
         </Form.Item>
 
         {selectedChild && (
+          <>
           <Form.Item
             name="fieldsToDisplay"
             label="Fields to Display"
@@ -182,6 +198,20 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
                 .map((field) => ({ value: field.name, label: field.label }))} // Ensure unique options
             />
           </Form.Item>
+
+          <Form.Item
+          name="fieldapiname"
+          label="Lookup Name"
+          rules={[{ required: true, message: 'Please select a lookup field' }]}
+          >
+          <Select placeholder="Select a lookup field">
+            {lookupFields.map(field => (
+              <Option key={field.name} value={field.name}>{field.label}</Option>
+            ))}
+          </Select>
+          </Form.Item>
+          </>
+
         )}
       </Form>
       </Card>

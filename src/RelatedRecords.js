@@ -4,6 +4,8 @@ import { BASE_URL } from './Constant';
 import ChildRecordTable from './RecordTable';
 import ApiService from './apiService';
 import CreateRecordDrawer from './CreateRecordDrawer';
+import { generateBody } from './Components/Utility';
+
 
 const { Title } = Typography;
 
@@ -137,16 +139,8 @@ const fetchCurrentRecordDetails = async () => {
   };
 
   const handleFinish = async (values) => {
-    const updatedValues = {};
     
-    currentFieldsData.forEach((field) => {
-      const fieldName = field.name;
-      if (field.type === 'lookup') {
-        updatedValues[`${fieldName.toLowerCase()}`] = values[fieldName];
-      } else {
-        updatedValues[fieldName] = values[fieldName];
-      }
-    });
+    const updatedValues=generateBody(currentFieldsData,values);
 
     const body = {
       object_name: currentChildObjectName,
@@ -262,7 +256,7 @@ const handleNewButtonClick = async (relatedList) => {
         setSelectedDate={setSelectedDate}
       />
     </div>
-  );
+  ); 
 };
 
 export default RelatedRecord;

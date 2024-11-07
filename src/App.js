@@ -11,7 +11,9 @@ import AppSidebar from './Sidebar';
 import DataTable from './ObjectSetupView';
 import ObjectSetupDetail from './ObjectSetupDetail';
 import ObjectFieldDetail from './ObjectDetail';
-import UploadRecords from './Components/UploadCsvRecords';
+import Import from './Components/ImportWizard';
+import ImportPage from './Components/NewImport';
+import UploadRecords from './Components/UploadRecords';
 import AppFooter from './Footer';  
 import Profile from './Profile';  
 import RecordDetail from './RecordDetailPage';
@@ -39,7 +41,6 @@ const sidebarRoutes = [
 const App = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
 
   // Check if the current path is login, signup, or forgot-password
   const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(location.pathname.toLowerCase());
@@ -75,7 +76,7 @@ const App = () => {
         <AppSidebar
           onSidebarToggle={handleSidebarToggle}
           collapsedWidth="80px"
-          expandedWidth="20%" // Use 20% width for expanded sidebar
+          expandedWidth="20%" 
         />
       )} {/* Conditionally render sidebar */}
       <Layout
@@ -104,7 +105,9 @@ const App = () => {
             <Route path="setup/objectManager" element={<DataTable />} />
             <Route path="/object-setup/:id" element={<ObjectFieldDetail />} />
             <Route path="/record/:objectName/:id" element={<RecordDetail />} />
-            <Route path="/record/:objectName/UploadCsv" element={<UploadRecords />} />
+            <Route path="/import" element={<Import />} />
+            <Route path="/import/new-import" element={<ImportPage />} />
+            <Route path="/import/new-import/standard" element={<UploadRecords />} />
             <Route path="/object/:id" element={<ObjectSetupDetail />} />
             <Route path="/object-profile" element={<Profile />} />
             <Route path="/setup" element={<SetupPage />} />

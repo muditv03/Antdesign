@@ -291,7 +291,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
 
     setDrawerVisible(true);
   };
-
+ 
   const fetchRecords = async () => {
     // Logic to fetch records goes here
     try {

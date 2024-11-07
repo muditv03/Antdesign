@@ -543,11 +543,12 @@ const RecordDetail = () => {
               fontWeight:500
             }}
           >
-             {type === 'boolean'
-              ? form.getFieldValue(name)
-                ? "True"
-                : "False"
-                : type === 'currency'
+            {type === 'boolean' ? (
+              <Checkbox
+                  checked={form.getFieldValue(name)}
+                  disabled
+              />
+            ): type === 'currency'
                 ? `$${form.getFieldValue(name) !== undefined && form.getFieldValue(name) !== null ? parseFloat(form.getFieldValue(name)).toFixed(2) : ''}`
                 : type === 'String'
                 ? form.getFieldValue(name) || ''

@@ -1,3 +1,10 @@
 const BASE_URL = 'http://localhost:3000';
 const DateFormat='DD/MM/YYYY';
-export { BASE_URL,DateFormat } ; 
+const helpTextFormula = `
+Use operators like +, -, *, / for calculations. 
+Example: IF(Salary > 50000, "High", "Low"). 
+Functions like CONCAT, DATE, and ROUND are also supported.`
+
+;
+
+export { BASE_URL,DateFormat,helpTextFormula } ; 

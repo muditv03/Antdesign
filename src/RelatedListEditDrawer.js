@@ -13,6 +13,8 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
   const [allChildObjects, setAllChildObjects] = useState([]);
   const [selectedChild, setSelectedChild] = useState('');
   const [selectedFields, setSelectedFields] = useState([]); // Track selected fields
+  const [lookupFields, setLookupFields] = useState([]); // New state for lookup fields
+
 
   // Fetch parent objects
   useEffect(() => {
@@ -38,6 +40,8 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
         parentObject: record.parent_object_name || parentObjectName,
         childObject: record.child_object_name,
         fieldsToDisplay: record.fields_to_display || [],
+        fieldapiname:record.field_api_name
+
       }); 
       setSelectedChild(record.child_object_name);
       setSelectedFields(record.fields_to_display || []);
@@ -51,7 +55,14 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
         const api = new apiService(`${BASE_URL}/mt_fields/object/${selectedChild}`, {}, 'GET');
         try {
           const res = await api.makeCall();
-          setChildObjectFields(res);
+          setChildObjectFields(res
+            .filter((field) => field.name !== 'recordCount')
+          );
+          const lookupFieldsFiltered = res.filter(
+            (field) => field.type === 'lookup' && field.parent_object_name === parentObjectName
+          );
+          setLookupFields(lookupFieldsFiltered);
+
         } catch (error) {
           message.error('Error fetching child object fields');
         }
@@ -78,8 +89,8 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
     setSelectedFields(value);
   };
 
-  const handleFinish = (values) => {
-    const { relatedListName, parentObject, fieldsToDisplay } = values;
+  const handleFinish = async(values) => {
+    const { relatedListName, parentObject, fieldsToDisplay,fieldapiname } = values;
 
     if (!relatedListName || !parentObject || !selectedChild) {
       message.error('Please complete all required fields.');
@@ -91,26 +102,31 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
       parent_object_name: parentObject,
       child_object_name: selectedChild,
       fields_to_display: fieldsToDisplay,
+      field_api_name:fieldapiname
+
     };
 
-    const api = new apiService(
-      `${BASE_URL}/related_lists/${record.key}`,
-      {},
-      'PUT',
-      data
-    );
 
-    api.makeCall()
-      .then(() => {
-        message.success('Related list updated successfully!');
-        onClose();
-      })
-      .catch((error) => {
-        console.error('Error updating related list:', error);
-        const errorMessage = error && typeof error === 'object'
-        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-        : 'Failed to updated related list due to an unknown error';
-        message.error(errorMessage);      });
+    try {
+      const apiServiceForTab = new apiService(
+          `${BASE_URL}/related_lists/${record.key}`,
+          { 'Content-Type': 'application/json' },
+          'PUT',
+          data
+      );
+
+      await apiServiceForTab.makeCall();
+      message.success('Related list updated successfully!');
+      form.resetFields();
+      onClose(); // Close the drawer after successful creation
+  } catch (error) {
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to update related list due to an unknown error';
+      message.error(errorMessage);       
+    } 
+
+   
   };
 
   return (
@@ -146,8 +162,7 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
           name="parentObject"
           label="Parent Object"
           rules={[{ required: true, message: 'Please select a parent object' }]}
-
-          
+ 
         > 
           <Select placeholder="Select parent object" value={parentObjectName} disabled onChange={(value) => form.setFieldsValue({ parentObject: value })}> 
             {parentObjects.map(obj => (
@@ -176,6 +191,7 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
         </Form.Item>
 
         {selectedChild && (
+          <>
           <Form.Item
             name="fieldsToDisplay"
             label="Fields to Display"
@@ -196,6 +212,19 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
                 ))}
             </Select>
           </Form.Item>
+
+          <Form.Item
+          name="fieldapiname"
+          label="Lookup Name"
+          rules={[{ required: true, message: 'Please select a lookup field' }]}
+          >
+          <Select placeholder="Select a lookup field" defaultValue={form.getFieldValue('fieldapiname')}>
+            {lookupFields.map(field => (
+              <Option key={field.name} value={field.name}>{field.label}</Option>
+            ))}
+          </Select>
+          </Form.Item>
+          </>
         )}
       </Form>
     </Drawer>
