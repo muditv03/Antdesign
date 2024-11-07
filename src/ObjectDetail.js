@@ -1,6 +1,6 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { Table, Form, Card, Button, Row, Col, Typography, Tabs } from 'antd';
+import { useLocation ,useNavigate,Link} from 'react-router-dom';
+import { Table, Form, Card, Button, Row, Col, Typography, Tabs,Breadcrumb} from 'antd';
 import ObjectFieldTab from './Components/ObjectFieldsTab';
 import CreateListView from './Components/CreateListView';
 import ObjectRelatedListTab from './Components/ObjectRelatedListTab';
@@ -13,6 +13,7 @@ const { TabPane } = Tabs;
 
 const ObjectFieldDetail = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { record } = location.state || {};
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
@@ -41,8 +42,19 @@ const ObjectFieldDetail = () => {
     setEditingRecord(null);
   };
 
+ 
+
   return (
     <div>
+       <Breadcrumb style={{ marginBottom: '16px' }}>
+       <Breadcrumb.Item>
+       <Link to="/setup?tab=objectManager" style={{ fontWeight: 'bold' }}>
+          Object Manager
+        </Link>
+        </Breadcrumb.Item>
+        <Breadcrumb.Item>{record?.label || 'Object Details'}</Breadcrumb.Item>
+      </Breadcrumb>
+
       <Title level={3}>{record?.label || 'Object Details'}</Title>
       <Tabs defaultActiveKey="1" tabPosition='left'>
         <TabPane tab="Details" key="1">

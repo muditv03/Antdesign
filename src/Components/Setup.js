@@ -2,21 +2,31 @@ import React, { useEffect, useState } from 'react';
 import { Tabs,Breadcrumb } from 'antd';
 import Home from './Home'; // Import your Home component
 import Datable from '../ObjectSetupView'; // Import your Object Setup component
+import { useLocation } from 'react-router-dom';
+
  
 const { TabPane } = Tabs;
 
 const SetupPage = () => {
   const [activeKey, setActiveKey] = useState('home');
+  const location = useLocation();
 
-  // Handle tab change
+
+  // Handle tab change 
   const handleTabChange = (key) => {
     setActiveKey(key); // Set the active tab key
   };
 
   useEffect(() => {
-    // Automatically set the active tab to 'home' on initial load
+    const searchParams = new URLSearchParams(location.search);
+    const tab = searchParams.get('tab');
+   // Set the active tab based on the query parameter
+   if (tab === 'objectManager') {
+    setActiveKey('setup/objectManager');
+  } else {
     setActiveKey('home');
-  }, []);
+  }
+  }, [location.search]);
 
   return (
     <div style={{ padding: '5px' }}>

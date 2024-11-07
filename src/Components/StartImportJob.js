@@ -2,9 +2,13 @@ import React, { useState } from "react";
 import { Card, Button, message,Typography } from "antd";
 import ApiService from '../apiService'; 
 import { BASE_URL } from '../Constant';
+import { useNavigate } from "react-router-dom";
+
 
 const StartImport = ({bulkImportJobId}) => {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
 
   const handleStartImport = async () => {
     setLoading(true);
@@ -15,6 +19,7 @@ const StartImport = ({bulkImportJobId}) => {
 
       const response = await apiService.makeCall();
       message.success("Import started successfully");
+      navigate('/import');
       console.log(response);
     } catch (error) {
       message.error("Failed to start import");
