@@ -131,7 +131,7 @@ const DataTable = () => {
       fixed: 'left',
       render: (text, record) => (
         <a onClick={() => handleLabelClick(record)}>{text}</a>
-      ),
+      ), 
     },
     {
       title: 'API Name',
@@ -146,6 +146,7 @@ const DataTable = () => {
       key: 'plurallabel',
       width: 100,
     },
+    
 
     { 
       title: 'Action',

@@ -295,7 +295,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       //   message.error(`Please enter value for filter ${index + 1}`);
       //  }
      });
-   
+    
      if (!isValid) {
        return; // Stop the submission if validation fails
      }

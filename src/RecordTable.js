@@ -11,7 +11,7 @@ import CreateRecordDrawer from './CreateRecordDrawer';
 import { generateBody } from './Components/Utility';
 dayjs.extend(customParseFormat);
  
-const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, onClone, onDelete,relatedListId,currentRecordId,currentObjectName ,refreshRecords}) => {
+const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, onClone, onDelete,relatedListId,currentRecordId,currentObjectName ,refreshRecords}) => {
 
   //console.log('id is '+currentRecordId);
   //console.log('object name is'+currentObjectName);
@@ -183,7 +183,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
 
       for (const lookupField of lookupFields) {
         const ob = lookupField.parent_object_name;
-        let objectName='';
+        let objectName=''; 
        
         objectName = lookupField.name;
 
