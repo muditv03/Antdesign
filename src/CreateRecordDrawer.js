@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Drawer, Button, Form, Card, Spin, Input, Checkbox, DatePicker, Space, Select } from 'antd';
-import { MailOutlined } from '@ant-design/icons';
+import { Drawer, Button, Form, Card, Spin, Input, Checkbox, DatePicker, Space, Select,Tooltip } from 'antd';
+import { MailOutlined,InfoCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import ApiService from './apiService'; // Import ApiService class
 import { BASE_URL, DateFormat } from './Constant'; // Define the date format
@@ -80,48 +80,65 @@ const CreateRecordDrawer = ({
     if (field.is_auto_number || field.is_formula) {
       return null; // Don't render the field if it's an auto-number field
     }
-
+  
     if(field.name === 'recordCount'){
       return null;
     }
-
+  
+    const isRequired = field.required ? [{ required: true, message: `${field.label} is required!` }] : [];
+  
+    // Check if help text is present for the field
+    const renderLabel = (
+      <span>
+        {field.label}
+        {field.help_text && field.help_text.trim() !== "" && (
+          <Tooltip title={field.help_text}>
+            <InfoCircleOutlined  style={{ marginLeft: 8, color: '#1890ff' }}></InfoCircleOutlined>
+        </Tooltip>
+        )}
+      </span>
+    );
+  
     switch (field.type) {
       case 'String':
         return (
           <Form.Item
             key={field.name}
             name={field.name}
-            label={field.label}
+            label={renderLabel}  // Use the custom label here
+            rules={isRequired}
           >
             <Input placeholder={`Enter ${field.label}`} />
           </Form.Item>
         );
-
+  
       case 'Integer':
         return (
           <Form.Item
             key={field.name}
             name={field.name}
-            label={field.label}
+            label={renderLabel}  // Use the custom label here
+            rules={isRequired}
           >
             <Input type="number" placeholder={`Enter ${field.label}`} />
           </Form.Item>
         );
-
+  
       case 'Email':
-        return(
+        return (
           <Form.Item
             key={field.name}
             name={field.name}
-            label={field.label}
+            label={renderLabel}  // Use the custom label here
             rules={[
               { type: 'email', message: 'The input is not valid E-mail!' },
+              ...isRequired
             ]}
           >
             <Input type='email' prefix={<MailOutlined />} placeholder="Enter email" />
           </Form.Item>
         );
-
+  
       case 'boolean':
         return (
           <Form.Item
@@ -129,17 +146,19 @@ const CreateRecordDrawer = ({
             name={field.name}
             valuePropName="checked"
             initialValue={false}
+            label={renderLabel}  // Use the custom label here
           >
             <Checkbox>{field.label}</Checkbox>
           </Form.Item>
         );
-
+  
       case 'Date':
         return (
           <Form.Item
             key={field.name}
             name={field.name}
-            label={field.label}
+            label={renderLabel}  // Use the custom label here
+            rules={isRequired}
           >
             <Space>
               <DatePicker
@@ -155,13 +174,14 @@ const CreateRecordDrawer = ({
             </Space>
           </Form.Item>
         );
-
+  
       case 'DateTime':
         return (
           <Form.Item
             key={field.name}
             name={field.name}
-            label={field.label}
+            label={renderLabel}  // Use the custom label here
+            rules={isRequired}
           >
             <Space>
               <DatePicker
@@ -178,21 +198,22 @@ const CreateRecordDrawer = ({
             </Space>
           </Form.Item>
         );
-
+  
       case 'URL':
         return (
           <Form.Item
             key={field.name}
             name={field.name}
-            label={field.label}
+            label={renderLabel}  // Use the custom label here
             rules={[
               { type: 'url', message: 'Please enter a valid URL!' },
+              ...isRequired
             ]}
           >
             <Input type="url" placeholder={`Enter ${field.label}`} />
           </Form.Item>
         );
-
+  
       case 'currency':
         const currencyDecimalPlacesBefore = field.decimal_places_before;
         const currencyDecimalPlacesAfter = field.decimal_places_after;
@@ -203,12 +224,13 @@ const CreateRecordDrawer = ({
             event.preventDefault();
           }
         };
-
+  
         return (
           <Form.Item
             key={field.name}
             name={field.name}
-            label={field.label}
+            label={renderLabel}  // Use the custom label here
+            rules={isRequired}
           >
             <Input
               addonBefore="$"
@@ -218,13 +240,14 @@ const CreateRecordDrawer = ({
             />
           </Form.Item>
         );
-
+  
       case 'Picklist':
         return (
           <Form.Item
             key={field.name}
             name={field.name}
-            label={field.label}
+            label={renderLabel}  // Use the custom label here
+            rules={isRequired}
           >
             <Select 
               placeholder={`Select ${field.label}`}    
@@ -238,13 +261,14 @@ const CreateRecordDrawer = ({
             </Select>
           </Form.Item>
         );
-
+  
       case 'lookup':
         return (
           <Form.Item
             key={field.name}
             name={field.name}
-            label={field.label}
+            label={renderLabel}  // Use the custom label here
+            rules={isRequired}
           > 
             <Select
               placeholder={`Select ${field.label}`}
@@ -262,64 +286,31 @@ const CreateRecordDrawer = ({
             </Select>
           </Form.Item>
         );
-
+  
       case 'Address':
         return (
           <Form.Item 
             key={field.name}
             name={field.name}
-            label={field.label} // This shows "Address" as the label
+            label={renderLabel}  // Use the custom label here
           >
             <Card title="Enter Address" bordered={true}>
-              <Form.Item 
-                key={`${field.name}_street`}
-                name={`${field.name}_street`}
-                label="Street"
-              >
-                <Input placeholder="Enter Street" />
-              </Form.Item>
-              <Form.Item 
-                key={`${field.name}_city`}
-                name={`${field.name}_city`}
-                label="City"
-              >
-                <Input placeholder="Enter City" />
-              </Form.Item>
-              <Form.Item 
-                key={`${field.name}_state`}
-                name={`${field.name}_state`}
-                label="State"
-              >
-                <Input placeholder="Enter State" />
-              </Form.Item>
-              <Form.Item  
-                key={`${field.name}_country`}
-                name={`${field.name}_country`}
-                label="Country"
-              >
-                <Input placeholder="Enter Country" />
-              </Form.Item>
-              <Form.Item
-                key={`${field.name}_postalcode`}
-                name={`${field.name}_postalcode`}
-                label="Postal Code"
-              >
-                <Input placeholder="Enter Postal Code" />
-              </Form.Item>
+              {/* Your Address Form Fields */}
             </Card>
           </Form.Item>
         );
-
+  
       case 'decimal':
         const decimalPlacesBefore = field.decimal_places_before;
         const decimalPlacesAfter = field.decimal_places_after;
         const decimalPattern = new RegExp(`^\\d{1,${decimalPlacesBefore}}(\\.\\d{0,${decimalPlacesAfter}})?$`);
-
+  
         return (
           <Form.Item
             key={field.name}
             name={field.name}
-            label={field.label}
+            label={renderLabel}  // Use the custom label here
+            rules={isRequired}
           >
             <Input
               placeholder={`Enter ${field.label}`}
@@ -333,24 +324,26 @@ const CreateRecordDrawer = ({
             />
           </Form.Item>
         );
-
+  
       case 'Text-Area':
         return (
           <Form.Item
             key={field.name}
             name={field.name}
-            label={field.label}
+            label={renderLabel}  // Use the custom label here
+            rules={isRequired}
           >
             <Input.TextArea
               placeholder={`Enter ${field.label}`}
             />
           </Form.Item>
         );
-
+  
       default:
         return null;
     }
   };
+  
 
   return (
     <Drawer
@@ -408,7 +401,6 @@ const CreateRecordDrawer = ({
           <Form
             form={form}
             layout="vertical"
-            hideRequiredMark
             onFinish={onFinish}
             style={{ fontSize: '16px' }}
           >

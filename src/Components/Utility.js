@@ -5,7 +5,7 @@ export const generateBody = (fieldsDataDrawer, values) => {
         const fieldName = field.name;
         if (field.type === 'lookup') {
             updatedValues[`${fieldName}_id`] = values[fieldName];
-        }
+        } 
         else if (field.type === 'Address') {
             updatedValues[fieldName] = {
                 street: values[`${field.name}_street`],
@@ -21,3 +21,4 @@ export const generateBody = (fieldsDataDrawer, values) => {
     });
     return updatedValues;
 };
+

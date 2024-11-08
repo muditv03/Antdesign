@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Card,Input, Button, Row, Col, Typography, Avatar, Select, Tabs, Checkbox, message, Space, DatePicker,Collapse,Affix } from 'antd';
+import { Form, Card,Input, Button, Row, Col, Typography, Avatar, Select, Tabs, Checkbox, message, Space, DatePicker,Collapse,Affix,Tooltip } from 'antd';
 import { useParams } from 'react-router-dom';
-import { EditOutlined,UnorderedListOutlined } from '@ant-design/icons';
+import { EditOutlined,UnorderedListOutlined,InfoCircleOutlined } from '@ant-design/icons';
 import RelatedRecord from './RelatedRecords';
 import { BASE_URL,DateFormat } from './Constant';
 import dayjs from 'dayjs';
@@ -205,14 +205,21 @@ const RecordDetail = () => {
 
 
   const renderFieldWithEdit = (field, selectedDate, setSelectedDate) => {
-    const { name, label, type, picklist_values, isTextArea } = field;
+    const { name, label, type, picklist_values, isTextArea,required, help_text } = field;
   
     const validationRules = [];
+     // Check for required field
+     if (required) {
+      validationRules.push({
+        required: true,
+        message: `${label} is required.`,
+      });
+    }
+
     if (name === 'recordCount') {
       return null;
     }
 
-  
     if (type === 'Integer') {
       validationRules.push({
         type: 'number',
@@ -247,6 +254,7 @@ const RecordDetail = () => {
     }
 
     const isFieldEditable = !field.is_auto_number && !field.is_formula && isEditable;
+    
  
     const   handleAddressChange =(parentField, childField, value)  =>{
      
@@ -280,6 +288,7 @@ const RecordDetail = () => {
       >
         {isFieldEditable ? (
           <>
+          
             {type === 'boolean' ? (
               <Form.Item
               name={name}
@@ -292,6 +301,7 @@ const RecordDetail = () => {
             >
               <Checkbox>{label}</Checkbox>
               </Form.Item>
+            
             ) : type === 'Picklist' ? (
               <Form.Item
             name={name}
@@ -526,6 +536,7 @@ const RecordDetail = () => {
               <Input placeholder={label} type={type === 'date' ? 'date' : 'text'} />
               </Form.Item>
             )}
+            
           </>
         ) : (
           <div
@@ -541,7 +552,7 @@ const RecordDetail = () => {
               overflowWrap: 'break-word',
               fontSize:'16px',
               fontWeight:500
-            }}
+            }} 
           >
             {type === 'boolean' ? (
               <Checkbox
@@ -622,13 +633,13 @@ const RecordDetail = () => {
             }}>
            
               <Row gutter={24} style={{ marginBottom: '0px' }}>
-                {fields.map((field, index) => (
-                  <Col key={index} xs={24} sm={12} style={{ marginBottom: -5 }}>
-                    <Form.Item label={field.label} style={{ marginBottom: -1, padding: '0px' }}>
-                      {renderFieldWithEdit(field, selectedDate, setSelectedDate)}
-                    </Form.Item>
-                  </Col>
-                ))}
+              {fields.map((field, index) => (
+                <Col key={index} xs={24} sm={12} style={{ marginBottom: -5 }}>
+                  <Form.Item label={<span>{field.label} {field.help_text && <Tooltip title={field.help_text}><InfoCircleOutlined style={{ marginLeft: 5 }} /></Tooltip>}</span>} style={{ marginBottom: -1, padding: '0px' }}>
+                    {renderFieldWithEdit(field, selectedDate, setSelectedDate)}
+                  </Form.Item>
+                </Col>
+              ))}
               </Row>
   
               <div className="system-info-section" style={{

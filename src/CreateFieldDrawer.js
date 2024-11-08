@@ -22,6 +22,10 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   const [formula,setFormula]=useState('');
   const [isValidFormula, setIsValidFormula] = useState(null); // null means not checked yet
   const [validationMessage, setValidationMessage] = useState(null);
+  const [selectedCC,setSelectedCC]=useState([]);
+  const [isRequired, setIsRequired] = useState(false); // State for auto number checkbox
+  const [isUnique, setIsUnique] = useState(false); // State for auto number checkbox
+  const [isExternalId, setIsExternalID] = useState(false); // State for auto number checkbox
 
 
 
@@ -72,10 +76,21 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         length: editField.decimal_places_before + editField.decimal_places_after, // Calculate total length
         decimal_places: editField.decimal_places_after, // Set decimal places
         format:editField.auto_number_format,
-        startingPoint:editField.auto_number_starting
+        startingPoint:editField.auto_number_starting,
+        description:editField.description,
+        helpText:editField.help_text,
+        defaultValue:editField.default_value,
+        required:editField.required,
+        unique:editField.unique,
+        external_id:editField.external_id
       });
+      setSelectedCC(editField.compliance_categorization)
       setFieldType(editField.type); // Set field type for conditional rendering
       setIsAutoNumber(editField.is_auto_number || false); // Set auto number state if editing
+      setIsRequired(editField.required || false); // Set auto number state if editing
+      setIsUnique(editField.unique || false); // Set auto number state if editing
+      setIsExternalID(editField.external_id || false); // Set auto number state if editing
+
     } else {
       form.resetFields(); // Reset fields for creating a new field
       setIsAutoNumber(false); // Reset auto number state
@@ -111,9 +126,19 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       iseditable: values.iseditable || true,
       iswriteable: values.iswriteable || true,
       is_auto_number: isAutoNumber, 
-      is_formula:isFormula
+      is_formula:isFormula,
+      description:values.description,
+      help_text:values.helpText,
+      default_value:values.defaultValue,
+      required:isRequired,
+      unique:isUnique,
+      external_id:isExternalId
       
     };
+
+    if(values.type==='String' || values.type==='Picklist'){
+      newField.compliance_categorization=selectedCC
+    }
 
     if(values.type=='lookup'){
       newField.parent_object_name=values.parent_object_name;
@@ -169,6 +194,15 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
           iswriteable: values.iswriteable,
           is_formula:isFormula,
           is_auto_number: isAutoNumber,
+          description:values.description,
+          help_text:values.helpText,
+          default_value:values.defaultValue,
+          required:isRequired,
+          unique:isUnique,
+          external_id:isExternalId,
+          ...((values.type==='Picklist' || values.type==='String') && {
+            compliance_categorization:selectedCC
+          }),
           ...(isAutoNumber && { auto_number_format: values.format, auto_number_starting: values.startingPoint }),
           ...(values.type === 'Picklist' && { picklist_values: picklistValues }),
           ...(values.type === 'decimal' || values.type === 'currency' && {
@@ -260,6 +294,14 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
     }
   };
 
+  const handleComplianceCategorizationChange = (value) => {
+   
+    console.log('cc value is');
+    console.log(value);
+    setSelectedCC(value);
+  };
+
+
 
   return (
     <Drawer
@@ -326,7 +368,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                     setIsAutoNumber(false); // Reset auto number checkbox if type is not String
                   }
                 }}
-              >
+              > 
                 <Option value="String">Text</Option>
                 <Option value="Integer">Number</Option>
                 <Option value="decimal">Decimal</Option>
@@ -560,7 +602,6 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                   ))}
                 </Select>
               
-              
                 </Form.Item>
 
             <Form.Item
@@ -573,8 +614,70 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
 
             </>
             )}
+
+          {(fieldType==='String' || fieldType==='Picklist' ) && (
+            <Form.Item
+              name="complianceCategorization"
+              label="Compliance Categorization"
+            >
+              <Select
+                mode="multiple"
+                placeholder="Select compliance categorization"
+                onChange={handleComplianceCategorizationChange}
+                defaultValue={selectedCC}
+                value={selectedCC}
+              >
+                  <Option value="PII">PII</Option>
+                  <Option value="HIPAA">HIPAA</Option>
+                  <Option value="GDPR">GDPR</Option>
+                  <Option value="PCI">PCI</Option>
+                  <Option value="COPPA">COPPA</Option>
+                  <Option value="CCPA">CCPA</Option>
+                </Select>
+            </Form.Item>
+          ) }
+                <Form.Item
+                  name="description"
+                  label="Description"
+                >
+                  <Input.TextArea placeholder="Enter description" />
+                </Form.Item>
+           
+                <Form.Item
+                  name="helpText"
+                  label="Help Text"
+                >
+                  <Input.TextArea placeholder="Enter help text" />
+                </Form.Item>
+
+                <Form.Item
+                  name="defaultValue"
+                  label="Default Value"
+                >
+                  <Input placeholder="Enter default value" type="text"/>
+                </Form.Item>
            
 
+                <Form.Item name="required" >
+                  <Checkbox
+                   checked={isRequired}
+                   onChange={(e) => setIsRequired(e.target.checked)}
+                  >Required
+                  </Checkbox>
+                </Form.Item>
+                <Form.Item name="unique" 
+                >
+                  <Checkbox
+                   checked={isUnique}
+                   onChange={(e) => setIsUnique(e.target.checked)}
+                  >Unique</Checkbox>
+                </Form.Item>
+                <Form.Item name="external_id" >
+                  <Checkbox
+                  checked={isExternalId}
+                  onChange={(e) => setIsExternalID(e.target.checked)}
+                  >External Id</Checkbox>
+                </Form.Item>
           </Form>
         </Card>
       </Spin>

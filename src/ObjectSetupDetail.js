@@ -188,7 +188,7 @@ const ObjectSetupDetail = () => {
     setSelectedView('');
     fetchRecords('');
   }, [id]);
-  
+   
 
   const handleViewChange = (value) => {
     console.log('id of view is ');
