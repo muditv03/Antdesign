@@ -28,7 +28,7 @@ const ObjectFieldDetail = () => {
       key: record?.key || 'N/A',
       label: record?.label || 'N/A',
       name: record?.name || 'N/A',
-      plurallabel: record?.plurallabel || 'N/A',
+      plurallabel: record?.pluralLabel || 'N/A',
     },
   ];
 
