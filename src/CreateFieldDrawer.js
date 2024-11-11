@@ -607,7 +607,25 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             <Form.Item
               name="relationship_name"
               label="Relationship Name"
-              rules={[{ required: true, message: 'Please enter parent object name' }]}>
+              rules={[ 
+                { required: true, message: 'Please enter the name' }, 
+                {
+                  validator: (_, value) => {
+                    if (!value) {
+                      return Promise.resolve();
+                    }
+                    const alphabetOnlyRegex = /^[a-zA-Z]+$/;
+                    if (!alphabetOnlyRegex.test(value)) {
+                      return Promise.reject(new Error('Name should only contain alphabets without spaces.'));
+                    }
+                    if (pluralize.isPlural(value)) {
+                      return Promise.reject(new Error('API name cannot be plural.'));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+              >
               <Input placeholder="Please enter relationship name" /> 
 
               </Form.Item>

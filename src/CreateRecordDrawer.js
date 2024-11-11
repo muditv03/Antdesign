@@ -287,18 +287,52 @@ const CreateRecordDrawer = ({
           </Form.Item>
         );
   
-      case 'Address':
-        return (
-          <Form.Item 
-            key={field.name}
-            name={field.name}
-            label={renderLabel}  // Use the custom label here
-          >
-            <Card title="Enter Address" bordered={true}>
-              {/* Your Address Form Fields */}
-            </Card>
-          </Form.Item>
-        );
+        case 'Address':
+          return (
+            <Form.Item
+              key={field.name}
+              name={field.name}
+              label={field.label} // This shows "Address" as the label
+            >
+              <Card title="Enter Address" bordered={true}>
+                <Form.Item
+                  key={`${field.name}_street`}
+                  name={`${field.name}_street`}
+                  label="Street"
+                >
+                  <Input placeholder="Enter Street" />
+                </Form.Item>
+                <Form.Item
+                  key={`${field.name}_city`}
+                  name={`${field.name}_city`}
+                  label="City"
+                >
+                  <Input placeholder="Enter City" />
+                </Form.Item>
+                <Form.Item
+                  key={`${field.name}_state`}
+                  name={`${field.name}_state`}
+                  label="State"
+                >
+                  <Input placeholder="Enter State" />
+                </Form.Item>
+                <Form.Item
+                  key={`${field.name}_country`}
+                  name={`${field.name}_country`}
+                  label="Country"
+                >
+                  <Input placeholder="Enter Country" />
+                </Form.Item>
+                <Form.Item
+                  key={`${field.name}_postalcode`}
+                  name={`${field.name}_postalcode`}
+                  label="Postal Code"
+                >
+                  <Input placeholder="Enter Postal Code" />
+                </Form.Item>
+              </Card>
+            </Form.Item>
+          );
   
       case 'decimal':
         const decimalPlacesBefore = field.decimal_places_before;
