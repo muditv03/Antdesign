@@ -10,7 +10,7 @@ import CreateRecordDrawer from './CreateRecordDrawer';
 import CreateListViewDrawer from './Components/CreateListViewDrawer';
 import ApiService from './apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { generateBody } from './Components/Utility';
+import { generateBody, formatRecordData, fetchLookupData } from './Components/Utility';
 
 dayjs.extend(customParseFormat);      
            
@@ -290,71 +290,14 @@ const ObjectSetupDetail = () => {
       setFieldsDataDrawer(fieldsResponse);
   
       // Format date fields in the record before setting them in the form
-      const formattedRecord = { ...recordResponse };
-  
-      // Iterate over the record to identify and format date fields
-      fieldsResponse.forEach(field => {
-
-        if (field.type === 'Address' && formattedRecord[field.name]) {
-          // Set individual address fields
-          formattedRecord[`${field.name}_street`] = recordResponse[field.name]['street'] || '';
-          formattedRecord[`${field.name}_city`] = recordResponse[field.name]['city'] || '';
-
-          formattedRecord[`${field.name}_state`] = recordResponse[field.name]['state'] || '';
-
-          formattedRecord[`${field.name}_country`] = recordResponse[field.name]['country'] || '';
-
-          formattedRecord[`${field.name}_postalcode`] = recordResponse[field.name]['postal_code'] || '';
-
-         
-        }
-
-        if (field.type === 'Date' && record[field.name]) {
-          // Format date to DD/MM/YYYY if the field is of Date type
-          formattedRecord[field.name] = dayjs(record[field.name]).format(DateFormat);
-        }
-        if (field.type === 'DateTime' && record[field.name]) {
-          // Format date to DD/MM/YYYY if the field is of Date type
-          formattedRecord[field.name] = dayjs(record[field.name]).format('DD/MM/YYYY HH:mm:ss');
-        }
-      }); 
-  
+      const formattedRecord = await formatRecordData(recordResponse, fieldsResponse, BASE_URL);
       setSelectedRecord(formattedRecord);
       form.setFieldsValue(formattedRecord);
       setDrawerVisible(true);
   
-      // Fetch all lookup field values and prefill in the form
-      const lookupFields = fieldsResponse.filter(field => field.type === 'lookup');
-  
-      for (const lookupField of lookupFields) {
-        const ob = lookupField.parent_object_name;
-        let objectName='';
+      // Fetch lookup data
+      await fetchLookupData(record, fieldsResponse, BASE_URL, setLookupName, form);
         
-        objectName = lookupField.name;
-
-             
-        const recordId = recordResponse[`${objectName}_id`];
-  
-        if (recordId) {
-          // Create an instance of ApiService for fetching the single record
-          const apiServiceForRecord = new ApiService(
-            `${BASE_URL}/fetch_single_record/${ob}/${recordId}`,
-            { 'Content-Type': 'application/json' },
-            'GET' // Specify the method as 'GET'
-          );
-  
-          const response = await apiServiceForRecord.makeCall();
-  
-          // Store the name in a state to display it in the UI
-          setLookupName(prev => ({ ...prev, [lookupField.name]: response.Name }));
-  
-          // Set the lookup ID in the form
-          form.setFieldsValue({
-            [lookupField.name]: recordId
-          });
-        }
-      }
-  
     } catch (error) {
       console.error('Error fetching API response:', error);
     } finally {
@@ -365,94 +308,36 @@ const ObjectSetupDetail = () => {
   
   
   const handleCloneClick = async (record) => {
-    // Clone the record and remove the ID, set isClone to true
-  
     try {
-      //setLoading(true);
-  
-      const apiServiceforCurrentRecord= new ApiService(
+      // Fetch the original record data
+      const apiServiceforCurrentRecord = new ApiService(
         `${BASE_URL}/fetch_single_record/${objectName}/${record._id}`,
         { 'Content-Type': 'application/json' },
-        'GET' // Specify the method as 'GET'
+        'GET'
       );
-      // Create an instance of ApiService for fetching fields data
+  
+      const recordResponse = await apiServiceforCurrentRecord.makeCall();
+  
+      // Fetch fields data
       const apiServiceForFields = new ApiService(
         `${BASE_URL}/mt_fields/object/${objectName}`,
         { 'Content-Type': 'application/json' },
-        'GET' // Specify the method as 'GET'
+        'GET'
       );
   
-      const recordResponse=await apiServiceforCurrentRecord.makeCall();
       const fieldsResponse = await apiServiceForFields.makeCall();
       setFieldsDataDrawer(fieldsResponse);
+  
+      // Clone and remove ID and set isClone to true
       const clonedRecord = { ...recordResponse, _id: undefined, isClone: true };
-
-      // Format date fields in the cloned record before setting them in the form
-      const formattedClonedRecord = { ...clonedRecord };
   
-      // Iterate over the fields to identify and format date fields
-      fieldsResponse.forEach(field => {
-
-        if (field.type === 'Address' && clonedRecord[field.name]) {
-          // Set individual address fields
-          formattedClonedRecord[`${field.name}_street`] = clonedRecord[field.name]['street'] || '';
-          formattedClonedRecord[`${field.name}_city`] = clonedRecord[field.name]['city'] || '';
-
-          formattedClonedRecord[`${field.name}_state`] = clonedRecord[field.name]['state'] || '';
-
-          formattedClonedRecord[`${field.name}_country`] = clonedRecord[field.name]['country'] || '';
-
-          formattedClonedRecord[`${field.name}_postalcode`] = clonedRecord[field.name]['postal_code'] || '';
-
-          
-        }
-        if (field.type === 'Date' && clonedRecord[field.name]) {
-          // Format date to DD/MM/YYYY if the field is of Date type
-          formattedClonedRecord[field.name] = dayjs(clonedRecord[field.name]).format(DateFormat);
-        }
-        if (field.type === 'DateTime' && clonedRecord[field.name]) {
-          // Format date to DD/MM/YYYY if the field is of Date type
-          formattedClonedRecord[field.name] = dayjs(clonedRecord[field.name]).format('DD/MM/YYYY HH:mm:ss');
-        }
-      });
-  
-      // Set the formatted cloned record values in the form
+      // Format the cloned record data
+      const formattedClonedRecord = await formatRecordData(clonedRecord, fieldsResponse, BASE_URL);
       setSelectedRecord(formattedClonedRecord);
-      form.setFieldsValue(formattedClonedRecord); 
+      form.setFieldsValue(formattedClonedRecord);
   
-      // Prefill all lookup fields
-      const lookupFields = fieldsResponse.filter(field => field.type === 'lookup');
-  
-      for (const lookupField of lookupFields) {
-        const ob = lookupField.parent_object_name;
-        let objectName='';
-       
-        objectName = lookupField.name;
-
-        
-        const recordId = record[`${objectName}_id`];
-  
-        if (recordId) {
-          // Create an instance of ApiService for fetching the single record
-          const apiServiceForRecord = new ApiService(
-            `${BASE_URL}/fetch_single_record/${ob}/${recordId}`,
-            { 'Content-Type': 'application/json' },
-            'GET' // Specify the method as 'GET'
-          );
-  
-          const response = await apiServiceForRecord.makeCall();
-
-          
-
-          // Store the name in a state to display it in the UI
-          setLookupName(prev => ({ ...prev, [lookupField.name]: response.Name }));
-  
-          // Set the lookup ID in the form
-          form.setFieldsValue({
-            [lookupField.name]: recordId
-          });
-        }
-      }
+      // Fetch and set lookup data
+      await fetchLookupData(clonedRecord, fieldsResponse, BASE_URL, setLookupName, form);
   
     } catch (error) {
       console.error('Error fetching API response:', error);

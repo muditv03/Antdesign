@@ -8,7 +8,7 @@ import { BASE_URL, DateFormat } from './Constant';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import ApiService from './apiService'; // Import ApiService class
 import CreateRecordDrawer from './CreateRecordDrawer';
-import { generateBody } from './Components/Utility';
+import { generateBody, formatRecordData, fetchLookupData } from './Components/Utility';
 dayjs.extend(customParseFormat);
  
 const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, onClone, onDelete,relatedListId,currentRecordId,currentObjectName ,refreshRecords}) => {
@@ -147,64 +147,17 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
       );
 
       const fieldsResponse = await apiServiceForFields.makeCall();
-      setFieldsDataState(fieldsResponse); // Use the correct state setter
-
-      const formattedRecord = { ...record };
-
-      fieldsResponse.forEach(field => {
-       
-        if (field.type === 'Address' && formattedRecord[field.name]) {
-          formattedRecord[`${field.name}_street`] = record[field.name]['street'] || '';
-          formattedRecord[`${field.name}_city`] = record[field.name]['city'] || '';
-
-          formattedRecord[`${field.name}_state`] = record[field.name]['state'] || '';
-
-          formattedRecord[`${field.name}_country`] = record[field.name]['country'] || '';
-
-          formattedRecord[`${field.name}_postalcode`] = record[field.name]['postal_code'] || '';
-
-         
-        }
-
-
-        if (field.type === 'Date' && record[field.name]) {
-          formattedRecord[field.name] = dayjs(record[field.name]).format(DateFormat);
-        }
-        if (field.type === 'DateTime' && record[field.name]) {
-          formattedRecord[field.name] = dayjs(record[field.name]).format('DD/MM/YYYY HH:mm:ss');
-        }
-      });
-
+      setFieldsDataState(fieldsResponse);
+  
+      // Format the record data
+      const formattedRecord = await formatRecordData(record, fieldsResponse, BASE_URL);
       setSelectedRecord(formattedRecord);
       form.setFieldsValue(formattedRecord);
       setDrawerVisible(true);
-
-      const lookupFields = fieldsResponse.filter(field => field.type === 'lookup');
-
-      for (const lookupField of lookupFields) {
-        const ob = lookupField.parent_object_name;
-        let objectName=''; 
-       
-        objectName = lookupField.name;
-
-        const recordId = record[`${objectName}_id`];
-
-        if (recordId) {
-          const apiServiceForRecord = new ApiService(
-            `${BASE_URL}/fetch_single_record/${ob}/${recordId}`,
-            { 'Content-Type': 'application/json' },
-            'GET'
-          );
-
-          const response = await apiServiceForRecord.makeCall();
-          setLookupName(prev => ({ ...prev, [lookupField.name]: response.Name }));
-
-          form.setFieldsValue({
-            [lookupField.name]: recordId
-          });
-        }
-
-      }
+  
+      // Fetch lookup data
+      await fetchLookupData(record, fieldsResponse, BASE_URL, setLookupName, form);
+  
       refreshRecords();
     } catch (error) {
       console.error('Error fetching API response:', error);
@@ -215,81 +168,36 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
 
   const handleCloneClick = async (record) => {
     const clonedRecord = { ...record, _id: undefined, isClone: true };
-
+  
     try {
+      // Fetch fields data
       const apiServiceForFields = new ApiService(
         `${BASE_URL}/mt_fields/object/${childObjectName}`,
         { 'Content-Type': 'application/json' },
         'GET'
       );
-
+  
       const fieldsResponse = await apiServiceForFields.makeCall();
       setFieldsDataState(fieldsResponse);
-      console.log('field response while cloning is '+JSON.stringify(fieldsResponse));
-      const formattedClonedRecord = { ...clonedRecord };
-
-      fieldsResponse.forEach(field => {
-        if (field.type === 'Address' && clonedRecord[field.name]) {
-          // Set individual address fields
-          formattedClonedRecord[`${field.name}_street`] = clonedRecord[field.name]['street'] || '';
-          formattedClonedRecord[`${field.name}_city`] = clonedRecord[field.name]['city'] || '';
-
-          formattedClonedRecord[`${field.name}_state`] = clonedRecord[field.name]['state'] || '';
-
-          formattedClonedRecord[`${field.name}_country`] = clonedRecord[field.name]['country'] || '';
-
-          formattedClonedRecord[`${field.name}_postalcode`] = clonedRecord[field.name]['postal_code'] || '';
-
-           
-        }
-
-        if (field.type === 'Date' && clonedRecord[field.name]) {
-          formattedClonedRecord[field.name] = dayjs(clonedRecord[field.name]).format(DateFormat);
-        }
-        if (field.type === 'DateTime' && clonedRecord[field.name]) {
-          formattedClonedRecord[field.name] = dayjs(clonedRecord[field.name]).format('DD/MM/YYYY HH:mm:ss');
-        }
-      });
-
+      console.log('Field response while cloning is:', JSON.stringify(fieldsResponse));
+  
+      // Format the cloned record data
+      const formattedClonedRecord = await formatRecordData(clonedRecord, fieldsResponse, BASE_URL);
       setSelectedRecord(formattedClonedRecord);
       form.setFieldsValue(formattedClonedRecord);
-
-      const lookupFields = fieldsResponse.filter(field => field.type === 'lookup');
-
-      for (const lookupField of lookupFields) {
-        const ob = lookupField.parent_object_name;
-        let objectName='';
-       
-        objectName = lookupField.name;
-
-            
-        const recordId = record[`${objectName}_id`];
-        console.log('REc')
-        console.log(record)
-
-        if (recordId) {
-          const apiServiceForRecord = new ApiService(
-            `${BASE_URL}/fetch_single_record/${ob}/${recordId}`,
-            { 'Content-Type': 'application/json' },
-            'GET'
-          );
-
-          const response = await apiServiceForRecord.makeCall();
-          setLookupName(prev => ({ ...prev, [lookupField.name]: response.Name }));
-
-          form.setFieldsValue({
-            [lookupField.name]: recordId
-          });
-        }
-      }
-      refreshRecords();
+  
+      // Fetch and set lookup data
+      await fetchLookupData(clonedRecord, fieldsResponse, BASE_URL, setLookupName, form);
+  
+      refreshRecords(); // Refresh records if needed
+  
     } catch (error) {
       console.error('Error fetching API response:', error);
     } finally {
       setLoading(false);
     }
-
-    setDrawerVisible(true);
+  
+    setDrawerVisible(true); // Open the drawer after setting the values
   };
  
   const fetchRecords = async () => {
