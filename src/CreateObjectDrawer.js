@@ -19,6 +19,8 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       
       console.log(editingRecord);
       form.setFieldsValue(editingRecord); // Pre-fill form with existing data if editing
+      console.log('editing record is ');
+      console.log(editingRecord);
       setIsAllowSearch(editingRecord.allow_search);
       setIsTrackActivities(editingRecord.track_activities);
       setIsTrackFieldHistory(editingRecord.track_field_history);
@@ -43,7 +45,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
   };
 
   const handleFinish = async (values) => {
-    setLoading(true);
+    setLoading(true); // Start the spinner
     const formData = {
       label: values.label,
       name: values.name,
@@ -55,48 +57,98 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       track_activities: isTrackActivities,
       track_field_history: isTrackFieldHistory,
     };
-
     try {
       let response;
       if (editingRecord && editingRecord.key) {
+        // Update existing record using ApiService
         const apiService = new ApiService(
           `${BASE_URL}/mt_objects/${editingRecord.key}`,
           { 'Content-Type': 'application/json' },
           'PUT',
           { mt_object: formData }
         );
-
         response = await apiService.makeCall();
-
+        const newTab = {
+          label: values.label,
+          name: values.name,
+          description: 'All Accounts',
+          mt_object_id: response._id, // Use the new object ID from the response
+          icon: values.icon,
+          addObjectTab: values.addObjectTab,
+        };
+        if (newTab.icon && newTab.addObjectTab) {
+          const apiServiceForTab = new ApiService(
+            `${BASE_URL}/mt_tabs`,
+            { 'Content-Type': 'application/json' },
+            'POST',
+            { mt_tab: newTab }
+          );
+          const tabResponse = await apiServiceForTab.makeCall();
+          if (!tabResponse || !tabResponse._id) {
+            throw new Error('Failed to create a new tab');
+          }
+        }
         message.success('Object updated successfully');
-        onAddOrEditObject({ ...editingRecord, ...formData });
+        onAddOrEditObject({ ...editingRecord, ...formData }); // Update the object in the parent component
       } else {
+        // Create new record using ApiService
         const apiService = new ApiService(
           `${BASE_URL}/mt_objects`,
           { 'Content-Type': 'application/json' },
           'POST',
           { mt_object: formData }
         );
-
         response = await apiService.makeCall();
         if (response && response._id) {
           message.success('Object created successfully');
         } else {
           throw new Error('Invalid response from server');
         }
-
+        // Create newTab only when object is created successfully
+        const newTab = {
+          label: values.label,
+          name: values.name,
+          description: 'All Accounts',
+          mt_object_id: response._id, // Use the new object ID from the response
+          icon: values.icon,
+          addObjectTab: values.addObjectTab,
+        };
+        if (newTab.icon && newTab.addObjectTab) {
+          const apiServiceForTab = new ApiService(
+            `${BASE_URL}/mt_tabs`,
+            { 'Content-Type': 'application/json' },
+            'POST',
+            { mt_tab: newTab }
+          );
+          const tabResponse = await apiServiceForTab.makeCall();
+          if (!tabResponse || !tabResponse._id) {
+            throw new Error('Failed to create a new tab');
+          }
+        }
+        // Update the list of objects in the parent component
         onAddOrEditObject({
-          key: response._id,
-          ...formData,
+          key: response._id, // Use the ID from the response
+          label: values.label,
+          name: values.name,
+          plurallabel: values.plurallabel,
+          addObjectTab: values.addObjectTab,
+          icon: values.icon,
+          description: values.description,
+          allow_search: isallowSearch,
+          track_activities: isTrackActivities,
+          track_field_history: isTrackFieldHistory,
         });
       }
-      eventBus.emit('objectCreatedOrUpdated');
-      onClose();
+      eventBus.emit('objectCreatedOrUpdated'); // Notify that object was created or updated
+      onClose(); // Close the drawer upon success
       form.resetFields();
     } catch (error) {
-      message.error('Failed to save object');
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to save object due to an unknown error';
+      message.error(errorMessage);
     } finally {
-      setLoading(false);
+      setLoading(false); // Stop the spinner
     }
   };
 
@@ -158,7 +210,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
               <Input placeholder="Please enter the name" disabled={!!editingRecord}/>
             </Form.Item>
             <Form.Item
-              name="plurallabel"
+              name="pluralLabel"
               label="Plural Label"
               rules={[{ required: true, message: 'Please enter the plural label' }]}
             >

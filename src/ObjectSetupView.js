@@ -31,10 +31,8 @@ const DataTable = () => {
   
       // Set the data state with the response
       setData(response.map((item) => ({
-        key: item._id,
-        label: item.label,
-        name: item.name,
-        plurallabel: item.pluralLabel,
+       ...item, // Keeps all fields of the item
+      key: item._id,
       })));
     } catch (error) {
       console.error('Error fetching object list:', error);
@@ -57,6 +55,8 @@ const DataTable = () => {
   };
 
   const handleEdit = (record) => {
+    console.log('editing recorrrrrdddd');
+    console.log(record);
     setEditingRecord(record);
     setDrawerVisible(true);
   };
@@ -142,8 +142,8 @@ const DataTable = () => {
     },
     {
       title: 'Plural Label',
-      dataIndex: 'plurallabel',
-      key: 'plurallabel',
+      dataIndex: 'pluralLabel',
+      key: 'pluralLabel',
       width: 100,
     },
     
@@ -155,7 +155,8 @@ const DataTable = () => {
       render: (text, record) => (
         <Tooltip title="Edit">
           <EditOutlined
-            onClick={() => handleEdit(record)}
+            onClick={() =>
+               handleEdit(record)}
             style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
           />
         </Tooltip>
