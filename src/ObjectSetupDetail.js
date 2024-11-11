@@ -46,9 +46,11 @@ const ObjectSetupDetail = () => {
   const[isListViewDrawerVisible,setIsListViewDrawerVisible]=useState(false);
   const[objectForListView,setObjectForListView]=useState();
   const [ListViewInDrawer,SetListViewInDrawer]=useState();
+  const [currentPage, setCurrentPage] = useState(1);
+
 
   
-  const fetchRecords = (selectedViewId) => {
+  const fetchRecords = (selectedViewId,page = currentPage  ) => {
     setError('');
 
     setLoading(true);
@@ -149,6 +151,8 @@ const ObjectSetupDetail = () => {
       .finally(() => {
         setLoading(false);
       });
+      setCurrentPage(page); // Preserve the current page number after fetch
+
   };
   
   const fetchListViews = async () => {
@@ -538,7 +542,7 @@ const ObjectSetupDetail = () => {
   
       await apiService.makeCall();
       message.success('Record deleted successfully.');
-      fetchRecords(selectedView);
+      fetchRecords(selectedView,currentPage);
     } catch (error) {
       message.error('Failed to delete record.');
       console.error('Error deleting record:', error);
@@ -785,7 +789,14 @@ const ObjectSetupDetail = () => {
     </Row>
     <div style={{ flex: 1, overflow: 'auto' }}>
 
-      <Table columns={columns} dataSource={records} rowKey="_id" />
+      <Table columns={columns}
+       dataSource={records}
+       rowKey="_id"
+       pagination={{
+        current: currentPage,
+        onChange: (page) => setCurrentPage(page), // Update currentPage when user changes the page
+      }}
+       />
       </div>
       
       <CreateRecordDrawer
