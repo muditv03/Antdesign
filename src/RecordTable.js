@@ -95,7 +95,18 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
      }
      if (field.type === 'lookup' && record[`${field.name}_id`]) {
       const lookupId = record[ `${field.name}_id`];
-      return lookupNames[lookupId] || 'Loading...';
+      const lookupName = lookupNames[lookupId] || 'Loading...';
+
+      if (field.name === 'user') {
+        return lookupName; // Simply return the name without a link if it's 'user'
+      } else {
+        return (
+          <a href={`/record/${field.parent_object_name}/${lookupId}`} target="_blank" rel="noopener noreferrer">
+            {lookupName}
+          </a>
+        ); // Otherwise, make it a link
+      }
+
       }
        if (field.type === 'Address') {
         // Ensure the address is properly constructed from the record
@@ -145,7 +156,7 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
         { 'Content-Type': 'application/json' },
         'GET'
       );
-
+ 
       const fieldsResponse = await apiServiceForFields.makeCall();
       setFieldsDataState(fieldsResponse);
   

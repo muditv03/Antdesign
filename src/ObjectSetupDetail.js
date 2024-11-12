@@ -518,9 +518,19 @@ const ObjectSetupDetail = () => {
        
         if(lookupId){
         // Check if the name has already been fetched and stored
-        if (lookupNames[lookupId]) {
-          return lookupNames[lookupId]; // Return the cached name if available
-        } else {
+            if (lookupNames[lookupId]) {
+              // If the name is 'user', do not make it linkable
+              if (field.name=== 'user') {
+                return lookupNames[lookupId]; // Just return the name without a link
+              } else {
+                // Otherwise, render the name as a link
+                return (
+                  <a href={`/record/${ob}/${lookupId}`} target="_blank" rel="noopener noreferrer">
+                    {lookupNames[lookupId]}
+                  </a>
+                );
+              }      
+          } else {
           // Fetch the name if not cached
           fetchLookupName(ob, lookupId).then(name => {
             setLookupNames(prevState => ({ ...prevState, [lookupId]: name }));
@@ -661,7 +671,7 @@ const ObjectSetupDetail = () => {
         </Dropdown>
 
       </Col>
-     
+      
       <Col  style={{ marginTop:'10px' }}>
           <Button icon={<ImportOutlined />} onClick={handleFileUpload} style={{ marginBottom: 5, marginRight: '5px' }}>
             Import Records

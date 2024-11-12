@@ -87,7 +87,7 @@ const ObjectRelatedListTab = () => {
     if (record?.name) {
       setParentObjectName(record.name);
       fetchRelatedLists();
-    }
+    } 
   }, [record]);
 
   const handleEditRelatedList = (record) => {

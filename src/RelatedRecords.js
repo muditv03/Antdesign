@@ -85,7 +85,7 @@ const RelatedRecord = ({ objectName, recordId }) => {
         console.error('Error deleting record:', error);
         message.error('Failed to delete record');
       }
-    },
+    }, 
     [fetchRelatedRecords]
   );
 
