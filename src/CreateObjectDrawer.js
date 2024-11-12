@@ -4,7 +4,7 @@ import * as Icons from '@ant-design/icons';
 import { BASE_URL } from './Constant';
 import ApiService from './apiService'; // Import ApiService class
 import eventBus from './eventBus'; // Import the event bus
-
+ 
 const { Option } = Select;
 
 const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord }) => {
@@ -49,7 +49,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
     const formData = {
       label: values.label,
       name: values.name,
-      pluralLabel: values.plurallabel,
+      pluralLabel: values.pluralLabel,
       addObjectTab: values.addObjectTab,
       icon: values.icon,
       description: values.description,
@@ -220,7 +220,6 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
             <Form.Item
               name="description"
               label="Object Description"
-              rules={[{ required: true, message: 'Please enter the object description' }]}
             >
               <Input placeholder="Please enter the object description" />
             </Form.Item>
