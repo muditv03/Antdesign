@@ -21,7 +21,6 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
         const res = await api.makeCall();
         setParentObjects(res);
       } catch (error) {
-        message.error('Error fetching parent objects');
       }
     };
 
@@ -124,7 +123,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
       } 
   };
 
-
+ 
   return (
     <Drawer
       title={editingRelatedList ? "Edit Related List" : "Create Related List"}

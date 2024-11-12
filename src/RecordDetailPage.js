@@ -344,7 +344,10 @@ const RecordDetail = () => {
                     }}>
                     {lookupOptions[field.parent_object_name]?.filter(option => option._id !== record?._id).map((option) => (
                       <Option key={option._id} value={option._id}>
+                       <a href={`/record/${field.parent_object_name}/${option._id}`} target="_blank" rel="noopener noreferrer">
                         {option.Name}
+                        </a>
+
                       </Option>
                     ))}
               </Select>
@@ -585,7 +588,14 @@ const RecordDetail = () => {
                     [form.getFieldValue(name).street, form.getFieldValue(name).city, form.getFieldValue(name).state, form.getFieldValue(name).postal_code, form.getFieldValue(name).country]
                       .filter(Boolean) // This removes undefined or empty values
                       .join(', ') // Joins non-empty values with a comma and space
-                  : lookupNames[name] || form.getFieldValue(name) }
+                   : type === 'lookup' && name!=='user' ? (
+                        <a href={`/record/${field.parent_object_name}/${record[name + '_id']}`} target="_blank" rel="noopener noreferrer">
+                          {lookupNames[name] || form.getFieldValue(name)}
+                        </a>
+                    
+                    ) : (
+                      lookupNames[name] || form.getFieldValue(name)
+                    )}
           </div>
         )}
        
@@ -688,7 +698,7 @@ const RecordDetail = () => {
                     Cancel
                   </Button>
                   <Button type="primary" htmlType="submit" >
-                    Save
+                     Save
                   </Button>
                 </Row>
               </div>
