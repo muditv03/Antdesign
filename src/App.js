@@ -3,27 +3,27 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from 'antd';
 import { BrowserRouter as Router, Route, Routes, useLocation,useNavigate } from 'react-router-dom';
-import Login from './Login';
-import Signup from './Signup';
-import ForgotPassword from './ForgotPassword';
-import AppHeader from './Header';
-import AppSidebar from './Sidebar';
-import DataTable from './ObjectSetupView';
-import ObjectSetupDetail from './ObjectSetupDetail';
-import ObjectFieldDetail from './ObjectDetail';
-import Import from './Components/ImportWizard';
-import ImportPage from './Components/NewImport';
-import UploadRecords from './Components/UploadRecords';
-import AppFooter from './Footer';  
-import Profile from './Profile';  
-import RecordDetail from './RecordDetailPage';
-import ErrorPage from './Error'
-import ForbiddenError from './Error-403'
-import NotFoundError from './Error-404'
-import InternalServerError from './Error-500'
-import UnprocessableEntity from './Error-422';
-import SetupPage from './Components/Setup';
-import Home from './Components/Home';
+import Login from './Authentication/Login';
+import Signup from './Authentication/Signup';
+import ForgotPassword from './Authentication/ForgotPassword';
+import AppHeader from './HomeDashboard/Header';
+import AppSidebar from './HomeDashboard/Sidebar';
+import DataTable from './Object/ObjectSetupView';
+import ObjectSetupDetail from './Record/ObjectSetupDetail';
+import ObjectFieldDetail from './Object/ObjectDetail';
+import Import from './ImportExport/ImportWizard';
+import ImportPage from './ImportExport/NewImport';
+import UploadRecords from './ImportExport/UploadRecords';
+import AppFooter from './HomeDashboard/Footer';  
+import Profile from './HomeDashboard/Profile';  
+import RecordDetail from './Record/RecordDetailPage';
+import ErrorPage from './Components/Error'
+import ForbiddenError from './Components/Error-403'
+import NotFoundError from './Components/Error-404'
+import InternalServerError from './Components/Error-500'
+import UnprocessableEntity from './Components/Error-422';
+import SetupPage from './SetupComponent/Setup';
+import Home from './SetupComponent/Home';
 import Cookies from 'js-cookie';
 
    
