@@ -657,6 +657,8 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                 </Select>
             </Form.Item>
           ) }
+         {!isFormula && !isAutoNumber && (
+            <>
                 <Form.Item
                   name="description"
                   label="Description"
@@ -699,7 +701,11 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                   onChange={(e) => setIsExternalID(e.target.checked)}
                   >External Id</Checkbox>
                 </Form.Item>
+                </>
+         )}
+             
           </Form>
+
         </Card>
       </Spin>
     </Drawer>
