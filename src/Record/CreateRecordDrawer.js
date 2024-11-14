@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Drawer, Button, Form, Card, Spin, Input, Checkbox, DatePicker, Space, Select,Tooltip } from 'antd';
+import { Drawer, Button, Form, Card, Spin, Input, Checkbox, DatePicker, Space, Select,Tooltip ,Avatar} from 'antd';
 import { MailOutlined,InfoCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import ApiService from '../Components/apiService'; // Import ApiService class
 import { BASE_URL, DateFormat } from '../Components/Constant'; // Define the date format
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat); 
-
+ 
 const CreateRecordDrawer = ({ 
   visible, 
   onClose, 
@@ -270,20 +270,41 @@ const CreateRecordDrawer = ({
             label={renderLabel}  // Use the custom label here
             rules={isRequired}
           > 
-            <Select
-              placeholder={`Select ${field.label}`}
-              showSearch
-              allowClear
-              filterOption={(input, option) =>
-                option.children.toLowerCase().includes(input.toLowerCase())
-              }
-            > 
-              {lookupOptions[field.name]?.filter(option => option._id !== selectedRecord?._id).map((option) => (
-                <Select.Option key={option._id} value={option._id}>
-                  {option.Name}
-                </Select.Option>
-              ))}
-            </Select>
+           <Select
+      placeholder={`Select ${field.label}`}
+      showSearch
+      allowClear
+      filterOption={(input, option) =>
+        option.label.toLowerCase().includes(input.toLowerCase())
+      }
+      value={selectedRecord ? { value: selectedRecord.id, label: selectedRecord.name } : undefined}
+      optionLabelProp="label"
+      dropdownRender={(menu) => <div>{menu}</div>}
+      style={{ width: '100%' }}
+    >
+      {lookupOptions[field.name]?.filter(option => option._id !== selectedRecord?.id).map((option) => (
+        <Select.Option key={option._id} value={option._id} label={
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Avatar size="small" style={{ marginRight: 8, backgroundColor: '#87D068' }}>
+              {option.Name.charAt(0).toUpperCase()}
+            </Avatar>
+            {option.Name}
+          </div>
+        }>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Avatar style={{ marginRight: 8, backgroundColor: '#87D068' }}>
+              {option.Name.charAt(0).toUpperCase()}
+            </Avatar>
+            <div>
+              <div>{option.Name}</div>
+              <div style={{ fontSize: '0.9em', color: '#888' }}>
+               {option.Name}-{option.Name}
+               </div>
+            </div>
+          </div>
+        </Select.Option>
+      ))}
+    </Select>
           </Form.Item>
         );
   
