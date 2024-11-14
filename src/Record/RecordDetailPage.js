@@ -9,7 +9,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import ApiService from '../Components/apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import ActivityComponent from './ActivityComponent';
+import ActivityComponent from '../Activity/ActivityComponent';
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone); 
