@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
- 
+   
 class ApiService {
   constructor(endpoint, headers = {}, method = '', body = null) {
     this.endpoint = endpoint;

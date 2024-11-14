@@ -133,7 +133,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
         `${BASE_URL}/mt_fields/object/${object.name}`,
         { 'Content-Type': 'application/json' },
         'GET'
-      );
+      ); 
       apiService.makeCall()
       .then(response =>{
         console.log('response is ');
@@ -312,7 +312,7 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
       return acc;
     }, {});
 
-
+ 
    
     const adjustedFields = selectedFields.map((field) => {
       const selectedField = fields.find((f) => f.name === field);
@@ -448,6 +448,8 @@ const CreateListViewDrawer = ({ visible, onClose, object,fetchListViews,selected
                   
                   placeholder="Select field"
                   value={filter.field}
+                  allowClear={false} // Disable the clear option
+
                   onChange={(value) =>
                     
                      handleFilterChange(index, 'field', value)}

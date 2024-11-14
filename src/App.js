@@ -25,7 +25,7 @@ import UnprocessableEntity from './Components/Error-422';
 import SetupPage from './SetupComponent/Setup';
 import Home from './SetupComponent/Home';
 import Cookies from 'js-cookie';
-
+ 
    
 const { Content } = Layout;
   

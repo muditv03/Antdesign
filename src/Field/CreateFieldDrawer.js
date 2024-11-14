@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Drawer, Form, Input, Button, message, Select, Card, Spin, Checkbox,Tooltip,Row,Col } from 'antd';
+import { Drawer, Form, Input, Button, message, Select, Card, Spin, Checkbox,Tooltip,Row,Col,Cascader } from 'antd';
 import { BASE_URL,helpTextFormula } from '../Components/Constant';
-import { InfoCircleOutlined } from '@ant-design/icons'; // Import the InfoCircle icon
+import { InfoCircleOutlined ,PlusOutlined, MinusCircleOutlined } from '@ant-design/icons'; // Import the InfoCircle icon
 
 import ApiService from '../Components/apiService'; // Import ApiService class
 import pluralize from 'pluralize';
@@ -26,6 +26,16 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   const [isRequired, setIsRequired] = useState(false); // State for auto number checkbox
   const [isUnique, setIsUnique] = useState(false); // State for auto number checkbox
   const [isExternalId, setIsExternalID] = useState(false); // State for auto number checkbox
+                    
+  const [ParentObjectFields,setParentObjectFields]=useState([]);
+
+  const [logic, setLogic] = useState('');
+  const [operator, setOperator] = useState('AND');
+  const [isLogicEditable, setIsLogicEditable] = useState(false);
+  const [filters, setFilters] = useState([{ 1 :{field: '', value: '',displayValue:'' }}]); // For managing filters
+  const [valueOperator,SetValueOperator]=useState('');
+  const [parentfieldlookupOptions, setParentFieldLookupOptions] = useState([]); // For storing lookup options
+
 
 
 
@@ -71,6 +81,50 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   // Initialize the form in edit mode
   useEffect(() => {
     if (editField) {
+
+      const existingFilters = editField.lookup_config.filter_criteria
+      ? Object.entries(editField.lookup_config.filter_criteria).map(([key, { field, value }]) => {
+       
+        console.log('inside the filters');
+        console.log(editField.lookup_config.filter_criteria);
+        console.log(field);
+        console.log(value);
+          let operator='';
+          let actualValue='';
+         
+          if(Object.keys(value)[0]!=="0"){
+            operator = Object.keys(value)[0]; 
+            actualValue = value[operator]; 
+
+          }else{
+             actualValue = value; // Extract the actual value (e.g., '50')
+            
+          }
+          let op='';
+          if(operator!==''){
+            try{
+            SetValueOperator(operator.replace('$', '')); 
+            op=operator.replace('$', '');
+            }catch (error) {
+              // Handle the error gracefully
+              SetValueOperator(''); // or any default value
+          }
+          }else{
+            op='';
+          }
+          return {
+            field, 
+            value: value, 
+            displayValue: actualValue, 
+            operator:op
+          };
+      })
+      : [{ field: '', value: '', operator: '' }];
+
+
+      console.log('filters in editing');
+      console.log(existingFilters);
+
       form.setFieldsValue({
         ...editField,
         length: editField.decimal_places_before + editField.decimal_places_after, // Calculate total length
@@ -82,8 +136,12 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         defaultValue:editField.default_value,
         required:editField.required,
         unique:editField.unique,
-        external_id:editField.external_id
+        external_id:editField.external_id,
+        fieldsToDisplay:editField.lookup_config.display_fields,
+        SearchLayout:editField.lookup_config.search_layout,
       });
+      setFilters(existingFilters);
+      setLogic(editField.lookup_config.logic)
       setIsFormula(editField.is_formula)
       setFormula(editField.formula)
       setSelectedCC(editField.compliance_categorization)
@@ -106,6 +164,42 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
 
   const handleFinish = async (values) => {
 
+
+    const filterObj = filters.reduce((acc, filter, index) => {
+      if (filter.field) {
+        acc[index + 1] = {
+          field: filter.field,
+          value: filter.value
+        };
+      }
+      return acc;
+    }, {});
+
+    console.log('filters are');
+    console.log(filterObj);
+
+    console.log(values.fieldsToDisplay);
+    console.log(values.SearchLayout);
+    console.log(logic);
+
+    
+    const lookupConfig = {
+      display_fields: values.fieldsToDisplay,
+      search_layout: values.SearchLayout,
+      logic: logic,
+      filter_criteria: filters.reduce((acc, filter, index) => {
+        if (filter.field) {
+          acc[index + 1] = {
+            field: filter.field,
+            value: filter.value
+          };
+        }
+        return acc;
+      }, {})
+    };
+
+    console.log('lookup config is ');
+    console.log(lookupConfig); 
     console.log('finish');
     console.log(isFormula);
     if (isFormula) {
@@ -135,7 +229,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       required:isRequired,
       unique:isUnique,
       external_id:isExternalId
-      
+    
     };
 
     if(values.type==='String' || values.type==='Picklist'){
@@ -145,6 +239,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
     if(values.type=='lookup'){
       newField.parent_object_name=values.parent_object_name;
       newField.relationship_name=values.relationship_name;
+      newField.lookup_config=lookupConfig;
     }
     // Include starting and ending points if isAutoNumber is true
     if (isAutoNumber) {
@@ -175,11 +270,12 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         const fieldService = new ApiService(`${BASE_URL}/mt_fields/${editField._id}`, {}, 'PUT', {
           mt_field: newField,
         });
-        const response = await fieldService.makeCall();
+       const response = await fieldService.makeCall();
         onSaveEdit({ ...editField, ...values }); // Update the field in the parent component
 
         message.success('Field updated successfully');
       } else {
+        console.log(newField);
         // Create new field logic (POST request)
         const fieldService = new ApiService(`${BASE_URL}/mt_fields`, {}, 'POST', {
           mt_field: newField,
@@ -213,7 +309,8 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
           }),
           ...(values.type==='lookup' && {
             parent_object_name:values.parent_object_name,
-            relationship_name:values.relationship_name
+            relationship_name:values.relationship_name,
+            lookup_config:lookupConfig,
            }), 
           ...(isFormula  && {formula:formula}) 
          
@@ -304,6 +401,136 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   };
 
 
+  const handleAddFilter = () => {
+    const len=filters.length + 1;
+    SetValueOperator('');
+    setFilters([...filters, { len:{ field: '', value: '',displayValue:'' }}]);
+    setLogic(generateLogic(filters,operator));
+  };
+
+  const handleRemoveFilter = (index) => {
+    console.log('index after removing is ');
+    console.log(index);
+    const updatedFilters = [...filters];
+    updatedFilters.splice(index, 1);
+    SetValueOperator('');
+    setFilters(updatedFilters);
+    setLogic(generateLogic(updatedFilters,operator));
+  };
+
+  const handleValueOpertorChange =(index,value)=>{
+    const updatedFilters = [...filters];
+    updatedFilters[index]["operator"]=value;
+    updatedFilters[index]["value"]='';
+    updatedFilters[index]["displayValue"]='';
+    SetValueOperator(value);
+    setFilters(updatedFilters);
+  }
+
+  // Handle value change for flters
+  const handleValueChange = (index, value) => {
+    const updatedFilters = [...filters];
+     if (valueOperator) {
+      updatedFilters[index]["value"] = { [`$${valueOperator}`]: value }; 
+      updatedFilters[index]["displayValue"]=value;
+      updatedFilters[index]["operator"]=valueOperator;
+      }else {
+          updatedFilters[index]["value"] =value; 
+          updatedFilters[index]["displayValue"]=value;
+          updatedFilters[index]["operator"]='';
+      }
+    setFilters(updatedFilters);
+  };
+
+  const handleFilterChange = (index, key, value) => {
+    
+    console.log('handle filter change is called');
+    const updatedFilters = [...filters];  
+    console.log(updatedFilters);
+    console.log(value);
+    console.log(updatedFilters[index][key]);
+    updatedFilters[index][key] = value[value.length-1];
+    console.log(updatedFilters);
+    console.log('field while consoling value is ');
+
+    // If field type is 'lookup', fetch records for that field's object
+    console.log('fields in handle filter change is ');
+    const selectedField = ParentObjectFields.find(field => value.includes(field.name));
+    console.log(selectedField);
+    if (selectedField && selectedField.type === 'lookup') {
+      console.log('lookup field is selected');
+      console.log(selectedField);
+      fetchLookupRecordsForParent(selectedField.parent_object_name); // Pass object name to fetch records
+
+    }
+    setFilters(updatedFilters);
+    setLogic(generateLogic(filters,operator));
+
+  };
+
+  const handleOperatorChange = (value) => {
+    setOperator(value);
+    if (value !== 'custom') {
+      setLogic(generateLogic(filters, value));
+   
+      setIsLogicEditable(false);
+    } else {
+      setIsLogicEditable(true);
+    }
+  };
+
+  
+
+  const handleParentObjectChange = async (value) => {
+    try {
+
+      console.log(value);
+      const apiService = new ApiService(
+        `${BASE_URL}/mt_fields/object/${value}`,
+        { 'Content-Type': 'application/json' },
+        'GET'
+      );
+      const response=await apiService.makeCall();
+      const filteredFields = response.filter(field => field.name !== 'recordCount' && field.type!=='lookup' && !field.is_formula); // Filter out 'recordCount'
+
+      setParentObjectFields(filteredFields);
+      console.log(response);
+    } catch (error) {
+      console.error("Error fetching fields:", error);
+    }
+  };
+
+   // Function to fetch records for the lookup field
+   const fetchLookupRecordsForParent = async (objectName) => {
+    try {
+      const apiServiceForRecords = new ApiService(
+        `${BASE_URL}/fetch_records/${objectName}`,
+        { 'Content-Type': 'application/json' },
+        'GET'
+      );
+      const response = await apiServiceForRecords.makeCall();
+      // Assuming response is an array of records with _id and Name fields
+      const records = response.map(record => ({
+        value: record._id, // Set _id as value
+        label: record.Name, // Set Name as label
+      }));
+    
+      setParentFieldLookupOptions(records); // Set options for the lookup field
+    } catch (error) {
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to save field due to an unknown error';
+      message.error(errorMessage);        }
+  };
+
+
+  const generateLogic = (filtersArray, operatorType) => {
+   
+    const logicstr=filtersArray.map((filter, index) => index + 1).join(` ${operatorType} `);
+    return logicstr;
+  };
+
+
 
   return (
     <Drawer
@@ -363,6 +590,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
               rules={[{ required: true, message: 'Please select the type' }]}
             > 
               <Select
+              showSearch
                 placeholder="Select the field type"
                 onChange={(value) => {
                   setFieldType(value);
@@ -595,9 +823,10 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             name="parent_object_name"
             label="Parent Object Name"
             rules={[{ required: true, message: 'Please enter parent object name' }]}
+
              
               >
-                <Select placeholder="Select an object" disabled={isEditMode}>
+                <Select placeholder="Select an object" disabled={isEditMode} onChange={(e)=>handleParentObjectChange(e)}>
                   {availableObjects.map((object) => (
                     <Option key={object.id} value={object.name}>
                       {object.name}
@@ -633,9 +862,140 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
 
               </Form.Item>
 
+
+                <Form.Item
+                  name="fieldsToDisplay"
+                  label="Fields to Display"
+                  rules={[{ required: true, message: 'Please select at least one field' }]}
+                >
+                   <Select mode="multiple" placeholder="Select fields to display" >
+                  {ParentObjectFields.map((field) => (
+                    <Option key={field.id} value={field.name}>
+                      {field.name}
+                    </Option>
+                  ))}
+                </Select>
+                </Form.Item>
+
+                <Form.Item
+                  name="SearchLayout"
+                  label="Search layout"
+                  rules={[{ required: true, message: 'Please select at least one field' }]}
+                >
+                   <Select mode="multiple" placeholder="Select fields to display" >
+                  {ParentObjectFields.map((field) => (
+                    <Option key={field.id} value={field.name}>
+                      {field.name}
+                    </Option>
+                  ))}
+                </Select>
+                </Form.Item>
+
+
+                <h3>Filters</h3>
+          {filters.map((filter, index) => (
+            <Row key={index} gutter={16} align="middle" style={{ marginBottom: '10px' }}>
+              <Col span={1} style={{width:'100%'}}>{index + 1}.</Col> {/* Display the filter number */}
+              <Col span={7}>
+                <Cascader
+                  
+                  placeholder="Select field"
+                  value={filter.field}
+                  allowClear={false} // Disable the clear option
+
+                  onChange={(value) =>
+
+                     handleFilterChange(index, 'field', value)}
+                  style={{ width: '100%' }}
+                  options={ParentObjectFields.map((field) =>
+                    field.type === 'Address'
+                      ? {
+                          label: field.label, // Show the Address field
+                          value: field.name, // Value is the field name
+                          children: [  // Add children options for Address fields
+                            { value: `${field.name}.street`, label: 'Street' },
+                            { value: `${field.name}.city`, label: 'City' },
+                            { value: `${field.name}.state`, label: 'State' },
+                            { value: `${field.name}.postalcode`, label: 'Postal Code' },
+                            { value: `${field.name}.country`, label: 'Country' },
+                          ],
+                        }
+                      : { value: field.name, label: field.label }
+                  )}                    
+                   />
+              </Col>
+              <Col span={7}>
+                  <Select 
+                  name="ValueOperator"
+                  Label="Select operator"
+                  placeholder="Select operator"
+                  style={{ width: '100%' }}
+                  onChange={(e)=>handleValueOpertorChange(index,e)}
+                  value={filter.operator}
+
+                  >
+                  <Option value='gt'>Greater than</Option>
+                  <Option value='gte'>Greater than equal to</Option>
+                  <Option value='lt'>Less than</Option>
+                  <Option value='lte'>Less than equal to</Option>
+                  <Option value=''>Equal to</Option>
+                  <Option value='ne'>Not Equal to</Option>
+                  </Select>
+                  </Col>
+              <Col span={7}>
+              {ParentObjectFields.find((f) => f.name === filter.field)?.type === 'lookup' ? (
+                  <Select
+                    allowClear
+                    placeholder="Select value"
+                    value={filter.displayValue}
+                    style={{ width: '100%' }} // Ensuring full width for the select field
+                    onChange={(value) => handleValueChange(index, value)}
+                    options={parentfieldlookupOptions}
+
+                  />
+                ) : ( 
+                  <Input
+                    placeholder="Enter value"
+                    value={filter.displayValue}
+                    onChange={(e) => handleValueChange(index, e.target.value)}
+                  />
+                )}
+              </Col>
+             
+              <Col span={1}>
+                <MinusCircleOutlined onClick={() => handleRemoveFilter(index)} />
+              </Col>
+             
+            </Row>
+          ))}
+
+          <Button type="dashed" onClick={handleAddFilter} block icon={<PlusOutlined />}>
+            Add Filter
+          </Button>
+
+
+        <h3>Operator</h3>
+          <Form.Item name="operator" label="Operator">
+            <Select defaultValue="AND"  onChange={handleOperatorChange}>
+              <Option value="AND">AND</Option>
+              <Option value="OR">OR</Option>
+              <Option value="custom">Custom</Option>
+            </Select>
+          </Form.Item>
+
+            <Input
+            style={{marginBottom:'10px'}}
+              label="Enter logic"
+              defaultValue={logic}
+              value={logic}
+              onChange={(e) => setLogic(e.target.value)} 
+              disabled={!isLogicEditable}
+              placeholder="Logic"
+            />      
+
             </>
             )}
-
+ 
           {(fieldType==='String' || fieldType==='Picklist' ) && (
             <Form.Item
               name="complianceCategorization"

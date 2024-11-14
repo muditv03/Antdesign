@@ -114,7 +114,7 @@ const ObjectSetupDetail = () => {
         console.log(selectedViewId?.fields_to_display);
         const fieldOfListView=selectedViewId?.fields_to_display;
         console.log('fields of list view are');
-        
+         
         // Filter fields from fieldsResponse based on whether their name exists in the recordFieldNames
         const matchingFields = fieldsResponse.filter(field => {
           if (field.type === 'lookup') {
