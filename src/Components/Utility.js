@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import ApiService from '../apiService';
+import ApiService from './apiService';
 
 
 // Function to handle Insert operation
@@ -18,6 +18,9 @@ export const generateBody = (fieldsDataDrawer, values) => {
                 country: values[`${field.name}_country`],
                 postal_code: values[`${field.name}_postalcode`]
             };
+        }
+        else if(field.type==='percentage'){
+          updatedValues[fieldName]=values[fieldName]/100;
         }
         else {
             updatedValues[fieldName] = values[fieldName];
@@ -47,6 +50,9 @@ export const formatRecordData = async (record, fieldsResponse, BASE_URL) => {
       }
       if (field.type === 'DateTime' && record[field.name]) {
         formattedRecord[field.name] = dayjs(record[field.name]).format('DD/MM/YYYY HH:mm:ss');
+      }
+      if (field.type === 'percentage' && record[field.name]) {
+        formattedRecord[field.name] = record[field.name]*100;
       }
     });
   
