@@ -13,7 +13,7 @@ import ActivityComponent from '../Activity/ActivityComponent';
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone); 
-     
+      
 const { TextArea } = Input;
 const { Option } = Select;
 const { Title } = Typography;
