@@ -1,14 +1,24 @@
 import dayjs from 'dayjs';
 import ApiService from './apiService';
+import { replace } from 'react-router-dom';
 
 
 // Function to handle Insert operation
 export const generateBody = (fieldsDataDrawer, values) => {
     const updatedValues = {};
+    console.log('values are');
+    console.log(values);
     fieldsDataDrawer.forEach((field) => {
         const fieldName = field.name;
+        console.log('value');
+        console.log( values[fieldName]);
         if (field.type === 'lookup') {
+          console.log(values[fieldName._id]);
+          if(values[fieldName]?._id){
+            updatedValues[`${fieldName}_id`] = values[fieldName]._id;
+          }else{
             updatedValues[`${fieldName}_id`] = values[fieldName];
+          }
         } 
         else if (field.type === 'Address') {
             updatedValues[fieldName] = {
@@ -26,6 +36,8 @@ export const generateBody = (fieldsDataDrawer, values) => {
             updatedValues[fieldName] = values[fieldName];
         }
     });
+
+    console.log(updatedValues);
     return updatedValues;
 };
 
@@ -59,27 +71,22 @@ export const formatRecordData = async (record, fieldsResponse, BASE_URL) => {
     return formattedRecord;
   };
   
-  export const fetchLookupData = async (record, fieldsResponse, BASE_URL, setLookupName, form) => {
+  export const fetchLookupData =  (record, fieldsResponse, BASE_URL, setLookupName, form) => {
     const lookupFields = fieldsResponse.filter(field => field.type === 'lookup');
+    console.log('fetch lookup datA IS cALLED')
+    console.log('record is ');
+    console.log(record);
   
     for (const lookupField of lookupFields) {
-      const ob = lookupField.parent_object_name;
-      const objectName = lookupField.name;
-      const recordId = record[`${objectName}_id`];
+     console.log('looku[ fields are');
+     console.log(lookupField);
+      console.log('lookup field name is');
+      console.log(lookupField.name);
+      console.log(record[lookupField.name].Name);
+      form.setFieldsValue({
+        [lookupField.name]: record[lookupField.name].Name
+      });
   
-      if (recordId) {
-        const apiServiceForRecord = new ApiService(
-          `${BASE_URL}/fetch_single_record/${ob}/${recordId}`,
-          { 'Content-Type': 'application/json' },
-          'GET'
-        );
-  
-        const response = await apiServiceForRecord.makeCall();
-        setLookupName(prev => ({ ...prev, [lookupField.name]: response.Name }));
-  
-        form.setFieldsValue({
-          [lookupField.name]: recordId
-        });
-      }
+     
     }
   };

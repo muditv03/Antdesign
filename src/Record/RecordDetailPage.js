@@ -33,10 +33,9 @@ const RecordDetail = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [recordName, setRecordName] = useState('');
   const [bottom, setBottom] = useState(100);
+  const [lookupOptionforparent,setLookupOptionsForParent]=useState([]);
 
-
- 
- 
+  
     const fetchRecords = async () => {
       try {
         // Fetch the record data
@@ -140,14 +139,21 @@ const RecordDetail = () => {
     try {
       console.log(values);
       const bodyData = Object.assign({},values);
-      
       fields.forEach(field => {
         if (field.type === 'lookup') {
           let lookupFieldName;
+
           
           lookupFieldName = field.name + '_id';
-          
+          console.log('not changed lookup values');
+          console.log(bodyData[field.name]);
+          if(bodyData[field.name]?._id){
+            
+            bodyData[lookupFieldName] = bodyData[field.name]._id;
+
+          }else{
           bodyData[lookupFieldName] = bodyData[field.name];
+          }
           delete bodyData[field.name];
         }
 
@@ -211,9 +217,47 @@ const RecordDetail = () => {
   };
 
 
+  const handleSearch = async (value,fieldId,name) => {
+    console.log('handle search called');
+
+    console.log( value)
+    if (value) {
+      console.log(fieldId);
+      console.log(value);
+      try {
+        const apiService = new ApiService(`${BASE_URL}/search_lookup/${fieldId}/${value}`, {
+          'Content-Type': 'application/json', // Add any necessary headers, such as content type
+        }, 'GET', );
+        const response=await apiService.makeCall();
+        console.log('response of lookups ar');
+        console.log(response);
+        // Assuming the response data structure has options as an array
+        setLookupOptionsForParent(prevOptions => ({
+          ...prevOptions,
+          [name]: response // Store the response for the specific field name
+        }));
+      } catch (error) {
+        console.error("API request failed:", error);
+        setLookupOptionsForParent(prevOptions => ({
+          ...prevOptions,
+          [name]: [] 
+        }))     
+      } finally {
+      }
+    } else {
+      setLookupOptionsForParent(prevOptions => ({
+        ...prevOptions,
+        [name]: []
+      }));    }
+  };
+
+ 
+
   const renderFieldWithEdit = (field, selectedDate, setSelectedDate) => {
-    const { name, label, type, picklist_values, isTextArea,required, help_text } = field;
+    const { name, label, type, picklist_values, isTextArea,required, help_text,_id } = field;
   
+    
+
     const validationRules = [];
      // Check for required field
      if (required) {
@@ -260,6 +304,7 @@ const RecordDetail = () => {
       );
     }
 
+   
     const isFieldEditable = !field.is_auto_number && !field.is_formula && isEditable;
     
  
@@ -332,32 +377,53 @@ const RecordDetail = () => {
                 name={name}
                 label={label}
                 key={name}
-                valuePropName={type === 'boolean' ? 'checked' : 'value'}
-                initialValue={form.getFieldValue(name)}
                 rules={validationRules}
                 noStyle
               >
-                  <Select 
-                    allowClear 
-                    placeholder={label} 
-                    defaultValue={form.getFieldValue(name) || lookupNames[name]}
-                    onChange={(value) => {
-                      // If cleared, set the value to null for this specific field
-                      if (!value) {
-                        form.setFieldsValue({ [name]: null });
-                      } else {
-                        form.setFieldsValue({ [name]: value });
-                      }
-                    }}>
-                    {lookupOptions[field.parent_object_name]?.filter(option => option._id !== record?._id).map((option) => (
-                      <Option key={option._id} value={option._id}>
-                       <a href={`/record/${field.parent_object_name}/${option._id}`} target="_blank" rel="noopener noreferrer">
-                        {option.Name}
-                        </a>
+                 <Select
+                    allowClear
+                    showSearch
+                    placeholder="Type to search"
+                    onSearch={(value) => handleSearch(value, _id,name)} 
+                    notFoundContent="Search for records"
+                    filterOption={false} 
+                    options={[
+                      ...(lookupOptionforparent[name] || []).map((option) => ({
+                        label: (
+                          <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <div>
+                            <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
+                              {option.Name.charAt(0).toUpperCase()}
+                            </Avatar>
+                            {option.Name}
+                            </div>
+                           
+                          </div>
+                        ),
+                        value: option.id,
+                      })),
+                      // Add the initial value if not already in options
+                      ...(form.getFieldValue(name) &&
+                      !(lookupOptionforparent[name] || []).some(
+                        (option) => option.id === form.getFieldValue(name).id
+                      )
+                        ? [
+                            {
+                              label: (
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                  <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
+                                    {form.getFieldValue(name).Name.charAt(0).toUpperCase()}
+                                  </Avatar>
+                                  {form.getFieldValue(name).Name}
+                                </div>
+                              ),
+                              value: form.getFieldValue(name).id,
+                            },
+                          ]
+                        : []),
+                    ]}
 
-                      </Option>
-                    ))}
-              </Select>
+                  />
               </Form.Item>
             ) : type === 'Date' ? (
               <Form.Item
@@ -609,9 +675,23 @@ const RecordDetail = () => {
                       .filter(Boolean) // This removes undefined or empty values
                       .join(', ') // Joins non-empty values with a comma and space
                    : type === 'lookup' && name!=='user' ? (
-                        <a href={`/record/${field.parent_object_name}/${record[name + '_id']}`} target="_blank" rel="noopener noreferrer">
-                          {lookupNames[name] || form.getFieldValue(name)}
-                        </a>
+                    <a
+                    href={`/record/${field.parent_object_name}/${record[name + '_id']}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+                  >
+                    <Avatar
+                    size='small'
+                      style={{
+                        backgroundColor: '#87d068',
+                        marginRight: 8,
+                      }}
+                    >
+                      {(form.getFieldValue(name)?.Name || '').charAt(0).toUpperCase()}
+                    </Avatar>
+                    {form.getFieldValue(name)?.Name || ''}
+                  </a>
                     
                     ) : (
                       lookupNames[name] || form.getFieldValue(name)

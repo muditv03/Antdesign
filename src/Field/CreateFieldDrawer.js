@@ -82,8 +82,9 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   useEffect(() => {
     if (editField) {
 
-      const existingFilters = editField.lookup_config.filter_criteria
-      ? Object.entries(editField.lookup_config.filter_criteria).map(([key, { field, value }]) => {
+
+      const existingFilters = editField.lookup_config?.filter_criteria
+      ? Object.entries(editField.lookup_config?.filter_criteria).map(([key, { field, value }]) => {
        
         console.log('inside the filters');
         console.log(editField.lookup_config.filter_criteria);
@@ -137,11 +138,11 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         required:editField.required,
         unique:editField.unique,
         external_id:editField.external_id,
-        fieldsToDisplay:editField.lookup_config.display_fields,
-        SearchLayout:editField.lookup_config.search_layout,
+        fieldsToDisplay:editField.lookup_config?.display_fields,
+        SearchLayout:editField.lookup_config?.search_layout,
       });
-      setFilters(existingFilters);
-      setLogic(editField.lookup_config.logic)
+      setFilters(existingFilters || {});
+      setLogic(editField.lookup_config?.logic)
       setIsFormula(editField.is_formula)
       setFormula(editField.formula)
       setSelectedCC(editField.compliance_categorization)

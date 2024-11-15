@@ -19,6 +19,8 @@ const CreateRecordDrawer = ({
   form 
 }) => { 
   const [lookupOptions, setLookupOptions] = useState([]);
+  const [lookupOptionforparent,setLookupOptionsForParent]=useState([]);
+
 
   useEffect(() => {
     const fetchAllLookupOptions = async () => {
@@ -74,6 +76,41 @@ const CreateRecordDrawer = ({
       form.resetFields(); // Reset the form if no record is selected (for new record)
     }
   }, [selectedRecord, form, fieldsData]);
+
+  const handleSearch = async (value,fieldId,name) => {
+    console.log('handle search called');
+
+    console.log( value)
+    if (value) {
+      console.log(fieldId);
+      console.log(value);
+      try {
+        const apiService = new ApiService(`${BASE_URL}/search_lookup/${fieldId}/${value}`, {
+          'Content-Type': 'application/json', // Add any necessary headers, such as content type
+        }, 'GET', );
+        const response=await apiService.makeCall();
+        console.log('response of lookups ar');
+        console.log(response);
+        // Assuming the response data structure has options as an array
+        setLookupOptionsForParent(prevOptions => ({
+          ...prevOptions,
+          [name]: response // Store the response for the specific field name
+        }));
+      } catch (error) {
+        console.error("API request failed:", error);
+        setLookupOptionsForParent(prevOptions => ({
+          ...prevOptions,
+          [name]: [] 
+        }))     
+      } finally {
+      }
+    } else {
+      setLookupOptionsForParent(prevOptions => ({
+        ...prevOptions,
+        [name]: []
+      }));    }
+  };
+
 
   const renderFormItem = (field) => {
 
@@ -270,41 +307,32 @@ const CreateRecordDrawer = ({
             label={renderLabel}  // Use the custom label here
             rules={isRequired}
           > 
-           <Select
-      placeholder={`Select ${field.label}`}
-      showSearch
-      allowClear
-      filterOption={(input, option) =>
-        option.label.toLowerCase().includes(input.toLowerCase())
-      }
-      value={selectedRecord ? { value: selectedRecord.id, label: selectedRecord.name } : undefined}
-      optionLabelProp="label"
-      dropdownRender={(menu) => <div>{menu}</div>}
-      style={{ width: '100%' }}
-    >
-      {lookupOptions[field.name]?.filter(option => option._id !== selectedRecord?.id).map((option) => (
-        <Select.Option key={option._id} value={option._id} label={
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Avatar size="small" style={{ marginRight: 8, backgroundColor: '#87D068' }}>
-              {option.Name.charAt(0).toUpperCase()}
-            </Avatar>
-            {option.Name}
-          </div>
-        }>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Avatar style={{ marginRight: 8, backgroundColor: '#87D068' }}>
-              {option.Name.charAt(0).toUpperCase()}
-            </Avatar>
-            <div>
-              <div>{option.Name}</div>
-              <div style={{ fontSize: '0.9em', color: '#888' }}>
-               {option.Name}-{option.Name}
-               </div>
-            </div>
-          </div>
-        </Select.Option>
-      ))}
-    </Select>
+          <Select
+                    allowClear
+                    showSearch
+                    placeholder="Type to search"
+                    onSearch={(value) => handleSearch(value, field._id,field.name)} 
+                    filterOption={false} 
+                    notFoundContent="Search for records"
+                    options={[
+                      ...(lookupOptionforparent[field.name] || []).map((option) => ({
+                        label: option.Name,
+                        value: option.id,
+                      })),
+                      // Add the initial value if not already in options
+                      ...(form.getFieldValue(field.name) &&
+                      !(lookupOptionforparent[field.name] || []).some(
+                        (option) => option.id === form.getFieldValue(field.name).id
+                      )
+                        ? [
+                            {
+                              label: form.getFieldValue(field.name).Name,
+                              value: form.getFieldValue(field.name).id,
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
           </Form.Item>
         );
   
@@ -411,7 +439,7 @@ const CreateRecordDrawer = ({
     }
   };
   
-
+ 
   return (
     <Drawer
       title={<div style={{ fontSize: '20px', fontWeight: 'bold' }}>
