@@ -393,7 +393,7 @@ const RecordDetail = () => {
                           <div style={{ display: 'flex', alignItems: 'center' }}>
                             <div>
                             <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                              {option.Name.charAt(0).toUpperCase()}
+                              {option.Name?.charAt(0).toUpperCase()}
                             </Avatar>
                             {option.Name}
                             </div>
@@ -412,7 +412,7 @@ const RecordDetail = () => {
                               label: (
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                   <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                                    {form.getFieldValue(name).Name.charAt(0).toUpperCase()}
+                                    {form.getFieldValue(name).Name?.charAt(0).toUpperCase()}
                                   </Avatar>
                                   {form.getFieldValue(name).Name}
                                 </div>

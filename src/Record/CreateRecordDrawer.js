@@ -316,7 +316,17 @@ const CreateRecordDrawer = ({
                     notFoundContent="Search for records"
                     options={[
                       ...(lookupOptionforparent[field.name] || []).map((option) => ({
-                        label: option.Name,
+                        label: (
+                          <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <div>
+                            <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
+                              {option.Name?.charAt(0).toUpperCase()}
+                            </Avatar>
+                            {option.Name}
+                            </div>
+                           
+                          </div>
+                        ),
                         value: option.id,
                       })),
                       // Add the initial value if not already in options
@@ -326,12 +336,20 @@ const CreateRecordDrawer = ({
                       )
                         ? [
                             {
-                              label: form.getFieldValue(field.name).Name,
+                              label: (
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                  <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
+                                    {form.getFieldValue(field.name).Name?.charAt(0).toUpperCase()}
+                                  </Avatar>
+                                  {form.getFieldValue(field.name).Name}
+                                </div>
+                              ),
                               value: form.getFieldValue(field.name).id,
                             },
                           ]
                         : []),
                     ]}
+
                   />
           </Form.Item>
         );
