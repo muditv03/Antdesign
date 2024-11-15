@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Table, Typography, Button,Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker,Spin, Modal,Space,Upload } from 'antd';
+import { Table, Typography, Button,Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker,Spin, Modal,Space,Upload,Avatar } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined ,ImportOutlined, SettingOutlined,CaretDownOutlined} from '@ant-design/icons';
 import { BASE_URL,DateFormat } from '../Components/Constant';
@@ -301,7 +301,10 @@ const ObjectSetupDetail = () => {
       setDrawerVisible(true);
   
       // Fetch lookup data
-      await fetchLookupData(record, fieldsResponse, BASE_URL, setLookupName, form);
+      fetchLookupData(recordResponse, fieldsResponse, BASE_URL, setLookupName, form);
+
+      console.log('form');
+      console.log(form.getFieldValue('Account'));
         
     } catch (error) {
       console.error('Error fetching API response:', error);
@@ -342,7 +345,7 @@ const ObjectSetupDetail = () => {
       form.setFieldsValue(formattedClonedRecord);
   
       // Fetch and set lookup data
-      await fetchLookupData(clonedRecord, fieldsResponse, BASE_URL, setLookupName, form);
+     fetchLookupData(clonedRecord, fieldsResponse, BASE_URL, setLookupName, form);
   
     } catch (error) {
       console.error('Error fetching API response:', error);
@@ -520,9 +523,8 @@ const ObjectSetupDetail = () => {
         let lookupId='';
         
         lookupId = record[field.name + '_id'];
-       
-        
         const ob = field.parent_object_name;
+
        
         if(lookupId){
         // Check if the name has already been fetched and stored
@@ -533,9 +535,24 @@ const ObjectSetupDetail = () => {
               } else {
                 // Otherwise, render the name as a link
                 return (
-                  <a href={`/record/${ob}/${lookupId}`} target="_blank" rel="noopener noreferrer">
+                  <a
+                        href={`/record/${ob}/${lookupId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+                      >
+                        <Avatar
+                        size='small'
+                          style={{
+                            backgroundColor: '#87d068',
+                            marginRight: 8,
+                          }}
+                        >
+                    {lookupNames[lookupId].charAt(0).toUpperCase()}
+                    </Avatar>
                     {lookupNames[lookupId]}
-                  </a>
+                      </a>
+                  
                 );
               }      
           } else {
