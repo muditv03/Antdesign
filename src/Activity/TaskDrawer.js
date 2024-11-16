@@ -99,7 +99,7 @@ const TaskDrawer = ({ visible, onClose, objectName, recordId,fetchActivityRecord
 
           {/* Activity Type */}
           <Form.Item label="Activity Type" name="ActivityType" rules={[{ required: true, message: 'Please select an activity type!' }]}>
-            <Select placeholder="Select activity type">
+            <Select placeholder="Select activity type" disabled>
               <Option value="Call">Call</Option>
               <Option value="Meeting">Meeting</Option>
               <Option value="Email">Email</Option>
@@ -119,13 +119,13 @@ const TaskDrawer = ({ visible, onClose, objectName, recordId,fetchActivityRecord
           </Form.Item>
 
           {/* Start Date & Time */}
-          <Form.Item label="Start Date & Time" name="StartDateTime">
+          <Form.Item label="Start Date & Time" name="StartDateTime" style={{ display: 'none' }}>
             <DatePicker showTime style={{ width: '100%' }} placeholder="Select start date & time" />
           </Form.Item>
 
           {/* End Date & Time */}
-          <Form.Item label="End Date & Time" name="EndDateTime">
-            <DatePicker showTime style={{ width: '100%' }} placeholder="Select end date & time" />
+          <Form.Item label="Due Date & Time" name="EndDateTime">
+            <DatePicker showTime style={{ width: '100%' }} placeholder="Select due date & time" />
           </Form.Item>
 
           {/* Assigned To */}
@@ -138,7 +138,6 @@ const TaskDrawer = ({ visible, onClose, objectName, recordId,fetchActivityRecord
             <Select placeholder="Select status">
               <Option value="Pending">Pending</Option>
               <Option value="Completed">Completed</Option>
-              <Option value="Overdue">Overdue</Option>
             </Select>
           </Form.Item>
 

@@ -2,12 +2,14 @@ import React from 'react';
 import { Drawer, Button, Form, Card, Select, DatePicker, Input, message } from 'antd';
 import ApiService from '../Components/apiService';
 import { BASE_URL } from '../Components/Constant';
+import dayjs from 'dayjs';
 
 const { Option } = Select;
 const { TextArea } = Input;
 
 const CallDrawer = ({ visible, onClose, objectName, recordId,fetchActivityRecords }) => {
   const [form] = Form.useForm();
+  const currentDate = dayjs().format('YYYY-MM-DD HH:mm:ss');
 
   const handleSave = async () => {
     try {
@@ -91,7 +93,7 @@ const CallDrawer = ({ visible, onClose, objectName, recordId,fetchActivityRecord
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
         }}
       >
-        <Form layout="vertical" form={form} initialValues={{ AssociatedObject: objectName, ParentId: recordId, ActivityType: 'Call' }}>
+        <Form layout="vertical" form={form} initialValues={{ AssociatedObject: objectName, ParentId: recordId, ActivityType: 'Call', Status: 'Completed' }}>
           {/* Name */}
           <Form.Item label="Name" name="Name" rules={[{ required: true, message: 'Please enter a name!' }]}>
             <Input placeholder="Enter name" />
@@ -99,7 +101,7 @@ const CallDrawer = ({ visible, onClose, objectName, recordId,fetchActivityRecord
 
           {/* Activity Type */}
           <Form.Item label="Activity Type" name="ActivityType" rules={[{ required: true, message: 'Please select an activity type!' }]}>
-            <Select placeholder="Select activity type">
+            <Select placeholder="Select activity type" disabled>
               <Option value="Call">Call</Option>
               <Option value="Meeting">Meeting</Option>
               <Option value="Email">Email</Option>
@@ -114,17 +116,17 @@ const CallDrawer = ({ visible, onClose, objectName, recordId,fetchActivityRecord
           </Form.Item>
 
           {/* Description */}
-          <Form.Item label="Description" name="Description">
-            <TextArea placeholder="Enter description" rows={4} />
+          <Form.Item label="Comments" name="Description">
+            <TextArea placeholder="Enter comment" rows={4} />
           </Form.Item>
 
           {/* Start Date & Time */}
-          <Form.Item label="Start Date & Time" name="StartDateTime">
+          <Form.Item label="Start Date & Time" name="StartDateTime" style={{ display: 'none' }}>
             <DatePicker showTime style={{ width: '100%' }} placeholder="Select start date & time" />
           </Form.Item>
 
           {/* End Date & Time */}
-          <Form.Item label="End Date & Time" name="EndDateTime">
+          <Form.Item label="Call Date & Time" name="EndDateTime" initialValue={dayjs()} style={{ display: 'none' }}>
             <DatePicker showTime style={{ width: '100%' }} placeholder="Select end date & time" />
           </Form.Item>
 
@@ -134,11 +136,10 @@ const CallDrawer = ({ visible, onClose, objectName, recordId,fetchActivityRecord
           </Form.Item>
 
           {/* Status */}
-          <Form.Item label="Status" name="Status">
+          <Form.Item label="Status" name="Status" style={{ display: 'none' }}>
             <Select placeholder="Select status">
               <Option value="Pending">Pending</Option>
               <Option value="Completed">Completed</Option>
-              <Option value="Overdue">Overdue</Option>
             </Select>
           </Form.Item>
 
