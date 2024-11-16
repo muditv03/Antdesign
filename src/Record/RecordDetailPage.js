@@ -827,7 +827,7 @@ const RecordDetail = () => {
         <RelatedRecord objectName={objectName} recordId={id} />
       </TabPane>
       <TabPane tab="Activity" key="3">
-        <ActivityComponent />
+      <ActivityComponent objectName={objectName} recordId={id} />
       </TabPane>
     </Tabs>
   </div>
