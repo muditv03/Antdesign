@@ -137,12 +137,45 @@ const CustomTimeline = ({ objectName, recordId }) => {
                 header={
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>{item.subject}</span>
-                    <span>{item.endDateTime}</span>
-                  </div>
+                    <span>
+                   {(() => {
+                   const [day, month, year, time] = item.endDateTime.split(/[\s/:]+/);
+                   const formattedDate = new Date(`${year}-${month}-${day}T${time}:00`);
+                   return formattedDate.toLocaleDateString('en-GB', {
+                   day: '2-digit',
+                   month: 'long',
+                   year: 'numeric',
+                   });
+                   })()}
+            </span>   
+            </div>
                 }
                 key={item.key}
               >
-                <p><strong>End Date & Time:</strong> {item.endDateTime}</p>
+                <p><strong>End Date & Time:</strong> <span>
+        {(() => {
+            // Assuming item.endDateTime format: '17/11/2024 00:30:00'
+            const [day, month, year, hours, minutes, seconds] = item.endDateTime.split(/[\s/:]+/);
+            const formattedDate = new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}`);
+
+            // Format the date and time
+            const dateStr = formattedDate.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+            });
+
+            // Format the time in 12-hour format (with AM/PM)
+            const timeStr = formattedDate.toLocaleTimeString('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+            });
+
+            return `${dateStr}, ${timeStr}`;
+        })()}
+                </span>
+                </p>
                 <p><strong>Status:</strong> {item.status}</p>
                 <p><strong>Priority:</strong> {item.priority}</p>
               </Panel>
