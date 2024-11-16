@@ -80,6 +80,7 @@ const CreateRecordDrawer = ({
   const handleSearch = async (value,fieldId,name) => {
     console.log('handle search called');
 
+    
     console.log( value)
     if (value) {
       console.log(fieldId);
@@ -120,6 +121,11 @@ const CreateRecordDrawer = ({
   
     if(field.name === 'recordCount'){
       return null;
+    }
+
+    if(field.type==='lookup'){
+      console.log('hello');
+      console.log(form.getFieldValue(field.name));
     }
   
     const isRequired = field.required ? [{ required: true, message: `${field.label} is required!` }] : [];
@@ -353,22 +359,23 @@ const CreateRecordDrawer = ({
                     </div>
                       )
                         ,
-                        value: option.id,
+                        value: option._id,
                       })),
                       
                       // Add the initial value if not already in options
                       ...(form.getFieldValue(field.name) &&
                       !(lookupOptionforparent[field.name] || []).some(
-                        (option) => option.id === form.getFieldValue(field.name).id
+                        (option) => option._id === form.getFieldValue(field.name)._id
                       )
                         ? [
                             {
                               children: (
+                                
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                   <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                                    {form.getFieldValue(field.name).Name?.charAt(0).toUpperCase()}
+                                    {form.getFieldValue(field.name)?.Name?.charAt(0).toUpperCase()}
                                   </Avatar>
-                                  {form.getFieldValue(field.name).Name}
+                                  {form.getFieldValue(field.name)?.Name}
                                 </div>
                               ),
                               value: form.getFieldValue(field.name).id,

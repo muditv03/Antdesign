@@ -257,6 +257,10 @@ const RecordDetail = () => {
   const renderFieldWithEdit = (field, selectedDate, setSelectedDate) => {
     const { name, label, type, picklist_values, isTextArea,required, help_text,_id,lookup_config } = field;
   
+    if(type==='lookup'){
+      console.log('lookup ids');
+      console.log(form.getFieldValue(name)?.Name);
+    }
     
 
     const validationRules = [];
@@ -389,6 +393,7 @@ const RecordDetail = () => {
                     notFoundContent="Search for records"
                     optionLabelProp='children'
                     filterOption={false} 
+                    initialValue={form.getFieldValue(name).Name}
                     options={[
                       ...(lookupOptionforparent[name] || []).map((option) => ({
                         children: (
@@ -403,7 +408,7 @@ const RecordDetail = () => {
                           </div>
                           
                         ),
-                        value: option.id,
+                        value: option._id,
                         label:(
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -431,7 +436,7 @@ const RecordDetail = () => {
                       // Add the initial value if not already in options
                       ...(form.getFieldValue(name) &&
                       !(lookupOptionforparent[name] || []).some(
-                        (option) => option.id === form.getFieldValue(name).id
+                        (option) => option._id === form.getFieldValue(name)._id
                       ) 
                         ? [
                             {
@@ -444,6 +449,7 @@ const RecordDetail = () => {
                                 </div>
                               ),
                               value: form.getFieldValue(name).id,
+                              
                             },
                           ]
                         : []),
