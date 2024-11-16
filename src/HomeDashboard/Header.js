@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Avatar, Input, Drawer, Button, Grid, Dropdown } from 'antd';
+import { Layout, Menu, Avatar, Input, Drawer, Button, Grid, Dropdown ,Select} from 'antd';
 import { UserOutlined, SearchOutlined, MenuOutlined, SettingOutlined, DownOutlined } from '@ant-design/icons';
 import { Link,useNavigate } from 'react-router-dom';
 import logo from '../CompanyLogo.png'; // Import your logo file
 import Cookies from 'js-cookie';
+import { responsiveArray } from 'antd/es/_util/responsiveObserver';
+import ApiService from '../Components/apiService'; // Import ApiService class
+import { BASE_URL,DateFormat } from '../Components/Constant';
 
+ 
 const { Header } = Layout;
 const { Search } = Input;
 const { useBreakpoint } = Grid;
@@ -13,6 +17,7 @@ const AppHeader = () => {
   const [visible, setVisible] = useState(false);
   const screens = useBreakpoint();
   const navigate = useNavigate(); // Use navigate hook for programmatic navigation
+  const [seachResults,setSearchResults]=useState([]);
 
   const username = Cookies.get('username') || 'Aptclouds';
   console.log('Retrieved username from cookie:', username);
@@ -25,8 +30,47 @@ const AppHeader = () => {
     setVisible(false);
   };
 
-  const onSearch = (value) => {
+  const onSearch =async (value) => {
     console.log(value);
+    console.log( value)
+    if (value) {
+      console.log(value);
+      try {
+        const apiService = new ApiService(`${BASE_URL}/global_search/${value}`, {
+          'Content-Type': 'application/json', // Add any necessary headers, such as content type
+        }, 'GET', );
+        const response=await apiService.makeCall();
+        console.log('response of lookups ar');
+        console.log(response);
+    
+        const searchOptions=[];
+        Object.keys(response).forEach((objectName) => {
+          const records = response[objectName]?.records || [];
+          records.forEach((record) => {
+            searchOptions.push({
+              label: `${objectName} - ${record.Name || 'Unnamed Record'}`,
+              value: record._id,
+              objectName, // Include the object name for navigation
+
+            });
+          });
+        });
+
+
+        setSearchResults(searchOptions);
+       } catch (error) {
+        console.error("API request failed:", error);
+        setSearchResults([]);
+      } finally {
+      }
+    } else {
+          
+    }
+  };
+
+  const handleRecordChange = (value, option) => {
+    const { objectName } = option;
+    navigate(`/record/${objectName}/${value}`);
   };
 
   const handleLogout = () => {
@@ -71,6 +115,7 @@ const AppHeader = () => {
       <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
         {!screens.md && (
           <Button
+          
             icon={<MenuOutlined />}
             onClick={showDrawer}
             style={{
@@ -88,15 +133,30 @@ const AppHeader = () => {
         
 
         {screens.md && (
-          <Search
+          <Select
+            showSearch
+            notFoundContent="Search for records"
             placeholder="Search..."
-            onSearch={onSearch}
+            onSearch={(value) => onSearch(value)} 
+            options={seachResults} // Assuming searchResults is the state with transformed options
+            onChange={handleRecordChange}
             style={{
               width: '500px',
               borderRadius: '4px',
             }}
             prefix={<SearchOutlined />}
-          />
+            dropdownRender={(menu) => <div>{menu}</div>} // Allows for dropdown customization
+          >
+            {seachResults.map((option) => (
+              <Select.Option key={option.value} value={option.value} label={option.label}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontWeight: 'bold' }}>{option.objectName}</span>
+                  <span style={{ color: '#888' }}>{option.label.split(' - ')[1]}</span>
+                </div>
+              </Select.Option>
+            ))}
+
+          </Select>
         )}
       </div>
       <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>

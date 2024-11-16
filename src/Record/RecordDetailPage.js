@@ -248,13 +248,14 @@ const RecordDetail = () => {
       setLookupOptionsForParent(prevOptions => ({
         ...prevOptions,
         [name]: []
-      }));    }
+      }));    
+    }
   };
 
  
 
   const renderFieldWithEdit = (field, selectedDate, setSelectedDate) => {
-    const { name, label, type, picklist_values, isTextArea,required, help_text,_id } = field;
+    const { name, label, type, picklist_values, isTextArea,required, help_text,_id,lookup_config } = field;
   
     
 
@@ -386,10 +387,11 @@ const RecordDetail = () => {
                     placeholder="Type to search"
                     onSearch={(value) => handleSearch(value, _id,name)} 
                     notFoundContent="Search for records"
+                    optionLabelProp='children'
                     filterOption={false} 
                     options={[
                       ...(lookupOptionforparent[name] || []).map((option) => ({
-                        label: (
+                        children: (
                           <div style={{ display: 'flex', alignItems: 'center' }}>
                             <div>
                             <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
@@ -399,17 +401,41 @@ const RecordDetail = () => {
                             </div>
                            
                           </div>
+                          
                         ),
                         value: option.id,
+                        label:(
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                          <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <Avatar size="small" style={{ backgroundColor: '#87d068', marginRight: 8 }}>
+                              {option.Name?.charAt(0).toUpperCase()}
+                            </Avatar>
+                            {option.Name}
+                            
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
+                          {lookup_config?.display_fields?.map((fieldKey,index) => (
+                            <div key={fieldKey} 
+                            style={{ 
+                                fontSize: '12px', 
+                                color: '#888',
+                                marginRight: index < lookup_config?.display_fields.length - 1 ? 8 : 0, // Add margin except for the last item
+                            }}>
+                              {`${option[fieldKey] || ''}`}
+                            </div>
+                          ))}
+                          </div>
+                      </div>
+                        )
                       })),
                       // Add the initial value if not already in options
                       ...(form.getFieldValue(name) &&
                       !(lookupOptionforparent[name] || []).some(
                         (option) => option.id === form.getFieldValue(name).id
-                      )
+                      ) 
                         ? [
                             {
-                              label: (
+                              children: (
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                   <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
                                     {form.getFieldValue(name).Name?.charAt(0).toUpperCase()}
@@ -674,7 +700,7 @@ const RecordDetail = () => {
                     [form.getFieldValue(name).street, form.getFieldValue(name).city, form.getFieldValue(name).state, form.getFieldValue(name).postal_code, form.getFieldValue(name).country]
                       .filter(Boolean) // This removes undefined or empty values
                       .join(', ') // Joins non-empty values with a comma and space
-                   : type === 'lookup' && name!=='user' ? (
+                   : type === 'lookup' && name!=='user' && form.getFieldValue(name) ? (
                     <a
                     href={`/record/${field.parent_object_name}/${record[name + '_id']}`}
                     target="_blank"
@@ -690,7 +716,7 @@ const RecordDetail = () => {
                     >
                       {(form.getFieldValue(name)?.Name || '').charAt(0).toUpperCase()}
                     </Avatar>
-                    {form.getFieldValue(name)?.Name || ''}
+                    {form.getFieldValue(name)?.Name } 
                   </a>
                     
                     ) : (

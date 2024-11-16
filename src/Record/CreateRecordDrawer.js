@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Children, useEffect, useState } from 'react';
 import { Drawer, Button, Form, Card, Spin, Input, Checkbox, DatePicker, Space, Select,Tooltip ,Avatar} from 'antd';
 import { MailOutlined,InfoCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -314,21 +314,48 @@ const CreateRecordDrawer = ({
                     onSearch={(value) => handleSearch(value, field._id,field.name)} 
                     filterOption={false} 
                     notFoundContent="Search for records"
+                    optionLabelProp="children"
                     options={[
                       ...(lookupOptionforparent[field.name] || []).map((option) => ({
-                        label: (
-                          <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <div>
-                            <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                              {option.Name?.charAt(0).toUpperCase()}
-                            </Avatar>
-                            {option.Name}
-                            </div>
-                           
+                        children: (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                              <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <Avatar size="small" style={{ backgroundColor: '#87d068', marginRight: 8 }}>
+                                  {option.Name?.charAt(0).toUpperCase()}
+                                </Avatar>
+                                {option.Name}
+                                
+                              </div>
+                             
                           </div>
                         ),
+                        label:(
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <Avatar size="small" style={{ backgroundColor: '#87d068', marginRight: 8 }}>
+                            {option.Name?.charAt(0).toUpperCase()}
+                          </Avatar>
+                          {option.Name}
+                          
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
+                        {field.lookup_config?.display_fields?.map((fieldKey,index) => (
+                          <div key={fieldKey} 
+                          style={{ 
+                              fontSize: '12px', 
+                              color: '#888',
+                              marginRight: index < field.lookup_config?.display_fields.length - 1 ? 8 : 0, // Add margin except for the last item
+                          }}>
+                            {`${option[fieldKey] || ''}`}
+                          </div>
+                        ))}
+                        </div>
+                    </div>
+                      )
+                        ,
                         value: option.id,
                       })),
+                      
                       // Add the initial value if not already in options
                       ...(form.getFieldValue(field.name) &&
                       !(lookupOptionforparent[field.name] || []).some(
@@ -336,7 +363,7 @@ const CreateRecordDrawer = ({
                       )
                         ? [
                             {
-                              label: (
+                              children: (
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                   <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
                                     {form.getFieldValue(field.name).Name?.charAt(0).toUpperCase()}
@@ -347,9 +374,9 @@ const CreateRecordDrawer = ({
                               value: form.getFieldValue(field.name).id,
                             },
                           ]
-                        : []),
+                        : []
+                      ),
                     ]}
-
                   />
           </Form.Item>
         );
