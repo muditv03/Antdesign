@@ -91,7 +91,7 @@ const TaskDrawer = ({ visible, onClose, objectName, recordId,fetchActivityRecord
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
         }}
       >
-        <Form layout="vertical" form={form} initialValues={{ AssociatedObject: objectName, ParentId: recordId }}>
+        <Form layout="vertical" form={form} initialValues={{ AssociatedObject: objectName, ParentId: recordId, ActivityType: 'Task' }}>
           {/* Name */}
           <Form.Item label="Name" name="Name" rules={[{ required: true, message: 'Please enter a name!' }]}>
             <Input placeholder="Enter name" />
@@ -152,12 +152,12 @@ const TaskDrawer = ({ visible, onClose, objectName, recordId,fetchActivityRecord
           </Form.Item>
 
           {/* Associated Object */}
-          <Form.Item label="Associated Object" name="AssociatedObject">
+          <Form.Item label="Associated Object" name="AssociatedObject" style={{ display: 'none' }}>
             <Input placeholder="Enter associated object" disabled />
           </Form.Item>
 
           {/* Parent ID */}
-          <Form.Item label="Parent ID" name="ParentId">
+          <Form.Item label="Parent ID" name="ParentId" style={{ display: 'none' }}>
             <Input placeholder="Enter parent ID" disabled />
           </Form.Item>
         </Form>
