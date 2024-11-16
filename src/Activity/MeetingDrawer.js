@@ -99,7 +99,7 @@ const CallDrawer = ({ visible, onClose, objectName, recordId,fetchActivityRecord
 
           {/* Activity Type */}
           <Form.Item label="Activity Type" name="ActivityType" rules={[{ required: true, message: 'Please select an activity type!' }]}>
-            <Select placeholder="Select activity type">
+            <Select placeholder="Select activity type" disabled>
               <Option value="Call">Call</Option>
               <Option value="Meeting">Meeting</Option>
               <Option value="Email">Email</Option>
@@ -138,7 +138,6 @@ const CallDrawer = ({ visible, onClose, objectName, recordId,fetchActivityRecord
             <Select placeholder="Select status">
               <Option value="Pending">Pending</Option>
               <Option value="Completed">Completed</Option>
-              <Option value="Overdue">Overdue</Option>
             </Select>
           </Form.Item>
 

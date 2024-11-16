@@ -72,13 +72,11 @@ const CustomTimeline = ({ objectName, recordId }) => {
     .format('DD/MM/YYYY HH:mm:ss');
 
         let section = '';
-        if (endDateTime < currentDate) {
-          section = 'Past Activities';
-        } else if (endDateTime >= currentDate && endDateTime <= tomorrow) {
+        if (record.Status === 'Pending') {
           section = 'Upcoming & Overdue';
-        } else if (endDateTime > tomorrow && endDateTime <= endOfMonth) {
+        } else {
           section = 'This Month';
-        }
+        } 
 
         return {
           type: record.ActivityType,
@@ -260,21 +258,13 @@ const CustomTimeline = ({ objectName, recordId }) => {
         </Collapse>
       </div>
 
-      {/* Accordion for "Past Activities" section */}
-      <div style={{ marginBottom: '20px' }}>
-        <Collapse defaultActiveKey={['3']} expandIconPosition="right">
-          <Panel header="Past Activities" key="3">
-            {renderTimelineSection('Past Activities')}
-          </Panel>
-        </Collapse>
-      </div>
 
       {/* Render the appropriate drawer based on button clicked */}
       {drawerVisible && drawerType === 'Task' && <TaskDrawer fetchActivityRecords={fetchActivityRecords} objectName={objectName} recordId={recordId} visible={drawerVisible} onClose={handleDrawerClose} />}
-      {drawerVisible && drawerType === 'Call' && <CallDrawer fetchActivityRecords={fetchActivityRecords} visible={drawerVisible} onClose={handleDrawerClose} />}
-      {drawerVisible && drawerType === 'Email' && <EmailDrawer fetchActivityRecords={fetchActivityRecords} visible={drawerVisible} onClose={handleDrawerClose} />}
-      {drawerVisible && drawerType === 'Meeting' && <MeetingDrawer fetchActivityRecords={fetchActivityRecords} visible={drawerVisible} onClose={handleDrawerClose} />}
-      {drawerVisible && drawerType === 'Note' && <NoteDrawer fetchActivityRecords={fetchActivityRecords} visible={drawerVisible} onClose={handleDrawerClose} />}
+      {drawerVisible && drawerType === 'Call' && <CallDrawer fetchActivityRecords={fetchActivityRecords} objectName={objectName} recordId={recordId} visible={drawerVisible} onClose={handleDrawerClose} />}
+      {drawerVisible && drawerType === 'Email' && <EmailDrawer fetchActivityRecords={fetchActivityRecords} objectName={objectName} recordId={recordId} visible={drawerVisible} onClose={handleDrawerClose} />}
+      {drawerVisible && drawerType === 'Meeting' && <MeetingDrawer fetchActivityRecords={fetchActivityRecords} objectName={objectName} recordId={recordId} visible={drawerVisible} onClose={handleDrawerClose} />}
+      {drawerVisible && drawerType === 'Note' && <NoteDrawer fetchActivityRecords={fetchActivityRecords} objectName={objectName} recordId={recordId} visible={drawerVisible} onClose={handleDrawerClose} />}
     </Card>
   );
 };
