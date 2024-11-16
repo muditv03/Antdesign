@@ -140,9 +140,9 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         external_id:editField.external_id,
         fieldsToDisplay:editField.lookup_config?.display_fields,
         SearchLayout:editField.lookup_config?.search_layout,
-      });
+      }); 
       setFilters(existingFilters || {});
-      setLogic(editField.lookup_config?.logic)
+      setLogic(editField.lookup_config?.logic_string)
       setIsFormula(editField.is_formula)
       setFormula(editField.formula)
       setSelectedCC(editField.compliance_categorization)
@@ -187,7 +187,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
     const lookupConfig = {
       display_fields: values.fieldsToDisplay,
       search_layout: values.SearchLayout,
-      logic: logic,
+      logic_string: logic,
       filter_criteria: filters.reduce((acc, filter, index) => {
         if (filter.field) {
           acc[index + 1] = {
