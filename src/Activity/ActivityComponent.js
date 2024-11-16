@@ -70,9 +70,6 @@ const CustomTimeline = ({ objectName, recordId }) => {
         const formattedEndDateTime = dayjs(record.EndDateTime)
     .utc()
     .format('DD/MM/YYYY HH:mm:ss');
-    const formattedEndDate = dayjs(record.EndDateTime)
-    .utc()
-    .format('DD/MM/YYYY');
 
         let section = '';
         if (endDateTime < currentDate) {
@@ -138,44 +135,43 @@ const CustomTimeline = ({ objectName, recordId }) => {
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>{item.subject}</span>
                     <span>
-                   {(() => {
-                   const [day, month, year, time] = item.endDateTime.split(/[\s/:]+/);
-                   const formattedDate = new Date(`${year}-${month}-${day}T${time}:00`);
-                   return formattedDate.toLocaleDateString('en-GB', {
-                   day: '2-digit',
-                   month: 'long',
-                   year: 'numeric',
-                   });
-                   })()}
-            </span>   
-            </div>
+                      {(() => {
+                        const [day, month, year, time] = item.endDateTime.split(/[\s/:]+/);
+                        const formattedDate = new Date(`${year}-${month}-${day}T${time}:00`);
+                        return formattedDate.toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: 'long',
+                          year: 'numeric',
+                        });
+                      })()}
+                    </span>
+                  </div>
                 }
                 key={item.key}
               >
                 <p><strong>End Date & Time:</strong> <span>
-        {(() => {
-            // Assuming item.endDateTime format: '17/11/2024 00:30:00'
-            const [day, month, year, hours, minutes, seconds] = item.endDateTime.split(/[\s/:]+/);
-            const formattedDate = new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}`);
-
-            // Format the date and time
-            const dateStr = formattedDate.toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
-            });
-
-            // Format the time in 12-hour format (with AM/PM)
-            const timeStr = formattedDate.toLocaleTimeString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true,
-            });
-
-            return `${dateStr}, ${timeStr}`;
-        })()}
-                </span>
-                </p>
+                  {(() => {
+                    // Assuming item.endDateTime format: '17/11/2024 00:30:00'
+                    const [day, month, year, hours, minutes, seconds] = item.endDateTime.split(/[\s/:]+/);
+                    const formattedDate = new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}`);
+  
+                    // Format the date and time
+                    const dateStr = formattedDate.toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric',
+                    });
+  
+                    // Format the time in 12-hour format (with AM/PM)
+                    const timeStr = formattedDate.toLocaleTimeString('en-GB', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true,
+                    });
+  
+                    return `${dateStr}, ${timeStr}`;
+                  })()}
+                </span></p>
                 <p><strong>Status:</strong> {item.status}</p>
                 <p><strong>Priority:</strong> {item.priority}</p>
               </Panel>
@@ -184,6 +180,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
         ))}
     </Timeline>
   );
+  
 
   return (
     <Card>
@@ -274,10 +271,10 @@ const CustomTimeline = ({ objectName, recordId }) => {
 
       {/* Render the appropriate drawer based on button clicked */}
       {drawerVisible && drawerType === 'Task' && <TaskDrawer fetchActivityRecords={fetchActivityRecords} objectName={objectName} recordId={recordId} visible={drawerVisible} onClose={handleDrawerClose} />}
-      {drawerVisible && drawerType === 'Call' && <CallDrawer visible={drawerVisible} onClose={handleDrawerClose} />}
-      {drawerVisible && drawerType === 'Email' && <EmailDrawer visible={drawerVisible} onClose={handleDrawerClose} />}
-      {drawerVisible && drawerType === 'Meeting' && <MeetingDrawer visible={drawerVisible} onClose={handleDrawerClose} />}
-      {drawerVisible && drawerType === 'Note' && <NoteDrawer visible={drawerVisible} onClose={handleDrawerClose} />}
+      {drawerVisible && drawerType === 'Call' && <CallDrawer fetchActivityRecords={fetchActivityRecords} visible={drawerVisible} onClose={handleDrawerClose} />}
+      {drawerVisible && drawerType === 'Email' && <EmailDrawer fetchActivityRecords={fetchActivityRecords} visible={drawerVisible} onClose={handleDrawerClose} />}
+      {drawerVisible && drawerType === 'Meeting' && <MeetingDrawer fetchActivityRecords={fetchActivityRecords} visible={drawerVisible} onClose={handleDrawerClose} />}
+      {drawerVisible && drawerType === 'Note' && <NoteDrawer fetchActivityRecords={fetchActivityRecords} visible={drawerVisible} onClose={handleDrawerClose} />}
     </Card>
   );
 };
