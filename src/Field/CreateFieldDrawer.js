@@ -38,7 +38,6 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
 
 
 
-
   // Utility function to sanitize label and create API name
   const generateApiName = (label) => {
     return label
@@ -151,7 +150,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       setIsRequired(editField.required || false); // Set auto number state if editing
       setIsUnique(editField.unique || false); // Set auto number state if editing
       setIsExternalID(editField.external_id || false); // Set auto number state if editing
-
+      handleParentObjectChange(editField.parent_object_name);
     } else {
       form.resetFields(); // Reset fields for creating a new field
       setIsAutoNumber(false); // Reset auto number state
@@ -183,7 +182,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
     console.log(values.SearchLayout);
     console.log(logic);
 
-    
+     
     const lookupConfig = {
       display_fields: values.fieldsToDisplay,
       search_layout: values.SearchLayout,
@@ -862,7 +861,6 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
               <Input placeholder="Please enter relationship name" /> 
 
               </Form.Item>
-
 
                 <Form.Item
                   name="fieldsToDisplay"

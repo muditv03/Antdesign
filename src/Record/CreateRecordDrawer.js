@@ -328,7 +328,7 @@ const CreateRecordDrawer = ({
                               </div>
                              
                           </div>
-                        ),
+                        ), 
                         label:(
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
