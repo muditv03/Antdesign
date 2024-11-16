@@ -1,11 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Timeline, Collapse, Card, Dropdown, message, Col, Row } from 'antd';
-import { UserOutlined, FileTextOutlined, PhoneOutlined, MailOutlined, CalendarOutlined, ClockCircleOutlined } from '@ant-design/icons';
-import TaskDrawer from './TaskDrawer'; // Import the drawer components
+import { 
+  UserOutlined, 
+  FileTextOutlined, 
+  PhoneOutlined, 
+  MailOutlined, 
+  CalendarOutlined, 
+  ClockCircleOutlined 
+} from '@ant-design/icons';
+import TaskDrawer from './TaskDrawer';
 import CallDrawer from './CallDrawer';
 import EmailDrawer from './EmailDrawer';
 import MeetingDrawer from './MeetingDrawer';
 import NoteDrawer from './NoteDrawer';
+import ApiService from '../Components/apiService';
+import { BASE_URL } from '../Components/Constant';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
+dayjs.extend(utc);
+dayjs.extend(timezone); 
 
 const { Panel } = Collapse;
 
@@ -26,26 +42,76 @@ const menuProps = {
   onClick: handleMenuClick,
 };
 
-const CustomTimeline = () => {
+const CustomTimeline = ({ objectName, recordId }) => {
   const [timelineData, setTimelineData] = useState([]);
-  const [drawerVisible, setDrawerVisible] = useState(false); // State to control drawer visibility
-  const [drawerType, setDrawerType] = useState(''); // State to control which drawer is shown
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [drawerType, setDrawerType] = useState('');
+
+  console.log('Object Name:', objectName);
+  console.log('Record ID:', recordId);
+
+  // Fetch activity records function
+  const fetchActivityRecords = async () => {
+    try {
+      const fetchRec = new ApiService(`${BASE_URL}/fetchActivityRecords/${objectName}/${recordId}`, {}, 'GET');
+      const response = await fetchRec.makeCall();
+      console.log("Activity Records Response:", response);
+
+      // Get current date, tomorrow, and end of the month
+      const currentDate = new Date();
+      const tomorrow = new Date(currentDate);
+      tomorrow.setDate(currentDate.getDate() + 1);
+
+      const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+      // Map response to timelineData format with categorization
+      const data = response.map((record) => {
+        const endDateTime = new Date(record.EndDateTime);
+        const formattedEndDateTime = dayjs(record.EndDateTime)
+    .utc()
+    .format('DD/MM/YYYY HH:mm:ss');
+    const formattedEndDate = dayjs(record.EndDateTime)
+    .utc()
+    .format('DD/MM/YYYY');
+
+        let section = '';
+        if (endDateTime < currentDate) {
+          section = 'Past Activities';
+        } else if (endDateTime >= currentDate && endDateTime <= tomorrow) {
+          section = 'Upcoming & Overdue';
+        } else if (endDateTime > tomorrow && endDateTime <= endOfMonth) {
+          section = 'This Month';
+        }
+
+        return {
+          type: record.ActivityType,
+          section,
+          subject: record.Subject,
+          endDateTime: formattedEndDateTime,
+          status: record.Status,
+          priority: record.Priority,
+          icon: getIconByType(record.ActivityType),
+          key: record.id || Date.now(),
+        };
+      });
+
+      setTimelineData(data);
+    } catch (error) {
+      console.error("Error fetching activity records:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchActivityRecords();
+  }, []);
 
   const handleButtonClick = (type) => {
-    const newEntry = { 
-      type, 
-      content: `New ${type} record created`, 
-      icon: getIconByType(type),
-      key: Date.now() 
-    };
-    setTimelineData([newEntry, ...timelineData]);
-
-    setDrawerType(type); // Set which drawer to show based on button clicked
-    setDrawerVisible(true); // Open the drawer
+    setDrawerType(type);
+    setDrawerVisible(true);
   };
 
   const getIconByType = (type) => {
-    switch(type) {
+    switch (type) {
       case 'Task': return <FileTextOutlined />;
       case 'Call': return <PhoneOutlined />;
       case 'Email': return <MailOutlined />;
@@ -56,17 +122,44 @@ const CustomTimeline = () => {
   };
 
   const handleDrawerClose = () => {
-    setDrawerVisible(false); // Close the drawer
+    setDrawerVisible(false);
   };
+
+  const renderTimelineSection = (section) => (
+    <Timeline>
+      {timelineData
+        .filter((item) => item.section === section)
+        .map((item) => (
+          <Timeline.Item key={item.key} dot={item.icon} color="blue">
+            <span>{item.type}</span>
+            <Collapse expandIconPosition="right">
+              <Panel
+                header={
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{item.subject}</span>
+                    <span>{item.endDateTime}</span>
+                  </div>
+                }
+                key={item.key}
+              >
+                <p><strong>End Date & Time:</strong> {item.endDateTime}</p>
+                <p><strong>Status:</strong> {item.status}</p>
+                <p><strong>Priority:</strong> {item.priority}</p>
+              </Panel>
+            </Collapse>
+          </Timeline.Item>
+        ))}
+    </Timeline>
+  );
 
   return (
     <Card>
       <Row justify="start" style={{ paddingBottom: '20px' }}>
         <Col style={{ marginRight: '10px' }}>
-          <Dropdown.Button 
-            onClick={() => handleButtonClick('Task')} 
-            menu={menuProps} 
-            icon={<FileTextOutlined />} 
+          <Dropdown.Button
+            onClick={() => handleButtonClick('Task')}
+            menu={menuProps}
+            icon={<FileTextOutlined />}
             placement="bottom"
             style={{ backgroundColor: 'transparent', color: '#000' }}
           >
@@ -74,10 +167,10 @@ const CustomTimeline = () => {
           </Dropdown.Button>
         </Col>
         <Col style={{ marginRight: '10px' }}>
-          <Dropdown.Button 
-            onClick={() => handleButtonClick('Call')} 
-            menu={menuProps} 
-            icon={<PhoneOutlined />} 
+          <Dropdown.Button
+            onClick={() => handleButtonClick('Call')}
+            menu={menuProps}
+            icon={<PhoneOutlined />}
             placement="bottom"
             style={{ backgroundColor: 'transparent', color: '#000' }}
           >
@@ -85,10 +178,10 @@ const CustomTimeline = () => {
           </Dropdown.Button>
         </Col>
         <Col style={{ marginRight: '10px' }}>
-          <Dropdown.Button 
-            onClick={() => handleButtonClick('Email')} 
-            menu={menuProps} 
-            icon={<MailOutlined />} 
+          <Dropdown.Button
+            onClick={() => handleButtonClick('Email')}
+            menu={menuProps}
+            icon={<MailOutlined />}
             placement="bottom"
             style={{ backgroundColor: 'transparent', color: '#000' }}
           >
@@ -96,10 +189,10 @@ const CustomTimeline = () => {
           </Dropdown.Button>
         </Col>
         <Col style={{ marginRight: '10px' }}>
-          <Dropdown.Button 
-            onClick={() => handleButtonClick('Meeting')} 
-            menu={menuProps} 
-            icon={<CalendarOutlined />} 
+          <Dropdown.Button
+            onClick={() => handleButtonClick('Meeting')}
+            menu={menuProps}
+            icon={<CalendarOutlined />}
             placement="bottom"
             style={{ backgroundColor: 'transparent', color: '#000' }}
           >
@@ -107,10 +200,10 @@ const CustomTimeline = () => {
           </Dropdown.Button>
         </Col>
         <Col>
-          <Dropdown.Button 
-            onClick={() => handleButtonClick('Note')} 
-            menu={menuProps} 
-            icon={<ClockCircleOutlined />} 
+          <Dropdown.Button
+            onClick={() => handleButtonClick('Note')}
+            menu={menuProps}
+            icon={<ClockCircleOutlined />}
             placement="bottom"
             style={{ backgroundColor: 'transparent', color: '#000' }}
           >
@@ -119,22 +212,35 @@ const CustomTimeline = () => {
         </Col>
       </Row>
 
-      {/* Timeline */}
-      <Timeline>
-        {timelineData.map((item) => (
-          <Timeline.Item key={item.key} dot={item.icon} color="blue">
-            <span>{item.type}</span>
-            <Collapse expandIconPosition="right">
-              <Panel header={item.type} key={item.key}>
-                <p>{item.content}</p>
-              </Panel>
-            </Collapse>
-          </Timeline.Item>
-        ))}
-      </Timeline>
+      {/* Accordion for "Upcoming & Overdue" section */}
+      <div style={{ marginBottom: '20px' }}>
+        <Collapse defaultActiveKey={['1']} expandIconPosition="right">
+          <Panel header="Upcoming & Overdue" key="1">
+            {renderTimelineSection('Upcoming & Overdue')}
+          </Panel>
+        </Collapse>
+      </div>
+
+      {/* Accordion for "This Month" section */}
+      <div style={{ marginBottom: '20px' }}>
+        <Collapse defaultActiveKey={['2']} expandIconPosition="right">
+          <Panel header="This Month" key="2">
+            {renderTimelineSection('This Month')}
+          </Panel>
+        </Collapse>
+      </div>
+
+      {/* Accordion for "Past Activities" section */}
+      <div style={{ marginBottom: '20px' }}>
+        <Collapse defaultActiveKey={['3']} expandIconPosition="right">
+          <Panel header="Past Activities" key="3">
+            {renderTimelineSection('Past Activities')}
+          </Panel>
+        </Collapse>
+      </div>
 
       {/* Render the appropriate drawer based on button clicked */}
-      {drawerVisible && drawerType === 'Task' && <TaskDrawer visible={drawerVisible} onClose={handleDrawerClose} />}
+      {drawerVisible && drawerType === 'Task' && <TaskDrawer fetchActivityRecords={fetchActivityRecords} objectName={objectName} recordId={recordId} visible={drawerVisible} onClose={handleDrawerClose} />}
       {drawerVisible && drawerType === 'Call' && <CallDrawer visible={drawerVisible} onClose={handleDrawerClose} />}
       {drawerVisible && drawerType === 'Email' && <EmailDrawer visible={drawerVisible} onClose={handleDrawerClose} />}
       {drawerVisible && drawerType === 'Meeting' && <MeetingDrawer visible={drawerVisible} onClose={handleDrawerClose} />}
