@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Table, Typography, Button,Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker,Spin, Modal,Space,Upload,Avatar } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined ,ImportOutlined, SettingOutlined,CaretDownOutlined} from '@ant-design/icons';
+import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined ,ImportOutlined, SettingOutlined,CaretDownOutlined,PhoneOutlined} from '@ant-design/icons';
 import { BASE_URL,DateFormat } from '../Components/Constant';
 import dayjs from 'dayjs';
 import CreateRecordDrawer from './CreateRecordDrawer';
@@ -367,6 +367,8 @@ const ObjectSetupDetail = () => {
         ...updatedValues // Use the updated values
       }
     }; 
+    console.log('body is');
+    console.log(body);
    
     try {
       //setLoading(true);
@@ -498,6 +500,7 @@ const ObjectSetupDetail = () => {
       }else if (field.type === 'DateTime') {
         return text ? dayjs(text).utc().format('DD/MM/YYYY HH:mm:ss') : ''; // Format DateTime as DD/MM/YYYY HH:mm:ss
       } 
+
       else if (field.type === 'currency') {
         return text ? `$${text.toFixed(2)}` : ''; // Format as currency with dollar sign
       }else if (field.type === 'Integer') {
@@ -512,7 +515,7 @@ const ObjectSetupDetail = () => {
           <a href={`mailto:${text}`} target="_blank" rel="noopener noreferrer">
             {text}
           </a>
-        ) : '';
+        ) : ''; 
       } else if (field.type === 'URL') {
         return text ? (
           <a href={text.startsWith('http') ? text : `http://${text}`} target="_blank" rel="noopener noreferrer">
@@ -555,7 +558,8 @@ const ObjectSetupDetail = () => {
                   
                 );
               }      
-          } else {
+          } 
+          else {
           // Fetch the name if not cached
           fetchLookupName(ob, lookupId).then(name => {
             setLookupNames(prevState => ({ ...prevState, [lookupId]: name }));
@@ -579,7 +583,16 @@ const ObjectSetupDetail = () => {
           ].filter(Boolean).join(', '); // Join non-empty fields with a comma
         }
         return ''; // Return an empty string if the address is not available
+      }else if (field.type === 'Phone') {
+        // Add PhoneOutlined for phone numbers
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <PhoneOutlined style={{ marginRight: 8 }} />
+            {text || ''}
+          </div>
+        );
       }
+
       
       return index === 0 ? (
         <a onClick={() => handleLabelClick(record)}>{text}</a>

@@ -1,6 +1,6 @@
 import React, { Children, useEffect, useState } from 'react';
 import { Drawer, Button, Form, Card, Spin, Input, Checkbox, DatePicker, Space, Select,Tooltip ,Avatar} from 'antd';
-import { MailOutlined,InfoCircleOutlined } from '@ant-design/icons';
+import { MailOutlined,InfoCircleOutlined,PhoneOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import ApiService from '../Components/apiService'; // Import ApiService class
 import { BASE_URL, DateFormat } from '../Components/Constant'; // Define the date format
@@ -123,10 +123,7 @@ const CreateRecordDrawer = ({
       return null;
     }
 
-    if(field.type==='lookup'){
-      console.log('hello');
-      console.log(form.getFieldValue(field.name));
-    }
+   
   
     const isRequired = field.required ? [{ required: true, message: `${field.label} is required!` }] : [];
   
@@ -166,6 +163,38 @@ const CreateRecordDrawer = ({
             <Input type="number" placeholder={`Enter ${field.label}`} />
           </Form.Item>
         );
+
+        case 'Phone':
+        return (
+          <Form.Item
+            key={field.name}
+            name={field.name}
+            label={renderLabel} // Use the custom label here
+            rules={[
+              ...isRequired, // Include the required validation if applicable
+              {
+                validator: (_, value) => {
+                  if (!value || /^[0-9]{10}$/.test(value)) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error('Please enter a valid 10-digit phone number')
+                  );
+                },
+              },
+            ]}
+          >
+      <Input
+
+        type="text" // Use text to prevent input methods restricting values
+        placeholder={`Enter ${field.label}`}
+        maxLength={10} // Prevent more than 10 characters
+        addonBefore={
+          <PhoneOutlined style={{ cursor: 'pointer' }}  />
+        }
+      />
+    </Form.Item>
+  );
   
       case 'Email':
         return (
@@ -352,8 +381,10 @@ const CreateRecordDrawer = ({
                               color: '#888',
                               marginRight: index < field.lookup_config?.display_fields.length - 1 ? 8 : 0, // Add margin except for the last item
                           }}>
-                            {`${option[fieldKey] || ''}`}
-                          </div>
+  {typeof option[fieldKey] === 'object' && option[fieldKey] !== null
+                                        ? Object.values(option[fieldKey]).join(' ') // Join object values with space
+                                        : option[fieldKey] || '' // Display value or fallback to empty string
+                                    }                           </div>
                         ))}
                         </div>
                     </div>
