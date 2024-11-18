@@ -12,65 +12,22 @@ import { BASE_URL,DateFormat } from '../Components/Constant';
 const { Header } = Layout;
 const { Search } = Input;
 const { useBreakpoint } = Grid;
-
 const AppHeader = () => {
   const [visible, setVisible] = useState(false);
   const screens = useBreakpoint();
   const navigate = useNavigate(); // Use navigate hook for programmatic navigation
-  const [seachResults,setSearchResults]=useState([]);
-
+  const [placeholder,setplaceholder]=useState('search');
   const username = Cookies.get('username') || 'Aptclouds';
   console.log('Retrieved username from cookie:', username);
-
+  const [searchResults, setSearchResults] = useState([]); // Stores search results
+  const [loading, setLoading] = useState(false); // Loading state
+  const [showDropdown, setShowDropdown] = useState(false);
   const showDrawer = () => {
     setVisible(true);
   };
 
   const onClose = () => {
     setVisible(false);
-  };
-
-  const onSearch =async (value) => {
-    console.log(value);
-    console.log( value)
-    if (value) {
-      console.log(value);
-      try {
-        const apiService = new ApiService(`${BASE_URL}/global_search/${value}`, {
-          'Content-Type': 'application/json', // Add any necessary headers, such as content type
-        }, 'GET', );
-        const response=await apiService.makeCall();
-        console.log('response of lookups ar');
-        console.log(response);
-    
-        const searchOptions=[];
-        Object.keys(response).forEach((objectName) => {
-          const records = response[objectName]?.records || [];
-          records.forEach((record) => {
-            searchOptions.push({
-              label: `${objectName} - ${record.Name || 'Unnamed Record'}`,
-              value: record._id,
-              objectName, // Include the object name for navigation
-
-            });
-          });
-        });
-
-
-        setSearchResults(searchOptions);
-       } catch (error) {
-        console.error("API request failed:", error);
-        setSearchResults([]);
-      } finally {
-      }
-    } else {
-          
-    }
-  };
-
-  const handleRecordChange = (value, option) => {
-    const { objectName } = option;
-    navigate(`/record/${objectName}/${value}`);
   };
 
   const handleLogout = () => {
@@ -95,6 +52,70 @@ const AppHeader = () => {
       <Menu.Item key="1" icon={<SettingOutlined />} onClick={() => navigate('/setup')}>
         Setup
       </Menu.Item>
+    </Menu>
+  );
+  const handleSelect = ({ key,item }) => {
+    console.log( menu);
+    console.log('key'+key);
+    const { objectName } = item.props;
+    console.log(objectName);
+    navigate(`/record/${objectName}/${key}`);
+    setShowDropdown(false); // Hide the dropdown after selection
+  };
+
+  const fetchSearchResults = async (value) => {
+    console.log('inside fetchSearchRes'+value);
+    if (!value) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    setLoading(true);
+    setShowDropdown(true);
+
+    try {
+            const apiService = new ApiService(`${BASE_URL}/global_search/${value}`, {
+              'Content-Type': 'application/json', // Add any necessary headers, such as content type
+            }, 'GET', );
+            const response= await apiService.makeCall();
+            console.log(response);
+        
+
+      const formattedResults = [];
+      Object.keys(response).forEach((objectName) => {
+        const records = response[objectName]?.records || [];
+        records.forEach((record) => {
+          formattedResults.push({
+            label: `${objectName} - ${record.Name || 'Unnamed Record'}`,
+            value: record._id,
+            objectName, // Include the object name for navigation
+
+          });
+        });
+      });
+
+
+      setSearchResults(formattedResults);
+      searchResults.map((result) => {
+        console.log(result);
+      })
+      console.log(formattedResults);
+    } catch (error) {
+      console.error('Error fetching search results:', error);
+      setSearchResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const menu = (
+    <Menu onClick={handleSelect}>
+      {searchResults.map((result) => (
+        <Menu.Item key={result.value} objectName={result.objectName}>
+          {result.label}
+        </Menu.Item>
+
+      ))}
     </Menu>
   );
 
@@ -131,33 +152,37 @@ const AppHeader = () => {
         <img src={logo} alt="Company Logo" style={{ height: '40px', margin: '28px 16px 0 0' }} />
         </Link>
         
-
-        {screens.md && (
-          <Select
-            showSearch
-            notFoundContent="Search for records"
-            placeholder="Search..."
-            onSearch={(value) => onSearch(value)} 
-            options={seachResults} // Assuming searchResults is the state with transformed options
-            onChange={handleRecordChange}
-            style={{
-              width: '500px',
-              borderRadius: '4px',
-            }}
-            prefix={<SearchOutlined />}
-            dropdownRender={(menu) => <div>{menu}</div>} // Allows for dropdown customization
-          >
-            {seachResults.map((option) => (
-              <Select.Option key={option.value} value={option.value} label={option.label}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontWeight: 'bold' }}>{option.objectName}</span>
-                  <span style={{ color: '#888' }}>{option.label.split(' - ')[1]}</span>
-                </div>
-              </Select.Option>
-            ))}
-
-          </Select>
-        )}
+        <Search
+        placeholder="Search for records"
+        onSearch={(value) => fetchSearchResults(value)}
+        onChange={(e) => fetchSearchResults(e.target.value)}
+        enterButton
+        loading={loading}
+        onBlur={() => setTimeout(() => setShowDropdown(false), 200)} // Delay to allow selection before hiding
+        onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
+      />
+      <div>
+      {showDropdown && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50px',
+            left: '110px',
+            width: '40%',
+            backgroundColor: 'white',
+            // border: '1px solid #d9d9d9',
+            // borderRadius: '4px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+            zIndex: 1000,
+          }}
+        >
+          <Dropdown overlay={menu} visible={showDropdown} >
+            <div />
+          </Dropdown>
+          </div>
+        )}  
+      </div>
+      
       </div>
       <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
         {/* Vertical Line */}
