@@ -393,7 +393,6 @@ const RecordDetail = () => {
                     notFoundContent="Search for records"
                     optionLabelProp='children'
                     filterOption={false} 
-                    initialValue={form.getFieldValue(name).Name}
                     options={[
                       ...(lookupOptionforparent[name] || []).map((option) => ({
                         children: (
