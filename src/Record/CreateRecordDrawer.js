@@ -194,7 +194,7 @@ const CreateRecordDrawer = ({
         }
       />
     </Form.Item>
-  );
+  ); 
   
       case 'Email':
         return (
@@ -322,6 +322,28 @@ const CreateRecordDrawer = ({
             rules={isRequired}
           >
             <Select 
+              placeholder={`Select ${field.label}`}    
+              allowClear 
+            >
+              {field.picklist_values.map((value) => (
+                <Select.Option key={value} value={value}>
+                  {value}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        );
+
+        case 'MultiSelect':
+        return (
+          <Form.Item
+            key={field.name}
+            name={field.name}
+            label={renderLabel}  // Use the custom label here
+            rules={isRequired}
+          >
+            <Select 
+              mode="multiple"
               placeholder={`Select ${field.label}`}    
               allowClear 
             >

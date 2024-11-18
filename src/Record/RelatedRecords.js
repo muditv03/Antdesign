@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Typography, Row, Col, Button, Form, message } from 'antd';
+import { Card, Typography, Row, Col, Button, Form, message,Upload,List, Tooltip } from 'antd';
+import { UploadOutlined,DownloadOutlined } from '@ant-design/icons'; // For the upload icon
 import { BASE_URL } from '../Components/Constant';
 import ChildRecordTable from './RecordTable';
 import ApiService from '../Components/apiService';
 import CreateRecordDrawer from './CreateRecordDrawer';
 import { generateBody } from '../Components/Utility';
-
+ 
 
 const { Title } = Typography;
 
-const RelatedRecord = ({ objectName, recordId }) => {
+const RelatedRecord = ({ objectid,objectName, recordId }) => {
   const [groupedData, setGroupedData] = useState({});
   const [childRecordsMap, setChildRecordsMap] = useState({});
   const [fieldsDataMap, setFieldsDataMap] = useState({});
@@ -22,7 +23,35 @@ const RelatedRecord = ({ objectName, recordId }) => {
 
   const [currentRecordName, setCurrentRecordName] = useState('');
   const [isFieldReadOnly, setIsFieldReadOnly] = useState(false);
+  const [files,setFiles]=useState([]);
+  const [isAllowFile,setIsAllowFiles]=useState(false);
 
+  useEffect( ()=>{
+
+    console.log(objectid);
+    console.log(objectid);
+    const fetchallowfile=async(objectid)=>{
+    try{
+
+      const relatedListService = new ApiService(
+        `${BASE_URL}/mt_objects/${objectid}`,
+        {},
+        'GET'
+      );
+      const response = await relatedListService.makeCall();
+      console.log(response);
+      console.log(response.allow_files);
+      setIsAllowFiles(response.allow_files);
+    }
+    catch(error){
+
+    }
+  }
+
+  fetchallowfile(objectid);
+
+    
+  },[objectid])
   // Fetch related records
   const fetchRelatedRecords = async () => {
     try {
@@ -201,6 +230,85 @@ const handleNewButtonClick = async (relatedList) => {
     setCurrentFieldsData([]);
   };
 
+
+  useEffect(()=>{
+    fetchfiles();
+  },[objectName,recordId])
+
+  const fetchfiles=async()=>{
+    try{
+
+      const apiService = new ApiService(
+        `${BASE_URL}/get_data/${objectName}/${recordId}`,
+        { 'Content-Type': 'application/json' },
+        'GET',
+      );
+      const response =await apiService.makeCall();
+      console.log(response);
+      setFiles(response);
+
+    }
+    catch(error){
+     
+    
+    }
+  }
+
+
+  const handleFileUpload = async(file) => {
+
+    console.log(objectName);
+    console.log(recordId);
+    console.log(file.file);
+    const formData = new FormData();
+    formData.append('file', file.file);
+
+
+    try{
+    // Assuming there is an API endpoint to handle file uploads
+    const uploadService = new ApiService(`${BASE_URL}/file_upload/${objectName}/${recordId}`, {
+      'Content-Type':  "application/x-www-form-urlencoded"
+  }, 'POST',formData); 
+
+    const response=await uploadService.makeCall();
+    console.log(response);
+    message.success('File uploaded succesfully');
+    fetchfiles();
+    }catch(error){
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to upload files due to an unknown error';
+      message.error(errorMessage);
+    }
+
+  
+  };
+
+  const handleDownloadFile=async(fileId)=>{
+
+    console.log('file id is');
+    console.log(fileId);
+
+    try{
+
+      const apiService = new ApiService(
+        `${BASE_URL}/get_data/download_file/${fileId}`,
+        { 'Content-Type': 'application/json' },
+        'GET',
+      );
+      const response =await apiService.makeCall();
+      console.log(response);
+
+    }
+    catch(error){
+      const errorMessage = error && typeof error === 'object'
+      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+      : 'Failed to download file due to an unknown error';
+      message.error(errorMessage);
+    }
+  }
+
+
   return (
     <div>
       {Object.keys(groupedData).length > 0 ? (
@@ -255,7 +363,53 @@ const handleNewButtonClick = async (relatedList) => {
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
       />
+
+{isAllowFile && (
+      <Card
+        title={
+          <Row justify="space-between" align="middle" >
+            <Col>
+              <Title level={4} style={{ margin: 0 }}>
+                Upload Files
+              </Title>
+            </Col>
+            <Col>
+            <Upload
+                customRequest={handleFileUpload} // Use custom file upload handler
+                showUploadList={false} // Hide default upload list
+              >
+                <Button icon={<UploadOutlined />}>Upload Files</Button>
+              </Upload>
+            </Col>
+          </Row>
+        }
+      >
+        <List
+        dataSource={files}
+        renderItem={(file) => (
+          <List.Item
+            actions={[
+              <Tooltip title="Download file">
+              <Button
+                icon={<DownloadOutlined />}
+                onClick={() => handleDownloadFile(file.file_id)}
+              >
+                
+              </Button>
+              </Tooltip>
+            ]}
+          >
+            <List.Item.Meta
+              title={<span style={{ fontWeight: 'normal' }}>{file.file_name}</span>}
+            />
+          </List.Item>
+        )}
+      />
+       
+      </Card>
+      )}
     </div>
+
   ); 
 };
 

@@ -253,7 +253,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       newField.formula=formula;
     }
 
-    if (values.type === 'Picklist') {
+    if (values.type === 'Picklist' || values.type==='MultiSelect') {
       newField.picklist_values = picklistValues;
     }
 
@@ -302,7 +302,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             compliance_categorization:selectedCC
           }),
           ...(isAutoNumber && { auto_number_format: values.format, auto_number_starting: values.startingPoint }),
-          ...(values.type === 'Picklist' && { picklist_values: picklistValues }),
+          ...(values.type === 'Picklist' || values.type==='MultiSelect' && { picklist_values: picklistValues }),
           ...(values.type === 'decimal' || values.type==='percentage' || values.type === 'currency' && {
             decimal_places_before: values.length,
             decimal_places_after: values.decimal_places,
@@ -608,12 +608,14 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                 <Option value="Address">Address</Option>
                 <Option value="Date">Date</Option>
                 <Option value="DateTime">Date Time</Option>
-                <Option value="URL">URL</Option>
                 <Option value="percentage">Percentage (%)</Option>
                 <Option value="Phone">Phone</Option>
                 <Option value="Picklist">Picklist</Option>
+                <Option value="MultiSelect">Multi-Select Picklist</Option>
                 <Option value="lookup">Lookup</Option>
                 <Option value="Text-Area">Text Area</Option>
+                <Option value="URL">URL</Option>
+
               </Select>
             </Form.Item>
  
@@ -789,7 +791,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
               </>
             )}
 
-            {fieldType === 'Picklist' && ( // Only show for Picklist type
+            {fieldType === 'Picklist' || fieldType==='MultiSelect' && ( // Only show for Picklist type
               <Form.Item
                 name="picklist_values"
                 label="Picklist Values (comma separated)"

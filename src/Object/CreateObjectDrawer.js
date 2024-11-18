@@ -13,10 +13,10 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
   const [isallowSearch, setIsAllowSearch] = useState(false); // State for auto number checkbox
   const [isTrackActivities, setIsTrackActivities] = useState(false); // State for auto number checkbox
   const [isTrackFieldHistory, setIsTrackFieldHistory] = useState(false); // State for auto number checkbox
+  const [isAllowFileUpload,setIsAllowFileUpload]=useState(false);
 
   useEffect(() => {
     if (editingRecord) {
-      
       console.log(editingRecord);
       form.setFieldsValue(editingRecord); // Pre-fill form with existing data if editing
       console.log('editing record is ');
@@ -24,8 +24,9 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       setIsAllowSearch(editingRecord.allow_search);
       setIsTrackActivities(editingRecord.track_activities);
       setIsTrackFieldHistory(editingRecord.track_field_history);
+      setIsAllowFileUpload(editingRecord.allow_files);
     } else {
-      form.resetFields(); // Reset form for new object creation
+      form.resetFields(); 
     }
   }, [editingRecord, form]);
 
@@ -56,7 +57,8 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       allow_search: isallowSearch,
       track_activities: isTrackActivities,
       track_field_history: isTrackFieldHistory,
-    };
+      allow_files:isAllowFileUpload
+    }; 
     try {
       let response;
       if (editingRecord && editingRecord.key) {
@@ -137,6 +139,8 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
           allow_search: isallowSearch,
           track_activities: isTrackActivities,
           track_field_history: isTrackFieldHistory,
+          allow_files:isAllowFileUpload
+
         });
       }
       eventBus.emit('objectCreatedOrUpdated'); // Notify that object was created or updated
@@ -258,7 +262,14 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
                onChange={(e) => setIsTrackFieldHistory(e.target.checked)}
               >Track Field History</Checkbox>
             </Form.Item>
-
+          
+            <Form.Item name="allowFileUpload">
+              <Checkbox
+               checked={isAllowFileUpload}
+               onChange={(e) => setIsAllowFileUpload(e.target.checked)}
+              >Allow File Upload</Checkbox>
+            </Form.Item>
+          
            
           </Form>
         </Card>
