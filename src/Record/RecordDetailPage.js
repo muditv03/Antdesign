@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Card,Input, Button, Row, Col, Typography, Avatar, Select, Tabs, Checkbox, message, Space, DatePicker,Collapse,Affix,Tooltip } from 'antd';
 import { useParams } from 'react-router-dom';
-import { EditOutlined,UnorderedListOutlined,InfoCircleOutlined } from '@ant-design/icons';
+import { EditOutlined,UnorderedListOutlined,InfoCircleOutlined,PhoneOutlined } from '@ant-design/icons';
 import RelatedRecord from './RelatedRecords';
 import { BASE_URL,DateFormat } from '../Components/Constant';
 import dayjs from 'dayjs';
@@ -137,13 +137,13 @@ const RecordDetail = () => {
  
   const onFinish = async (values) => {
     try {
+      console.log('values are');
       console.log(values);
       const bodyData = Object.assign({},values);
+      console.log(bodyData);
       fields.forEach(field => {
         if (field.type === 'lookup') {
           let lookupFieldName;
-
-          
           lookupFieldName = field.name + '_id';
           console.log('not changed lookup values');
           console.log(bodyData[field.name]);
@@ -177,14 +177,21 @@ const RecordDetail = () => {
         
       });
 
+      
       console.log(bodyData);
-      var data = Object.assign(bodyData)
+      const sanitizedData = Object.keys(bodyData).reduce((acc, key) => {
+        acc[key] = bodyData[key] === undefined ? "" : bodyData[key];
+        return acc;
+      }, {});
+      
+      var data = Object.assign(sanitizedData)
       data['_id'] = record?._id;
       const body = {
         object_name: objectName,
         data: data
       };
 
+      console.log('final body');
       console.log(body);
  
       const apiService = new ApiService(`${BASE_URL}/insert_or_update_records`, {
@@ -425,7 +432,10 @@ const RecordDetail = () => {
                                 color: '#888',
                                 marginRight: index < lookup_config?.display_fields.length - 1 ? 8 : 0, // Add margin except for the last item
                             }}>
-                              {`${option[fieldKey] || ''}`}
+                            {typeof option[fieldKey] === 'object' && option[fieldKey] !== null
+                                        ? Object.values(option[fieldKey]).join(' ') // Join object values with space
+                                        : option[fieldKey] || '' // Display value or fallback to empty string
+                                    }                            
                             </div>
                           ))}
                           </div>
@@ -617,6 +627,33 @@ const RecordDetail = () => {
                 >
                 <Input placeholder={label} type="number" addonAfter="%" />
                 </Form.Item>
+                 ) : type === 'Phone' ? (
+                  <Form.Item
+                  key={name}
+                  name={name}
+                  rules={[
+                    {
+                      validator: (_, value) => {
+                        if (!value || /^[0-9]{10}$/.test(value)) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject(
+                          new Error('Please enter a valid 10-digit phone number')
+                        );
+                      },
+                    },
+                  ]}
+                >
+            <Input
+      
+              type="text" // Use text to prevent input methods restricting values
+              placeholder={`Enter ${label}`}
+              maxLength={10} // Prevent more than 10 characters
+              addonBefore={
+                <PhoneOutlined style={{ cursor: 'pointer' }}  />
+              }
+            />
+          </Form.Item>
             ) : type === 'Email' ? (
               <Form.Item
             name={name}
@@ -723,6 +760,11 @@ const RecordDetail = () => {
                     </Avatar>
                     {form.getFieldValue(name)?.Name } 
                   </a>
+                   ) : type === 'Phone' && form.getFieldValue(name)? (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <PhoneOutlined style={{ marginRight: 8 }} />
+                      {form.getFieldValue(name) || ''}
+                    </div>
                     
                     ) : (
                       lookupNames[name] || form.getFieldValue(name)

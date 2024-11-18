@@ -610,6 +610,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                 <Option value="DateTime">Date Time</Option>
                 <Option value="URL">URL</Option>
                 <Option value="percentage">Percentage (%)</Option>
+                <Option value="Phone">Phone</Option>
                 <Option value="Picklist">Picklist</Option>
                 <Option value="lookup">Lookup</Option>
                 <Option value="Text-Area">Text Area</Option>
@@ -698,7 +699,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                 </Select>
               </Form.Item>
               </Col>
-              <Col span={8}> 
+              <Col span={8}>  
               <Form.Item
               name="field_for_formula"
               label="Insert field"

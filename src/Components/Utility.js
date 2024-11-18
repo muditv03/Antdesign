@@ -17,7 +17,7 @@ export const generateBody = (fieldsDataDrawer, values) => {
           if(values[fieldName]?._id){
             updatedValues[`${fieldName}_id`] = values[fieldName]._id;
           }else{
-            updatedValues[`${fieldName}_id`] = values[fieldName];
+            updatedValues[`${fieldName}_id`] = values[fieldName] ?? "";
           }
         } 
         else if (field.type === 'Address') {
@@ -69,7 +69,7 @@ export const formatRecordData = async (record, fieldsResponse, BASE_URL) => {
     });
   
     return formattedRecord;
-  };
+  }; 
   
   export const fetchLookupData =  (record, fieldsResponse, BASE_URL, setLookupName, form) => {
     const lookupFields = fieldsResponse.filter(field => field.type === 'lookup');
@@ -84,7 +84,7 @@ export const formatRecordData = async (record, fieldsResponse, BASE_URL) => {
       console.log(lookupField.name);
       console.log(record[lookupField.name].Name);
       form.setFieldsValue({
-        [lookupField.name]: record[lookupField.name].Name
+        [lookupField.name]: record[lookupField.name].Name 
       });
   
      
