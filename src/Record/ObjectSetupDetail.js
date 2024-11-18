@@ -400,8 +400,9 @@ const ObjectSetupDetail = () => {
   
 
   const handleLabelClick = (record) => {
+    console.log(id);
     if (record._id) {
-      navigate(`/record/${objectName}/${record._id}`, { state: { record } });
+      navigate(`/record/${objectName}/${record._id}`, { state: { record,objectid:id} });
     } else {
       console.error("Record ID is undefined");
     }
@@ -592,6 +593,10 @@ const ObjectSetupDetail = () => {
           </div>
         );
       }
+      else if (field.type === 'MultiSelect') {
+        return Array.isArray(text) ? text.join(', ') : text || ''; // Convert array to comma-separated string
+      }
+  
 
       
       return index === 0 ? (

@@ -3,6 +3,7 @@ import { Form, Card,Input, Button, Row, Col, Typography, Avatar, Select, Tabs, C
 import { useParams } from 'react-router-dom';
 import { EditOutlined,UnorderedListOutlined,InfoCircleOutlined,PhoneOutlined } from '@ant-design/icons';
 import RelatedRecord from './RelatedRecords';
+import { useLocation } from 'react-router-dom';
 import { BASE_URL,DateFormat } from '../Components/Constant';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -22,7 +23,11 @@ const { Panel } = Collapse;
 
  
 const RecordDetail = () => {
-  const { id, objectid, objectName } = useParams();
+  const location = useLocation();  // Access the location object
+
+  const { id, objectName } = useParams();
+  const {  objectid } = location.state || '';  // Access record and objectid from state
+
   const [form] = Form.useForm();
   const [record, setRecord] = useState(null);
   const [fields, setFields] = useState([]);
@@ -132,6 +137,8 @@ const RecordDetail = () => {
     };
 
   useEffect(() => {
+    console.log('id is ')
+    console.log(objectid);
     fetchRecords();
   }, [id, objectid, objectName]);
  
@@ -384,6 +391,24 @@ const RecordDetail = () => {
                 ))}
               </Select>
               </Form.Item>
+               ) : type === 'MultiSelect' ? (
+                <Form.Item
+              name={name}
+              label={label}
+              key={name}
+              valuePropName={type === 'boolean' ? 'checked' : 'value'}
+              initialValue={form.getFieldValue(name)}
+              rules={validationRules}
+              noStyle
+            >
+                <Select mode="multiple" placeholder={label}>
+                  {picklist_values?.map((option) => (
+                    <Option key={option} value={option}>
+                      {option}
+                    </Option>
+                  ))}
+                </Select>
+                </Form.Item>
             ) : type === 'lookup' ? (
               <Form.Item
                 name={name}
@@ -765,6 +790,10 @@ const RecordDetail = () => {
                       <PhoneOutlined style={{ marginRight: 8 }} />
                       {form.getFieldValue(name) || ''}
                     </div>
+                      ) : type === 'MultiSelect' ? (
+                        Array.isArray(form.getFieldValue(name))
+                          ? form.getFieldValue(name).join(', ')
+                          : form.getFieldValue(name) || ''
                     
                     ) : (
                       lookupNames[name] || form.getFieldValue(name)
@@ -894,10 +923,10 @@ const RecordDetail = () => {
               </Button>
             </Row>
           </div>
-          </Affix>
+          </Affix> 
       </TabPane>
       <TabPane tab="Related" key="2">
-        <RelatedRecord objectName={objectName} recordId={id} />
+        <RelatedRecord objectid={objectid} objectName={objectName} recordId={id} />
       </TabPane>
       <TabPane tab="Activity" key="3">
       <ActivityComponent objectName={objectName} recordId={id} />
