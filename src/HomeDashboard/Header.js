@@ -153,6 +153,9 @@ const AppHeader = () => {
         </Link>
         
         <Search
+        style = {{
+          width: '78%',
+        }}
         placeholder="Search for records"
         onSearch={(value) => fetchSearchResults(value)}
         onChange={(e) => fetchSearchResults(e.target.value)}
@@ -167,8 +170,8 @@ const AppHeader = () => {
           style={{
             position: 'absolute',
             top: '50px',
-            left: '110px',
-            width: '40%',
+            left: '90px',
+            width: '35%',
             backgroundColor: 'white',
             // border: '1px solid #d9d9d9',
             // borderRadius: '4px',
