@@ -25,6 +25,7 @@ import UnprocessableEntity from './Components/Error-422';
 import SetupPage from './SetupComponent/Setup';
 import Home from './SetupComponent/Home';
 import Cookies from 'js-cookie';
+import SearchResults from './SetupComponent/SearchResults';
  
    
 const { Content } = Layout;
@@ -116,7 +117,7 @@ const App = () => {
             <Route path ="/Error/404" element={<NotFoundError/>}/>
             <Route path ="/Error/500" element={<InternalServerError/>}/>
             <Route path ="/Error/422" element={<UnprocessableEntity/>}/>
-
+            <Route path ="/SearchResults" element={<SearchResults/>}/>
  
 
             {/* Add more routes as needed */}

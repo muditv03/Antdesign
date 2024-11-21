@@ -6,7 +6,7 @@ import ChildRecordTable from './RecordTable';
 import ApiService from '../Components/apiService';
 import CreateRecordDrawer from './CreateRecordDrawer';
 import { generateBody } from '../Components/Utility';
- 
+import FieldHistory from './FieldHistory';
 
 const { Title } = Typography;
 
@@ -408,6 +408,7 @@ const handleNewButtonClick = async (relatedList) => {
        
       </Card>
       )}
+    <FieldHistory/>
     </div>
 
   ); 
