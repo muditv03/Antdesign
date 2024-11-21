@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Table, message, Select, Typography, Spin } from "antd";
-import ApiService from '../Components/apiService'; 
+import ApiService from '../Components/apiService';
 import { BASE_URL } from '../Components/Constant';
 
 const MapContent = ({ uploadedCSVID, object, onDataChange }) => {
@@ -20,7 +20,7 @@ const MapContent = ({ uploadedCSVID, object, onDataChange }) => {
                 const id = uploadedCSVID;
                 const csvService = new ApiService(`${BASE_URL}/csv_column_headers/${id}`, {
                     'Content-Type': 'application/json'
-                }, 'GET'); 
+                }, 'GET');
                 const csvResponse = await csvService.makeCall();
                 setCsvColumns(csvResponse.field_names); // Store CSV column headers
 
@@ -29,9 +29,9 @@ const MapContent = ({ uploadedCSVID, object, onDataChange }) => {
                     'Content-Type': 'application/json'
                 }, 'GET');
                 const fieldResponse = await fieldService.makeCall();
-                const filteredFields = fieldResponse.filter(field => 
-                    field.name !== 'recordCount' && 
-                    !field.is_formula && 
+                const filteredFields = fieldResponse.filter(field =>
+                    field.name !== 'recordCount' &&
+                    !field.is_formula &&
                     !field.is_auto_number
                 );
                 setFields(filteredFields);
@@ -54,40 +54,40 @@ const MapContent = ({ uploadedCSVID, object, onDataChange }) => {
 
     // Function to handle fuzzy matching
     // Function to handle fuzzy matching
-const handleFuzzyMatch = (csvColumns, fieldsData) => {
-    // Create a set to keep track of fields that are already mapped
-    const mappedFields = new Set();
-    
-    const newMappings = csvColumns.map(column => {
-        // Try to find a field that matches the column
-        const matchedField = fieldsData.find(field =>
-            column.toLowerCase().includes(field.name.toLowerCase()) && !mappedFields.has(field.name)
-        );
+    const handleFuzzyMatch = (csvColumns, fieldsData) => {
+        // Create a set to keep track of fields that are already mapped
+        const mappedFields = new Set();
 
-        if (matchedField) {
-            mappedFields.add(matchedField.name); // Mark this field as mapped
-        }
+        const newMappings = csvColumns.map(column => {
+            // Try to find a field that matches the column
+            const matchedField = fieldsData.find(field =>
+                column.toLowerCase().includes(field.name.toLowerCase()) && !mappedFields.has(field.name)
+            );
 
-        return {
-            header: column,
-            field: matchedField ? matchedField.name : null, // Set to matched field name or null
-            isMapped: !!matchedField // Set to true if there is a match
-        };
-    });
+            if (matchedField) {
+                mappedFields.add(matchedField.name); // Mark this field as mapped
+            }
 
-    // Update the mapped data state
-    setMappedData(newMappings);
-};
+            return {
+                header: column,
+                field: matchedField ? matchedField.name : null, // Set to matched field name or null
+                isMapped: !!matchedField // Set to true if there is a match
+            };
+        });
+
+        // Update the mapped data state
+        setMappedData(newMappings);
+    };
 
     const handleFieldChange = (headerIndex, field) => {
         const updatedMappedData = [...mappedData];
-        
+
         // If the field is already mapped, prevent re-mapping it
         if (field && mappedData.some(record => record.field === field && record.header !== updatedMappedData[headerIndex].header)) {
             message.warning('This field has already been mapped to another column.');
             return; // Exit early if the field is already mapped
         }
-    
+
         if (field) {
             updatedMappedData[headerIndex].field = field;
             updatedMappedData[headerIndex].isMapped = true; // Update mapped status to true
@@ -95,10 +95,10 @@ const handleFuzzyMatch = (csvColumns, fieldsData) => {
             updatedMappedData[headerIndex].field = null; // Clear the mapped field
             updatedMappedData[headerIndex].isMapped = false; // Update mapped status to false
         }
-    
+
         setMappedData(updatedMappedData);
     };
-    
+
 
     // Calculate the counts of mapped and unmapped columns
     const mappedCount = mappedData.filter(record => record.isMapped).length;
@@ -120,10 +120,10 @@ const handleFuzzyMatch = (csvColumns, fieldsData) => {
             dataIndex: 'field',
             key: 'field',
             render: (text, record, index) => (
-                <Select 
+                <Select
                     placeholder="Select field"
-                    onChange={(value) => handleFieldChange(index, value)} 
-                    style={{ width: '100%' }} 
+                    onChange={(value) => handleFieldChange(index, value)}
+                    style={{ width: '100%' }}
                     defaultValue={text} // Default to the mapped field name
                     allowClear // Enable the clear option
                 >
@@ -159,7 +159,7 @@ const handleFuzzyMatch = (csvColumns, fieldsData) => {
     return (
         <div>
             <Title level={3} style={{ marginTop: '10px' }}>Mappings</Title>
-            
+
             {/* Show loading spinner when data is being fetched */}
             {loading ? (
                 <Spin size="large" style={{ display: 'block', margin: '20px auto' }} />

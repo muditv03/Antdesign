@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Timeline, Collapse, Card, Dropdown, message, Col, Row } from 'antd';
-import { 
-  UserOutlined, 
-  FileTextOutlined, 
-  PhoneOutlined, 
-  MailOutlined, 
-  CalendarOutlined, 
-  ClockCircleOutlined 
+import {
+  UserOutlined,
+  FileTextOutlined,
+  PhoneOutlined,
+  MailOutlined,
+  CalendarOutlined,
+  ClockCircleOutlined
 } from '@ant-design/icons';
 import TaskDrawer from './TaskDrawer';
 import CallDrawer from './CallDrawer';
@@ -21,7 +21,7 @@ import timezone from 'dayjs/plugin/timezone';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
-dayjs.extend(timezone); 
+dayjs.extend(timezone);
 
 const { Panel } = Collapse;
 
@@ -68,15 +68,15 @@ const CustomTimeline = ({ objectName, recordId }) => {
       const data = response.map((record) => {
         const endDateTime = new Date(record.EndDateTime);
         const formattedEndDateTime = dayjs(record.EndDateTime)
-    .utc()
-    .format('DD/MM/YYYY HH:mm:ss');
+          .utc()
+          .format('DD/MM/YYYY HH:mm:ss');
 
         let section = '';
         if (record.Status === 'Pending') {
           section = 'Upcoming & Overdue';
         } else {
           section = 'This Month';
-        } 
+        }
 
         return {
           type: record.ActivityType,
@@ -152,21 +152,21 @@ const CustomTimeline = ({ objectName, recordId }) => {
                     // Assuming item.endDateTime format: '17/11/2024 00:30:00'
                     const [day, month, year, hours, minutes, seconds] = item.endDateTime.split(/[\s/:]+/);
                     const formattedDate = new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}`);
-  
+
                     // Format the date and time
                     const dateStr = formattedDate.toLocaleDateString('en-GB', {
-                        day: '2-digit',
-                        month: 'long',
-                        year: 'numeric',
+                      day: '2-digit',
+                      month: 'long',
+                      year: 'numeric',
                     });
-  
+
                     // Format the time in 12-hour format (with AM/PM)
                     const timeStr = formattedDate.toLocaleTimeString('en-GB', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true,
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true,
                     });
-  
+
                     return `${dateStr}, ${timeStr}`;
                   })()}
                 </span></p>
@@ -178,7 +178,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
         ))}
     </Timeline>
   );
-  
+
 
   return (
     <Card>

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Tabs,Breadcrumb } from 'antd';
+import { Tabs, Breadcrumb } from 'antd';
 import Home from './Home'; // Import your Home component
 import Datable from '../Object/ObjectSetupView'; // Import your Object Setup component
 import { useLocation } from 'react-router-dom';
 
- 
+
 const { TabPane } = Tabs;
 
 const SetupPage = () => {
@@ -20,18 +20,18 @@ const SetupPage = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const tab = searchParams.get('tab');
-   // Set the active tab based on the query parameter
-   if (tab === 'objectManager') {
-    setActiveKey('setup/objectManager');
-  } else {
-    setActiveKey('home');
-  }
+    // Set the active tab based on the query parameter
+    if (tab === 'objectManager') {
+      setActiveKey('setup/objectManager');
+    } else {
+      setActiveKey('home');
+    }
   }, [location.search]);
 
   return (
     <div style={{ padding: '5px' }}>
 
-      
+
 
       {/* Tabs navigation */}
       <Tabs activeKey={activeKey} onChange={handleTabChange}>

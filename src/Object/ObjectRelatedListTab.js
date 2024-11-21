@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Table, Button, Row, Col, message, Spin, Space, Tooltip ,Typography} from 'antd';
+import { Table, Button, Row, Col, message, Spin, Space, Tooltip, Typography } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
-import CreateRelatedListDrawer from './CreateRelatedListDrawer'; 
-import RelatedListEditDrawer from './RelatedListEditDrawer'; 
-import ApiService from '../Components/apiService'; 
+import CreateRelatedListDrawer from './CreateRelatedListDrawer';
+import RelatedListEditDrawer from './RelatedListEditDrawer';
+import ApiService from '../Components/apiService';
 import { BASE_URL } from '../Components/Constant';
 
 
@@ -14,7 +14,7 @@ const { Title } = Typography;
 
 const ObjectRelatedListTab = () => {
   const location = useLocation();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const { record } = location.state || {};
   const [relatedLists, setRelatedLists] = useState([]);
   const [relatedListDrawerVisible, setRelatedListDrawerVisible] = useState(false);
@@ -72,12 +72,12 @@ const ObjectRelatedListTab = () => {
         related_list_name: item.related_list.related_list_name,
         child_object_name: item.related_list.child_object_name,
         fields_to_display: item.related_list.fields_to_display,
-        field_api_name:item.related_list.field_api_name
+        field_api_name: item.related_list.field_api_name
       }));
 
       setRelatedLists(formattedData);
     } catch (error) {
-     console.log(error);      
+      console.log(error);
     } finally {
       setLoadingRelatedLists(false);
     }
@@ -87,12 +87,12 @@ const ObjectRelatedListTab = () => {
     if (record?.name) {
       setParentObjectName(record.name);
       fetchRelatedLists();
-    } 
+    }
   }, [record]);
 
   const handleEditRelatedList = (record) => {
-    
-    
+
+
     setEditingRelatedList({
       ...record,
       fields_to_display: record.fields_to_display || [],
@@ -142,7 +142,7 @@ const ObjectRelatedListTab = () => {
               onClick={() => handleEditRelatedList(record)}
               style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
             />
-          </Tooltip> }
+          </Tooltip>}
         </Space>
       ),
     },
@@ -150,16 +150,16 @@ const ObjectRelatedListTab = () => {
 
   return (
     <div>
-       <Row justify="space-between" align="middle" style={{ marginBottom: 10 }}>
-      <Col>
-        <Title level={3} style={{ marginTop:'10px' }}>Related Lists</Title>
-      </Col>
-      <Col  style={{ marginTop:'10px' }}>
-        <Button type="primary" onClick={showRelatedListDrawer} style={{ marginBottom: 5 }}>
-          Create Related List
-        </Button>
-      </Col>
-    </Row>
+      <Row justify="space-between" align="middle" style={{ marginBottom: 10 }}>
+        <Col>
+          <Title level={3} style={{ marginTop: '10px' }}>Related Lists</Title>
+        </Col>
+        <Col style={{ marginTop: '10px' }}>
+          <Button type="primary" onClick={showRelatedListDrawer} style={{ marginBottom: 5 }}>
+            Create Related List
+          </Button>
+        </Col>
+      </Row>
       <Spin spinning={loadingRelatedLists}>
         <Table columns={relatedListColumns} dataSource={relatedLists} pagination={false} />
       </Spin>

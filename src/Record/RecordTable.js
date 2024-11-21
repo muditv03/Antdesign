@@ -10,8 +10,8 @@ import ApiService from '../Components/apiService'; // Import ApiService class
 import CreateRecordDrawer from './CreateRecordDrawer';
 import { generateBody, formatRecordData, fetchLookupData } from '../Components/Utility';
 dayjs.extend(customParseFormat);
- 
-const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, onClone, onDelete,relatedListId,currentRecordId,currentObjectName ,refreshRecords}) => {
+
+const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, onClone, onDelete, relatedListId, currentRecordId, currentObjectName, refreshRecords }) => {
 
   //console.log('id is '+currentRecordId);
   //console.log('object name is'+currentObjectName);
@@ -43,7 +43,7 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
       console.error('Error fetching lookup name:', error);
       return '';
     }
-  }; 
+  };
 
   useEffect(() => {
     const fetchAllLookupNames = async () => {
@@ -67,14 +67,14 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
       fetchAllLookupNames();
     }
   }, [childRecords, fieldsData, childObjectName]);
- 
+
   // Define columns dynamically based on fieldsData
-  const columns = fieldsData.map((field,index) => ({
+  const columns = fieldsData.map((field, index) => ({
     title: field.label,
     dataIndex: field.name,
     key: field.name,
     render: (value, record) => {
-      
+
       // Make the first column a clickable link
       if (index === 0) {
         return (
@@ -84,31 +84,31 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
               navigate(`/record/${childObjectName}/${record._id}`); // Use record.key directly
               window.location.reload(); // Reload the page after navigation
             }}
-            >
+          >
             {value}
           </a>
         );
-      } 
-
-     if(field.name==='recordCount'){
-      return null;
-     }
-     if (field.type === 'lookup' && record[`${field.name}_id`]) {
-      const lookupId = record[ `${field.name}_id`];
-      const lookupName = lookupNames[lookupId] || 'Loading...';
-
-      if (field.name === 'user') {
-        return lookupName; // Simply return the name without a link if it's 'user'
-      } else {
-        return (
-          <a href={`/record/${field.parent_object_name}/${lookupId}`} target="_blank" rel="noopener noreferrer">
-            {lookupName}
-          </a>
-        ); // Otherwise, make it a link
       }
 
+      if (field.name === 'recordCount') {
+        return null;
       }
-       if (field.type === 'Address') {
+      if (field.type === 'lookup' && record[`${field.name}_id`]) {
+        const lookupId = record[`${field.name}_id`];
+        const lookupName = lookupNames[lookupId] || 'Loading...';
+
+        if (field.name === 'user') {
+          return lookupName; // Simply return the name without a link if it's 'user'
+        } else {
+          return (
+            <a href={`/record/${field.parent_object_name}/${lookupId}`} target="_blank" rel="noopener noreferrer">
+              {lookupName}
+            </a>
+          ); // Otherwise, make it a link
+        }
+
+      }
+      if (field.type === 'Address') {
         // Ensure the address is properly constructed from the record
         const address = record[field.name]; // Access the address object
         if (address) {
@@ -146,8 +146,8 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
 
       return value;
     },
-  })); 
-  
+  }));
+
   const handleEditClick = async (record) => {
     try {
       // Fetch fields data
@@ -156,19 +156,19 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
         { 'Content-Type': 'application/json' },
         'GET'
       );
- 
+
       const fieldsResponse = await apiServiceForFields.makeCall();
       setFieldsDataState(fieldsResponse);
-  
+
       // Format the record data
       const formattedRecord = await formatRecordData(record, fieldsResponse, BASE_URL);
       setSelectedRecord(formattedRecord);
       form.setFieldsValue(formattedRecord);
       setDrawerVisible(true);
-  
+
       // Fetch lookup data
       await fetchLookupData(record, fieldsResponse, BASE_URL, setLookupName, form);
-  
+
       refreshRecords();
     } catch (error) {
       console.error('Error fetching API response:', error);
@@ -179,7 +179,7 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
 
   const handleCloneClick = async (record) => {
     const clonedRecord = { ...record, _id: undefined, isClone: true };
-  
+
     try {
       // Fetch fields data
       const apiServiceForFields = new ApiService(
@@ -187,30 +187,30 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
         { 'Content-Type': 'application/json' },
         'GET'
       );
-  
+
       const fieldsResponse = await apiServiceForFields.makeCall();
       setFieldsDataState(fieldsResponse);
       console.log('Field response while cloning is:', JSON.stringify(fieldsResponse));
-  
+
       // Format the cloned record data
       const formattedClonedRecord = await formatRecordData(clonedRecord, fieldsResponse, BASE_URL);
       setSelectedRecord(formattedClonedRecord);
       form.setFieldsValue(formattedClonedRecord);
-  
+
       // Fetch and set lookup data
       await fetchLookupData(clonedRecord, fieldsResponse, BASE_URL, setLookupName, form);
-  
+
       refreshRecords(); // Refresh records if needed
-  
+
     } catch (error) {
       console.error('Error fetching API response:', error);
     } finally {
       setLoading(false);
     }
-  
+
     setDrawerVisible(true); // Open the drawer after setting the values
   };
- 
+
   const fetchRecords = async () => {
     // Logic to fetch records goes here
     try {
@@ -227,21 +227,21 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
   };
 
   const handleFinish = async (values) => {
-    const updatedValues=generateBody(fieldsDataState,values);
+    const updatedValues = generateBody(fieldsDataState, values);
     const body = {
       object_name: childObjectName,
       data: {
         _id: selectedRecord?._id && !selectedRecord?.isClone ? selectedRecord._id : undefined, // If cloning, exclude the ID
         ...updatedValues // Use the updated values
       }
-    }; 
-  
+    };
+
     try {
       //setLoading(true);
-      console.log('object name is '+objectName)
+      console.log('object name is ' + objectName)
 
       console.log('body while updating is ' + JSON.stringify(body));
-  
+
       // Create an instance of ApiService for the POST request
       const apiService = new ApiService(
         `${BASE_URL}/insert_or_update_records`,
@@ -249,9 +249,9 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
         'POST',
         body
       );
-  
+
       await apiService.makeCall();
-  
+
       message.success(selectedRecord?._id && !selectedRecord?.isClone ? 'Record updated successfully' : 'Record created successfully');
       setDrawerVisible(false);
       fetchRecords();
@@ -259,10 +259,10 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
       form.resetFields();
     } catch (error) {
       console.error('Error saving record:', error);
-  
+
       const errorMessage = error && typeof error === 'object'
-      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-      : 'Failed to save record due to an unknown error';
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to save record due to an unknown error';
       message.error(errorMessage);
     } finally {
       setLoading(false); // Ensure loading is stopped regardless of success or failure
@@ -283,8 +283,8 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
   columns.push({
     title: 'Action',
     key: 'operation',
-    width: 130, 
- 
+    width: 130,
+
     render: (_, record) => (
       <>
         <Tooltip title="Edit">
@@ -309,23 +309,23 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
             />
           </Popconfirm>
         </Tooltip>
-      </> 
+      </>
     ),
   });
 
   return (
     <div>
 
-    <Table
-      dataSource={childRecords}
-      columns={columns}
-      rowKey="_id"
-      pagination={false}
-      loading={loading}
-       scroll={{
-        x: 'max-content',
-      }}
-      
+      <Table
+        dataSource={childRecords}
+        columns={columns}
+        rowKey="_id"
+        pagination={false}
+        loading={loading}
+        scroll={{
+          x: 'max-content',
+        }}
+
       />
       <CreateRecordDrawer
         visible={drawerVisible}
@@ -338,8 +338,8 @@ const ChildRecordTable =  ({ fieldsData, childRecords, childObjectName, onEdit, 
         setSelectedDate={setSelectedDate}
         form={form}
       />
-      </div>
-  ); 
-}; 
+    </div>
+  );
+};
 
 export default ChildRecordTable;

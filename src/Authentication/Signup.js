@@ -1,5 +1,5 @@
-import React,{useState} from 'react';
-import { Form, Input, Button, Layout, Typography, message,Spin } from 'antd';
+import React, { useState } from 'react';
+import { Form, Input, Button, Layout, Typography, message, Spin } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -29,7 +29,7 @@ const Signup = () => {
 
     try {
       const apiService = new ApiService(`${BASE_URL}/register`, {
-        'Content-Type': 'application/json', 
+        'Content-Type': 'application/json',
       }, 'POST', {
         user: body,
       });
@@ -46,8 +46,8 @@ const Signup = () => {
     } catch (error) {
       // Handle registration failure
       const errorMessage = error && typeof error === 'object'
-      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-      : 'Failed to save field due to an unknown error';
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to save field due to an unknown error';
       message.error(errorMessage);
       setLoading(false);
     }
@@ -135,90 +135,90 @@ const Signup = () => {
             </Title>
           </div>
           <div style={signupSectionStyle}>
-          <Spin spinning={loading}>
+            <Spin spinning={loading}>
 
-            <Title level={2} style={titleStyle}>Signup</Title>
-            <Form
-              form={form} // Attach the form instance here
-              name="signup"
-              initialValues={{ remember: true }}
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
-              layout="vertical"
-            >
-              {/* Name Field */}
-              <Form.Item
-                label="Name"
-                name="name"
-                rules={[{ required: true, message: 'Please input your name!' }]}
-                style={formItemStyle}
+              <Title level={2} style={titleStyle}>Signup</Title>
+              <Form
+                form={form} // Attach the form instance here
+                name="signup"
+                initialValues={{ remember: true }}
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                layout="vertical"
               >
-                <Input prefix={<UserOutlined />} />
-              </Form.Item>
+                {/* Name Field */}
+                <Form.Item
+                  label="Name"
+                  name="name"
+                  rules={[{ required: true, message: 'Please input your name!' }]}
+                  style={formItemStyle}
+                >
+                  <Input prefix={<UserOutlined />} />
+                </Form.Item>
 
-              {/* Username Field */}
-              <Form.Item
-                label="Username"
-                name="username"
-                rules={[{ required: true, message: 'Please input your username!' }]}
-                style={formItemStyle}
-              >
-                <Input prefix={<UserOutlined />} />
-              </Form.Item>
+                {/* Username Field */}
+                <Form.Item
+                  label="Username"
+                  name="username"
+                  rules={[{ required: true, message: 'Please input your username!' }]}
+                  style={formItemStyle}
+                >
+                  <Input prefix={<UserOutlined />} />
+                </Form.Item>
 
-              {/* Email Field */}
-              <Form.Item
-                label="Email"
-                name="email"
-                rules={[
-                  { required: true, message: 'Please input your email!' },
-                  { type: 'email', message: 'The input is not valid E-mail!' },
-                ]}
-                style={formItemStyle}
-              >
-                <Input prefix={<MailOutlined />} />
-              </Form.Item>
+                {/* Email Field */}
+                <Form.Item
+                  label="Email"
+                  name="email"
+                  rules={[
+                    { required: true, message: 'Please input your email!' },
+                    { type: 'email', message: 'The input is not valid E-mail!' },
+                  ]}
+                  style={formItemStyle}
+                >
+                  <Input prefix={<MailOutlined />} />
+                </Form.Item>
 
-              {/* Password Field */}
-              <Form.Item
-                label="Password"
-                name="password"
-                rules={[{ required: true, message: 'Please input your password!' }]}
-                style={formItemStyle}
-              >
-                <Input.Password prefix={<LockOutlined />} />
-              </Form.Item>
+                {/* Password Field */}
+                <Form.Item
+                  label="Password"
+                  name="password"
+                  rules={[{ required: true, message: 'Please input your password!' }]}
+                  style={formItemStyle}
+                >
+                  <Input.Password prefix={<LockOutlined />} />
+                </Form.Item>
 
-              {/* Confirm Password Field */}
-              <Form.Item
-                label="Confirm Password"
-                name="confirm"
-                rules={[
-                  { required: true, message: 'Please confirm your password!' },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || getFieldValue('password') === value) {
-                        return Promise.resolve();
-                      }
-                      return Promise.reject(new Error('The two passwords do not match!'));
-                    },
-                  }),
-                ]}
-                style={formItemStyle}
-              >
-                <Input.Password prefix={<LockOutlined />} />
-              </Form.Item>
+                {/* Confirm Password Field */}
+                <Form.Item
+                  label="Confirm Password"
+                  name="confirm"
+                  rules={[
+                    { required: true, message: 'Please confirm your password!' },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        if (!value || getFieldValue('password') === value) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject(new Error('The two passwords do not match!'));
+                      },
+                    }),
+                  ]}
+                  style={formItemStyle}
+                >
+                  <Input.Password prefix={<LockOutlined />} />
+                </Form.Item>
 
-              {/* Signup Button */}
-              <Form.Item>
-                <Button type="primary" htmlType="submit" block style={signupButtonStyle}>
-                  Signup
-                </Button>
-              </Form.Item>
-            </Form>
-            <Text>
-              Already have an account? <Link to="/login">Login</Link>
-            </Text>
+                {/* Signup Button */}
+                <Form.Item>
+                  <Button type="primary" htmlType="submit" block style={signupButtonStyle}>
+                    Signup
+                  </Button>
+                </Form.Item>
+              </Form>
+              <Text>
+                Already have an account? <Link to="/login">Login</Link>
+              </Text>
 
             </Spin>
           </div>

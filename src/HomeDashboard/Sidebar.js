@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, Drawer, Grid, Button, Tooltip,Spin } from 'antd';
+import { Menu, Drawer, Grid, Button, Tooltip, Spin } from 'antd';
 import { MenuOutlined, PushpinOutlined } from '@ant-design/icons';
 import * as Icons from '@ant-design/icons';
 import axios from 'axios';
@@ -8,7 +8,7 @@ import { BASE_URL } from '../Components/Constant';
 import ApiService from '../Components/apiService'; // Import ApiService class
 import eventBus from '../Components/eventBus'; // Import the event bus
 
-     
+
 const { useBreakpoint } = Grid;
 
 const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
@@ -26,14 +26,14 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
   const location = useLocation();
 
   useEffect(() => {
-     // Retrieve selected tab from localStorage on component mount
-     const savedSelectedKey = localStorage.getItem('selectedKey');
-     setSelectedKey(savedSelectedKey);
+    // Retrieve selected tab from localStorage on component mount
+    const savedSelectedKey = localStorage.getItem('selectedKey');
+    setSelectedKey(savedSelectedKey);
 
     const fetchData = async () => {
       try {
         setLoading(true);
-       // const response = await axios.get(`${BASE_URL}/mt_tabs`);
+        // const response = await axios.get(`${BASE_URL}/mt_tabs`);
 
         const apiService = new ApiService(`${BASE_URL}/mt_tabs`, {}, 'GET');
         const response = await apiService.makeCall();
@@ -48,7 +48,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
               icon: IconComponent ? <IconComponent /> : null,
               objectName: item.object_name || item.label.toLowerCase(),
             };
-          }); 
+          });
 
         setItems(filteredItems);
       } catch (error) {
@@ -62,16 +62,16 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
 
     };
 
-     // Fetch data initially
-  fetchData();
+    // Fetch data initially
+    fetchData();
 
-  // Listen for event to reload sidebar data
-  eventBus.on('objectCreatedOrUpdated', fetchData);
+    // Listen for event to reload sidebar data
+    eventBus.on('objectCreatedOrUpdated', fetchData);
 
-  // Cleanup the event listener when component unmounts
-  return () => {
-    eventBus.off('objectCreatedOrUpdated', fetchData);
-  };
+    // Cleanup the event listener when component unmounts
+    return () => {
+      eventBus.off('objectCreatedOrUpdated', fetchData);
+    };
   }, []);
 
   useEffect(() => {
@@ -83,15 +83,15 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
     });
     setSelectedKey(matchedItem ? matchedItem.key : null);  // Only select tab if match foundz
   }, [location.pathname, items]);
- 
+
   const handleClick = (e) => {
 
     const clickedItem = items.find(item => item.key === e.key);
-  
+
 
     if (clickedItem && clickedItem.objectName) {
       setSelectedKey(e.key); // Update selected key in state
-      localStorage.setItem('selectedKey', e.key); 
+      localStorage.setItem('selectedKey', e.key);
       navigate(`/object/${e.key}`);
     }
   };
@@ -163,7 +163,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
                 overflowY: 'auto',
                 backgroundColor: '#001529',
               }}
-               className="custom-scrollbar"
+              className="custom-scrollbar"
             >
               <Menu
                 onClick={handleClick}
@@ -179,7 +179,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
             </div>
           )}
           <Tooltip title={fixed ? 'Keep navigation closed' : 'Keep navigation opened'}
-            >
+          >
             <Button
               onClick={toggleFixed}
               icon={<PushpinOutlined />}

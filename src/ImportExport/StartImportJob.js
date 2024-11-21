@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Card, Button, message,Typography } from "antd";
-import ApiService from '../Components/apiService'; 
+import { Card, Button, message, Typography } from "antd";
+import ApiService from '../Components/apiService';
 import { BASE_URL } from '../Components/Constant';
 import { useNavigate } from "react-router-dom";
 
 
-const StartImport = ({bulkImportJobId}) => {
+const StartImport = ({ bulkImportJobId }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -15,7 +15,7 @@ const StartImport = ({bulkImportJobId}) => {
     try {
       const apiService = new ApiService(`${BASE_URL}/start_job/${bulkImportJobId}`, {
         'Content-Type': 'application/json'
-      }, 'POST'); 
+      }, 'POST');
 
       const response = await apiService.makeCall();
       message.success("Import started successfully");
@@ -31,11 +31,11 @@ const StartImport = ({bulkImportJobId}) => {
 
   return (
     <Card style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '70vh', flexDirection: 'column' }}>
-      <div style={{ marginBottom: '16px'}}>
+      <div style={{ marginBottom: '16px' }}>
         <Typography.Title level={4}>Start Importing</Typography.Title>
       </div>
       <div>
-        <Button type="default"  loading={loading} onClick={handleStartImport}>
+        <Button type="default" loading={loading} onClick={handleStartImport}>
           Start Import
         </Button>
       </div>

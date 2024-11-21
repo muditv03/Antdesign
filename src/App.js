@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Layout } from 'antd';
-import { BrowserRouter as Router, Route, Routes, useLocation,useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Login from './Authentication/Login';
 import Signup from './Authentication/Signup';
 import ForgotPassword from './Authentication/ForgotPassword';
@@ -14,8 +14,8 @@ import ObjectFieldDetail from './Object/ObjectDetail';
 import Import from './ImportExport/ImportWizard';
 import ImportPage from './ImportExport/NewImport';
 import UploadRecords from './ImportExport/UploadRecords';
-import AppFooter from './HomeDashboard/Footer';  
-import Profile from './HomeDashboard/Profile';  
+import AppFooter from './HomeDashboard/Footer';
+import Profile from './HomeDashboard/Profile';
 import RecordDetail from './Record/RecordDetailPage';
 import ErrorPage from './Components/Error'
 import ForbiddenError from './Components/Error-403'
@@ -25,10 +25,10 @@ import UnprocessableEntity from './Components/Error-422';
 import SetupPage from './SetupComponent/Setup';
 import Home from './SetupComponent/Home';
 import Cookies from 'js-cookie';
- 
-   
+
+
 const { Content } = Layout;
-  
+
 // Define the sidebar routes
 const sidebarRoutes = [
   '/object-setup',
@@ -45,7 +45,7 @@ const App = () => {
   // Check if the current path is login, signup, or forgot-password
   const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(location.pathname.toLowerCase());
   const [sidebarWidth, setSidebarWidth] = useState('80px'); // Default to collapsed width
- 
+
   useEffect(() => {
     // Check if the user is authenticated
     const token = Cookies.get('tokenRes'); // Check for JWT token in cookies
@@ -58,7 +58,7 @@ const App = () => {
   useEffect(() => {
     // Deselect the tab if the current route is not in the sidebarRoutes array
     const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
-    
+
     if (!isSidebarRoute) {
       localStorage.removeItem('selectedKey');
     }
@@ -76,7 +76,7 @@ const App = () => {
         <AppSidebar
           onSidebarToggle={handleSidebarToggle}
           collapsedWidth="80px"
-          expandedWidth="20%" 
+          expandedWidth="20%"
         />
       )} {/* Conditionally render sidebar */}
       <Layout
@@ -87,7 +87,7 @@ const App = () => {
         }}
       >
 
-       
+
         <Content
           style={{
             padding: '24px',
@@ -97,7 +97,7 @@ const App = () => {
             height: '100%', // Ensure content uses full height
             overflow: 'auto', // Enable scrolling if content overflows
           }}
-        > 
+        >
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
@@ -112,12 +112,12 @@ const App = () => {
             <Route path="/object-profile" element={<Profile />} />
             <Route path="/setup" element={<SetupPage />} />
             <Route path="/Error" element={<ErrorPage />} />
-            <Route path ="/Error/403" element={<ForbiddenError/>}/>
-            <Route path ="/Error/404" element={<NotFoundError/>}/>
-            <Route path ="/Error/500" element={<InternalServerError/>}/>
-            <Route path ="/Error/422" element={<UnprocessableEntity/>}/>
+            <Route path="/Error/403" element={<ForbiddenError />} />
+            <Route path="/Error/404" element={<NotFoundError />} />
+            <Route path="/Error/500" element={<InternalServerError />} />
+            <Route path="/Error/422" element={<UnprocessableEntity />} />
 
- 
+
 
             {/* Add more routes as needed */}
           </Routes>

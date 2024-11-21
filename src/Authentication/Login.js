@@ -3,14 +3,14 @@ import { Form, Input, Button, Checkbox, Layout, Typography, Spin, message } from
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useJwt } from "react-jwt";
-import {jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import jwtEncode from 'jwt-encode';
 import axios from 'axios';
 //const sign = require('jwt-encode');
 import Cookies from 'js-cookie';
 import { BASE_URL } from '../Components/Constant';
 import ApiService from '../Components/apiService'; // Import ApiService class
-    
+
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
@@ -56,9 +56,9 @@ const Login = () => {
       const email = response.user.email;
       const name = response.user.Name;
 
-      console.log('token generated is '+ tokenRes);
+      console.log('token generated is ' + tokenRes);
 
-      if (token && username && email ) {
+      if (token && username && email) {
         Cookies.set('tokenRes', tokenRes, { expires: 7 });
         Cookies.set('username', username, { expires: 7 });
         Cookies.set('email', email, { expires: 7 });

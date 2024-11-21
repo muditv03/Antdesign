@@ -1,16 +1,16 @@
 import React from 'react';
 import { Menu } from 'antd';
 
-const Menubar = ({ onSelect,selectedItem }) => {
+const Menubar = ({ onSelect, selectedItem }) => {
   const menuItems = [
     { key: 'Organisation Setup', label: 'Setup Home' },
     { key: 'Users', label: 'Users' },
     { key: 'Custom Tabs', label: 'Custom Tabs' },
     { key: 'Import Wizard', label: 'Import Wizard' },
     { key: 'Recycle bin', label: 'Recycle bin' },
-  
-  ]; 
- 
+
+  ];
+
   return (
     <Menu
       mode="inline"
