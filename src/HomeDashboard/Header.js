@@ -64,7 +64,8 @@ const AppHeader = () => {
   };
 
   const fetchSearchResults = async (value) => {
-    console.log('inside fetchSearchRes'+value);
+    if(value.length >3){
+      console.log('inside fetchSearchRes'+value);
     if (!value) {
       setSearchResults([]);
       setShowDropdown(false);
@@ -107,8 +108,17 @@ const AppHeader = () => {
     } finally {
       setLoading(false);
     }
+    }
+    
   };
   const menu = (
+    <div
+      style={{
+        maxHeight: '200px', // Limit the height
+        overflowY: 'auto',  // Enable vertical scrolling
+      }}
+    >
+
     <Menu onClick={handleSelect}>
       {searchResults.map((result) => (
         <Menu.Item key={result.value} objectName={result.objectName}>
@@ -117,8 +127,20 @@ const AppHeader = () => {
 
       ))}
     </Menu>
+    </div>
   );
+  const handleEnter = async ()=>{
+    console.log('inside handle Enter');  
+  // Serialize the response data to a query string
+  // const queryParams = new URLSearchParams({
+  //   results: JSON.stringify(searchResults),  // Encoding response as a string
+  // }).toString();
+  setShowDropdown(false);
+  // Navigate to SearchResults with query parameters
+  // navigate(`/SearchResults?${queryParams}`);
+    navigate('/SearchResults', { state: { searchResults: searchResults } });
 
+  };
   return (
     <Header
       style={{
@@ -154,15 +176,16 @@ const AppHeader = () => {
         
         <Search
         style = {{
-          width: '78%',
+          width: '60%',
         }}
         placeholder="Search for records"
         onSearch={(value) => fetchSearchResults(value)}
         onChange={(e) => fetchSearchResults(e.target.value)}
         enterButton
-        loading={loading}
+        // loading={loading}
         onBlur={() => setTimeout(() => setShowDropdown(false), 200)} // Delay to allow selection before hiding
-        onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
+        // onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
+        onPressEnter={handleEnter}
       />
       <div>
       {showDropdown && (
@@ -171,7 +194,8 @@ const AppHeader = () => {
             position: 'absolute',
             top: '50px',
             left: '90px',
-            width: '35%',
+            
+            width: '28%',
             backgroundColor: 'white',
             // border: '1px solid #d9d9d9',
             // borderRadius: '4px',
