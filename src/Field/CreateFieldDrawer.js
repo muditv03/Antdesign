@@ -791,7 +791,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
               </>
             )}
 
-            {fieldType === 'Picklist' || fieldType==='MultiSelect' && ( // Only show for Picklist type
+            {(fieldType === 'Picklist' || fieldType==='MultiSelect') && ( // Only show for Picklist type
               <Form.Item
                 name="picklist_values"
                 label="Picklist Values (comma separated)"
