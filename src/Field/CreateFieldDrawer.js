@@ -26,8 +26,8 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   const [isRequired, setIsRequired] = useState(false); // State for auto number checkbox
   const [isUnique, setIsUnique] = useState(false); // State for auto number checkbox
   const [isExternalId, setIsExternalID] = useState(false); // State for auto number checkbox
-
-  const [ParentObjectFields, setParentObjectFields] = useState([]);
+  const [isFieldTrackingEnabled,setIsFieldTrackingEnabled] = useState(false);
+  const [ParentObjectFields,setParentObjectFields]=useState([]);
 
   const [logic, setLogic] = useState('');
   const [operator, setOperator] = useState('AND');
@@ -129,17 +129,18 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         ...editField,
         length: editField.decimal_places_before + editField.decimal_places_after, // Calculate total length
         decimal_places: editField.decimal_places_after, // Set decimal places
-        format: editField.auto_number_format,
-        startingPoint: editField.auto_number_starting,
-        description: editField.description,
-        helpText: editField.help_text,
-        defaultValue: editField.default_value,
-        required: editField.required,
-        unique: editField.unique,
-        external_id: editField.external_id,
-        fieldsToDisplay: editField.lookup_config?.display_fields,
-        SearchLayout: editField.lookup_config?.search_layout,
-      });
+        format:editField.auto_number_format,
+        startingPoint:editField.auto_number_starting,
+        description:editField.description,
+        helpText:editField.help_text,
+        defaultValue:editField.default_value,
+        required:editField.required,
+        unique:editField.unique,
+        external_id:editField.external_id,
+        field_Tracking:editField.field_Tracking,
+        fieldsToDisplay:editField.lookup_config?.display_fields,
+        SearchLayout:editField.lookup_config?.search_layout,
+      }); 
       setFilters(existingFilters || {});
       setLogic(editField.lookup_config?.logic_string)
       setIsFormula(editField.is_formula)
@@ -150,6 +151,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       setIsRequired(editField.required || false); // Set auto number state if editing
       setIsUnique(editField.unique || false); // Set auto number state if editing
       setIsExternalID(editField.external_id || false); // Set auto number state if editing
+      setIsFieldTrackingEnabled(editField.field_Tracking)
       handleParentObjectChange(editField.parent_object_name);
     } else {
       form.resetFields(); // Reset fields for creating a new field
@@ -221,16 +223,16 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       mt_object_id: mtObjectId,
       iseditable: values.iseditable || true,
       iswriteable: values.iswriteable || true,
-      is_auto_number: isAutoNumber,
-      is_formula: isFormula,
-      description: values.description,
-      help_text: values.helpText,
-      default_value: values.defaultValue,
-      required: isRequired,
-      unique: isUnique,
-      external_id: isExternalId
-
-    };
+      is_auto_number: isAutoNumber, 
+      is_formula:isFormula,
+      description:values.description,
+      help_text:values.helpText,
+      default_value:values.defaultValue,
+      required:isRequired,
+      unique:isUnique,
+      external_id:isExternalId,
+      field_Tracking: isFieldTrackingEnabled
+        };
 
     if (values.type === 'String' || values.type === 'Picklist') {
       newField.compliance_categorization = selectedCC
@@ -292,14 +294,15 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
           iswriteable: values.iswriteable,
           is_formula: isFormula,
           is_auto_number: isAutoNumber,
-          description: values.description,
-          help_text: values.helpText,
-          default_value: values.defaultValue,
-          required: isRequired,
-          unique: isUnique,
-          external_id: isExternalId,
-          ...((values.type === 'Picklist' || values.type === 'String') && {
-            compliance_categorization: selectedCC
+          description:values.description,
+          help_text:values.helpText,
+          default_value:values.defaultValue,
+          required:isRequired,
+          unique:isUnique,
+          external_id:isExternalId,
+          field_Tracking:isFieldTrackingEnabled,
+          ...((values.type==='Picklist' || values.type==='String') && {
+            compliance_categorization:selectedCC
           }),
           ...(isAutoNumber && { auto_number_format: values.format, auto_number_starting: values.startingPoint }),
           ...(values.type === 'Picklist' || values.type === 'MultiSelect' && { picklist_values: picklistValues }),
@@ -792,7 +795,8 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
               </>
             )}
 
-            {(fieldType === 'Picklist' || fieldType === 'MultiSelect') && ( // Only show for Picklist type
+
+            {(fieldType === 'Picklist' || fieldType==='MultiSelect') && ( // Only show for Picklist type
               <Form.Item
                 name="picklist_values"
                 label="Picklist Values (comma separated)"
@@ -801,7 +805,6 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                 <Input placeholder="Enter picklist values" onChange={handlePicklistChange} />
               </Form.Item>
             )}
-
             {fieldType === 'decimal' || fieldType === 'percentage' || fieldType === 'currency' ? ( // Only show for decimal and currency types
               <>
                 <Form.Item
@@ -1064,9 +1067,16 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                     onChange={(e) => setIsExternalID(e.target.checked)}
                   >External Id</Checkbox>
                 </Form.Item>
-              </>
-            )}
 
+                <Form.Item name="field_Tracking" >
+                  <Checkbox
+                  checked={isFieldTrackingEnabled}
+                  onChange={(e) => setIsFieldTrackingEnabled(e.target.checked)}
+                  >Enable Field Tracking</Checkbox>
+                </Form.Item>
+                </>
+         )}
+             
           </Form>
 
         </Card>

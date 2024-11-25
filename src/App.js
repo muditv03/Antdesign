@@ -25,8 +25,8 @@ import UnprocessableEntity from './Components/Error-422';
 import SetupPage from './SetupComponent/Setup';
 import Home from './SetupComponent/Home';
 import Cookies from 'js-cookie';
-
-
+import SearchResults from './SetupComponent/SearchResults';
+ 
 const { Content } = Layout;
 
 // Define the sidebar routes
@@ -112,12 +112,12 @@ const App = () => {
             <Route path="/object-profile" element={<Profile />} />
             <Route path="/setup" element={<SetupPage />} />
             <Route path="/Error" element={<ErrorPage />} />
-            <Route path="/Error/403" element={<ForbiddenError />} />
-            <Route path="/Error/404" element={<NotFoundError />} />
-            <Route path="/Error/500" element={<InternalServerError />} />
-            <Route path="/Error/422" element={<UnprocessableEntity />} />
-
-
+            <Route path ="/Error/403" element={<ForbiddenError/>}/>
+            <Route path ="/Error/404" element={<NotFoundError/>}/>
+            <Route path ="/Error/500" element={<InternalServerError/>}/>
+            <Route path ="/Error/422" element={<UnprocessableEntity/>}/>
+            <Route path ="/SearchResults" element={<SearchResults/>}/>
+ 
 
             {/* Add more routes as needed */}
           </Routes>

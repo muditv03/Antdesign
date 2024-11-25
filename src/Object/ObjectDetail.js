@@ -1,10 +1,12 @@
 import React from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { Table, Form, Card, Button, Row, Col, Typography, Tabs, Breadcrumb } from 'antd';
+import { useLocation ,useNavigate,Link} from 'react-router-dom';
+import { Table, Form, message,Card, Button, Row, Col, Typography, Tabs,Breadcrumb} from 'antd';
 import ObjectFieldTab from '../Field/ObjectFieldsTab';
 import CreateListView from './CreateListView';
 import ObjectRelatedListTab from './ObjectRelatedListTab';
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
+import { BASE_URL } from '../Components/Constant';
+import ApiService from '../Components/apiService'; 
 import CreateObjectDrawer from './CreateObjectDrawer';
 import CreateLayout from './CreateLayout';
 
@@ -15,14 +17,144 @@ const { TabPane } = Tabs;
 const ObjectFieldDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  
   const { record } = location.state || {};
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [form] = Form.useForm();
+  // const [fieldsData, setFieldsData] = useState([]);
+  const [availableFields, setAvailableFields] = useState([]);
+  const [selectedFields, setSelectedFields] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(true); // Determines whether the user is editing or viewing
+  const [allFields, setAllFields] = useState([]); // Holds all fields fetched from the API
 
   const handleAddOrEditObject = (updatedObject) => {
     // Logic to update the object in state
   };
+  useEffect(() => {
+    const fetchFields = async () => {
+      setLoading(true);
+      try {
+        const apiServiceForAllFields = new ApiService(
+          `${BASE_URL}/mt_fields/object/${record.name}`,
+          { 'Content-Type': 'application/json' },
+          'GET'
+        );
+        const getSelectedValuesApiService = new ApiService(
+          `${BASE_URL}/mt_objects/${record._id}`,
+          { 'Content-Type': 'application/json' },
+          'GET',
+        );
+        let responseForSelectedValues = await getSelectedValuesApiService.makeCall();
+        const selectedFieldNames = responseForSelectedValues.search_layout_fields || [];
+        setSelectedFields(
+          selectedFieldNames.map((name) => ({ name, isSelected: false }))
+        );
+  
+        // setSelectedFields(responseForSelectedValues.search_layout_fields);
+        console.log('selected values');
+        console.log(selectedFields);
+        // console.log(responseForSelectedValues.search_layout_fields);
+        const response = await apiServiceForAllFields.makeCall();
+        const allFields = response
+        .filter((field) => field.name !== 'recordCount')
+        .map((field) => ({ ...field, key: field._id, isSelected: false }));
+
+        const availableFieldsFiltered = allFields.filter(
+          (field) => !selectedFieldNames.includes(field.name)
+        );
+  
+        setAvailableFields(availableFieldsFiltered);
+
+          console.log('all values respons');
+          console.log(availableFields);
+
+      } catch (error) {
+        const errorMessage = error && typeof error === 'object'
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to fetch fields due to an unknown error';
+        message.error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFields();
+  }, []);
+  
+  const handleAddToSelected = () => {
+    const selected = availableFields.filter((field) => field.isSelected);
+    setSelectedFields([...selectedFields, ...selected]);
+    console.log(selectedFields);
+    setAvailableFields(availableFields.filter((field) => !field.isSelected));
+    console.log('handleaddtoselected');
+  };
+
+  // Move selected field from Selected to Available
+  const handleRemoveFromSelected = () => {
+    const unselected = selectedFields.filter((field) => field.isSelected);
+    setAvailableFields([...availableFields, ...unselected]);
+    setSelectedFields(selectedFields.filter((field) => !field.isSelected));
+    console.log(selectedFields);
+
+    console.log('handleremovefromselected');
+  };
+
+  // Toggle field selection
+  const toggleSelection = (field, list, setList) => {
+    if (!isEditMode) return;
+    setList(
+      list.map((item) =>
+        item.name === field.name
+          ? { ...item, isSelected: !item.isSelected }
+          : item
+      )
+    );
+  };
+
+  // Save selected fields
+  const handleSave = () => {
+    const selectedArray = selectedFields.map((field) => field.name);
+    console.log('Selected Fields:', selectedArray);
+    sendSelectedValues(selectedArray);
+    setIsEditMode(false);
+    // Send selectedArray to the backend if needed
+  };
+  const sendSelectedValues = async (values)=>{
+    console.log('inside sendselval');
+    const requestBody = {
+        search_layout_fields: values,
+    };  
+    const apiService = new ApiService(
+      `${BASE_URL}/mt_objects/${record._id}`,
+      { 'Content-Type': 'application/json' },
+      'PUT',
+      { mt_object: requestBody }
+    );
+    let response = await apiService.makeCall();
+    if (response && response._id) {
+      message.success('Fields Updated Successfully');
+    } else {
+      throw new Error('Invalid Response From Server');
+    }
+  }
+  const handleEdit = () => {
+    setIsEditMode(true); // Switch to edit mode
+  };
+  const styles = {
+    listContainer: {
+      border: '1px solid #ddd',
+      padding: '10px',
+      width: '300px',
+      maxHeight: '400px', // Set a maximum height
+      overflowY: 'auto', // Add vertical scrollbar if content exceeds height
+      display: 'flex',
+      flexDirection: 'column',
+      marginLeft: '100px'
+    },
+  };
+  
 
   const dataset = [
     {
@@ -42,8 +174,6 @@ const ObjectFieldDetail = () => {
     setDrawerVisible(false);
     setEditingRecord(null);
   };
-
-
 
   return (
     <div>
@@ -126,6 +256,95 @@ const ObjectFieldDetail = () => {
           <Card>
             <CreateLayout object={record} />
           </Card>
+        </TabPane>
+        <TabPane tab="Search Result Layout" key="5">
+            <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+          {/* Available Fields */}
+          <div style={styles.listContainer}>
+            <h3>Available Fields</h3>
+            {loading ? (
+              <p>Loading...</p>
+            ) : (
+              availableFields.map((field) => (
+                <div
+                  key={field.name}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() =>
+                    toggleSelection(field, availableFields, setAvailableFields)
+                  }
+                >
+                  <input
+                    type="checkbox"
+                    checked={(field.isSelected && isEditMode) ? true : false}
+                    onChange={() =>
+                      toggleSelection(field, availableFields, setAvailableFields)
+                    }
+                  />
+                  <span style={{ marginLeft: '10px' }}>{field.name}</span>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Arrow Buttons */}
+          <div style={{marginTop:'50px', marginLeft:'70px', width: '80px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <Button onClick={handleAddToSelected} 
+            disabled={!availableFields.length || !isEditMode}>
+              →
+            </Button>
+            <Button
+              onClick={handleRemoveFromSelected}
+              disabled={!selectedFields.length || !isEditMode}
+            >
+              ←
+            </Button>
+          </div>
+
+          {/* Selected Fields */}
+          <div style={styles.listContainer}>
+            <h3>Selected Fields</h3>
+            {selectedFields.map((field) => (
+              <div
+                key={field.name}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                }}
+                onClick={() =>
+                  toggleSelection(field, selectedFields, setSelectedFields)
+                }
+              >
+                <input
+                  type="checkbox"
+                  checked={(field.isSelected && isEditMode) ? true : false}
+                  onChange={() =>
+                    toggleSelection(field, selectedFields, setSelectedFields)
+                  }
+                />
+                <span style={{ marginLeft: '10px' }}>{field.name}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Save Button */}
+          <div style = {{marginTop: '60px'}}>
+              {isEditMode ? (
+              <Button type="primary" onClick={handleSave}>
+                Save
+              </Button>
+            ) : (
+              <Button type="default" onClick={handleEdit}>
+                Edit
+              </Button>
+            )}                  
+          </div>
+        </div>
+
         </TabPane>
       </Tabs>
     </div>
