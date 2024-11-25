@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Drawer, Form, Select, Input, Button, message, Spin,Card } from 'antd';
+import { Drawer, Form, Select, Input, Button, message, Spin, Card } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
 import * as Icons from '@ant-design/icons';
 import ApiService from '../Components/apiService'; // Ensure this points to your ApiService
@@ -38,9 +38,9 @@ const CreateTabDrawer = ({ visible, onClose }) => {
                 setObjects(filteredObjects); // Set the filtered objects
             } catch (error) {
                 const errorMessage = error && typeof error === 'object'
-                ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-                : 'Failed to fetch tabs due to an unknown error';
-                message.error(errorMessage); 
+                    ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+                    : 'Failed to fetch tabs due to an unknown error';
+                message.error(errorMessage);
             } finally {
                 setFetchingObjects(false); // Update loading status
             }
@@ -66,10 +66,10 @@ const CreateTabDrawer = ({ visible, onClose }) => {
 
     const handleSubmit = async (values) => {
         setLoading(true); // Start loading (spinner and disable buttons)
-        
+
         console.log('Form values:', values);
-        console.log('label is '+values.label);
-        console.log('name is '+values.name);
+        console.log('label is ' + values.label);
+        console.log('name is ' + values.name);
 
         // Construct the new tab object using selected values
         const newTab = {
@@ -80,7 +80,7 @@ const CreateTabDrawer = ({ visible, onClose }) => {
             icon: values.icon // Icon selected
         };
 
-        console.log('body is '+JSON.stringify(newTab));
+        console.log('body is ' + JSON.stringify(newTab));
 
         // Call the API to create a new tab
         try {
@@ -93,14 +93,15 @@ const CreateTabDrawer = ({ visible, onClose }) => {
 
             await apiServiceForTab.makeCall();
             eventBus.emit('objectCreatedOrUpdated'); // Notify that object was created or updated
- 
+
             message.success('New tab created successfully'); // Show success message
             onClose(); // Close the drawer after successful creation
         } catch (error) {
             const errorMessage = error && typeof error === 'object'
-            ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-            : 'Failed to create new tab due to an unknown error';
-            message.error(errorMessage);        } finally {
+                ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+                : 'Failed to create new tab due to an unknown error';
+            message.error(errorMessage);
+        } finally {
             setLoading(false); // Stop loading
         }
     };
@@ -129,7 +130,7 @@ const CreateTabDrawer = ({ visible, onClose }) => {
 
     return (
         <Drawer
-            title={ 
+            title={
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <CloseOutlined style={{ cursor: 'pointer', marginRight: '10px' }} onClick={onClose} />
                     <span>Create New Tab</span>
@@ -154,70 +155,70 @@ const CreateTabDrawer = ({ visible, onClose }) => {
                 </div>
             }
         >
-          <Card
-            style={{ margin: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
+            <Card
+                style={{ margin: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
 
-          >
-            <Form form={form} id="createTabForm" layout="vertical" onFinish={handleSubmit}>
-                <Form.Item label="Select Object" name="object" required>
-                    <Select placeholder="Select an object" loading={fetchingObjects}>
-                        {objects.map(object => (
-                            <Option key={object._id} value={object._id} label={object.name}>
-                                {object.name} {/* Assuming object has a name property */}
-                            </Option>
-                        ))}
-                    </Select>
-                </Form.Item>
+            >
+                <Form form={form} id="createTabForm" layout="vertical" onFinish={handleSubmit}>
+                    <Form.Item label="Select Object" name="object" required>
+                        <Select placeholder="Select an object" loading={fetchingObjects}>
+                            {objects.map(object => (
+                                <Option key={object._id} value={object._id} label={object.name}>
+                                    {object.name} {/* Assuming object has a name property */}
+                                </Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
 
-                <Form.Item
-                    name="label"
-                    label="Label"
-                    rules={[{ required: true, message: 'Please enter the label' }]}
-                >
-                    <Input 
-                        placeholder="Please enter the field label" 
-                        onBlur={handleLabelChange} // Add onChange handler here
-                    />
-                </Form.Item>
-
-                <Form.Item
-                    name="name"
-                    label="API Name"
-                    rules={[ 
-                        { required: true, message: 'Please enter the name' }, 
-                        {
-                            validator: (_, value) => {
-                                if (!value) {
-                                    return Promise.resolve();
-                                }
-                                const alphabetOnlyRegex = /^[a-zA-Z]+$/;
-                                if (!alphabetOnlyRegex.test(value)) {
-                                    return Promise.reject(new Error('Name should only contain alphabets without spaces.'));
-                                }
-                                if (pluralize.isPlural(value)) {
-                                    return Promise.reject(new Error('API name cannot be plural.'));
-                                }
-                                return Promise.resolve();
-                            },
-                        },
-                    ]}
-                >
-                    <Input placeholder="Please enter the name" />
-                </Form.Item>
-
-                <Form.Item name="icon" label="Icon">
-                    <Select
-                        placeholder="Select an icon"
-                        optionLabelProp="label"
-                        showSearch
-                        filterOption={(input, option) =>
-                            option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                        }
+                    <Form.Item
+                        name="label"
+                        label="Label"
+                        rules={[{ required: true, message: 'Please enter the label' }]}
                     >
-                        {iconOptions}
-                    </Select>
-                </Form.Item>
-            </Form>
+                        <Input
+                            placeholder="Please enter the field label"
+                            onBlur={handleLabelChange} // Add onChange handler here
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="name"
+                        label="API Name"
+                        rules={[
+                            { required: true, message: 'Please enter the name' },
+                            {
+                                validator: (_, value) => {
+                                    if (!value) {
+                                        return Promise.resolve();
+                                    }
+                                    const alphabetOnlyRegex = /^[a-zA-Z]+$/;
+                                    if (!alphabetOnlyRegex.test(value)) {
+                                        return Promise.reject(new Error('Name should only contain alphabets without spaces.'));
+                                    }
+                                    if (pluralize.isPlural(value)) {
+                                        return Promise.reject(new Error('API name cannot be plural.'));
+                                    }
+                                    return Promise.resolve();
+                                },
+                            },
+                        ]}
+                    >
+                        <Input placeholder="Please enter the name" />
+                    </Form.Item>
+
+                    <Form.Item name="icon" label="Icon">
+                        <Select
+                            placeholder="Select an icon"
+                            optionLabelProp="label"
+                            showSearch
+                            filterOption={(input, option) =>
+                                option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                            }
+                        >
+                            {iconOptions}
+                        </Select>
+                    </Form.Item>
+                </Form>
             </Card>
         </Drawer>
     );

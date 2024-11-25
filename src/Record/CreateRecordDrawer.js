@@ -1,32 +1,32 @@
 import React, { Children, useEffect, useState } from 'react';
-import { Drawer, Button, Form, Card, Spin, Input, Checkbox, DatePicker, Space, Select,Tooltip ,Avatar} from 'antd';
-import { MailOutlined,InfoCircleOutlined,PhoneOutlined } from '@ant-design/icons';
+import { Drawer, Button, Form, Card, Spin, Input, Checkbox, DatePicker, Space, Select, Tooltip, Avatar } from 'antd';
+import { MailOutlined, InfoCircleOutlined, PhoneOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import ApiService from '../Components/apiService'; // Import ApiService class
 import { BASE_URL, DateFormat } from '../Components/Constant'; // Define the date format
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-dayjs.extend(customParseFormat); 
- 
-const CreateRecordDrawer = ({ 
-  visible, 
-  onClose, 
-  onFinish, 
-  loading, 
-  fieldsData, 
-  selectedRecord, 
-  selectedDate, 
+dayjs.extend(customParseFormat);
+
+const CreateRecordDrawer = ({
+  visible,
+  onClose,
+  onFinish,
+  loading,
+  fieldsData,
+  selectedRecord,
+  selectedDate,
   setSelectedDate,
-  form 
-}) => { 
+  form
+}) => {
   const [lookupOptions, setLookupOptions] = useState([]);
-  const [lookupOptionforparent,setLookupOptionsForParent]=useState([]);
+  const [lookupOptionforparent, setLookupOptionsForParent] = useState([]);
 
 
   useEffect(() => {
     const fetchAllLookupOptions = async () => {
       const lookupFields = fieldsData.filter(field => field.type === 'lookup');
       const lookupOptionsObj = {};
-  
+
       for (const lookupField of lookupFields) {
         try {
           const apiServiceForLookup = new ApiService(
@@ -36,7 +36,7 @@ const CreateRecordDrawer = ({
           );
           const response = await apiServiceForLookup.makeCall();
           lookupOptionsObj[lookupField.name] = response; // Store options for each lookup field
-        
+
         } catch (error) {
           console.error(`Error fetching lookup options for ${lookupField.name}:`, error);
         }
@@ -55,8 +55,8 @@ const CreateRecordDrawer = ({
       const formValues = {};
       fieldsData.forEach(field => {
         if (field.type === 'Date' || field.type === 'DateTime') {
-          formValues[field.name] = selectedRecord[field.name] 
-            ? dayjs(selectedRecord[field.name], field.type === 'Date' ? DateFormat : "DD/MM/YYYY HH:mm:ss") 
+          formValues[field.name] = selectedRecord[field.name]
+            ? dayjs(selectedRecord[field.name], field.type === 'Date' ? DateFormat : "DD/MM/YYYY HH:mm:ss")
             : null;
         } else if (field.type === 'boolean') {
           formValues[field.name] = selectedRecord[field.name] || false;
@@ -77,19 +77,19 @@ const CreateRecordDrawer = ({
     }
   }, [selectedRecord, form, fieldsData]);
 
-  const handleSearch = async (value,fieldId,name) => {
+  const handleSearch = async (value, fieldId, name) => {
     console.log('handle search called');
 
-    
-    console.log( value)
+
+    console.log(value)
     if (value) {
       console.log(fieldId);
       console.log(value);
       try {
         const apiService = new ApiService(`${BASE_URL}/search_lookup/${fieldId}/${value}`, {
           'Content-Type': 'application/json', // Add any necessary headers, such as content type
-        }, 'GET', );
-        const response=await apiService.makeCall();
+        }, 'GET',);
+        const response = await apiService.makeCall();
         console.log('response of lookups ar');
         console.log(response);
         // Assuming the response data structure has options as an array
@@ -101,15 +101,16 @@ const CreateRecordDrawer = ({
         console.error("API request failed:", error);
         setLookupOptionsForParent(prevOptions => ({
           ...prevOptions,
-          [name]: [] 
-        }))     
+          [name]: []
+        }))
       } finally {
       }
     } else {
       setLookupOptionsForParent(prevOptions => ({
         ...prevOptions,
         [name]: []
-      }));    }
+      }));
+    }
   };
 
 
@@ -118,27 +119,27 @@ const CreateRecordDrawer = ({
     if (field.is_auto_number || field.is_formula) {
       return null; // Don't render the field if it's an auto-number field
     }
-  
-    if(field.name === 'recordCount'){
+
+    if (field.name === 'recordCount') {
       return null;
     }
 
-   
-  
+
+
     const isRequired = field.required ? [{ required: true, message: `${field.label} is required!` }] : [];
-  
+
     // Check if help text is present for the field
     const renderLabel = (
       <span>
         {field.label}
         {field.help_text && field.help_text.trim() !== "" && (
           <Tooltip title={field.help_text}>
-            <InfoCircleOutlined  style={{ marginLeft: 8, color: '#1890ff' }}></InfoCircleOutlined>
-        </Tooltip>
+            <InfoCircleOutlined style={{ marginLeft: 8, color: '#1890ff' }}></InfoCircleOutlined>
+          </Tooltip>
         )}
       </span>
     );
-  
+
     switch (field.type) {
       case 'String':
         return (
@@ -151,7 +152,7 @@ const CreateRecordDrawer = ({
             <Input placeholder={`Enter ${field.label}`} />
           </Form.Item>
         );
-  
+
       case 'Integer':
         return (
           <Form.Item
@@ -164,7 +165,7 @@ const CreateRecordDrawer = ({
           </Form.Item>
         );
 
-        case 'Phone':
+      case 'Phone':
         return (
           <Form.Item
             key={field.name}
@@ -184,18 +185,18 @@ const CreateRecordDrawer = ({
               },
             ]}
           >
-      <Input
+            <Input
 
-        type="text" // Use text to prevent input methods restricting values
-        placeholder={`Enter ${field.label}`}
-        maxLength={10} // Prevent more than 10 characters
-        addonBefore={
-          <PhoneOutlined style={{ cursor: 'pointer' }}  />
-        }
-      />
-    </Form.Item>
-  ); 
-  
+              type="text" // Use text to prevent input methods restricting values
+              placeholder={`Enter ${field.label}`}
+              maxLength={10} // Prevent more than 10 characters
+              addonBefore={
+                <PhoneOutlined style={{ cursor: 'pointer' }} />
+              }
+            />
+          </Form.Item>
+        );
+
       case 'Email':
         return (
           <Form.Item
@@ -210,7 +211,7 @@ const CreateRecordDrawer = ({
             <Input type='email' prefix={<MailOutlined />} placeholder="Enter email" />
           </Form.Item>
         );
-  
+
       case 'boolean':
         return (
           <Form.Item
@@ -223,7 +224,7 @@ const CreateRecordDrawer = ({
             <Checkbox>{field.label}</Checkbox>
           </Form.Item>
         );
-  
+
       case 'Date':
         return (
           <Form.Item
@@ -246,7 +247,7 @@ const CreateRecordDrawer = ({
             </Space>
           </Form.Item>
         );
-  
+
       case 'DateTime':
         return (
           <Form.Item
@@ -261,16 +262,16 @@ const CreateRecordDrawer = ({
                 placeholder={`Select ${field.label}`}
                 style={{ width: '100%' }}
                 format="DD/MM/YYYY HH:mm:ss"
-                value={form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name),"DD/MM/YYYY HH:mm:ss") : null}
+                value={form.getFieldValue(field.name) ? dayjs(form.getFieldValue(field.name), "DD/MM/YYYY HH:mm:ss") : null}
                 onChange={(date, dateString) => {
-                  setSelectedDate(date ? dayjs(dateString,"DD/MM/YYYY HH:mm:ss") : null);
+                  setSelectedDate(date ? dayjs(dateString, "DD/MM/YYYY HH:mm:ss") : null);
                   form.setFieldsValue({ [field.name]: dateString });
                 }}
               />
             </Space>
           </Form.Item>
         );
-  
+
       case 'URL':
         return (
           <Form.Item
@@ -285,7 +286,7 @@ const CreateRecordDrawer = ({
             <Input type="url" placeholder={`Enter ${field.label}`} />
           </Form.Item>
         );
-  
+
       case 'currency':
         const currencyDecimalPlacesBefore = field.decimal_places_before;
         const currencyDecimalPlacesAfter = field.decimal_places_after;
@@ -296,7 +297,7 @@ const CreateRecordDrawer = ({
             event.preventDefault();
           }
         };
-  
+
         return (
           <Form.Item
             key={field.name}
@@ -312,7 +313,7 @@ const CreateRecordDrawer = ({
             />
           </Form.Item>
         );
-  
+
       case 'Picklist':
         return (
           <Form.Item
@@ -321,9 +322,9 @@ const CreateRecordDrawer = ({
             label={renderLabel}  // Use the custom label here
             rules={isRequired}
           >
-            <Select 
-              placeholder={`Select ${field.label}`}    
-              allowClear 
+            <Select
+              placeholder={`Select ${field.label}`}
+              allowClear
             >
               {field.picklist_values.map((value) => (
                 <Select.Option key={value} value={value}>
@@ -334,7 +335,7 @@ const CreateRecordDrawer = ({
           </Form.Item>
         );
 
-        case 'MultiSelect':
+      case 'MultiSelect':
         return (
           <Form.Item
             key={field.name}
@@ -342,10 +343,10 @@ const CreateRecordDrawer = ({
             label={renderLabel}  // Use the custom label here
             rules={isRequired}
           >
-            <Select 
+            <Select
               mode="multiple"
-              placeholder={`Select ${field.label}`}    
-              allowClear 
+              placeholder={`Select ${field.label}`}
+              allowClear
             >
               {field.picklist_values.map((value) => (
                 <Select.Option key={value} value={value}>
@@ -355,7 +356,7 @@ const CreateRecordDrawer = ({
             </Select>
           </Form.Item>
         );
-  
+
       case 'lookup':
         return (
           <Form.Item
@@ -363,136 +364,136 @@ const CreateRecordDrawer = ({
             name={field.name}
             label={renderLabel}  // Use the custom label here
             rules={isRequired}
-          > 
-          <Select
-                    allowClear
-                    showSearch
-                    placeholder="Type to search"
-                    onSearch={(value) => handleSearch(value, field._id,field.name)} 
-                    filterOption={false} 
-                    notFoundContent="Search for records"
-                    optionLabelProp="children"
-                    options={[
-                      ...(lookupOptionforparent[field.name] || []).map((option) => ({
-                        children: (
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                              <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <Avatar size="small" style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                                  {option.Name?.charAt(0).toUpperCase()}
-                                </Avatar>
-                                {option.Name}
-                                
-                              </div>
-                             
-                          </div>
-                        ), 
-                        label:(
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <Avatar size="small" style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                            {option.Name?.charAt(0).toUpperCase()}
-                          </Avatar>
-                          {option.Name}
-                          
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
-                        {field.lookup_config?.display_fields?.map((fieldKey,index) => (
-                          <div key={fieldKey} 
-                          style={{ 
-                              fontSize: '12px', 
+          >
+            <Select
+              allowClear
+              showSearch
+              placeholder="Type to search"
+              onSearch={(value) => handleSearch(value, field._id, field.name)}
+              filterOption={false}
+              notFoundContent="Search for records"
+              optionLabelProp="children"
+              options={[
+                ...(lookupOptionforparent[field.name] || []).map((option) => ({
+                  children: (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Avatar size="small" style={{ backgroundColor: '#87d068', marginRight: 8 }}>
+                          {option.Name?.charAt(0).toUpperCase()}
+                        </Avatar>
+                        {option.Name}
+
+                      </div>
+
+                    </div>
+                  ),
+                  label: (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Avatar size="small" style={{ backgroundColor: '#87d068', marginRight: 8 }}>
+                          {option.Name?.charAt(0).toUpperCase()}
+                        </Avatar>
+                        {option.Name}
+
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
+                        {field.lookup_config?.display_fields?.map((fieldKey, index) => (
+                          <div key={fieldKey}
+                            style={{
+                              fontSize: '12px',
                               color: '#888',
                               marginRight: index < field.lookup_config?.display_fields.length - 1 ? 8 : 0, // Add margin except for the last item
-                          }}>
-  {typeof option[fieldKey] === 'object' && option[fieldKey] !== null
-                                        ? Object.values(option[fieldKey]).join(' ') // Join object values with space
-                                        : option[fieldKey] || '' // Display value or fallback to empty string
-                                    }                           </div>
+                            }}>
+                            {typeof option[fieldKey] === 'object' && option[fieldKey] !== null
+                              ? Object.values(option[fieldKey]).join(' ') // Join object values with space
+                              : option[fieldKey] || '' // Display value or fallback to empty string
+                            }                           </div>
                         ))}
-                        </div>
+                      </div>
                     </div>
-                      )
-                        ,
-                        value: option._id,
-                      })),
-                      
-                      // Add the initial value if not already in options
-                      ...(form.getFieldValue(field.name) &&
-                      !(lookupOptionforparent[field.name] || []).some(
-                        (option) => option._id === form.getFieldValue(field.name)._id
-                      )
-                        ? [
-                            {
-                              children: (
-                                
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                  <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                                    {form.getFieldValue(field.name)?.Name?.charAt(0).toUpperCase()}
-                                  </Avatar>
-                                  {form.getFieldValue(field.name)?.Name}
-                                </div>
-                              ),
-                              value: form.getFieldValue(field.name).id,
-                            },
-                          ]
-                        : []
+                  )
+                  ,
+                  value: option._id,
+                })),
+
+                // Add the initial value if not already in options
+                ...(form.getFieldValue(field.name) &&
+                  !(lookupOptionforparent[field.name] || []).some(
+                    (option) => option._id === form.getFieldValue(field.name)._id
+                  )
+                  ? [
+                    {
+                      children: (
+
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
+                            {form.getFieldValue(field.name)?.Name?.charAt(0).toUpperCase()}
+                          </Avatar>
+                          {form.getFieldValue(field.name)?.Name}
+                        </div>
                       ),
-                    ]}
-                  />
+                      value: form.getFieldValue(field.name).id,
+                    },
+                  ]
+                  : []
+                ),
+              ]}
+            />
           </Form.Item>
         );
-  
-        case 'Address':
-          return (
-            <Form.Item
-              key={field.name}
-              name={field.name}
-              label={field.label} // This shows "Address" as the label
-            >
-              <Card title="Enter Address" bordered={true}>
-                <Form.Item
-                  key={`${field.name}_street`}
-                  name={`${field.name}_street`}
-                  label="Street"
-                >
-                  <Input placeholder="Enter Street" />
-                </Form.Item>
-                <Form.Item
-                  key={`${field.name}_city`}
-                  name={`${field.name}_city`}
-                  label="City"
-                >
-                  <Input placeholder="Enter City" />
-                </Form.Item>
-                <Form.Item
-                  key={`${field.name}_state`}
-                  name={`${field.name}_state`}
-                  label="State"
-                >
-                  <Input placeholder="Enter State" />
-                </Form.Item>
-                <Form.Item
-                  key={`${field.name}_country`}
-                  name={`${field.name}_country`}
-                  label="Country"
-                >
-                  <Input placeholder="Enter Country" />
-                </Form.Item>
-                <Form.Item
-                  key={`${field.name}_postalcode`}
-                  name={`${field.name}_postalcode`}
-                  label="Postal Code"
-                >
-                  <Input placeholder="Enter Postal Code" />
-                </Form.Item>
-              </Card>
-            </Form.Item>
-          );
-  
+
+      case 'Address':
+        return (
+          <Form.Item
+            key={field.name}
+            name={field.name}
+            label={field.label} // This shows "Address" as the label
+          >
+            <Card title="Enter Address" bordered={true}>
+              <Form.Item
+                key={`${field.name}_street`}
+                name={`${field.name}_street`}
+                label="Street"
+              >
+                <Input placeholder="Enter Street" />
+              </Form.Item>
+              <Form.Item
+                key={`${field.name}_city`}
+                name={`${field.name}_city`}
+                label="City"
+              >
+                <Input placeholder="Enter City" />
+              </Form.Item>
+              <Form.Item
+                key={`${field.name}_state`}
+                name={`${field.name}_state`}
+                label="State"
+              >
+                <Input placeholder="Enter State" />
+              </Form.Item>
+              <Form.Item
+                key={`${field.name}_country`}
+                name={`${field.name}_country`}
+                label="Country"
+              >
+                <Input placeholder="Enter Country" />
+              </Form.Item>
+              <Form.Item
+                key={`${field.name}_postalcode`}
+                name={`${field.name}_postalcode`}
+                label="Postal Code"
+              >
+                <Input placeholder="Enter Postal Code" />
+              </Form.Item>
+            </Card>
+          </Form.Item>
+        );
+
       case 'decimal':
         const decimalPlacesBefore = field.decimal_places_before;
         const decimalPlacesAfter = field.decimal_places_after;
         const decimalPattern = new RegExp(`^\\d{1,${decimalPlacesBefore}}(\\.\\d{0,${decimalPlacesAfter}})?$`);
-  
+
         return (
           <Form.Item
             key={field.name}
@@ -513,7 +514,7 @@ const CreateRecordDrawer = ({
           </Form.Item>
         );
 
-        case 'percentage':
+      case 'percentage':
         return (
           <Form.Item
             key={field.name}
@@ -521,10 +522,10 @@ const CreateRecordDrawer = ({
             label={renderLabel}
             rules={isRequired}
           >
-            <Input   addonAfter="%" type="float" placeholder={`Enter ${field.label}`} />
+            <Input addonAfter="%" type="float" placeholder={`Enter ${field.label}`} />
           </Form.Item>
         );
-  
+
       case 'Text-Area':
         return (
           <Form.Item
@@ -538,13 +539,13 @@ const CreateRecordDrawer = ({
             />
           </Form.Item>
         );
-  
+
       default:
         return null;
     }
   };
-  
- 
+
+
   return (
     <Drawer
       title={<div style={{ fontSize: '20px', fontWeight: 'bold' }}>
@@ -558,7 +559,7 @@ const CreateRecordDrawer = ({
         padding: '20px 16px',
         background: '#f0f2f5',
         borderBottom: '1px solid #e8e8e8',
-      }} 
+      }}
       footer={
         <div
           style={{
@@ -570,8 +571,8 @@ const CreateRecordDrawer = ({
             borderTop: '1px solid #e8e8e8',
           }}
         >
-          <Button 
-            onClick={onClose}             
+          <Button
+            onClick={onClose}
             disabled={loading} // Disable cancel button when loading is true
             style={{ height: '34px', width: '90px', fontSize: '14px' }}
           >
@@ -588,7 +589,7 @@ const CreateRecordDrawer = ({
               border: '1px solid #1890ff',
             }}
           >
-            Save 
+            Save
           </Button>
         </div>
       }

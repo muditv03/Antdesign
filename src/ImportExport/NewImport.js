@@ -18,7 +18,7 @@ const NewImport = () => {
     navigate('/import/new-import/standard'); // Adjust this path as needed
   };
 
-  const handleCancel=()=>{
+  const handleCancel = () => {
     navigate('/import');
   }
 
@@ -66,10 +66,10 @@ const NewImport = () => {
           <Button style={{ margin: '0 10px' }} onClick={handleCancel}>
             Cancel
           </Button>
-          <Button 
-            type="primary" 
-            style={{ margin: '0 10px' }} 
-            onClick={handleNext} 
+          <Button
+            type="primary"
+            style={{ margin: '0 10px' }}
+            onClick={handleNext}
             disabled={!selectedCard} // Disable button if no card is selected
           >
             Next

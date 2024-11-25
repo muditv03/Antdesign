@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, Button, Typography, Table, Tooltip } from "antd";
 import { UploadOutlined, SyncOutlined } from "@ant-design/icons";
 import axios from "axios";
-import ApiService from '../Components/apiService'; 
+import ApiService from '../Components/apiService';
 import { BASE_URL } from '../Components/Constant';
 
 const { Title } = Typography;
@@ -22,12 +22,12 @@ const Import = () => {
     const fetchJobData = async () => {
       try {
         const apiService = new ApiService(`${BASE_URL}/get_all_jobs`, {
-          'Content-Type':  "application/json"
-      }, 'GET'); 
+          'Content-Type': "application/json"
+        }, 'GET');
 
-      const response = await apiService.makeCall();
+        const response = await apiService.makeCall();
 
-      setJobData(response);
+        setJobData(response);
       } catch (error) {
         console.error("Error fetching job data:", error);
       }

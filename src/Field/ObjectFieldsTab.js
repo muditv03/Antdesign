@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Row, Col, Table, Button, message, Spin, Tooltip,Typography,Popconfirm } from 'antd';
-import CreateFieldDrawer from './CreateFieldDrawer'; 
-import ApiService from '../Components/apiService'; 
+import { Row, Col, Table, Button, message, Spin, Tooltip, Typography, Popconfirm } from 'antd';
+import CreateFieldDrawer from './CreateFieldDrawer';
+import ApiService from '../Components/apiService';
 import { BASE_URL } from '../Components/Constant';
-import { EditOutlined,DeleteOutlined,InfoCircleOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
-const {Title}=Typography;
+const { Title } = Typography;
 
 const ObjectFieldTab = () => {
   const location = useLocation();
@@ -51,15 +51,15 @@ const ObjectFieldTab = () => {
           `${BASE_URL}/mt_fields/object/${record.name}`,
           { 'Content-Type': 'application/json' },
           'GET'
-        ); 
+        );
         const response = await apiService.makeCall();
         setFieldsData(response
           .filter((field) => field.name !== 'recordCount')
           .map((field) => ({ ...field, key: field._id })));
       } catch (error) {
         const errorMessage = error && typeof error === 'object'
-        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-        : 'Failed to fetch fields due to an unknown error';
+          ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+          : 'Failed to fetch fields due to an unknown error';
         message.error(errorMessage);
       } finally {
         setLoadingFields(false);
@@ -77,7 +77,7 @@ const ObjectFieldTab = () => {
     }
   }, [record?.name]);
 
-  const deleteField= async (record)=>{
+  const deleteField = async (record) => {
 
     console.log('id is ');
     console.log(record._id);
@@ -89,7 +89,7 @@ const ObjectFieldTab = () => {
         {}, // Headers (if any)
         'DELETE'
       );
-  
+
       await apiService.makeCall();
       fetchFieldsData();
       message.success('Record deleted successfully.');
@@ -124,54 +124,54 @@ const ObjectFieldTab = () => {
       width: 100,
       render: (text, record) => (
         <>
-        <Tooltip title="Edit">
-          <EditOutlined
-            onClick={() => handleEdit(record)}
-            style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
-          />
-        </Tooltip> 
+          <Tooltip title="Edit">
+            <EditOutlined
+              onClick={() => handleEdit(record)}
+              style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
+            />
+          </Tooltip>
 
-        <Tooltip title="Delete">
-          <Popconfirm
-            title="Are you sure you want to delete this field?"
-            onConfirm={() => deleteField(record)}
-            okText="Yes"
-            cancelText="No"
-          >
-            
-           
-            <DeleteOutlined style={{ color: 'red', marginRight: 8, fontSize: '14px', cursor: 'pointer' }} />
-          </Popconfirm>
-        </Tooltip>
+          <Tooltip title="Delete">
+            <Popconfirm
+              title="Are you sure you want to delete this field?"
+              onConfirm={() => deleteField(record)}
+              okText="Yes"
+              cancelText="No"
+            >
+
+
+              <DeleteOutlined style={{ color: 'red', marginRight: 8, fontSize: '14px', cursor: 'pointer' }} />
+            </Popconfirm>
+          </Tooltip>
 
         </>
 
-        
+
       ),
 
     },
-   
+
   ];
 
   console.log(fieldsData);
 
   return (
-    <div>  
+    <div>
       <Row justify="space-between" align="middle" style={{ marginBottom: 10 }}>
-      <Col>
-        <Title level={3} style={{ marginTop:'10px' }}>Properties</Title>
-      </Col>
-      <Col  style={{ marginTop:'10px' }}>
-        <Button type="primary" onClick={showDrawer} style={{ marginBottom: 5 }}>
-          Create Field
-        </Button>
-      </Col>
-    </Row>
-      
+        <Col>
+          <Title level={3} style={{ marginTop: '10px' }}>Properties</Title>
+        </Col>
+        <Col style={{ marginTop: '10px' }}>
+          <Button type="primary" onClick={showDrawer} style={{ marginBottom: 5 }}>
+            Create Field
+          </Button>
+        </Col>
+      </Row>
+
       <Spin spinning={loadingFields || loading}>
         <Table columns={fieldColumns} dataSource={fieldsData} pagination={false} />
       </Spin>
-      
+
       <CreateFieldDrawer
         visible={drawerVisible}
         onClose={closeDrawer}

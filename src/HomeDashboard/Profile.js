@@ -67,7 +67,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <Layout style={{   backgroundColor: '#f4f6f9' }}>
+    <Layout style={{ backgroundColor: '#f4f6f9' }}>
       <Content style={{ maxWidth: '100%', padding: '20px' }}>
         <Card bordered={false} style={{ marginBottom: '20px' }}>
           <div style={headerStyle} >
@@ -97,10 +97,10 @@ const ProfilePage = () => {
                       <Input value={profile.email} disabled />
                     </Form.Item>
                   </Col>
-                  
+
                 </Row>
                 <Row gutter={16}>
-                <Col span={12}>
+                  <Col span={12}>
                     <Form.Item label="User Name">
                       <Input value={profile.username} disabled />
                     </Form.Item>
@@ -110,11 +110,11 @@ const ProfilePage = () => {
                       <Input value={profile.title} disabled />
                     </Form.Item>
                   </Col>
-                  
-                 
+
+
                 </Row>
                 <Row gutter={16}>
-                <Col span={12}>
+                  <Col span={12}>
                     <Form.Item label="Manager">
                       <Input value={profile.manager} disabled />
                     </Form.Item>
@@ -124,7 +124,7 @@ const ProfilePage = () => {
                       <Input value={profile.companyName} disabled />
                     </Form.Item>
                   </Col>
-                 
+
                 </Row>
               </Form>
             </Card>

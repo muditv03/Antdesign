@@ -23,79 +23,79 @@ const OrganisationSetup = () => {
 
   return (
     <Card>
-    <Row justify="space-between" align="middle" style={{ marginBottom: '16px' }}>
-      <Col>
-        <Title level={4} style={{ margin: 0, fontSize: '24px' }}>Organisation Setup</Title>
-      </Col>
-      <Col>
-        {!isEditing && (
-          <Button 
-            type="primary" 
-            onClick={() => setIsEditing(true)} 
-            style={{ marginRight: '8px' }}
-          >
-            Edit
-          </Button>
-        )}
-      </Col>
-    </Row>
-    <Form 
-      form={form} 
-      layout="vertical" 
-      style={{ position: 'relative' }} 
-      initialValues={initialValues} // Set initial values
-      onFinish={onFinish} // Handle form submission
-    >
-      <Row gutter={24}>
-        <Col xs={24} sm={12} md={12}>
-          <Form.Item
-            label="Default Currency"
-            style={{ marginBottom: '8px' }}
-          >
-            {isEditing ? (
-              <Select defaultValue={initialValues.currency}>
-                <Select.Option value="Dollar">Dollar</Select.Option>
-                <Select.Option value="Euro">Euro</Select.Option>
-                <Select.Option value="Pound">Pound</Select.Option>
-                {/* Add more options as needed */}
-              </Select>
-            ) : (
-              <span style={{ fontWeight: 500 }}>{initialValues.currency}</span>
-            )}
-          </Form.Item>
+      <Row justify="space-between" align="middle" style={{ marginBottom: '16px' }}>
+        <Col>
+          <Title level={4} style={{ margin: 0, fontSize: '24px' }}>Organisation Setup</Title>
         </Col>
-  
-        <Col xs={24} sm={12} md={12}>
-          <Form.Item
-            label="Local"
-            style={{ marginBottom: '8px' }}
-          >
-            {isEditing ? (
-              <Input defaultValue={initialValues.local} />
-            ) : (
-              <span style={{ fontWeight: 500 }}>{initialValues.local}</span>
-            )}
-          </Form.Item>
+        <Col>
+          {!isEditing && (
+            <Button
+              type="primary"
+              onClick={() => setIsEditing(true)}
+              style={{ marginRight: '8px' }}
+            >
+              Edit
+            </Button>
+          )}
         </Col>
       </Row>
-  
-      {/* Buttons for Cancel and Save at the bottom */}
-      {isEditing && (
-        <Row justify="end" style={{ marginTop: '16px' }}>
-          <Button 
-            style={{ marginRight: '8px' }} 
-            onClick={() => setIsEditing(false)} // Cancel button
-          >
-            Cancel
-          </Button>
-          <Button type="primary" onClick={() => form.submit()}> 
-            Save
-          </Button>
+      <Form
+        form={form}
+        layout="vertical"
+        style={{ position: 'relative' }}
+        initialValues={initialValues} // Set initial values
+        onFinish={onFinish} // Handle form submission
+      >
+        <Row gutter={24}>
+          <Col xs={24} sm={12} md={12}>
+            <Form.Item
+              label="Default Currency"
+              style={{ marginBottom: '8px' }}
+            >
+              {isEditing ? (
+                <Select defaultValue={initialValues.currency}>
+                  <Select.Option value="Dollar">Dollar</Select.Option>
+                  <Select.Option value="Euro">Euro</Select.Option>
+                  <Select.Option value="Pound">Pound</Select.Option>
+                  {/* Add more options as needed */}
+                </Select>
+              ) : (
+                <span style={{ fontWeight: 500 }}>{initialValues.currency}</span>
+              )}
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} sm={12} md={12}>
+            <Form.Item
+              label="Local"
+              style={{ marginBottom: '8px' }}
+            >
+              {isEditing ? (
+                <Input defaultValue={initialValues.local} />
+              ) : (
+                <span style={{ fontWeight: 500 }}>{initialValues.local}</span>
+              )}
+            </Form.Item>
+          </Col>
         </Row>
-      )}
-    </Form>
-  </Card>
-  
+
+        {/* Buttons for Cancel and Save at the bottom */}
+        {isEditing && (
+          <Row justify="end" style={{ marginTop: '16px' }}>
+            <Button
+              style={{ marginRight: '8px' }}
+              onClick={() => setIsEditing(false)} // Cancel button
+            >
+              Cancel
+            </Button>
+            <Button type="primary" onClick={() => form.submit()}>
+              Save
+            </Button>
+          </Row>
+        )}
+      </Form>
+    </Card>
+
   );
 };
 

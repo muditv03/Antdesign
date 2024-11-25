@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Layout, Typography,message,Spin } from 'antd';
-import { MailOutlined,LockOutlined,KeyOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Layout, Typography, message, Spin } from 'antd';
+import { MailOutlined, LockOutlined, KeyOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { BASE_URL } from '../Components/Constant';
 import ApiService from '../Components/apiService'; // Import ApiService class
@@ -11,24 +11,24 @@ const { Title, Text } = Typography;
 
 const ForgotPassword = () => {
 
-  const [isOTP,SetIsOTP]=useState(false);
-  const [email,setEmail]=useState('');
+  const [isOTP, SetIsOTP] = useState(false);
+  const [email, setEmail] = useState('');
   const [form] = Form.useForm();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false); // Loading state for spinner
 
-  const onFinish = async(values) => {
+  const onFinish = async (values) => {
     console.log('values are');
-    console.log( values);
+    console.log(values);
 
     setLoading(true);
 
     const apiService = new ApiService(`${BASE_URL}/reset_password`, {
-      'Content-Type': 'application/json', 
+      'Content-Type': 'application/json',
     }, 'POST', {
       email: email,
-      otp:values.OTP,
-      new_password:values.newpassword
+      otp: values.OTP,
+      new_password: values.newpassword
     });
 
     try {
@@ -41,22 +41,22 @@ const ForgotPassword = () => {
     } catch (error) {
 
       const errorMessage = error && typeof error === 'object'
-      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-      : 'Failed to save field due to an unknown error';
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to save field due to an unknown error';
       message.error(errorMessage);
       setLoading(false);
     }
 
 
   };
- 
+
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
 
   const layoutStyle = {
     minHeight: '100vh',
-    display: 'flex', 
+    display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
@@ -109,7 +109,7 @@ const ForgotPassword = () => {
   const forgotPasswordTextStyle = {
     marginBottom: '24px',
   };
- 
+
   const formItemStyle = {
     marginBottom: '16px',
   };
@@ -118,16 +118,16 @@ const ForgotPassword = () => {
     marginTop: '16px',
   };
 
-  const handleEmailChange =(value)=>{
+  const handleEmailChange = (value) => {
     console.log(value);
     setEmail(value);
   }
-  const handlesendOTP=async()=>{
+  const handlesendOTP = async () => {
 
     setLoading(true); // Start loading
     console.log(email);
     const apiService = new ApiService(`${BASE_URL}/forgot_password`, {
-      'Content-Type': 'application/json', 
+      'Content-Type': 'application/json',
     }, 'POST', {
       email: email,
     });
@@ -139,8 +139,8 @@ const ForgotPassword = () => {
       SetIsOTP(true);
     } catch (error) {
       const errorMessage = error && typeof error === 'object'
-      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-      : 'Failed to save field due to an unknown error';
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to save field due to an unknown error';
       message.error(errorMessage);
     } finally {
       setLoading(false); // Stop loading
@@ -160,115 +160,115 @@ const ForgotPassword = () => {
             </Title>
           </div>
           <div style={forgotPasswordSectionStyle}>
-          <Spin spinning={loading}>
+            <Spin spinning={loading}>
 
-            <Title level={2}>Reset Password</Title>
-            <Text style={forgotPasswordTextStyle}>Please enter your email to reset your password.</Text>
-            <Form
-              name="forgot-password"
-              initialValues={{ remember: true }}
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
-              layout="vertical"
-            >
-
-              {!isOTP && (
-                <>
-              <Form.Item
-                label="Email"
-                name="email"
-                onChange={(e)=>handleEmailChange(e.target.value)}
-                rules={[
-                  { required: true, message: 'Please input your email!' },
-                  { type: 'email', message: 'The input is not valid E-mail!' },
-                ]}
-                style={formItemStyle}
+              <Title level={2}>Reset Password</Title>
+              <Text style={forgotPasswordTextStyle}>Please enter your email to reset your password.</Text>
+              <Form
+                name="forgot-password"
+                initialValues={{ remember: true }}
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                layout="vertical"
               >
-                <Input prefix={<MailOutlined />} />
-              </Form.Item>
 
-              <Form.Item>
-                <Button type="primary" onClick={handlesendOTP} block style={submitButtonStyle}>
-                  Send OTP
-                </Button>
+                {!isOTP && (
+                  <>
+                    <Form.Item
+                      label="Email"
+                      name="email"
+                      onChange={(e) => handleEmailChange(e.target.value)}
+                      rules={[
+                        { required: true, message: 'Please input your email!' },
+                        { type: 'email', message: 'The input is not valid E-mail!' },
+                      ]}
+                      style={formItemStyle}
+                    >
+                      <Input prefix={<MailOutlined />} />
+                    </Form.Item>
 
-              </Form.Item>
-              </>
-            )}
+                    <Form.Item>
+                      <Button type="primary" onClick={handlesendOTP} block style={submitButtonStyle}>
+                        Send OTP
+                      </Button>
 
-            {isOTP && (
-              <>
+                    </Form.Item>
+                  </>
+                )}
 
-              <Form.Item
-                label="Enter OTP"
-                name="OTP"
-                style={formItemStyle}
-                rules={[{ required: true, message: 'Please enter OTP' }]}
+                {isOTP && (
+                  <>
 
-              >
-                <Input prefix={<KeyOutlined />}  />
-              </Form.Item>  
+                    <Form.Item
+                      label="Enter OTP"
+                      name="OTP"
+                      style={formItemStyle}
+                      rules={[{ required: true, message: 'Please enter OTP' }]}
 
-              <Form.Item
-                label="New Password"
-                name="newpassword"
-                rules={[{ required: true, message: 'Please input your password!' }]}
-                style={formItemStyle}
-              >
-                <Input.Password prefix={<LockOutlined />} />
-              </Form.Item>
+                    >
+                      <Input prefix={<KeyOutlined />} />
+                    </Form.Item>
 
-              {/* Confirm Password Field */}
-              <Form.Item
-                label="Confirm New Password"
-                name="confirmnew"
-                rules={[
-                  { required: true, message: 'Please confirm your new password!' },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || getFieldValue('newpassword') === value) {
-                        return Promise.resolve();
-                      }
-                      return Promise.reject(new Error('The two passwords do not match!'));
-                    },
-                  }),
-                ]}
-                style={formItemStyle}
-              >
-                <Input.Password prefix={<LockOutlined />} />
-              </Form.Item>
+                    <Form.Item
+                      label="New Password"
+                      name="newpassword"
+                      rules={[{ required: true, message: 'Please input your password!' }]}
+                      style={formItemStyle}
+                    >
+                      <Input.Password prefix={<LockOutlined />} />
+                    </Form.Item>
 
-              <Form.Item>
-                <Button type="primary" htmlType='submit'  block style={submitButtonStyle}>
-                  Set New Password
-                </Button>
+                    {/* Confirm Password Field */}
+                    <Form.Item
+                      label="Confirm New Password"
+                      name="confirmnew"
+                      rules={[
+                        { required: true, message: 'Please confirm your new password!' },
+                        ({ getFieldValue }) => ({
+                          validator(_, value) {
+                            if (!value || getFieldValue('newpassword') === value) {
+                              return Promise.resolve();
+                            }
+                            return Promise.reject(new Error('The two passwords do not match!'));
+                          },
+                        }),
+                      ]}
+                      style={formItemStyle}
+                    >
+                      <Input.Password prefix={<LockOutlined />} />
+                    </Form.Item>
 
-              </Form.Item>
-              </>
-            )}
-            </Form>
+                    <Form.Item>
+                      <Button type="primary" htmlType='submit' block style={submitButtonStyle}>
+                        Set New Password
+                      </Button>
 
-            {isOTP &&( 
-            <div style={{ position: 'relative' }}> 
+                    </Form.Item>
+                  </>
+                )}
+              </Form>
+
+              {isOTP && (
+                <div style={{ position: 'relative' }}>
+                  <Text>
+                    Didn't received OTP?
+                  </Text>
+                  <Button
+                    type="text"
+                    style={{ color: '#4096ff', padding: 2 }}
+                    onClick={() => SetIsOTP(false)}
+                  >
+                    Resend OTP
+                  </Button>
+                </div>
+              )}
+
+
               <Text>
-                Didn't received OTP?   
+                Remembered your password? <Link to="/login">Login</Link>
               </Text>
-              <Button
-                type="text"
-                style={{color:'#4096ff',padding:2}}
-                onClick={() => SetIsOTP(false)}
-                >
-                Resend OTP
-              </Button>
-            </div>
-            )}
 
-           
-            <Text>
-              Remembered your password? <Link to="/login">Login</Link>
-            </Text>
 
-            
             </Spin>
           </div>
         </div>

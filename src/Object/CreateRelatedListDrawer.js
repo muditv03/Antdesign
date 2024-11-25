@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Drawer, Form, Input, Button, Select, message,Card } from 'antd';
+import { Drawer, Form, Input, Button, Select, message, Card } from 'antd';
 import apiService from '../Components/apiService'; // Import your ApiService class
 import { BASE_URL } from '../Components/Constant';
 
@@ -10,7 +10,7 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
   const [parentObjects, setParentObjects] = useState([]);
   const [childObjectFields, setChildObjectFields] = useState([]);
   const [selectedChild, setSelectedChild] = useState('');
-  const [selectedFields, setSelectedFields] = useState([]); 
+  const [selectedFields, setSelectedFields] = useState([]);
   const [lookupFields, setLookupFields] = useState([]); // New state for lookup fields
 
   // Fetch parent objects
@@ -76,17 +76,17 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
   };
 
   // Handle field selection with a maximum of 7 fields
-  const handleFieldChange = async(value) => {
+  const handleFieldChange = async (value) => {
     if (value.length > 7) {
       message.error('You can select up to 7 fields.');
       return;
     }
     setSelectedFields(value);
   };
- 
+
   // Submit form handler
-  const handleFinish =async (values) => {
-    const { relatedListName, parentObject,fieldapiname } = values;
+  const handleFinish = async (values) => {
+    const { relatedListName, parentObject, fieldapiname } = values;
     if (!relatedListName || !parentObject || !selectedChild) {
       message.error('Please complete all required fields.');
       return;
@@ -97,33 +97,33 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
       child_object_name: selectedChild,
       related_list_name: relatedListName,
       fields_to_display: selectedFields,
-      field_api_name:fieldapiname
-      
-    }; 
+      field_api_name: fieldapiname
+
+    };
 
 
-      try {
-        const apiServiceForTab = new apiService(
-            `${BASE_URL}/create_related_list`,
-            { 'Content-Type': 'application/json' },
-            'POST',
-            data
-        );
+    try {
+      const apiServiceForTab = new apiService(
+        `${BASE_URL}/create_related_list`,
+        { 'Content-Type': 'application/json' },
+        'POST',
+        data
+      );
 
-        await apiServiceForTab.makeCall();
-        message.success('Related list created successfully!');
-        form.resetFields();
-        onClose(); // Close the drawer after successful creation
-        onAddRelatedList(); // Callback to refresh related lists
+      await apiServiceForTab.makeCall();
+      message.success('Related list created successfully!');
+      form.resetFields();
+      onClose(); // Close the drawer after successful creation
+      onAddRelatedList(); // Callback to refresh related lists
     } catch (error) {
-        const errorMessage = error && typeof error === 'object'
+      const errorMessage = error && typeof error === 'object'
         ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
         : 'Failed to create new related list due to an unknown error';
-        message.error(errorMessage);       
-      } 
+      message.error(errorMessage);
+    }
   };
 
- 
+
   return (
     <Drawer
       title={editingRelatedList ? "Edit Related List" : "Create Related List"}
@@ -143,76 +143,76 @@ const CreateRelatedListDrawer = ({ visible, onClose, onAddRelatedList, parentObj
         </div>
       }
     >
-      <Card 
+      <Card
         style={{ margin: '20px', padding: '20px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
 
       >
-      <Form layout="vertical" form={form} onFinish={handleFinish}>
-        <Form.Item
-          name="relatedListName"
-          label="Related List Name"
-          rules={[{ required: true, message: 'Please enter the related list name' }]}
-        >
-          <Input placeholder="Enter related list name" />
-        </Form.Item>
-
-        <Form.Item
-          name="parentObject"
-          label="Parent Object"
-          rules={[{ required: true, message: 'Please select a parent object' }]}
-        >
-          <Select placeholder="Select parent object" disabled value={parentObjectName}>
-            {parentObjects.map(obj => (
-              <Option key={obj.name} value={obj.name}>{obj.label}</Option>
-            ))}
-          </Select>
-        </Form.Item> 
-
-        <Form.Item
-          name="childObject"
-          label="Child Object"
-          rules={[{ required: true, message: 'Please select a child object' }]}
-        >
-          <Select placeholder="Select child object" onChange={handleChildObjectChange} value={selectedChild}>
-            {parentObjects.map(obj => (
-              <Option key={obj.name} value={obj.name}>{obj.label}</Option>
-            ))}
-          </Select>
-        </Form.Item>
-
-        {selectedChild && (
-          <>
+        <Form layout="vertical" form={form} onFinish={handleFinish}>
           <Form.Item
-            name="fieldsToDisplay"
-            label="Fields to Display"
-            rules={[{ required: true, message: 'Please select at least one field' }]}
+            name="relatedListName"
+            label="Related List Name"
+            rules={[{ required: true, message: 'Please enter the related list name' }]}
           >
-            <Select
-              mode="multiple"
-              placeholder="Select fields to display"
-              onChange={handleFieldChange}
-              value={selectedFields}
-              options={childObjectFields
-                .filter((field) => !selectedFields.includes(field.name))
-                .map((field) => ({ value: field.name, label: field.label }))} // Ensure unique options
-            />
+            <Input placeholder="Enter related list name" />
           </Form.Item>
 
           <Form.Item
-          name="fieldapiname"
-          label="Lookup Name"
-          rules={[{ required: true, message: 'Please select a lookup field' }]}
+            name="parentObject"
+            label="Parent Object"
+            rules={[{ required: true, message: 'Please select a parent object' }]}
           >
-          <Select placeholder="Select a lookup field">
-            {lookupFields.map(field => (
-              <Option key={field.name} value={field.name}>{field.label}</Option>
-            ))}
-          </Select>
+            <Select placeholder="Select parent object" disabled value={parentObjectName}>
+              {parentObjects.map(obj => (
+                <Option key={obj.name} value={obj.name}>{obj.label}</Option>
+              ))}
+            </Select>
           </Form.Item>
-          </>
 
-        )}
-      </Form>
+          <Form.Item
+            name="childObject"
+            label="Child Object"
+            rules={[{ required: true, message: 'Please select a child object' }]}
+          >
+            <Select placeholder="Select child object" onChange={handleChildObjectChange} value={selectedChild}>
+              {parentObjects.map(obj => (
+                <Option key={obj.name} value={obj.name}>{obj.label}</Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          {selectedChild && (
+            <>
+              <Form.Item
+                name="fieldsToDisplay"
+                label="Fields to Display"
+                rules={[{ required: true, message: 'Please select at least one field' }]}
+              >
+                <Select
+                  mode="multiple"
+                  placeholder="Select fields to display"
+                  onChange={handleFieldChange}
+                  value={selectedFields}
+                  options={childObjectFields
+                    .filter((field) => !selectedFields.includes(field.name))
+                    .map((field) => ({ value: field.name, label: field.label }))} // Ensure unique options
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="fieldapiname"
+                label="Lookup Name"
+                rules={[{ required: true, message: 'Please select a lookup field' }]}
+              >
+                <Select placeholder="Select a lookup field">
+                  {lookupFields.map(field => (
+                    <Option key={field.name} value={field.name}>{field.label}</Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </>
+
+          )}
+        </Form>
       </Card>
     </Drawer>
   );

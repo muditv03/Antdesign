@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-   
+
 class ApiService {
   constructor(endpoint, headers = {}, method = '', body = null) {
     this.endpoint = endpoint;
@@ -10,14 +10,14 @@ class ApiService {
     };
     this.method = method;
     this.body = body;
-    
+
     //console.log('Cookie is '+ JSON.stringify(Cookies.get('tokenRes')));
     // Add cookie data to headers if available
     const authToken = Cookies.get('tokenRes'); // Replace 'auth_token' with the actual cookie name
     if (authToken) {
       this.headers['Authorization'] = `Bearer ${authToken}`; // Add the Authorization header
     }
-  } 
+  }
 
   async makeCall() {
     try {
@@ -27,7 +27,7 @@ class ApiService {
         headers: this.headers,
         data: this.body,
       };
-  
+
       const response = await axios(options);
 
       if (response.status >= 200 && response.status < 300) {

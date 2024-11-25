@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Drawer, Form, Input, Button, message, Card, Checkbox, Select, Spin,Row,Col } from 'antd';
+import { Drawer, Form, Input, Button, message, Card, Checkbox, Select, Spin, Row, Col } from 'antd';
 import * as Icons from '@ant-design/icons';
 import { BASE_URL } from '../Components/Constant';
 import ApiService from '../Components/apiService'; // Import ApiService class
 import eventBus from '../Components/eventBus'; // Import the event bus
- 
+
 const { Option } = Select;
 
 const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord }) => {
@@ -13,7 +13,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
   const [isallowSearch, setIsAllowSearch] = useState(false); // State for auto number checkbox
   const [isTrackActivities, setIsTrackActivities] = useState(false); // State for auto number checkbox
   const [isTrackFieldHistory, setIsTrackFieldHistory] = useState(false); // State for auto number checkbox
-  const [isAllowFileUpload,setIsAllowFileUpload]=useState(false);
+  const [isAllowFileUpload, setIsAllowFileUpload] = useState(false);
 
   useEffect(() => {
     if (editingRecord) {
@@ -26,7 +26,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       setIsTrackFieldHistory(editingRecord.track_field_history);
       setIsAllowFileUpload(editingRecord.allow_files);
     } else {
-      form.resetFields(); 
+      form.resetFields();
     }
   }, [editingRecord, form]);
 
@@ -37,7 +37,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
   const handleLabelChange = (e) => {
     const label = e.target.value;
     const currentName = form.getFieldValue('name');
-  
+
     if (!currentName) {
       form.setFieldsValue({
         name: generateApiName(label),
@@ -57,8 +57,8 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       allow_search: isallowSearch,
       track_activities: isTrackActivities,
       track_field_history: isTrackFieldHistory,
-      allow_files:isAllowFileUpload
-    }; 
+      allow_files: isAllowFileUpload
+    };
     try {
       let response;
       if (editingRecord && editingRecord.key) {
@@ -139,7 +139,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
           allow_search: isallowSearch,
           track_activities: isTrackActivities,
           track_field_history: isTrackFieldHistory,
-          allow_files:isAllowFileUpload
+          allow_files: isAllowFileUpload
 
         });
       }
@@ -148,8 +148,8 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       form.resetFields();
     } catch (error) {
       const errorMessage = error && typeof error === 'object'
-      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-      : 'Failed to save object due to an unknown error';
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to save object due to an unknown error';
       message.error(errorMessage);
     } finally {
       setLoading(false); // Stop the spinner
@@ -211,7 +211,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
                 },
               ]}
             >
-              <Input placeholder="Please enter the name" disabled={!!editingRecord}/>
+              <Input placeholder="Please enter the name" disabled={!!editingRecord} />
             </Form.Item>
             <Form.Item
               name="pluralLabel"
@@ -229,48 +229,48 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
             </Form.Item>
 
             <Form.Item name="icon" label="Icon">
-                  <Select allowClear placeholder="Select an icon" optionLabelProp="label" showSearch filterOption={(input, option) =>
-                    option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                  }>
-                    {iconOptions}
-                  </Select>
+              <Select allowClear placeholder="Select an icon" optionLabelProp="label" showSearch filterOption={(input, option) =>
+                option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }>
+                {iconOptions}
+              </Select>
 
-                </Form.Item>
+            </Form.Item>
 
-           
-                <Form.Item name="addObjectTab" valuePropName="checked">
-                  <Checkbox>Add Object Tab</Checkbox>
-                </Form.Item>
-             
+
+            <Form.Item name="addObjectTab" valuePropName="checked">
+              <Checkbox>Add Object Tab</Checkbox>
+            </Form.Item>
+
 
             <Form.Item name="allowSearch" >
               <Checkbox
-               checked={isallowSearch}
-               onChange={(e) => setIsAllowSearch(e.target.checked)}
+                checked={isallowSearch}
+                onChange={(e) => setIsAllowSearch(e.target.checked)}
               >Allow Search</Checkbox>
             </Form.Item>
             <Form.Item name="trackActivities"
             >
               <Checkbox
-               checked={isTrackActivities}
-               onChange={(e) => setIsTrackActivities(e.target.checked)}
+                checked={isTrackActivities}
+                onChange={(e) => setIsTrackActivities(e.target.checked)}
               >Track Activities</Checkbox>
             </Form.Item>
             <Form.Item name="trackFieldHistory">
               <Checkbox
-               checked={isTrackFieldHistory}
-               onChange={(e) => setIsTrackFieldHistory(e.target.checked)}
+                checked={isTrackFieldHistory}
+                onChange={(e) => setIsTrackFieldHistory(e.target.checked)}
               >Track Field History</Checkbox>
             </Form.Item>
-          
+
             <Form.Item name="allowFileUpload">
               <Checkbox
-               checked={isAllowFileUpload}
-               onChange={(e) => setIsAllowFileUpload(e.target.checked)}
+                checked={isAllowFileUpload}
+                onChange={(e) => setIsAllowFileUpload(e.target.checked)}
               >Allow File Upload</Checkbox>
             </Form.Item>
-          
-           
+
+
           </Form>
         </Card>
       </Spin>

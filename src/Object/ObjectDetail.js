@@ -8,8 +8,9 @@ import { useState,useEffect } from 'react';
 import { BASE_URL } from '../Components/Constant';
 import ApiService from '../Components/apiService'; 
 import CreateObjectDrawer from './CreateObjectDrawer';
+import CreateLayout from './CreateLayout';
 
- 
+
 const { Title } = Typography;
 const { TabPane } = Tabs;
 
@@ -176,11 +177,11 @@ const ObjectFieldDetail = () => {
 
   return (
     <div>
-       <Breadcrumb style={{ marginBottom: '16px' }}>
-       <Breadcrumb.Item>
-       <Link to="/setup?tab=objectManager" style={{ fontWeight: 'bold' }}>
-          Object Manager
-        </Link>
+      <Breadcrumb style={{ marginBottom: '16px' }}>
+        <Breadcrumb.Item>
+          <Link to="/setup?tab=objectManager" style={{ fontWeight: 'bold' }}>
+            Object Manager
+          </Link>
         </Breadcrumb.Item>
         <Breadcrumb.Item>{record?.label || 'Object Details'}</Breadcrumb.Item>
       </Breadcrumb>
@@ -188,11 +189,11 @@ const ObjectFieldDetail = () => {
       <Title level={3}>{record?.label || 'Object Details'}</Title>
       <Tabs defaultActiveKey="1" tabPosition='left'>
         <TabPane tab="Details" key="1">
-          
+
           <Card>
-          <Row justify="end" style={{ marginBottom: '16px' }}>
-            
-          </Row>
+            <Row justify="end" style={{ marginBottom: '16px' }}>
+
+            </Row>
             <Form form={form} layout="vertical" style={{ position: 'relative' }}>
               <Title level={3} style={{ marginTop: '0px' }}>Details</Title>
               <Row gutter={24} style={{ marginBottom: '0px' }}>
@@ -203,28 +204,28 @@ const ObjectFieldDetail = () => {
                         label="Label"
                         labelCol={{ span: 6 }} // Adjust label column width
                         wrapperCol={{ span: 18 }} // Adjust wrapper column width
-                        style={{ marginBottom: '8px',borderBottom: '1px solid  #ddd' }} // Decrease bottom margin
+                        style={{ marginBottom: '8px', borderBottom: '1px solid  #ddd' }} // Decrease bottom margin
                       >
                         <span style={{ fontWeight: 500 }}>{field.label}</span>
                       </Form.Item>
                     </Col>
-              
+
                     <Col xs={24} sm={12}>
                       <Form.Item
                         label="Name"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
-                        style={{ marginBottom: '8px' ,borderBottom: '1px solid  #ddd'}}
+                        style={{ marginBottom: '8px', borderBottom: '1px solid  #ddd' }}
                       >
                         <span style={{ fontWeight: 500 }}>{field.name}</span>
-                       </Form.Item>
+                      </Form.Item>
                     </Col>
                     <Col xs={24} sm={12}>
                       <Form.Item
                         label="Plural Label"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 18 }}
-                        style={{ marginBottom: '8px',borderBottom: '1px solid  #ddd' }}
+                        style={{ marginBottom: '8px', borderBottom: '1px solid  #ddd' }}
                       >
                         <span style={{ fontWeight: 500 }}>{field.plurallabel}</span>
                       </Form.Item>
@@ -238,18 +239,23 @@ const ObjectFieldDetail = () => {
 
         <TabPane tab="Properties" key="2">
           <Card>
-          <ObjectFieldTab object={record} />  
+            <ObjectFieldTab object={record} />
           </Card>
         </TabPane>
         <TabPane tab="Related Lists" key="3">
-         <Card>
-         <ObjectRelatedListTab object={record} />
-         </Card>
+          <Card>
+            <ObjectRelatedListTab object={record} />
+          </Card>
         </TabPane>
         <TabPane tab="Create List View" key="4">
-         <Card>
-            <CreateListView object={record}/>
-         </Card>
+          <Card>
+            <CreateListView object={record} />
+          </Card>
+        </TabPane>
+      <TabPane tab="Layouts" key="5">
+          <Card>
+            <CreateLayout object={record} />
+          </Card>
         </TabPane>
         <TabPane tab="Search Result Layout" key="5">
             <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>

@@ -40,9 +40,9 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
         parentObject: record.parent_object_name || parentObjectName,
         childObject: record.child_object_name,
         fieldsToDisplay: record.fields_to_display || [],
-        fieldapiname:record.field_api_name
+        fieldapiname: record.field_api_name
 
-      }); 
+      });
       setSelectedChild(record.child_object_name);
       setSelectedFields(record.fields_to_display || []);
     }
@@ -89,8 +89,8 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
     setSelectedFields(value);
   };
 
-  const handleFinish = async(values) => {
-    const { relatedListName, parentObject, fieldsToDisplay,fieldapiname } = values;
+  const handleFinish = async (values) => {
+    const { relatedListName, parentObject, fieldsToDisplay, fieldapiname } = values;
 
     if (!relatedListName || !parentObject || !selectedChild) {
       message.error('Please complete all required fields.');
@@ -102,31 +102,31 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
       parent_object_name: parentObject,
       child_object_name: selectedChild,
       fields_to_display: fieldsToDisplay,
-      field_api_name:fieldapiname
+      field_api_name: fieldapiname
 
     };
 
 
     try {
       const apiServiceForTab = new apiService(
-          `${BASE_URL}/related_lists/${record.key}`,
-          { 'Content-Type': 'application/json' },
-          'PUT',
-          data
+        `${BASE_URL}/related_lists/${record.key}`,
+        { 'Content-Type': 'application/json' },
+        'PUT',
+        data
       );
 
       await apiServiceForTab.makeCall();
       message.success('Related list updated successfully!');
       form.resetFields();
       onClose(); // Close the drawer after successful creation
-  } catch (error) {
+    } catch (error) {
       const errorMessage = error && typeof error === 'object'
-      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-      : 'Failed to update related list due to an unknown error';
-      message.error(errorMessage);       
-    } 
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to update related list due to an unknown error';
+      message.error(errorMessage);
+    }
 
-   
+
   };
 
   return (
@@ -135,7 +135,7 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
       width={360}
       onClose={onClose}
       visible={visible}
-      
+
       headerStyle={{ backgroundColor: '#f0f2f5' }} // Header background color
       footerStyle={{ backgroundColor: '#f0f2f5' }} // Footer background color
       footer={
@@ -162,9 +162,9 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
           name="parentObject"
           label="Parent Object"
           rules={[{ required: true, message: 'Please select a parent object' }]}
- 
-        > 
-          <Select placeholder="Select parent object" value={parentObjectName} disabled onChange={(value) => form.setFieldsValue({ parentObject: value })}> 
+
+        >
+          <Select placeholder="Select parent object" value={parentObjectName} disabled onChange={(value) => form.setFieldsValue({ parentObject: value })}>
             {parentObjects.map(obj => (
               <Option key={obj.name} value={obj.name}>{obj.label}</Option>
 
@@ -192,38 +192,38 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
 
         {selectedChild && (
           <>
-          <Form.Item
-            name="fieldsToDisplay"
-            label="Fields to Display"
-            rules={[{ required: true, message: 'Please select at least one field' }]}
-          >
-            <Select
-              mode="multiple"
-              placeholder="Select fields to display"
-              onChange={handleFieldChange}
-              value={selectedFields}
+            <Form.Item
+              name="fieldsToDisplay"
+              label="Fields to Display"
+              rules={[{ required: true, message: 'Please select at least one field' }]}
             >
-              {childObjectFields
-                .filter((field) => !selectedFields.includes(field.name))
-                .map((field) => (
-                  <Option key={field.name} value={field.name}>
-                    {field.label}
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
+              <Select
+                mode="multiple"
+                placeholder="Select fields to display"
+                onChange={handleFieldChange}
+                value={selectedFields}
+              >
+                {childObjectFields
+                  .filter((field) => !selectedFields.includes(field.name))
+                  .map((field) => (
+                    <Option key={field.name} value={field.name}>
+                      {field.label}
+                    </Option>
+                  ))}
+              </Select>
+            </Form.Item>
 
-          <Form.Item
-          name="fieldapiname"
-          label="Lookup Name"
-          rules={[{ required: true, message: 'Please select a lookup field' }]}
-          >
-          <Select placeholder="Select a lookup field" defaultValue={form.getFieldValue('fieldapiname')}>
-            {lookupFields.map(field => (
-              <Option key={field.name} value={field.name}>{field.label}</Option>
-            ))}
-          </Select>
-          </Form.Item>
+            <Form.Item
+              name="fieldapiname"
+              label="Lookup Name"
+              rules={[{ required: true, message: 'Please select a lookup field' }]}
+            >
+              <Select placeholder="Select a lookup field" defaultValue={form.getFieldValue('fieldapiname')}>
+                {lookupFields.map(field => (
+                  <Option key={field.name} value={field.name}>{field.label}</Option>
+                ))}
+              </Select>
+            </Form.Item>
           </>
         )}
       </Form>

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Table, Typography, Button,Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker,Spin, Modal,Space,Upload,Avatar } from 'antd';
+import { Table, Typography, Button, Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker, Spin, Modal, Space, Upload, Avatar } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined ,ImportOutlined, SettingOutlined,CaretDownOutlined,PhoneOutlined} from '@ant-design/icons';
-import { BASE_URL,DateFormat } from '../Components/Constant';
+import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined, ImportOutlined, SettingOutlined, CaretDownOutlined, PhoneOutlined } from '@ant-design/icons';
+import { BASE_URL, DateFormat } from '../Components/Constant';
 import dayjs from 'dayjs';
 import CreateRecordDrawer from './CreateRecordDrawer';
 import CreateListViewDrawer from '../Object/CreateListViewDrawer';
@@ -12,14 +12,14 @@ import ApiService from '../Components/apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { generateBody, formatRecordData, fetchLookupData } from '../Components/Utility';
 
-dayjs.extend(customParseFormat);      
-           
+dayjs.extend(customParseFormat);
+
 const { Title } = Typography;
 const { Option } = Select;
 
 
 const ObjectSetupDetail = () => {
-  
+
   const { id } = useParams();
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,17 +40,17 @@ const ObjectSetupDetail = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [listViews, setListViews] = useState([]);
   const [selectedView, setSelectedView] = useState('');
-  const [lookupNameTable,setLookupNameTable]=useState('');
+  const [lookupNameTable, setLookupNameTable] = useState('');
   const [lookupNames, setLookupNames] = useState({});
   const [selectedListView, setSelectedListView] = useState(null); // State to store the selected list view for editing
-  const[isListViewDrawerVisible,setIsListViewDrawerVisible]=useState(false);
-  const[objectForListView,setObjectForListView]=useState();
-  const [ListViewInDrawer,SetListViewInDrawer]=useState();
+  const [isListViewDrawerVisible, setIsListViewDrawerVisible] = useState(false);
+  const [objectForListView, setObjectForListView] = useState();
+  const [ListViewInDrawer, SetListViewInDrawer] = useState();
   const [currentPage, setCurrentPage] = useState(1);
 
 
-  
-  const fetchRecords = (selectedViewId,page = currentPage  ) => {
+
+  const fetchRecords = (selectedViewId, page = currentPage) => {
     setError('');
 
     setLoading(true);
@@ -60,24 +60,24 @@ const ObjectSetupDetail = () => {
       { 'Content-Type': 'application/json' },
       'GET'
     );
-  
+
     apiServiceForObject.makeCall()
       .then(response => {
         const objName = response.name;
         setObjectForListView(response);
         console.log('Object name:', objName);
-         setObjectName(objName); 
+        setObjectName(objName);
         let apiServiceForRecords;
-        console.log('selected view id is '+selectedViewId);
+        console.log('selected view id is ' + selectedViewId);
         // Check if a selected list view exists
         if (selectedViewId) {
-          console.log('id of list view is '+selectedViewId);
+          console.log('id of list view is ' + selectedViewId);
           // If selected list view is present, use the new API call
           apiServiceForRecords = new ApiService(
             `${BASE_URL}/mt_list_views/${selectedViewId?._id}/records`,
             { 'Content-Type': 'application/json' },
-            'GET' 
-          ); 
+            'GET'
+          );
 
         } else {
           console.log('object name in else object')
@@ -88,13 +88,13 @@ const ObjectSetupDetail = () => {
             'GET'
           );
         }
-  
+
         const apiServiceForFields = new ApiService(
           `${BASE_URL}/mt_fields/object/${objName}`,
           { 'Content-Type': 'application/json' },
           'GET'
-        ); 
-  
+        );
+
         return Promise.all([
           apiServiceForRecords.makeCall(),
           apiServiceForFields.makeCall(),
@@ -103,43 +103,43 @@ const ObjectSetupDetail = () => {
           setFieldsDataDrawer(fieldsResponse);
           console.log(fieldsResponse);
           console.log(recordsResponse);
-          
-        
-         if(selectedViewId?._id){ 
-        // Get the field names from the recordsResponse
-        const recordFieldNames = Object.keys(recordsResponse[0] || {}); // First record as an example
-        console.log('record field names are');
-        console.log(recordFieldNames);
-        console.log('fields to display of selected list view');
-        console.log(selectedViewId?.fields_to_display);
-        const fieldOfListView=selectedViewId?.fields_to_display;
-        console.log('fields of list view are');
-         
-        // Filter fields from fieldsResponse based on whether their name exists in the recordFieldNames
-        const matchingFields = fieldsResponse.filter(field => {
-          if (field.type === 'lookup') {
-            // Check if the field name is 'User', then match with fieldName + '_id'
-           
-            // Otherwise, match with fieldName.toLowerCase() + '_id'
-            return fieldOfListView.includes(field.name + '_id');
+
+
+          if (selectedViewId?._id) {
+            // Get the field names from the recordsResponse
+            const recordFieldNames = Object.keys(recordsResponse[0] || {}); // First record as an example
+            console.log('record field names are');
+            console.log(recordFieldNames);
+            console.log('fields to display of selected list view');
+            console.log(selectedViewId?.fields_to_display);
+            const fieldOfListView = selectedViewId?.fields_to_display;
+            console.log('fields of list view are');
+
+            // Filter fields from fieldsResponse based on whether their name exists in the recordFieldNames
+            const matchingFields = fieldsResponse.filter(field => {
+              if (field.type === 'lookup') {
+                // Check if the field name is 'User', then match with fieldName + '_id'
+
+                // Otherwise, match with fieldName.toLowerCase() + '_id'
+                return fieldOfListView.includes(field.name + '_id');
+              }
+              // If not a lookup field, match directly by field name
+              return fieldOfListView.includes(field.name);
+            });
+
+            // Set only the matching fields
+            setFieldsData(matchingFields);
           }
-          // If not a lookup field, match directly by field name
-          return fieldOfListView.includes(field.name);
-        });
+          else {
+            setFieldsData(fieldsResponse);
 
-          // Set only the matching fields
-          setFieldsData(matchingFields);
-        }
-        else{
-          setFieldsData(fieldsResponse);
-
-        }
+          }
           // Identify and set the lookup field name
           const lookupField = fieldsResponse.find(field => field.type === 'lookup');
           if (lookupField) {
             setLookupFieldName(lookupField.name);
           }
-  
+
           // Set additional object details
           setObjectName(response.name);
           setobjectPluralName(response.pluralLabel);
@@ -149,38 +149,38 @@ const ObjectSetupDetail = () => {
         console.log('error is ');
         console.log(err);
         const errorMessage = err && typeof err === 'object'
-      ? Object.entries(err).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-      : 'Failed to save record due to an unknown error';
+          ? Object.entries(err).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+          : 'Failed to save record due to an unknown error';
         setError(err.response?.data?.error || errorMessage);
       })
       .finally(() => {
         setLoading(false);
       });
-      setCurrentPage(page); // Preserve the current page number after fetch
+    setCurrentPage(page); // Preserve the current page number after fetch
 
   };
-  
+
   const fetchListViews = async () => {
-    console.log('object name is '+objectName);
+    console.log('object name is ' + objectName);
     const apiService = new ApiService(
-        `${BASE_URL}/list-views/${objectName}`,
-        { 'Content-Type': 'application/json' },
-        'GET'
+      `${BASE_URL}/list-views/${objectName}`,
+      { 'Content-Type': 'application/json' },
+      'GET'
     );
     try {
-        const response = await apiService.makeCall();
-        setListViews(response.list_views); // Update state with fetched data
-        console.log(listViews);
+      const response = await apiService.makeCall();
+      setListViews(response.list_views); // Update state with fetched data
+      console.log(listViews);
 
     } catch (error) {
-        console.error("Error fetching list views:", error); // Log any errors
+      console.error("Error fetching list views:", error); // Log any errors
     } finally {
-        setLoading(false); // Set loading to false after the API call
+      setLoading(false); // Set loading to false after the API call
     }
   };
 
- 
-  
+
+
   useEffect(() => {
     if (objectName) {
       console.log('fetching records .....');
@@ -188,7 +188,7 @@ const ObjectSetupDetail = () => {
     }
   }, [objectName]); // Use only the necessary dependencies
 
- 
+
   useEffect(() => {
     console.log('view chsnged and now selected view is  ');
     console.log(selectedView);
@@ -197,7 +197,7 @@ const ObjectSetupDetail = () => {
     setSelectedView('');
     fetchRecords('');
   }, [id]);
-   
+
 
   const handleViewChange = (value) => {
     console.log('id of view is ');
@@ -208,7 +208,7 @@ const ObjectSetupDetail = () => {
     console.log(matchedView);
 
     setSelectedListView(matchedView);
-    
+
     setSelectedView(value);
     console.log(value);
     if (value) {
@@ -224,7 +224,7 @@ const ObjectSetupDetail = () => {
     const fetchAllLookupOptions = async () => {
       const lookupFields = fieldsDataDrawer.filter(field => field.type === 'lookup');
       const lookupOptionsObj = {};
-  
+
       for (const lookupField of lookupFields) {
         try {
           const apiServiceForLookup = new ApiService(
@@ -240,45 +240,45 @@ const ObjectSetupDetail = () => {
       }
       setLookupOptions(lookupOptionsObj); // Store all lookup options in state
     };
-  
+
     if (fieldsDataDrawer.some(field => field.type === 'lookup')) {
       fetchAllLookupOptions();
     }
   }, [fieldsDataDrawer]);
-  
+
   const handleCreateClick = async () => {
     setSelectedRecord(null); // Ensure no record is selected when creating a new record
     form.resetFields(); // Clear the form fields
     setDrawerVisible(true);
-  
+
     try {
       //setLoading(true);
-  
+
       // Create an instance of ApiService for fetching fields data
       const apiServiceForFields = new ApiService(
         `${BASE_URL}/mt_fields/object/${objectName}`,
         { 'Content-Type': 'application/json' },
         'GET' // Specify the method as 'GET'
       );
-  
+
       // Fetch the fields data
       const response = await apiServiceForFields.makeCall();
-      setFieldsDataDrawer(response); 
-  
+      setFieldsDataDrawer(response);
+
     } catch (error) {
       console.error('Error fetching API response:', error);
     } finally {
       setLoading(false); // Stop the spinner regardless of success or failure
     }
   };
-  
+
 
   const handleEditClick = async (record) => {
     // Fetch fields data first to check for date fields
     try {
       //setLoading(true);
-  
-      const apiServiceforCurrentRecord= new ApiService(
+
+      const apiServiceforCurrentRecord = new ApiService(
         `${BASE_URL}/fetch_single_record/${objectName}/${record._id}`,
         { 'Content-Type': 'application/json' },
         'GET' // Specify the method as 'GET'
@@ -289,32 +289,32 @@ const ObjectSetupDetail = () => {
         { 'Content-Type': 'application/json' },
         'GET' // Specify the method as 'GET'
       );
-  
-      const recordResponse=await apiServiceforCurrentRecord.makeCall();
+
+      const recordResponse = await apiServiceforCurrentRecord.makeCall();
       const fieldsResponse = await apiServiceForFields.makeCall();
       setFieldsDataDrawer(fieldsResponse);
-  
+
       // Format date fields in the record before setting them in the form
       const formattedRecord = await formatRecordData(recordResponse, fieldsResponse, BASE_URL);
       setSelectedRecord(formattedRecord);
       form.setFieldsValue(formattedRecord);
       setDrawerVisible(true);
-  
+
       // Fetch lookup data
       fetchLookupData(recordResponse, fieldsResponse, BASE_URL, setLookupName, form);
 
       console.log('form');
       console.log(form.getFieldValue('Account'));
-        
+
     } catch (error) {
       console.error('Error fetching API response:', error);
     } finally {
       setLoading(false);
     }
   };
-  
-  
-  
+
+
+
   const handleCloneClick = async (record) => {
     try {
       // Fetch the original record data
@@ -323,57 +323,57 @@ const ObjectSetupDetail = () => {
         { 'Content-Type': 'application/json' },
         'GET'
       );
-  
+
       const recordResponse = await apiServiceforCurrentRecord.makeCall();
-  
+
       // Fetch fields data
       const apiServiceForFields = new ApiService(
         `${BASE_URL}/mt_fields/object/${objectName}`,
         { 'Content-Type': 'application/json' },
         'GET'
       );
-  
+
       const fieldsResponse = await apiServiceForFields.makeCall();
       setFieldsDataDrawer(fieldsResponse);
-  
+
       // Clone and remove ID and set isClone to true
       const clonedRecord = { ...recordResponse, _id: undefined, isClone: true };
-  
+
       // Format the cloned record data
       const formattedClonedRecord = await formatRecordData(clonedRecord, fieldsResponse, BASE_URL);
       setSelectedRecord(formattedClonedRecord);
       form.setFieldsValue(formattedClonedRecord);
-  
+
       // Fetch and set lookup data
-     fetchLookupData(clonedRecord, fieldsResponse, BASE_URL, setLookupName, form);
-  
+      fetchLookupData(clonedRecord, fieldsResponse, BASE_URL, setLookupName, form);
+
     } catch (error) {
       console.error('Error fetching API response:', error);
     } finally {
       setLoading(false);
     }
-  
+
     setDrawerVisible(true); // Open the drawer after setting the values
   };
-  
-  
+
+
 
   const handleFinish = async (values) => {
-    const updatedValues=generateBody(fieldsDataDrawer,values);
+    const updatedValues = generateBody(fieldsDataDrawer, values);
     const body = {
       object_name: objectName,
       data: {
         _id: selectedRecord?._id && !selectedRecord?.isClone ? selectedRecord._id : undefined, // If cloning, exclude the ID
         ...updatedValues // Use the updated values
       }
-    }; 
+    };
     console.log('body is');
     console.log(body);
-   
+
     try {
       //setLoading(true);
 
-  
+
       // Create an instance of ApiService for the POST request
       const apiService = new ApiService(
         `${BASE_URL}/insert_or_update_records`,
@@ -381,28 +381,28 @@ const ObjectSetupDetail = () => {
         'POST',
         body
       );
-  
+
       await apiService.makeCall();
-      
+
       message.success(selectedRecord?._id && !selectedRecord?.isClone ? 'Record updated successfully' : 'Record created successfully');
       setDrawerVisible(false);
       fetchRecords(selectedView);
       form.resetFields();
     } catch (error) {
       const errorMessage = error && typeof error === 'object'
-      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-      : 'Failed to save record due to an unknown error';
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to save record due to an unknown error';
       message.error(errorMessage);
     } finally {
       setLoading(false); // Ensure loading is stopped regardless of success or failure
     }
   };
-  
+
 
   const handleLabelClick = (record) => {
     console.log(id);
     if (record._id) {
-      navigate(`/record/${objectName}/${record._id}`, { state: { record,objectid:id} });
+      navigate(`/record/${objectName}/${record._id}`, { state: { record, objectid: id } });
     } else {
       console.error("Record ID is undefined");
     }
@@ -413,7 +413,7 @@ const ObjectSetupDetail = () => {
       handleEditClick(selectedRecord);
     } else if (e.key === '2') {
       setIsDeleteModalVisible(true);
-    }else if (e.key === '3') {
+    } else if (e.key === '3') {
       handleCloneClick(selectedRecord);
     }
   };
@@ -435,26 +435,26 @@ const ObjectSetupDetail = () => {
         {}, // Headers (if any)
         'DELETE'
       );
-  
+
       await apiService.makeCall();
       message.success('Record deleted successfully.');
-      fetchRecords(selectedView,currentPage);
+      fetchRecords(selectedView, currentPage);
     } catch (error) {
       message.error('Failed to delete record.');
       console.error('Error deleting record:', error);
     }
   };
-  
 
- 
- 
+
+
+
   const confirmDelete = async () => {
     deleteRecord(selectedRecord);
 
     setIsDeleteModalVisible(false);
 
   };
- 
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -466,7 +466,7 @@ const ObjectSetupDetail = () => {
   const numberOfFieldsToShow = 5;
 
   // Filter fields, but always include the auto-number field
-  const filteredFieldsData = fieldsData.filter(field => 
+  const filteredFieldsData = fieldsData.filter(field =>
     field.name !== 'recordCount'
   );
 
@@ -481,7 +481,7 @@ const ObjectSetupDetail = () => {
   // Combine columns in the desired sequence: Name, Auto-number, other fields
   const fieldsToShow = [nameField, ...otherFields].filter(Boolean); // filter(Boolean) removes undefined
 
-    
+
   const fetchLookupName = async (objectName, id) => {
     const apiService = new ApiService(`${BASE_URL}/fetch_single_record/${objectName}/${id}`, {}, 'GET');
     const responseData = await apiService.makeCall();
@@ -489,7 +489,7 @@ const ObjectSetupDetail = () => {
   };
 
 
-  const columns =  fieldsToShow.map((field, index)  => ({
+  const columns = fieldsToShow.map((field, index) => ({
     title: field.label,
     dataIndex: field.name,
     key: field.name,
@@ -498,77 +498,77 @@ const ObjectSetupDetail = () => {
         return text ? 'True' : 'False';
       } else if (field.type === 'Date') {
         return text ? dayjs(text).format(DateFormat) : ''; // Format date as DD-MM-YYYY
-      }else if (field.type === 'DateTime') {
+      } else if (field.type === 'DateTime') {
         return text ? dayjs(text).utc().format('DD/MM/YYYY HH:mm:ss') : ''; // Format DateTime as DD/MM/YYYY HH:mm:ss
-      } 
+      }
 
       else if (field.type === 'currency') {
         return text ? `$${text.toFixed(2)}` : ''; // Format as currency with dollar sign
-      }else if (field.type === 'Integer') {
+      } else if (field.type === 'Integer') {
         return text === undefined || text === null ? '' : text === 0 ? '0' : text; // Show 0 for blank or zero values
-      }else if (field.type === 'percentage') {
-        return text ? `${text*100}%` : ''; // Format as currency with dollar sign
+      } else if (field.type === 'percentage') {
+        return text ? `${text * 100}%` : ''; // Format as currency with dollar sign
       }
       else if (field.type === 'decimal') {
         return text === undefined || text === null || text === '0' ? '' : Number(text).toFixed(2); // Show 0.00 for blank values
-      }else if (field.type === 'Email') {
+      } else if (field.type === 'Email') {
         return text ? (
           <a href={`mailto:${text}`} target="_blank" rel="noopener noreferrer">
             {text}
           </a>
-        ) : ''; 
+        ) : '';
       } else if (field.type === 'URL') {
         return text ? (
           <a href={text.startsWith('http') ? text : `http://${text}`} target="_blank" rel="noopener noreferrer">
             {text}
           </a>
-        ) : '';  
-      }else if (field.type === 'lookup') {
-        let lookupId='';
-        
+        ) : '';
+      } else if (field.type === 'lookup') {
+        let lookupId = '';
+
         lookupId = record[field.name + '_id'];
         const ob = field.parent_object_name;
 
-       
-        if(lookupId){
-        // Check if the name has already been fetched and stored
-            if (lookupNames[lookupId]) {
-              // If the name is 'user', do not make it linkable
-              if (field.name=== 'user') {
-                return lookupNames[lookupId]; // Just return the name without a link
-              } else {
-                // Otherwise, render the name as a link
-                return (
-                  <a
-                        href={`/record/${ob}/${lookupId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-                      >
-                        <Avatar
-                        size='small'
-                          style={{
-                            backgroundColor: '#87d068',
-                            marginRight: 8,
-                          }}
-                        >
+
+        if (lookupId) {
+          // Check if the name has already been fetched and stored
+          if (lookupNames[lookupId]) {
+            // If the name is 'user', do not make it linkable
+            if (field.name === 'user') {
+              return lookupNames[lookupId]; // Just return the name without a link
+            } else {
+              // Otherwise, render the name as a link
+              return (
+                <a
+                  href={`/record/${ob}/${lookupId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+                >
+                  <Avatar
+                    size='small'
+                    style={{
+                      backgroundColor: '#87d068',
+                      marginRight: 8,
+                    }}
+                  >
                     {lookupNames[lookupId].charAt(0).toUpperCase()}
-                    </Avatar>
-                    {lookupNames[lookupId]}
-                      </a>
-                  
-                );
-              }      
-          } 
+                  </Avatar>
+                  {lookupNames[lookupId]}
+                </a>
+
+              );
+            }
+          }
           else {
-          // Fetch the name if not cached
-          fetchLookupName(ob, lookupId).then(name => {
-            setLookupNames(prevState => ({ ...prevState, [lookupId]: name }));
-          });
-          return 'Loading...'; // Placeholder while fetching
+            // Fetch the name if not cached
+            fetchLookupName(ob, lookupId).then(name => {
+              setLookupNames(prevState => ({ ...prevState, [lookupId]: name }));
+            });
+            return 'Loading...'; // Placeholder while fetching
+          }
         }
       }
-      } 
       else if (field.type === 'Address') {
         // Ensure the address is properly constructed from the record
         const address = record[field.name]; // Access the address object
@@ -584,7 +584,7 @@ const ObjectSetupDetail = () => {
           ].filter(Boolean).join(', '); // Join non-empty fields with a comma
         }
         return ''; // Return an empty string if the address is not available
-      }else if (field.type === 'Phone') {
+      } else if (field.type === 'Phone' && text) {
         // Add PhoneOutlined for phone numbers
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -596,9 +596,9 @@ const ObjectSetupDetail = () => {
       else if (field.type === 'MultiSelect') {
         return Array.isArray(text) ? text.join(', ') : text || ''; // Convert array to comma-separated string
       }
-  
 
-      
+
+
       return index === 0 ? (
         <a onClick={() => handleLabelClick(record)}>{text}</a>
       ) : (
@@ -618,14 +618,14 @@ const ObjectSetupDetail = () => {
             style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
           />
         </Tooltip>
-  
+
         <Tooltip title="Clone">
           <CopyOutlined
             onClick={() => handleCloneClick(record)}
             style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
           />
         </Tooltip>
-  
+
         <Tooltip title="Delete">
           <Popconfirm
             title="Are you sure you want to delete this item?"
@@ -644,7 +644,7 @@ const ObjectSetupDetail = () => {
     SetListViewInDrawer(listView); // Set the selected list view for editing
     setIsListViewDrawerVisible(true); // Show the drawer
   };
- 
+
   const closeCreateListDrawer = () => {
     setIsListViewDrawerVisible(false); // Hide the drawer
   };
@@ -663,7 +663,7 @@ const ObjectSetupDetail = () => {
           list_view_name: `Cloned by ${selectedListView?.list_view_name}`, // replace name with the cloned name
         };
         console.log(clonedListView);
-  
+
         // Show the drawer with the cloned list view
         showCreateListDrawer(clonedListView);
       }
@@ -687,93 +687,94 @@ const ObjectSetupDetail = () => {
     navigate(`/import`);
   };
 
-  
+
   return (
     <Card>
 
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-    <Row justify="space-between" align="middle" style={{ marginBottom: 10 }}>
-      <Col>
-        <Title level={3} style={{ marginTop:'10px' }}>Records for {objectPluralName}</Title>
-        <Select value={selectedView} onChange={handleViewChange} style={{ width: 200, marginBottom: 16 }}>
-        <Option value="">All Records</Option>
-        {listViews.map(view => (
-          <Option key={view._id} value={view._id}>{view.list_view_name}</Option>
-        ))}
-      </Select>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Row justify="space-between" align="middle" style={{ marginBottom: 10 }}>
+          <Col>
+            <Title level={3} style={{ marginTop: '10px' }}>Records for {objectPluralName}</Title>
+            <Select value={selectedView} onChange={handleViewChange} style={{ width: 200, marginBottom: 16 }}>
+              <Option value="">All Records</Option>
+              {listViews.map(view => (
+                <Option key={view._id} value={view._id}>{view.list_view_name}</Option>
+              ))}
+            </Select>
 
-      <Dropdown overlay={listViewMenu} trigger={['click']}>
-          <Button
-            type="text"
-            style={{ marginLeft: 10, marginBottom: 16,border: '1px solid #d9d9d9', 
+            <Dropdown overlay={listViewMenu} trigger={['click']}>
+              <Button
+                type="text"
+                style={{
+                  marginLeft: 10, marginBottom: 16, border: '1px solid #d9d9d9',
+                }}
+              >
+                <SettingOutlined />
+                <CaretDownOutlined style={{ marginLeft: 4 }} />
+              </Button>
+            </Dropdown>
+
+          </Col>
+
+          <Col style={{ marginTop: '10px' }}>
+            <Button icon={<ImportOutlined />} onClick={handleFileUpload} style={{ marginBottom: 5, marginRight: '5px' }}>
+              Import Records
+            </Button>
+            <Button type="primary" onClick={handleCreateClick} style={{ marginBottom: 5, marginRight: '5px' }}>
+              Create Record
+            </Button>
+
+          </Col>
+        </Row>
+        <div style={{ flex: 1, overflow: 'auto' }}>
+
+          <Table columns={columns}
+            dataSource={records}
+            rowKey="_id"
+            pagination={{
+              current: currentPage,
+              onChange: (page) => setCurrentPage(page), // Update currentPage when user changes the page
             }}
-          >
-            <SettingOutlined />
-            <CaretDownOutlined style={{ marginLeft: 4 }} />
-          </Button>
-        </Dropdown>
+          />
+        </div>
 
-      </Col>
-      
-      <Col  style={{ marginTop:'10px' }}>
-          <Button icon={<ImportOutlined />} onClick={handleFileUpload} style={{ marginBottom: 5, marginRight: '5px' }}>
-            Import Records
-          </Button>
-        <Button type="primary" onClick={handleCreateClick} style={{ marginBottom: 5,marginRight:'5px' }}>
-          Create Record
-        </Button>
-        
-      </Col>
-    </Row>
-    <div style={{ flex: 1, overflow: 'auto' }}>
+        <CreateRecordDrawer
+          visible={drawerVisible}
+          onClose={() => setDrawerVisible(false)}
+          onFinish={handleFinish}
+          loading={loading}
+          fieldsData={fieldsDataDrawer}
+          selectedRecord={selectedRecord}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          form={form}
+        />
 
-      <Table columns={columns}
-       dataSource={records}
-       rowKey="_id"
-       pagination={{
-        current: currentPage,
-        onChange: (page) => setCurrentPage(page), // Update currentPage when user changes the page
-      }}
-       />
+        <CreateListViewDrawer
+          visible={isListViewDrawerVisible}
+          onClose={closeCreateListDrawer}
+          object={objectForListView}
+          fetchListViews={fetchListViews}
+          selectedListView={ListViewInDrawer} // Pass selected list view for editing
+
+        />
+
+        <Modal
+          title="Confirm Deletion"
+          visible={isDeleteModalVisible}
+          onOk={confirmDelete}
+          onCancel={() => setIsDeleteModalVisible(false)}
+          okText="Delete"
+          cancelText="Cancel"
+          centered
+        >
+          <p>Are you sure you want to delete this record?</p>
+        </Modal>
+
+
+
+
       </div>
-      
-      <CreateRecordDrawer
-        visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
-        onFinish={handleFinish}
-        loading={loading}
-        fieldsData={fieldsDataDrawer}
-        selectedRecord={selectedRecord}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-        form={form}
-      />
-
-      <CreateListViewDrawer
-        visible={isListViewDrawerVisible}
-        onClose={closeCreateListDrawer}
-        object={objectForListView}
-        fetchListViews={fetchListViews}
-        selectedListView={ListViewInDrawer} // Pass selected list view for editing
-
-      />
-
-      <Modal
-        title="Confirm Deletion"
-        visible={isDeleteModalVisible}
-        onOk={confirmDelete}
-        onCancel={() => setIsDeleteModalVisible(false)}
-        okText="Delete"
-        cancelText="Cancel"
-        centered
-      >
-        <p>Are you sure you want to delete this record?</p>
-      </Modal>
-
-     
-
-
-    </div>
     </Card>
 
   );

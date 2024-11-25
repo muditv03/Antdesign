@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Spin, message, Button,Tooltip,Popconfirm } from 'antd';
+import { Table, Spin, message, Button, Tooltip, Popconfirm } from 'antd';
 import { BASE_URL } from '../Components/Constant';
-import ApiService from '../Components/apiService'; 
-import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined  } from '@ant-design/icons';
+import ApiService from '../Components/apiService';
+import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons';
 import CreateTabDrawer from './CreateTabDrawer'; // Import the CreateTabDrawer component
 
 const CustomTabs = () => {
@@ -23,11 +23,11 @@ const CustomTabs = () => {
     } catch (err) {
       setError(err);
       const errorMessage = error && typeof error === 'object'
-      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-      : 'Failed to fetch tabs due to an unknown error';
-      message.error(errorMessage);    
-    } 
-      finally {
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to fetch tabs due to an unknown error';
+      message.error(errorMessage);
+    }
+    finally {
       setLoading(false);
     }
   };
@@ -67,7 +67,7 @@ const CustomTabs = () => {
         {}, // Headers (if any)
         'DELETE'
       );
-  
+
       await apiService.makeCall();
       fetchTabsData();
 
@@ -100,7 +100,7 @@ const CustomTabs = () => {
       key: 'description',
     },
   ];
- 
+
   columns.push({
     title: 'Action',
     key: 'operation',
@@ -108,31 +108,32 @@ const CustomTabs = () => {
       <>
         <Tooltip title="Edit">
           <EditOutlined
-        
+
             style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
           />
         </Tooltip>
         <Tooltip title="Delete">
-          <Popconfirm 
+          <Popconfirm
             title="Are you sure you want to delete this item?"
             okText="Yes"
             cancelText="No"
-            onConfirm={() =>{
+            onConfirm={() => {
               console.log('Confirm clicked'); // Add this line
-               deleteTab(record)}
+              deleteTab(record)
+            }
             }
 
           >
-            <DeleteOutlined style={{  color: 'red',marginRight: 8, fontSize: '14px', cursor: 'pointer' }} />
+            <DeleteOutlined style={{ color: 'red', marginRight: 8, fontSize: '14px', cursor: 'pointer' }} />
           </Popconfirm>
         </Tooltip>
       </>
     ),
   });
   return (
-    <div style={{  }}>
-      <Button type="primary" onClick={() => setDrawerVisible(true)} 
-        style={{ position: 'absolute', top: '20px', right: '20px',marginTop:'20px' }}>
+    <div style={{}}>
+      <Button type="primary" onClick={() => setDrawerVisible(true)}
+        style={{ position: 'absolute', top: '20px', right: '20px', marginTop: '20px' }}>
         Create New Tab
       </Button>
       {loading ? (

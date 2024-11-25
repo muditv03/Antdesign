@@ -25,10 +25,10 @@ const UserComponent = () => {
       setUsers(response);
     } catch (error) {
       const errorMessage = error && typeof error === 'object'
-      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-      : 'Failed to fetch users due to an unknown error';
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to fetch users due to an unknown error';
       message.error(errorMessage);
-        } finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -65,7 +65,7 @@ const UserComponent = () => {
   };
 
   const handleFinish = async (values) => {
-console.log(values);
+    console.log(values);
     setLoading(true);
     try {
       if (selectedUser) {
@@ -78,7 +78,7 @@ console.log(values);
             Name: values.Name,
           },
         };
-        
+
         const apiService = new ApiService(
           `${BASE_URL}/edit_user/${selectedUser._id}`,  // Use the ID of the selected user
           { 'Content-Type': 'application/json' },
@@ -96,7 +96,7 @@ console.log(values);
           Name: values.Name,
           email: values.email,
         };
-  
+
         const apiService = new ApiService(
           `${BASE_URL}/register`,
           { 'Content-Type': 'application/json' },
@@ -110,9 +110,9 @@ console.log(values);
       handleCloseDrawer();
     } catch (error) {
       const errorMessage = error && typeof error === 'object'
-      ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-      : 'Failed to save record due to an unknown error';
-      message.error(errorMessage);     
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to save record due to an unknown error';
+      message.error(errorMessage);
       console.error('Error saving record:', error);
     } finally {
       setLoading(false);
@@ -203,7 +203,7 @@ console.log(values);
         fieldsData={fieldsData}
         selectedRecord={selectedUser}
         selectedDate={null} // Initialize as needed
-        setSelectedDate={() => {}} // Implement state management as needed
+        setSelectedDate={() => { }} // Implement state management as needed
         form={form}
       />
     </div>

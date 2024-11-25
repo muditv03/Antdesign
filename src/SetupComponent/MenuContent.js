@@ -17,18 +17,18 @@ const MenuContent = ({ selectedItem }) => {
     case 'Users':
       return <UserComponent />; // Component for Settings
     case 'Import Wizard':
-      return  navigate(`/import`);
+      return navigate(`/import`);
     case 'Custom Tabs':
       return <Tabs />; // Component for Reports
     case 'Recycle bin':
-      return <Recyclebin/>  
+      return <Recyclebin />
 
     default:
       return <div>Select an item from the sidebar</div>;
   }
 };
 
- 
+
 const Tabs = () => (
   <div style={{ marginTop: '3px' }}> {/* Adjust margin as needed */}
     <h2>Custom Tabs</h2>
