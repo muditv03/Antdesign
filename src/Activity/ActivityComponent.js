@@ -253,7 +253,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
       });
 
     return (
-      <Collapse defaultActiveKey={["section"]} expandIconPosition="right">
+      <Collapse defaultActiveKey={["Upcoming & Overdue"]} expandIconPosition="right">
         <Panel header={section} key={section}>
           <Timeline>
             {sortedTimelineData.map((item) => (
