@@ -203,7 +203,7 @@ const NoteDrawer = ({
           </Form.Item>
 
           {/* Subject */}
-          <Form.Item label="Subject" name="Subject">
+          <Form.Item label="Subject" name="Subject" rules={[{ required: true, message: "Please enter subject!" }]}>
             <Input placeholder="Enter subject" />
           </Form.Item>
 

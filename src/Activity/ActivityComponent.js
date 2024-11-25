@@ -121,7 +121,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
         };
       });
 
-        // Sort records within each section by date
+     // Sort records within each section by date
     const sortedData = data.sort((a, b) => {
       const dateA = dayjs(a.EndDateTime, "DD/MM/YYYY HH:mm:ss");
       const dateB = dayjs(b.EndDateTime, "DD/MM/YYYY HH:mm:ss");
@@ -138,8 +138,28 @@ const CustomTimeline = ({ objectName, recordId }) => {
     // Prioritize "Upcoming & Overdue" section
     const orderedSections = ["Upcoming & Overdue", ...Object.keys(groupedData).filter((key) => key !== "Upcoming & Overdue")];
 
-    // Merge sections into a single array
-    const finalData = orderedSections.flatMap((section) => groupedData[section] || []);
+    // Sort "Upcoming & Overdue" section by ascending order (earliest first)
+    const upcomingOverdueSection = groupedData["Upcoming & Overdue"];
+    const sortedUpcomingOverdue = upcomingOverdueSection.sort((a, b) => {
+      const dateA = dayjs(a.EndDateTime, "DD/MM/YYYY HH:mm:ss");
+      const dateB = dayjs(b.EndDateTime, "DD/MM/YYYY HH:mm:ss");
+      return dateA.isBefore(dateB) ? -1 : 1; // Ascending sort for Upcoming & Overdue
+    });
+
+    // Sort other sections by descending order (latest first)
+    const sortedOtherSections = Object.keys(groupedData)
+      .filter((key) => key !== "Upcoming & Overdue")
+      .reduce((acc, section) => {
+        acc[section] = groupedData[section].sort((a, b) => {
+          const dateA = dayjs(a.EndDateTime, "DD/MM/YYYY HH:mm:ss");
+          const dateB = dayjs(b.EndDateTime, "DD/MM/YYYY HH:mm:ss");
+          return dateB.isBefore(dateA) ? -1 : 1; // Descending sort for other sections
+        });
+        return acc;
+      }, {});
+
+    // Merge sorted data into final array
+    const finalData = [sortedUpcomingOverdue, ...Object.values(sortedOtherSections)].flat();
       
 
       setTimelineData(finalData);
@@ -368,7 +388,12 @@ const CustomTimeline = ({ objectName, recordId }) => {
                       </span>
                     </p>
                     <p>
-                      <strong>Subject:</strong> {item.Subject}
+                      <strong>Subject:</strong> <a 
+                      href={`/record/Activity/${item._id}`} // Replace with your dynamic URL logic
+                      style={{ color: '#1890ff' }} // Optional styling
+                    >
+                    {item.Subject}
+                    </a>
                     </p>
                     <p>
                       <strong>Priority:</strong> {item.Priority}
