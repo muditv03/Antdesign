@@ -260,6 +260,7 @@ const ObjectFieldDetail = () => {
         </TabPane>
         <TabPane tab="Search Result Layout" key="6">
           <Card>
+          <h2 style={{paddingBottom:"30px"}}>Search Layout Fields</h2>
             <SearchLayout setAvailableFields={setAvailableFields}   setSelectedFields={setSelectedFields} availableFields={availableFields} selectedFields ={selectedFields} loading= {loading} isEditMode={isEditMode} toggleSelection={toggleSelection} handleAddToSelected={handleAddToSelected} handleRemoveFromSelected={handleRemoveFromSelected} handleSave={handleSave} handleEdit={handleEdit} />
         </Card>
         </TabPane>
