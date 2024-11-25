@@ -26,7 +26,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   const [isRequired, setIsRequired] = useState(false); // State for auto number checkbox
   const [isUnique, setIsUnique] = useState(false); // State for auto number checkbox
   const [isExternalId, setIsExternalID] = useState(false); // State for auto number checkbox
-                    
+  const [isFieldTrackingEnabled,setIsFieldTrackingEnabled] = useState(false);
   const [ParentObjectFields,setParentObjectFields]=useState([]);
 
   const [logic, setLogic] = useState('');
@@ -137,6 +137,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         required:editField.required,
         unique:editField.unique,
         external_id:editField.external_id,
+        field_Tracking:editField.field_Tracking,
         fieldsToDisplay:editField.lookup_config?.display_fields,
         SearchLayout:editField.lookup_config?.search_layout,
       }); 
@@ -150,6 +151,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       setIsRequired(editField.required || false); // Set auto number state if editing
       setIsUnique(editField.unique || false); // Set auto number state if editing
       setIsExternalID(editField.external_id || false); // Set auto number state if editing
+      setIsFieldTrackingEnabled(editField.field_Tracking)
       handleParentObjectChange(editField.parent_object_name);
     } else {
       form.resetFields(); // Reset fields for creating a new field
@@ -228,7 +230,8 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       default_value:values.defaultValue,
       required:isRequired,
       unique:isUnique,
-      external_id:isExternalId
+      external_id:isExternalId,
+      field_Tracking: isFieldTrackingEnabled
     
     };
 
@@ -298,6 +301,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
           required:isRequired,
           unique:isUnique,
           external_id:isExternalId,
+          field_Tracking:isFieldTrackingEnabled,
           ...((values.type==='Picklist' || values.type==='String') && {
             compliance_categorization:selectedCC
           }),
@@ -1062,6 +1066,12 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                   checked={isExternalId}
                   onChange={(e) => setIsExternalID(e.target.checked)}
                   >External Id</Checkbox>
+                </Form.Item>
+                <Form.Item name="field_Tracking" >
+                  <Checkbox
+                  checked={isFieldTrackingEnabled}
+                  onChange={(e) => setIsFieldTrackingEnabled(e.target.checked)}
+                  >Enable Field Tracking</Checkbox>
                 </Form.Item>
                 </>
          )}

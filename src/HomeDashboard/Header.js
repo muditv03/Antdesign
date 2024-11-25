@@ -22,6 +22,7 @@ const AppHeader = () => {
   const [searchResults, setSearchResults] = useState([]); // Stores search results
   const [loading, setLoading] = useState(false); // Loading state
   const [showDropdown, setShowDropdown] = useState(false);
+  const[responseToSend,setResponseToSend] = useState([]);
   const showDrawer = () => {
     setVisible(true);
   };
@@ -81,9 +82,11 @@ const AppHeader = () => {
             }, 'GET', );
             const response= await apiService.makeCall();
             console.log(response);
-        
+        setResponseToSend(response);
 
       const formattedResults = [];
+      console.log('response header');
+      console.log(response);
       Object.keys(response).forEach((objectName) => {
         const records = response[objectName]?.records || [];
         records.forEach((record) => {
@@ -98,9 +101,7 @@ const AppHeader = () => {
 
 
       setSearchResults(formattedResults);
-      searchResults.map((result) => {
-        console.log(result);
-      })
+      console.log('formattedresult');
       console.log(formattedResults);
     } catch (error) {
       console.error('Error fetching search results:', error);
@@ -138,7 +139,7 @@ const AppHeader = () => {
   setShowDropdown(false);
   // Navigate to SearchResults with query parameters
   // navigate(`/SearchResults?${queryParams}`);
-    navigate('/SearchResults', { state: { searchResults: searchResults } });
+    navigate('/SearchResults', { state: { searchResults: responseToSend } });
 
   };
   return (
