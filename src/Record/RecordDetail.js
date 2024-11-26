@@ -197,7 +197,7 @@ const RecordDetails = ({ objectName, id }) => {
             console.log(fieldId);
             console.log(value);
             try {
-                const apiService = new ApiService(`${BASE_URL}/search_lookup/${id}/${fieldId}/${value}`, {
+                const apiService = new ApiService(`${BASE_URL}/search_lookup/${fieldId}/${value}`, {
                     'Content-Type': 'application/json', // Add any necessary headers, such as content type
                 }, 'GET',);
                 const response = await apiService.makeCall();

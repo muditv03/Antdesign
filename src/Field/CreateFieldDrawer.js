@@ -137,7 +137,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
         required:editField.required,
         unique:editField.unique,
         external_id:editField.external_id,
-        field_Tracking:editField.field_Tracking,
+        field_Tracking:editField.track_field_history,
         fieldsToDisplay:editField.lookup_config?.display_fields,
         SearchLayout:editField.lookup_config?.search_layout,
       }); 
@@ -151,7 +151,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       setIsRequired(editField.required || false); // Set auto number state if editing
       setIsUnique(editField.unique || false); // Set auto number state if editing
       setIsExternalID(editField.external_id || false); // Set auto number state if editing
-      setIsFieldTrackingEnabled(editField.field_Tracking)
+      setIsFieldTrackingEnabled(editField.track_field_history)
       handleParentObjectChange(editField.parent_object_name);
     } else {
       form.resetFields(); // Reset fields for creating a new field
@@ -231,7 +231,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       required:isRequired,
       unique:isUnique,
       external_id:isExternalId,
-      field_Tracking: isFieldTrackingEnabled
+      track_field_history: isFieldTrackingEnabled
         };
 
     if (values.type === 'String' || values.type === 'Picklist') {
@@ -300,7 +300,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
           required:isRequired,
           unique:isUnique,
           external_id:isExternalId,
-          field_Tracking:isFieldTrackingEnabled,
+          track_field_history:isFieldTrackingEnabled,
           ...((values.type==='Picklist' || values.type==='String') && {
             compliance_categorization:selectedCC
           }),
