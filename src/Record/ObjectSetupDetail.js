@@ -595,7 +595,7 @@ const ObjectSetupDetail = () => {
       }
       else if (field.type === 'MultiSelect') {
         return Array.isArray(text) ? text.join(', ') : text || ''; // Convert array to comma-separated string
-      }else if(field.type === 'Text-Area' && field.is_rich_text === true){
+      }else if(field.type === 'Rich-Text'){
         console.log('Text-Area filed')
         return(
           <div dangerouslySetInnerHTML={{ __html: text }} />
