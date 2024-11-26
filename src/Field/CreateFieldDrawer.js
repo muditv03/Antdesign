@@ -619,6 +619,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                 <Option value="lookup">Lookup</Option>
                 <Option value="Text-Area">Text Area</Option>
                 <Option value="URL">URL</Option>
+                <Option value="Rich-Text">Rich-Text</Option>
 
               </Select>
             </Form.Item>
