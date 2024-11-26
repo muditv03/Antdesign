@@ -18,7 +18,7 @@ const DisplayField = ({ type, form, name, field, record,layouts }) => {
     }, [record]);
     
     const fieldValue = form.getFieldValue(name);
-    console.log('display field ui');
+    console.log('display field lookup ui');
     console.log(form.getFieldValue(name)); 
     const displayField=field?.lookup_config?.display_fields;
     const renderField = () => {
@@ -53,8 +53,13 @@ const DisplayField = ({ type, form, name, field, record,layouts }) => {
                           .filter(Boolean)
                           .join(', ')
                     : '';
+
             case 'lookup':
-                return name !== 'user' && fieldValue?.Name ? (
+                if (!form.getFieldValue(name+'_id')) {
+                    return '';
+                }
+                
+                return name !== 'user' && fieldValue? (
                     <div style={{ position: 'relative', display: 'inline-block' }}>
                     {fieldValue?.Name ? (
                         <a
@@ -74,7 +79,7 @@ const DisplayField = ({ type, form, name, field, record,layouts }) => {
                             >
                                 {(fieldValue?.Name || '').charAt(0).toUpperCase()}
                             </Avatar>
-                            {fieldValue?.Name}
+                            {fieldValue?.Name} 
                         </a>
                     ) : (
                         fieldValue?.Name
@@ -133,7 +138,7 @@ const DisplayField = ({ type, form, name, field, record,layouts }) => {
                                 fontWeight: 'bold',
                                 color: '#333',
                             }}
-                        >
+                        > 
                             {fieldValue?.Name || ''}
                         </div>
                     </div>

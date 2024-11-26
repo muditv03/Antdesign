@@ -87,7 +87,7 @@ const FieldRendererEdit = ({
                 name={name}
                 label={label}
                 key={name}
-                initialValue={form.getFieldValue(name)}
+                initialValue={initialValue}
                 rules={validationRules}
                 noStyle
               >
@@ -149,16 +149,16 @@ const FieldRendererEdit = ({
                               children: (
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                   <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                                    {form.getFieldValue(name)?.Name.charAt(0).toUpperCase}
+                                    {(form.getFieldValue(name)?.Name).charAt(0).toUpperCase()}
                                   </Avatar>
                                   {form.getFieldValue(name)?.Name}
                                 </div>
                               ),
-                              value: form.getFieldValue(name)._id,
+                             
                               
                             },
                           ]
-                        : []),
+                        : []), 
                     ]}
 
                   />
