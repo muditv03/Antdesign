@@ -48,6 +48,7 @@ const RecordDetails = ({ objectName, id }) => {
 
     const fetchRecords = async () => {
         try {
+            console.log('record after saving is ');
             setLoading(true);
 
             // Fetch the record data
@@ -94,9 +95,11 @@ const RecordDetails = ({ objectName, id }) => {
             
             setRecord(recordData);
             setLookupData(prevState => ({ ...prevState, ...updatedLookupOptions }));
-            console.log('record data is ');
+            console.log('record data after editing is ');
             console.log(recordData);
             setInitialValues(recordData);
+            console.log('contact record data is');
+            console.log(recordData['Contact']);
             form.setFieldsValue(recordData);
             setLoading(false);
 
@@ -178,8 +181,12 @@ const RecordDetails = ({ objectName, id }) => {
             message.success('Record saved successfully');
 
             setIsEditable(false);
+            console.log('moment before calling fetch records');
             fetchRecords();
+            console.log('moment after calling fetch records');
+
         } catch (error) {
+
             //console.error('Error saving record'+ error.response.data[0]);
             const errorMessage = error && typeof error === 'object'
                 ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
@@ -187,7 +194,7 @@ const RecordDetails = ({ objectName, id }) => {
             message.error(errorMessage);
         }
 
-    };
+    }; 
 
     const handleSearch = async (value, fieldId, name) => {
         console.log('handle search called');

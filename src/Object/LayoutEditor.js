@@ -68,7 +68,7 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
         updatedSections[sectionIndex][key] = value;
       }
       return updatedSections;
-    });
+    }); 
     console.log('value');
     console.log(value);
     let oldList = updatedFields;
@@ -172,9 +172,9 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
 
   const handleDragEnd = (result) => {
     const { source, destination, type } = result;
-
+  
     if (!destination) return;
-
+  
     if (type === "section") {
       // Handle section reordering
       const reorderedSections = Array.from(sections);
@@ -185,16 +185,34 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
       // Handle column reordering within a section
       const sourceSectionIndex = parseInt(source.droppableId.split("-")[1], 10);
       const destinationSectionIndex = parseInt(destination.droppableId.split("-")[1], 10);
-
-      if (sourceSectionIndex !== destinationSectionIndex) return;
-
-      const updatedSections = Array.from(sections);
-      const section = updatedSections[sourceSectionIndex];
-      const [movedColumn] = section.columns.splice(source.index, 1);
-      section.columns.splice(destination.index, 0, movedColumn);
-      setSections(updatedSections);
+  
+      if (sourceSectionIndex === destinationSectionIndex) {
+        const updatedSections = Array.from(sections);
+        const section = updatedSections[sourceSectionIndex];
+        const [movedColumn] = section.columns.splice(source.index, 1);
+        section.columns.splice(destination.index, 0, movedColumn);
+        setSections(updatedSections);
+      }
+    } else if (type === "item") {
+      // Handle item reordering within a column
+      const sourceSectionIndex = parseInt(source.droppableId.split("-")[1], 10);
+      const sourceColumnIndex = parseInt(source.droppableId.split("-")[3], 10);
+      const destinationSectionIndex = parseInt(destination.droppableId.split("-")[1], 10);
+      const destinationColumnIndex = parseInt(destination.droppableId.split("-")[3], 10);
+  
+      if (
+        sourceSectionIndex === destinationSectionIndex &&
+        sourceColumnIndex === destinationColumnIndex
+      ) {
+        const updatedSections = Array.from(sections);
+        const column = updatedSections[sourceSectionIndex].columns[sourceColumnIndex];
+        const [movedItem] = column.items.splice(source.index, 1);
+        column.items.splice(destination.index, 0, movedItem);
+        setSections(updatedSections);
+      }
     }
   };
+  
 
   const addItem = (sectionIndex, columnIndex) => {
     setSections((prevSections) => {
