@@ -108,16 +108,9 @@ const CreateTabDrawer = ({ visible, onClose }) => {
 
     const generateApiName = (label) => {
         return label
-            .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special characters
-            .trim() // Remove leading and trailing spaces
-            .split(/\s+/) // Split by one or more spaces
-            .map((word, index) => {
-                if (index === 0) {
-                    return word.charAt(0).toLowerCase() + word.slice(1); // First word lowercase
-                }
-                return word.charAt(0).toUpperCase() + word.slice(1); // Capitalize other words
-            })
-            .join(''); // Join back into a single string
+        .replace(/[^a-zA-Z]/g, '') // Remove all characters except letters (a-z, A-Z)
+        .replace(/\s+/g, '')       // Remove all spaces
+        .trim();
     };
 
     // Handle label change and update API name

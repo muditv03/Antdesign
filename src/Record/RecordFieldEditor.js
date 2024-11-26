@@ -6,7 +6,7 @@ import { PhoneOutlined } from '@ant-design/icons';
 const { Option } = Select;
 const { TextArea } = Input;
 
-const FieldRenderer = ({
+const FieldRendererEdit = ({
     isFieldEditable,
     type,
     name,
@@ -26,14 +26,10 @@ const FieldRenderer = ({
     
 }) => {
     if (!isFieldEditable) return null;
-
+ 
     const initialValue = form.getFieldValue(name);
-    console.log(lookupData[name]);
-    console.log('initial value from different component');
+    console.log('initial value from editing component');
     console.log(initialValue);
-    console.log(name+'_id')
-    console.log(form.getFieldValue(name+'_id'))
-
     switch (type) {
         case 'boolean':
             return (
@@ -91,8 +87,8 @@ const FieldRenderer = ({
                 name={name}
                 label={label}
                 key={name}
+                initialValue={form.getFieldValue(name)}
                 rules={validationRules}
-                initialValue={form.getFieldValue(name + '_id')}
                 noStyle
               >
                  <Select
@@ -102,7 +98,6 @@ const FieldRenderer = ({
                     onSearch={(value) => handleSearch(value, fieldId,name)} 
                     notFoundContent="Search for records"
                     optionLabelProp='children'
-
                     filterOption={false} 
                     options={[
                       ...(lookupOptionforparent[name] || []).map((option) => ({
@@ -147,19 +142,19 @@ const FieldRenderer = ({
                       // Add the initial value if not already in options
                       ...(form.getFieldValue(name) &&
                       !(lookupOptionforparent[name] || []).some(
-                        (option) => option._id === form.getFieldValue(name + '_id')
+                        (option) => option._id === form.getFieldValue(name)._id
                       ) 
                         ? [
                             {
                               children: (
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                   <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                                    {form.getFieldValue(name)?.charAt(0).toUpperCase()}
+                                    {form.getFieldValue(name)?.Name.charAt(0).toUpperCase}
                                   </Avatar>
-                                  {form.getFieldValue(name)}
+                                  {form.getFieldValue(name)?.Name}
                                 </div>
                               ),
-                              value: form.getFieldValue(name + '_id'),
+                              value: form.getFieldValue(name)._id,
                               
                             },
                           ]
@@ -407,4 +402,4 @@ const FieldRenderer = ({
     }
 };
 
-export default FieldRenderer;
+export default FieldRendererEdit;
