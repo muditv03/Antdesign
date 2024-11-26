@@ -5,7 +5,7 @@ import { EditOutlined, UnorderedListOutlined, InfoCircleOutlined, PhoneOutlined 
 import { BASE_URL, DateFormat } from '../Components/Constant';
 import ApiService from '../Components/apiService'; // Import ApiService class
 import dayjs from 'dayjs';
-import FieldRenderer from './RecordFieldEditor';
+import FieldRendererEdit from './RecordFieldEditor';
 import DisplayField from './RecordFieldDisplay';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -38,9 +38,7 @@ const RecordDetails = ({ objectName, id }) => {
 
 
     const handleEditClick = () => {
-        form.setFieldValue(initialValues);
         setIsEditable(true);
-
     };
 
     const handleCancelClick = () => {
@@ -90,9 +88,7 @@ const RecordDetails = ({ objectName, id }) => {
                     recordData[field.name] = localDateTime; // Store formatted date-time
                 }
                 if (field.type === 'lookup' && recordData[field.name]) {
-                    updatedLookupOptions[field.name] = recordData[field.name] || '';
-                    recordData[field.name] = recordData[field.name]?.Name  || '';
-                    recordData[field.name+'_id']=updatedLookupOptions[field.name]?._id  || '';
+                    recordData[field.name] = recordData[field.name]  || '';
                 }
             });
             
@@ -100,6 +96,7 @@ const RecordDetails = ({ objectName, id }) => {
             setLookupData(prevState => ({ ...prevState, ...updatedLookupOptions }));
             console.log('record data is ');
             console.log(recordData);
+            setInitialValues(recordData);
             form.setFieldsValue(recordData);
             setLoading(false);
 
@@ -200,7 +197,7 @@ const RecordDetails = ({ objectName, id }) => {
             console.log(fieldId);
             console.log(value);
             try {
-                const apiService = new ApiService(`${BASE_URL}/search_lookup/${fieldId}/${value}`, {
+                const apiService = new ApiService(`${BASE_URL}/search_lookup/${id}/${fieldId}/${value}`, {
                     'Content-Type': 'application/json', // Add any necessary headers, such as content type
                 }, 'GET',);
                 const response = await apiService.makeCall();
@@ -309,7 +306,7 @@ const RecordDetails = ({ objectName, id }) => {
                 }}
             >
                 {isFieldEditable ? (
-                    <FieldRenderer
+                    <FieldRendererEdit
                         isFieldEditable={isFieldEditable}
                         type={type}
                         name={name}
@@ -326,8 +323,6 @@ const RecordDetails = ({ objectName, id }) => {
                         handleAddressChange={handleAddressChange}
                         lookupData={lookupData}
                     />
-
-
                 ) : (
                     <DisplayField
                         type={type}
