@@ -111,7 +111,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
           EndDateTime: formattedEndDateTime,
           Status: record.Status,
           Priority: record.Priority,
-          icon: getIconByType(record.ActivityType),
+          icon: getIconByType(record.ActivityType, record.Status, formattedEndDateTime),
           key: record.id || Date.now(),
           _id: record._id,
           created_at: record.created_at,
@@ -142,8 +142,18 @@ const CustomTimeline = ({ objectName, recordId }) => {
     const upcomingOverdueSection = groupedData["Upcoming & Overdue"];
     const sortedUpcomingOverdue = upcomingOverdueSection.sort((a, b) => {
       const dateA = dayjs(a.EndDateTime, "DD/MM/YYYY HH:mm:ss");
-      const dateB = dayjs(b.EndDateTime, "DD/MM/YYYY HH:mm:ss");
-      return dateA.isBefore(dateB) ? -1 : 1; // Ascending sort for Upcoming & Overdue
+          const dateB = dayjs(b.EndDateTime, "DD/MM/YYYY HH:mm:ss");
+
+          // Move records with EndDateTime < currentDate to the end
+          const currentDate = dayjs().startOf("day");
+          const isAOverdue = dateA.isBefore(currentDate);
+          const isBOverdue = dateB.isBefore(currentDate);
+
+          if (isAOverdue && !isBOverdue) return 1;
+          if (!isAOverdue && isBOverdue) return -1;
+
+          // Sort by date if both are overdue or upcoming
+          return dateA.isBefore(dateB) ? -1 : 1;
     });
 
     // Sort other sections by descending order (latest first)
@@ -196,20 +206,24 @@ const CustomTimeline = ({ objectName, recordId }) => {
     console.log("Edit Record:", record);
   };
 
-  const getIconByType = (type) => {
+  const getIconByType = (type, status, endDateTime) => {
+    const isOverdue = status === "Pending" && dayjs(endDateTime, "DD/MM/YYYY HH:mm:ss").isBefore(dayjs());
+  const color = isOverdue ? "red" : "blue";
+
+  const iconStyles = { color };
     switch (type) {
       case "Task":
-        return <FileTextOutlined />;
+        return <FileTextOutlined style={iconStyles}/>;
       case "Call":
-        return <PhoneOutlined />;
+        return <PhoneOutlined style={iconStyles}/>;
       case "Email":
-        return <MailOutlined />;
+        return <MailOutlined style={iconStyles}/>;
       case "Meeting":
-        return <CalendarOutlined />;
+        return <CalendarOutlined style={iconStyles}/>;
       case "Note":
-        return <ClockCircleOutlined />;
+        return <ClockCircleOutlined style={iconStyles}/>;
       default:
-        return <UserOutlined />;
+        return <UserOutlined style={iconStyles}/>;
     }
   };
 
@@ -279,10 +293,11 @@ const CustomTimeline = ({ objectName, recordId }) => {
                       >
                         <span>
                           {(() => {
-                            // Determine message based on status and type
+                            
                             if (item.Status === "Pending") {
                               return `You have an upcoming ${item.ActivityType}`;
-                            } else if (item.Status === "Completed") {
+                            }
+                            else if (item.Status === "Completed") {
                               switch (item.ActivityType) {
                                 case "Call":
                                   return "You logged a call";
