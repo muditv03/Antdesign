@@ -11,7 +11,7 @@ const { Option } = Select;
 const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) => {
   const [layoutName, setLayoutName] = useState("");
   const [sections, setSections] = useState([]);
- 
+  const [updatedFields,setUpdatedFields] = useState(fields);
   useEffect(() => {
     if (Editinglayout) {
       // Set layout name
@@ -69,18 +69,48 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
       }
       return updatedSections;
     });
+    console.log('value');
+    console.log(value);
+    let oldList = updatedFields;
+    const filteredFields = oldList.filter((field) => field.label !== value);
+    setUpdatedFields(filteredFields);
+    console.log('filtered fields');
+    console.log(updatedFields);
   };
 
-  const deleteElement = (sectionIndex, columnIndex) => {
+  useEffect(() => {
+    console.log('UpdatedFields after update:', updatedFields);
+  }, [updatedFields]);
+  
+  const deleteElement = (sectionIndex, columnIndex,itemIndex,value) => {
+    console.log(value);
     setSections((prevSections) => {
       const updatedSections = [...prevSections];
-      if (columnIndex !== undefined) {
+      // const middata =updatedSections[sectionIndex].columns[columnIndex];
+      if(itemIndex !== undefined){
+        updatedSections[sectionIndex].columns[columnIndex].items.splice(itemIndex,1);
+        if (value && value.field) {
+        // Update the fields list
+          setUpdatedFields((prevFields) => {
+            console.log('Previous fields:', prevFields);
+            const newField = { label: value.field, name: value.field };
+            console.log('Adding to updatedFields:', newField); // Log before adding
+
+            return [...prevFields, newField];
+         });
+        } else {
+          console.error('Invalid deleted item or missing field:');
+        }
+        console.log(updatedFields);
+      }
+      else if (columnIndex !== undefined) {
         updatedSections[sectionIndex].columns.splice(columnIndex, 1);
       } else {
         updatedSections.splice(sectionIndex, 1);
       }
       return updatedSections;
     });
+
   };
 
   const saveLayout = async() => {
@@ -340,7 +370,7 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
                                                   }
                                                   style={{ width: "100%" }}
                                                 >
-                                                  {fields.map((field, index) => (
+                                                  {updatedFields.map((field, index) => (
                                                     <Option key={index.name} value={field.name}>
                                                       {field.name}
                                                     </Option>
@@ -352,7 +382,7 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
                                                   type="text"
                                                   danger
                                                   icon={<DeleteOutlined />}
-                                                  onClick={() => deleteElement(sectionIndex, columnIndex, itemIndex)}
+                                                  onClick={() => deleteElement(sectionIndex, columnIndex, itemIndex,item)}
                                                 />
                                               </Col>
                                             </Row>
