@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Typography, Row, Col, Button, Form, message, Upload, List, Tooltip,Divider } from 'antd';
-import { UploadOutlined, DownloadOutlined } from '@ant-design/icons'; // For the upload icon
+import { UploadOutlined, DownloadOutlined,DeleteOutlined } from '@ant-design/icons'; // For the upload icon
 import { BASE_URL } from '../Components/Constant';
 import ChildRecordTable from './RecordTable';
 import ApiService from '../Components/apiService';
@@ -341,7 +341,122 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
   };
   
 
+  const handleFilePreview = async (fileId) => {
+    try {
+      // Make an API call to fetch the file by its file_id
+      const apiService = new ApiService(
+        `${BASE_URL}/download_file/${fileId}`,
+        { 'Content-Type': 'application/json' },
+        'GET'
+      );
+  
+      const response = await apiService.makeCall(); // Fetching the response
+      console.log(response);
+  
+      // Extract base64 data from the response
+      const base64Data = response?.content?.$binary?.base64;
+  
+      // Extract file type from the file name
+      const fileName = response?.filename;
+      const fileExtension = fileName?.split('.').pop()?.toLowerCase();
+  
+      if (!base64Data) {
+        message.error('No file data available to preview');
+        return;
+      }
+  
+      // Handle preview based on file extension
+      switch (fileExtension) {
+        case 'pdf':
+          previewPDF(base64Data);
+          break;
+        case 'docx':
+        case 'doc':
+          message.info('Preview not available for Word files. Please download to view.');
+          break;
+        case 'csv':
+          message.info('Preview not available for CSV files. Please download to view.');
+          break;
+        case 'jpg':
+        case 'jpeg':
+        case 'png':
+          previewImage(base64Data);
+          break;
+        default:
+          message.error('Unsupported file type for preview');
+          break;
+      }
+    } catch (error) {
+      // Handle any errors during the process
+      const errorMessage = error && typeof error === 'object'
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to preview file due to an unknown error';
+      message.error(errorMessage); // Show error message to the user
+    }
+  };
+  
+  // Function to preview PDF file
+  const previewPDF = (base64Data) => {
+    const binary = atob(base64Data); // Decode base64 data
+    const byteArray = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      byteArray[i] = binary.charCodeAt(i);
+    }
+    
+    const blob = new Blob([byteArray], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  };
+  
+  // Function to preview Word file (DOCX)
+  const previewWord = (base64Data) => {
+    console.log('entered in previewword');
+    const binary = atob(base64Data); // Decode base64 data
+    const byteArray = new Uint8Array(binary.length);
+    console.log(binary);
+    for (let i = 0; i < binary.length; i++) {
+      byteArray[i] = binary.charCodeAt(i);
+    }
+    
+    const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  };
+  
+ 
+  
+  // Function to preview Image (JPG, PNG, etc.)
+  const previewImage = (base64Data) => {
+    const img = new Image();
+    img.src = `data:image/jpeg;base64,${base64Data}`; // Set base64 as image source
+    const newWindow = window.open();
+    newWindow.document.body.appendChild(img);
+  };
 
+
+  const handleDeleteFile=async(fileId)=>{
+
+    try {
+      // Assuming there is an API endpoint to handle file uploads
+      const apiService = new ApiService(
+        `${BASE_URL}/delete_file/${fileId}`,
+        { 'Content-Type': 'application/json' },
+        'DELETE'
+      );
+
+      const response = await apiService.makeCall();
+      console.log(response);
+      message.success('File deleted succesfully');
+      fetchfiles();
+    } catch (error) {
+      const errorMessage = error && typeof error === 'object'
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to delete file due to an unknown error';
+      message.error(errorMessage);
+    }
+
+  }
+  
   return (
     <div>
     {Object.keys(groupedData).length > 0 ? (
@@ -415,15 +530,41 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
                     icon={<DownloadOutlined />}
                     onClick={() => handleDownloadFile(file.file_id)}
                   />
+                  
                 </Tooltip>,
+                <Tooltip title="Delete file">
+                <Button
+                  icon={<DeleteOutlined />}
+                  onClick={() => handleDeleteFile(file.file_id)} // Add your delete handler here
+                  danger
+                />
+              </Tooltip>,
+                
+
               ]}
             >
               <List.Item.Meta
-                title={
-                  <span style={{ fontWeight: "normal" }}>{file.file_name}</span>
-                }
-              />
-            </List.Item>
+        title={
+          <a 
+            href="#" 
+            style={{
+              fontWeight: '500', 
+              color: '#1F5FBF', 
+              textDecoration: 'none', // Removes default underline
+              borderBottom: '1px solid #1F5FBF', // Adds bottom border
+              paddingBottom: '2px' // Optional, adds space for a cleaner look
+            }}
+            onClick={(e) => {
+              e.preventDefault(); // Prevent default anchor behavior
+              handleFilePreview(file.file_id); // Call preview function
+            }}
+          >
+            {file.file_name}
+          </a>
+        }
+        description=""
+      />
+        </List.Item>
           )}
         />
       </Card>
