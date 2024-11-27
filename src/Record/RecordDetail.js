@@ -384,11 +384,11 @@ const RecordDetails = ({ objectName, id }) => {
                                   style={{
                                     border: '1px solid #ddd', // Thin border around the section
                                     marginBottom: '20px', // Space between sections
-                                    padding: '20px', // Padding inside the section
+                                    padding: '20px',
                                     borderRadius: '4px', // Optional: rounded corners for the border
                                   }}
                                 >
-                                  <Title level={4}>{section.name}</Title>
+                                  <Title level={4} style={{marginTop:'2px'}}>{section.name}</Title>
                                   <Row gutter={24} style={{ marginBottom: '0px' }}>
                                     {/* Loop through columns within each section */}
                                     {section.columns?.map((column, columnIndex) => {
@@ -409,7 +409,7 @@ const RecordDetails = ({ objectName, id }) => {
                                         <Col
                                           key={columnIndex}
                                           span={columnSpan} // Dynamically set the span based on the number of columns
-                                          style={{ marginBottom: '20px' }}
+                                          style={{ marginBottom: '10px' }}
                                         >
                                           <div>
                                             {/* Loop through the number of items in this column */}
@@ -485,7 +485,7 @@ const RecordDetails = ({ objectName, id }) => {
                             <div style={{
                                 width: '90%',
                                 padding: '10px 0',
-                                background: '#f0f2f5',
+                                background: 'rgba(240, 242, 245, 0.9)', // Slightly transparent background
                                 position: 'fixed',
                                 bottom: '50px',
                                 left: 110

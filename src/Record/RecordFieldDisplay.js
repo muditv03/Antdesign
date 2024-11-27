@@ -69,7 +69,7 @@ const DisplayField = ({ type, form, name, field, record,layouts }) => {
                             style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
                             onMouseEnter={handleMouseEnter}
                             onMouseLeave={handleMouseLeave}
-                        >
+                        > 
                             <Avatar
                                 size="small"
                                 style={{
@@ -162,8 +162,8 @@ const DisplayField = ({ type, form, name, field, record,layouts }) => {
                                         marginBottom: 8,
                                     }}
                                 >
-                                    <span style={{ fontWeight: '500' }}>{displayFieldName}:-</span>
-                                    <span>
+                                    <span style={{ fontWeight: '500' }}>{displayFieldName}</span>
+                                    <span style={{fontWeight:'200'}}>
                                         {typeof fieldValue[displayFieldName] === 'boolean' ? (
                                             <Checkbox checked={fieldValue[displayFieldName]} disabled />
                                         ) : (

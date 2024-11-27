@@ -79,7 +79,7 @@ const FieldHistory = () => {
 
   const columns = [
     {
-      title: 'Date',
+      title: 'Created/Updated At',
       dataIndex: 'date',
 
     },
@@ -118,7 +118,7 @@ const FieldHistory = () => {
   return (
     <div>
 
-      <h2>History</h2>
+      {/* <h2>Field History</h2> */}
       <Table
         columns={columns}
         dataSource={arrayData}
