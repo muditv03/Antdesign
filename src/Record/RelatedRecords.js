@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Typography, Row, Col, Button, Form, message, Upload, List, Tooltip } from 'antd';
+import { Card, Typography, Row, Col, Button, Form, message, Upload, List, Tooltip,Divider } from 'antd';
 import { UploadOutlined, DownloadOutlined } from '@ant-design/icons'; // For the upload icon
 import { BASE_URL } from '../Components/Constant';
 import ChildRecordTable from './RecordTable';
@@ -26,6 +26,8 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
   const [isFieldReadOnly, setIsFieldReadOnly] = useState(false);
   const [files, setFiles] = useState([]);
   const [isAllowFile, setIsAllowFiles] = useState(false);
+  const [isTrackFieldHistory, setIsTrackFieldHistory] = useState(false);
+
 
   useEffect(() => {
 
@@ -43,6 +45,7 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
         console.log(response);
         console.log(response.allow_files);
         setIsAllowFiles(response.allow_files);
+        setIsTrackFieldHistory(response.track_field_history);
       }
       catch (error) {
 
@@ -286,133 +289,181 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
   };
 
   const handleDownloadFile = async (fileId) => {
-
-    console.log('file id is');
-    console.log(fileId);
-
+    console.log('File ID is:', fileId);
+  
     try {
-
       const apiService = new ApiService(
-        `${BASE_URL}/get_data/download_file/${fileId}`,
+        `${BASE_URL}/download_file/${fileId}`,
         { 'Content-Type': 'application/json' },
         'GET',
       );
-      const response = await apiService.makeCall();
+  
+      const response = await apiService.makeCall(); // Fetching the response
       console.log(response);
-
-    }
-    catch (error) {
+  
+      if (response && response.content && response.content.$binary) {
+        const { base64 } = response.content.$binary; // Get Base64-encoded content
+        const { filename } = response; // Extract filename
+  
+        // Decode Base64 into a binary Blob
+        const binaryData = atob(base64); // Decoding Base64
+        const byteArray = new Uint8Array(binaryData.length);
+  
+        for (let i = 0; i < binaryData.length; i++) {
+          byteArray[i] = binaryData.charCodeAt(i);
+        }
+  
+        // Create a Blob and trigger the download
+        const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+        const url = window.URL.createObjectURL(blob);
+  
+        // Create a temporary <a> element for the download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename || 'downloaded_file.csv'; // Use filename or default to 'downloaded_file.csv'
+        document.body.appendChild(a);
+        a.click();
+  
+        // Cleanup
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+  
+        console.log('File downloaded successfully');
+      } else {
+        throw new Error('Invalid file content received from the API.');
+      }
+    } catch (error) {
       const errorMessage = error && typeof error === 'object'
         ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
         : 'Failed to download file due to an unknown error';
       message.error(errorMessage);
     }
-  }
+  };
+  
 
 
   return (
     <div>
-      {Object.keys(groupedData).length > 0 ? (
-        Object.keys(groupedData).map((relatedListName) =>
-          groupedData[relatedListName].map((relatedList) => (
-            <Card
-              key={relatedList._id}
-              title={
-                <Row justify="space-between" align="middle">
-                  <Col>
-                    <Title level={4} style={{ margin: 0 }}>
-                      {relatedListName}
-                    </Title>
-                  </Col>
-                  <Col>
-                    <Button
-                      type="primary"
-                      onClick={() => handleNewButtonClick(relatedList)}
-                    >
-                      New
-                    </Button>
-                  </Col>
-                </Row>
-              }
-              style={{ marginBottom: 16 }}
-            >
-              <ChildRecordTable
-                records={groupedData[relatedListName]}
-                fieldsToDisplay={relatedList.fields_to_display || []}
-                childRecords={childRecordsMap[relatedList._id] || []}
-                fieldsData={fieldsDataMap[relatedList._id] || []}
-                childObjectName={relatedList.child_object_name}
-                onDelete={handleDeleteChildRecord} // Pass the delete function
-                relatedListId={relatedList._id} // Pass related list ID for deletion
-                currentRecordId={recordId} // Pass the current record ID
-                currentObjectName={objectName} // Pass the current object name
-                refreshRecords={refreshRecords} // Pass the refresh function
-              />
-            </Card>
-          ))
-        )
-      ) : (
-        <p>No related records found</p>
-      )}
-      <CreateRecordDrawer
-        visible={isDrawerVisible}
-        onClose={handleDrawerClose}
-        onFinish={handleFinish}
-        loading={false}
-        fieldsData={currentFieldsData}
-        form={form}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-      />
-
-      {isAllowFile && (
-        <Card
-          title={
-            <Row justify="space-between" align="middle" >
-              <Col>
-                <Title level={4} style={{ margin: 0 }}>
-                  Upload Files
-                </Title>
-              </Col>
-              <Col>
-                <Upload
-                  customRequest={handleFileUpload} // Use custom file upload handler
-                  showUploadList={false} // Hide default upload list
-                >
-                  <Button icon={<UploadOutlined />}>Upload Files</Button>
-                </Upload>
-              </Col>
-            </Row>
-          }
-        >
-          <List
-            dataSource={files}
-            renderItem={(file) => (
-              <List.Item
-                actions={[
-                  <Tooltip title="Download file">
-                    <Button
-                      icon={<DownloadOutlined />}
-                      onClick={() => handleDownloadFile(file.file_id)}
-                    >
-
-                    </Button>
-                  </Tooltip>
-                ]}
+    {Object.keys(groupedData).length > 0 ? (
+      Object.keys(groupedData).map((relatedListName) =>
+        groupedData[relatedListName].map((relatedList) => (
+          <Card
+            key={relatedList._id}
+            title={
+              <Row justify="space-between" align="middle">
+                <Col>
+                  <Title level={4} style={{ margin: 0 }}>
+                    {relatedListName}
+                  </Title>
+                </Col>
+                <Col>
+                  <Button
+                    type="primary"
+                    onClick={() => handleNewButtonClick(relatedList)}
+                  >
+                    New
+                  </Button>
+                </Col>
+              </Row>
+            }
+            style={{ marginBottom: 16 }}
+          >
+            <ChildRecordTable
+              records={groupedData[relatedListName]}
+              fieldsToDisplay={relatedList.fields_to_display || []}
+              childRecords={childRecordsMap[relatedList._id] || []}
+              fieldsData={fieldsDataMap[relatedList._id] || []}
+              childObjectName={relatedList.child_object_name}
+              onDelete={handleDeleteChildRecord} // Pass the delete function
+              relatedListId={relatedList._id} // Pass related list ID for deletion
+              currentRecordId={recordId} // Pass the current record ID
+              currentObjectName={objectName} // Pass the current object name
+              refreshRecords={refreshRecords} // Pass the refresh function
+            />
+          </Card>
+        ))
+      )
+    ) : null}
+  
+    {isAllowFile && (
+      <Card
+        title={
+          <Row justify="space-between" align="middle">
+            <Col>
+              <Title level={4} style={{ margin: 0 }}>
+                Upload Files
+              </Title>
+            </Col>
+            <Col>
+              <Upload
+                customRequest={handleFileUpload} // Use custom file upload handler
+                showUploadList={false} // Hide default upload list
               >
-                <List.Item.Meta
-                  title={<span style={{ fontWeight: 'normal' }}>{file.file_name}</span>}
-                />
-              </List.Item>
-            )}
-          />
+                <Button icon={<UploadOutlined />}>Upload Files</Button>
+              </Upload>
+            </Col>
+          </Row>
+        }
+      >
+        <List
+          dataSource={files}
+          renderItem={(file) => (
+            <List.Item
+              actions={[
+                <Tooltip title="Download file">
+                  <Button
+                    icon={<DownloadOutlined />}
+                    onClick={() => handleDownloadFile(file.file_id)}
+                  />
+                </Tooltip>,
+              ]}
+            >
+              <List.Item.Meta
+                title={
+                  <span style={{ fontWeight: "normal" }}>{file.file_name}</span>
+                }
+              />
+            </List.Item>
+          )}
+        />
+      </Card>
+    )}
 
-        </Card>
-      )}
-    <FieldHistory/>
-    </div>
+    {(isTrackFieldHistory &&
+  
+      <Card style = {{marginTop:"10px"}}>
+      <Row justify="space-between" align="middle">
+      <Col>
+        <Title level={4} style={{ margin: 0 }}>
+          Field History
+        </Title>
+      </Col>
+    </Row>
+    {/* Add a small space below the title */}
+    <Divider style={{ margin: '8px 0' }} />
+    <FieldHistory />
+    </Card>
+  )}
+  
+    {/* Show "No related records found" only if groupedData, isAllowFile, and FieldHistory are empty */}
+    {Object.keys(groupedData).length === 0 && !isAllowFile && !isTrackFieldHistory && (
+      <p>No related records found</p>
+    )}
+  
+    <CreateRecordDrawer
+      visible={isDrawerVisible}
+      onClose={handleDrawerClose}
+      onFinish={handleFinish}
+      loading={false}
+      fieldsData={currentFieldsData}
+      form={form}
+      selectedDate={selectedDate}
+      setSelectedDate={setSelectedDate}
+    />
+  </div>
+  
 
-  );
+  ); 
 };
 
 export default RelatedRecord;

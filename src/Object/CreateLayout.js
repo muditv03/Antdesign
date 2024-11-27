@@ -3,7 +3,7 @@ import ApiService from '../Components/apiService'; // Import ApiService class
 import { BASE_URL } from '../Components/Constant';
 import { Row, Col, Card, Button, Typography } from 'antd';
 import LayoutEditor from "./LayoutEditor";
-
+ 
 const { Title } = Typography;
 
 const CreateLayout = ({ object }) => {
