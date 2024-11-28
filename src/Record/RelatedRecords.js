@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Typography, Row, Col, Button, Form, message, Upload, List, Tooltip,Divider } from 'antd';
+import { Card, Typography, Row, Col, Button, Form, message, Upload, List, Tooltip,Divider,Spin } from 'antd';
 import { UploadOutlined, DownloadOutlined,DeleteOutlined } from '@ant-design/icons'; // For the upload icon
 import { BASE_URL } from '../Components/Constant';
 import ChildRecordTable from './RecordTable';
@@ -27,6 +27,8 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
   const [files, setFiles] = useState([]);
   const [isAllowFile, setIsAllowFiles] = useState(false);
   const [isTrackFieldHistory, setIsTrackFieldHistory] = useState(false);
+  const [loading, setLoading] = useState(false);
+
 
 
   useEffect(() => {
@@ -59,6 +61,8 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
   // Fetch related records
   const fetchRelatedRecords = async () => {
     try {
+      setLoading(true); // Start loading
+
       const relatedListService = new ApiService(
         `${BASE_URL}/related_lists/for_object/${objectName}`,
         {},
@@ -86,8 +90,12 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
           });
         });
       }
+      setLoading(false); // Start loading
+
     } catch (err) {
       console.error('Error fetching related records', err);
+      setLoading(false); // Start loading
+
     }
   };
 
@@ -458,6 +466,7 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
   }
   
   return (
+    <Spin spinning={loading}>
     <div>
     {Object.keys(groupedData).length > 0 ? (
       Object.keys(groupedData).map((relatedListName) =>
@@ -482,7 +491,7 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
               </Row>
             }
             style={{ marginBottom: 16 }}
-          >
+          > 
             <ChildRecordTable
               records={groupedData[relatedListName]}
               fieldsToDisplay={relatedList.fields_to_display || []}
@@ -603,6 +612,7 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
     />
   </div>
   
+  </Spin>
 
   ); 
 };

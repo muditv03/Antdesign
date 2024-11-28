@@ -346,7 +346,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
 
   return (
     <div>
-
+ 
       <Table
         dataSource={childRecords}
         columns={columns}
