@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Input, Select, Table } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DragOutlined } from '@ant-design/icons'; // Import the DragOutlined icon
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const { Option } = Select;
@@ -106,6 +106,14 @@ const SearchLayout = ({
                           backgroundColor: '#fff',
                         }}
                       >
+                        {/* Draggable Handle - Three Dots */}
+                        <DragOutlined
+                          style={{
+                            cursor: 'move',
+                            marginRight: '10px',
+                            fontSize: '16px',
+                          }}
+                        />
                         <span>{record.name}</span>
                         <Button
                           type="text"
@@ -130,9 +138,7 @@ const SearchLayout = ({
       {!isEditMode && (
         <Table
           dataSource={filteredFields}
-          columns={[
-            { title: 'Field Name', dataIndex: 'name', key: 'name' },
-          ]}
+          columns={[{ title: 'Field Name', dataIndex: 'name', key: 'name' }]}
           rowKey="name"
           pagination={false}
           style={{ marginBottom: '20px' }}
