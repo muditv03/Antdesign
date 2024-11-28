@@ -31,6 +31,19 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                 </Form.Item>
             );
 
+    
+            case 'Integer' :
+                return (
+                  <Form.Item
+                          name={name}
+                          initialValue={initialValue}
+                          rules={validationRules}
+                          noStyle
+                      >
+                          <Input initialValue={initialValue} placeholder={label} type="number"  />
+                      </Form.Item>
+      
+                ); 
         case 'Picklist':
             return (
                 <Form.Item
@@ -354,25 +367,10 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                 <Form.Item
                     name={name}
                     initialValue={initialValue}
-                    rules={[
-                        {
-                            validator: (_, value) => {
-                                if (!value) {
-                                    // Allow empty value
-                                    return Promise.resolve();
-                                }
-                                if (/^[0-9]{10}$/.test(value)) {
-                                    // Allow only 10-digit phone numbers
-                                    return Promise.resolve();
-                                }
-                                // Reject if the value is not a 10-digit number
-                                return Promise.reject('Enter a valid 10-digit phone number');
-                            },
-                        },
-                    ]}
+                    rules={validationRules}
                     noStyle
                 >
-                    <Input initialValue={initialValue} placeholder={`Enter ${label}`} maxLength={10} addonBefore={<PhoneOutlined />} />
+                    <Input initialValue={initialValue} placeholder={`Enter ${label}`} addonBefore={<PhoneOutlined />} />
                 </Form.Item>
             );
 
