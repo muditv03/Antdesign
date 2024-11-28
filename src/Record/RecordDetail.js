@@ -29,7 +29,7 @@ const RecordDetails = ({ objectName, id }) => {
     const [recordName, setRecordName] = useState('');
     const [initialValues, setInitialValues] = useState({});
     const [lookupData,setLookupData]=useState({});
-    const [layouts,setLayouts]=useState({});
+    const [layout,setLayout]=useState({});
 
 
     useEffect(() => {
@@ -61,7 +61,11 @@ const RecordDetails = ({ objectName, id }) => {
             setRecordName(responseData.Name);
             const layouts= new ApiService(`${BASE_URL}/get_by_objectName/${objectName}`, {}, 'GET');
             const res=await layouts.makeCall();
-            setLayouts(res);
+            const activeLayout = res.filter(layout => layout.active); 
+            console.log('active layout is ');
+            console.log(activeLayout);
+
+            setLayout(activeLayout);
             const fieldCallout = new ApiService(`${BASE_URL}/mt_fields/object/${objectName}`, {}, 'GET');
             const fieldsResponse = await fieldCallout.makeCall();
             const filteredFields = fieldsResponse.filter(field => field.name !== 'recordCount');
@@ -377,8 +381,8 @@ const RecordDetails = ({ objectName, id }) => {
                        {loading ? (
                             <Spin size="large" style={{ marginTop: '20px' }} />
                         ) : (
-                            layouts[0]?(
-                            layouts[0]?.sections?.map((section, sectionIndex) => (
+                            layout[0]?(
+                            layout[0]?.sections?.map((section, sectionIndex) => (
                                 <div
                                   key={sectionIndex}
                                   style={{
@@ -439,7 +443,7 @@ const RecordDetails = ({ objectName, id }) => {
                                   </Row>
                                 </div>
                               ))
-                            ):(
+                            ):( 
                                 <Row gutter={24} style={{ marginBottom: '0px' }}>
                                 {fields.map((field, index) => (
                                     <Col key={index} xs={24} sm={12} style={{ marginBottom: -5 }}>
