@@ -1,125 +1,152 @@
-import React from 'react';
-import { Button } from 'antd';
+import React, { useState } from 'react';
+import { Button, Input, Select, Table } from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+
+const { Option } = Select;
 
 const SearchLayout = ({
   availableFields,
   setAvailableFields,
-  setSelectedFields,
   selectedFields,
-  loading,
-  isEditMode,
-  toggleSelection,
-  handleAddToSelected,
-  handleRemoveFromSelected,
+  setSelectedFields,
   handleSave,
-  handleEdit,
+  setIsEditMode,
+  isEditMode
 }) => {
-    const styles = {
-        listContainer: {
-          border: '1px solid #ddd',
-          padding: '10px',
-          width: '300px',
-          maxHeight: '400px', // Set a maximum height
-          overflowY: 'auto', // Add vertical scrollbar if content exceeds height
-          display: 'flex',
-          flexDirection: 'column',
-          marginLeft: '100px'
-        },
-      };
-      
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleFieldSelect = (fieldName) => {
+    const field = availableFields.find((f) => f.name === fieldName);
+    if (field) {
+      setSelectedFields([...selectedFields, { ...field, order: '' }]);
+      setAvailableFields(availableFields.filter((f) => f.name !== fieldName));
+    }
+  };
+
+  const handleFieldRemove = (fieldName) => {
+    const field = selectedFields.find((f) => f.name === fieldName);
+    if (field) {
+      setAvailableFields([...availableFields, field]);
+      setSelectedFields(selectedFields.filter((f) => f.name !== fieldName));
+    }
+  };
+
+  const toggleEditMode = () => {
+    setIsEditMode(!isEditMode);
+  };
+
+  const filteredFields = selectedFields.filter((field) =>
+    field.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleDragEnd = (result) => {
+    const { destination, source } = result;
+
+    // If dropped outside the droppable area, do nothing
+    if (!destination) return;
+
+    const items = Array.from(selectedFields);
+    const [reorderedItem] = items.splice(source.index, 1);
+    items.splice(destination.index, 0, reorderedItem);
+
+    setSelectedFields(items); // Update the order of fields
+  };
+
   return (
-    <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-      {/* Available Fields */}
-      <div style={styles.listContainer}>
-        <h3>Available Fields</h3>
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
-          availableFields.map((field) => (
-            <div
-              key={field.name}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                cursor: 'pointer',
-              }}
-              onClick={() =>
-                toggleSelection(field, availableFields, setAvailableFields)
-              }
-            >
-              <input
-                type="checkbox"
-                checked={field.isSelected && isEditMode}
-                onChange={() =>
-                  toggleSelection(field, availableFields, setAvailableFields)
-                }
-              />
-              <span style={{ marginLeft: '10px' }}>{field.name}</span>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Arrow Buttons */}
-      <div
-        style={{
-          marginTop: '50px',
-          marginLeft: '70px',
-          width: '80px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '20px',
-        }}
-      >
-        <Button
-          onClick={handleAddToSelected}
-          disabled={!availableFields.length || !isEditMode}
-        >
-          →
-        </Button>
-        <Button
-          onClick={handleRemoveFromSelected}
-          disabled={!selectedFields.length || !isEditMode}
-        >
-          ←
-        </Button>
-      </div>
-
-      {/* Selected Fields */}
-      <div style={styles.listContainer}>
-        <h3>Selected Fields</h3>
-        {selectedFields.map((field) => (
-          <div
-            key={field.name}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              cursor: 'pointer',
-            }}
-            onClick={() =>
-              toggleSelection(field, selectedFields, setSelectedFields)
-            }
+    <div style={{ padding: '20px' }}>
+      {/* Show Select and Search Fields only when Edit Mode is enabled */}
+      {isEditMode && (
+        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+          <Select
+            style={{ width: '300px' }}
+            placeholder="Select a field"
+            onChange={handleFieldSelect}
           >
-            <input
-              type="checkbox"
-              checked={field.isSelected && isEditMode}
-              onChange={() =>
-                toggleSelection(field, selectedFields, setSelectedFields)
-              }
-            />
-            <span style={{ marginLeft: '10px' }}>{field.name}</span>
-          </div>
-        ))}
-      </div>
+            {availableFields.map((field) => (
+              <Option key={field.name} value={field.name}>
+                {field.name}
+              </Option>
+            ))}
+          </Select>
+          <Input
+            placeholder="Search added fields"
+            style={{ width: '300px'}}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      )}
 
-      {/* Save Button */}
-      <div style={{ marginTop: '60px' }}>
+      {/* Show Drag-and-Drop and the Table of Fields only when Edit Mode is enabled */}
+      {isEditMode && (
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="droppable">
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                style={{ marginBottom: '20px' }}
+              >
+                {/* Render Draggable Fields */}
+                {filteredFields.map((record, index) => (
+                  <Draggable key={record.name} draggableId={record.name} index={index}>
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        style={{
+                          ...provided.draggableProps.style,
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '10px',
+                          border: '1px solid #ddd',
+                          marginBottom: '8px',
+                          backgroundColor: '#fff',
+                        }}
+                      >
+                        <span>{record.name}</span>
+                        <Button
+                          type="text"
+                          danger
+                          onClick={() => handleFieldRemove(record.name)}
+                          style={{ marginLeft: 'auto' }}
+                        >
+                          <DeleteOutlined style={{ color: 'red', fontSize: '16px', cursor: 'pointer' }} />
+                        </Button>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      )}
+
+      {/* Show the Table of Fields when Edit Mode is not enabled */}
+      {!isEditMode && (
+        <Table
+          dataSource={filteredFields}
+          columns={[
+            { title: 'Field Name', dataIndex: 'name', key: 'name' },
+          ]}
+          rowKey="name"
+          pagination={false}
+          style={{ marginBottom: '20px' }}
+        />
+      )}
+
+      {/* Save and Edit Button */}
+      <div style={{ textAlign: 'right' }}>
         {isEditMode ? (
           <Button type="primary" onClick={handleSave}>
             Save
           </Button>
         ) : (
-          <Button type="default" onClick={handleEdit}>
+          <Button type="default" onClick={toggleEditMode}>
             Edit
           </Button>
         )}
