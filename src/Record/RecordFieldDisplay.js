@@ -1,8 +1,17 @@
 import React, { useEffect,useState } from 'react';
-import { Checkbox, Avatar,Card } from 'antd';
+import { Checkbox, Avatar,Card,Tag } from 'antd';
 import { PhoneOutlined } from '@ant-design/icons';
 
 const DisplayField = ({ type, form, name, field, record,layouts }) => {
+
+    const colors = ['blue', 'green', 'red', 'purple', 'orange', 'volcano', 'gold', 'cyan', 'lime', 'pink'];
+
+const getUniqueColor = (index) => {
+    // Assign a color based on the index, wrapping around if there are more values than colors
+    return colors[index % colors.length];
+};
+
+
 
     const [isHovered, setIsHovered] = useState(false);
 
@@ -20,7 +29,7 @@ const DisplayField = ({ type, form, name, field, record,layouts }) => {
     const fieldValue = form.getFieldValue(name);
     console.log('display field lookup ui');
     console.log(form.getFieldValue(name)); 
-    const displayField=field?.lookup_config?.display_fields;
+    const displayField=field?.lookup_config?.display_fields; 
     const renderField = () => {
         switch (type) {
             case 'boolean':
@@ -186,8 +195,28 @@ const DisplayField = ({ type, form, name, field, record,layouts }) => {
                         {fieldValue || ''}
                     </div>
                 ) : '';
-            case 'MultiSelect':
-                return Array.isArray(fieldValue) ? fieldValue.join(', ') : fieldValue || '';
+                case 'MultiSelect':
+                    return Array.isArray(fieldValue) ? (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
+                            {fieldValue.map((value, index) => (
+                                <Tag key={index} 
+                                color={getUniqueColor(index)}
+                                style={{
+                                    fontSize: '12px', // Increase font size
+                                    padding: '4px 10px', // Adjust padding for larger size
+                                    borderRadius: '8px', // Add rounded corners for better aesthetics
+                                    lineHeight: '1.5', // Adjust line height for better spacing
+                                }}
+                                >
+                                    {value}
+                                </Tag>
+                            ))}
+                        </div>
+                    ) : (
+                        fieldValue || ''
+                    );
+                
+                
             default:
                 return fieldValue || '';
         }
