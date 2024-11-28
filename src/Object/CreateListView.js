@@ -39,7 +39,6 @@ const CreateListView = ({ object }) => {
       const errorMessage = error && typeof error === 'object'
         ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
         : 'Failed to fetch list views due to an unknown error';
-      message.error(errorMessage);
     } finally {
       setLoading(false); // Set loading to false after the API call
     }

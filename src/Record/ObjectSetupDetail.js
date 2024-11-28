@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Table, Typography, Button, Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker, Spin, Modal, Space, Upload, Avatar } from 'antd';
+import { Table, Typography, Button, Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker, Spin, Modal, Space, Upload, Avatar,Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined, ImportOutlined, SettingOutlined, CaretDownOutlined, PhoneOutlined } from '@ant-design/icons';
 import { BASE_URL, DateFormat } from '../Components/Constant';
@@ -16,6 +16,13 @@ dayjs.extend(customParseFormat);
 
 const { Title } = Typography;
 const { Option } = Select;
+
+const colors = ['blue', 'green', 'red', 'purple', 'orange', 'volcano', 'gold', 'cyan', 'lime', 'pink'];
+
+const getUniqueColor = (index) => {
+    // Assign a color based on the index, wrapping around if there are more values than colors
+    return colors[index % colors.length];
+};
 
 
 const ObjectSetupDetail = () => {
@@ -593,14 +600,37 @@ const ObjectSetupDetail = () => {
           </div>
         );
       }
-      else if (field.type === 'MultiSelect') {
-        return Array.isArray(text) ? text.join(', ') : text || ''; // Convert array to comma-separated string
-      }else if(field.type === 'Rich-Text'){
+      
+      else if(field.type === 'Rich-Text'){
         console.log('Text-Area filed')
         return(
           <div dangerouslySetInnerHTML={{ __html: text }} />
         );
       }
+      else if (field.type === 'MultiSelect') {
+        // Check if text is an array (i.e., the MultiSelect field has multiple values)
+        return Array.isArray(text) ? (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {text.map((value, index) => (
+              <Tag
+                key={index}
+                color={getUniqueColor(index)} // Get a unique color for each tag
+                style={{
+                  fontSize: '14px', // Adjust font size for better readability
+                  padding: '6px 12px', // Adjust padding for larger size
+                  borderRadius: '8px', // Rounded corners for aesthetic appeal
+                  lineHeight: '1.5', // Adjust line height for better spacing
+                }}
+              >
+                {value}
+              </Tag>
+            ))}
+          </div>
+        ) : (
+          text || ''
+        );
+      }
+  
 
 
 

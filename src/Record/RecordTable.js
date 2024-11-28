@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Table, Button, Tooltip, Form } from 'antd';
+import { Table, Button, Tooltip, Form,Tag } from 'antd';
 import { EditOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons';
 import { message, Popconfirm } from 'antd';
 import dayjs from 'dayjs';
@@ -10,6 +10,13 @@ import ApiService from '../Components/apiService'; // Import ApiService class
 import CreateRecordDrawer from './CreateRecordDrawer';
 import { generateBody, formatRecordData, fetchLookupData } from '../Components/Utility';
 dayjs.extend(customParseFormat);
+
+const colors = ['blue', 'green', 'red', 'purple', 'orange', 'volcano', 'gold', 'cyan', 'lime', 'pink'];
+
+const getUniqueColor = (index) => {
+    // Assign a color based on the index, wrapping around if there are more values than colors
+    return colors[index % colors.length];
+};
 
 const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, onClone, onDelete, relatedListId, currentRecordId, currentObjectName, refreshRecords }) => {
 
@@ -123,6 +130,30 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
           ].filter(Boolean).join(', '); // Join non-empty fields with a comma
         }
         return ''; // Return an empty string if the address is not available
+      }
+     
+       if (field.type === 'MultiSelect' && value) {
+        // Check if text is an array (i.e., the MultiSelect field has multiple values)
+        return Array.isArray(value) ? (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {value.map((value, index) => (
+              <Tag
+                key={index}
+                color={getUniqueColor(index)} // Get a unique color for each tag
+                style={{
+                  fontSize: '14px', // Adjust font size for better readability
+                  padding: '6px 12px', // Adjust padding for larger size
+                  borderRadius: '8px', // Rounded corners for aesthetic appeal
+                  lineHeight: '1.5', // Adjust line height for better spacing
+                }}
+              >
+                {value}
+              </Tag>
+            ))}
+          </div>
+        ) : (
+          value || ''
+        );
       }
 
       if (field.type === 'Date' && value) {
@@ -320,6 +351,18 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
         dataSource={childRecords}
         columns={columns}
         rowKey="_id"
+        expandable={{
+          expandedRowRender: (record) => (
+            <p
+              style={{
+                margin: 0,
+              }}
+            >
+              This is sample record description
+            </p>
+          ),
+          rowExpandable: (record) => record.name !== 'Not Expandable',
+        }}
         pagination={false}
         loading={loading}
         scroll={{
