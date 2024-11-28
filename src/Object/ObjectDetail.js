@@ -27,7 +27,7 @@ const ObjectFieldDetail = () => {
   const [availableFields, setAvailableFields] = useState([]);
   const [selectedFields, setSelectedFields] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(true); // Determines whether the user is editing or viewing
+  const [isEditMode, setIsEditMode] = useState(false); // Determines whether the user is editing or viewing
   const [allFields, setAllFields] = useState([]); // Holds all fields fetched from the API
 
   const handleAddOrEditObject = (updatedObject) => {
@@ -260,8 +260,8 @@ const ObjectFieldDetail = () => {
         </TabPane>
         <TabPane tab="Search Result Layout" key="6">
           <Card>
-          <h2 style={{paddingBottom:"30px"}}>Search Layout Fields</h2>
-            <SearchLayout setAvailableFields={setAvailableFields}   setSelectedFields={setSelectedFields} availableFields={availableFields} selectedFields ={selectedFields} loading= {loading} isEditMode={isEditMode} toggleSelection={toggleSelection} handleAddToSelected={handleAddToSelected} handleRemoveFromSelected={handleRemoveFromSelected} handleSave={handleSave} handleEdit={handleEdit} />
+          <h2>Search Result Layout</h2>
+            <SearchLayout setAvailableFields={setAvailableFields}  setIsEditMode={setIsEditMode} setSelectedFields={setSelectedFields} availableFields={availableFields} selectedFields ={selectedFields} loading= {loading} isEditMode={isEditMode} toggleSelection={toggleSelection} handleSave={handleSave} handleEdit={handleEdit} />
         </Card>
         </TabPane>
       </Tabs>

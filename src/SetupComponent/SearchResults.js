@@ -5,7 +5,8 @@ import { Table, Collapse } from "antd";
 const SearchResults = () => {
   const location = useLocation();
   const { searchResults } = location.state || {};
-
+  console.log('search results');
+  console.log(JSON.stringify(searchResults));
   const [groupedData, setGroupedData] = useState({});
   const [columns, setColumns] = useState({});
 
@@ -52,7 +53,7 @@ const SearchResults = () => {
 
       {/* Display grouped data using Collapse and Table */}
       {Object.keys(groupedData).map((objectName) => (
-        <Collapse key={objectName} defaultActiveKey={["1"]}>
+        <Collapse style = {{marginBottom: "10px"}} key={objectName} defaultActiveKey={["1"]}>
           <Collapse.Panel header={objectName} key="1">
             <Table
               columns={columns[objectName]}

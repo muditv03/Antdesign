@@ -65,7 +65,7 @@ const AppHeader = () => {
   };
 
   const fetchSearchResults = async (value) => {
-    if(value.length >3){
+    if(value.length >2){
       console.log('inside fetchSearchRes'+value);
     if (!value) {
       setSearchResults([]);
@@ -180,7 +180,7 @@ const AppHeader = () => {
           width: '60%',
         }}
         placeholder="Search for records"
-        onSearch={(value) => fetchSearchResults(value)}
+        onSearch={handleEnter}
         onChange={(e) => fetchSearchResults(e.target.value)}
         enterButton
         // loading={loading}
