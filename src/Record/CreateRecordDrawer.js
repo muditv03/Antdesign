@@ -171,25 +171,13 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={renderLabel} // Use the custom label here
-            rules={[
-              ...isRequired, // Include the required validation if applicable
-              {
-                validator: (_, value) => {
-                  if (!value || /^[0-9]{10}$/.test(value)) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(
-                    new Error('Please enter a valid 10-digit phone number')
-                  );
-                },
-              },
-            ]}
+            rules={isRequired}
+
           >
             <Input
 
               type="text" // Use text to prevent input methods restricting values
               placeholder={`Enter ${field.label}`}
-              maxLength={10} // Prevent more than 10 characters
               addonBefore={
                 <PhoneOutlined style={{ cursor: 'pointer' }} />
               }
@@ -220,6 +208,8 @@ const CreateRecordDrawer = ({
             valuePropName="checked"
             initialValue={false}
             label={renderLabel}  // Use the custom label here
+            rules={isRequired}
+
           >
             <Checkbox>{field.label}</Checkbox>
           </Form.Item>

@@ -255,14 +255,7 @@ const RecordDetails = ({ objectName, id }) => {
             return null;
         }
 
-        if (type === 'Integer') {
-            validationRules.push({
-                type: 'number',
-                transform: (value) => Number(value),
-                min: 0,
-                message: 'Please enter a valid integer.',
-            });
-        } else if (type === 'decimal') {
+        if (type === 'decimal') {
             validationRules.push({
                 type: 'number',
                 transform: (value) => Number(value),
