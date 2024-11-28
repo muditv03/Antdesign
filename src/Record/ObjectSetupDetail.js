@@ -70,7 +70,14 @@ const ObjectSetupDetail = () => {
         let apiServiceForRecords;
         console.log('selected view id is ' + selectedViewId);
         // Check if a selected list view exists
-        if (selectedViewId) {
+        if (selectedViewId === 'recentlyViewed') {
+          console.log('Fetching recently viewed records');
+          apiServiceForRecords = new ApiService(
+              `${BASE_URL}/recent_view/${objName}`,
+              { 'Content-Type': 'application/json' },
+              'GET'
+          );
+        } else if (selectedViewId) {
           console.log('id of list view is ' + selectedViewId);
           // If selected list view is present, use the new API call
           apiServiceForRecords = new ApiService(
@@ -101,18 +108,18 @@ const ObjectSetupDetail = () => {
         ]).then(([recordsResponse, fieldsResponse]) => {
           setRecords(recordsResponse);
           setFieldsDataDrawer(fieldsResponse);
-          console.log(fieldsResponse);
-          console.log(recordsResponse);
+          console.log('fieldsResponse: ', fieldsResponse);
+          console.log('recordsResponse: ', recordsResponse);
 
 
-          if (selectedViewId?._id) {
+          if (selectedViewId === 'recentlyViewed' || selectedViewId?._id) {
             // Get the field names from the recordsResponse
             const recordFieldNames = Object.keys(recordsResponse[0] || {}); // First record as an example
             console.log('record field names are');
             console.log(recordFieldNames);
             console.log('fields to display of selected list view');
             console.log(selectedViewId?.fields_to_display);
-            const fieldOfListView = selectedViewId?.fields_to_display;
+            const fieldOfListView = selectedViewId?.fields_to_display || recordFieldNames;
             console.log('fields of list view are');
 
             // Filter fields from fieldsResponse based on whether their name exists in the recordFieldNames
@@ -194,8 +201,8 @@ const ObjectSetupDetail = () => {
     console.log(selectedView);
     console.log('id changed');
     console.log(id);
-    setSelectedView('');
-    fetchRecords('');
+    setSelectedView('recentlyViewed');
+    fetchRecords('recentlyViewed');
   }, [id]);
 
 
@@ -203,6 +210,13 @@ const ObjectSetupDetail = () => {
     console.log('id of view is ');
     console.log(value);
     console.log(listViews);
+    if (value === 'recentlyViewed') {
+      console.log('Recently Viewed selected');
+      setSelectedListView(null); // Clear the selected list view
+      setSelectedView(value);
+      fetchRecords('recentlyViewed'); // Fetch recently viewed records
+      return;
+    }
     const matchedView = listViews.find(view => view._id === value);
     console.log('list view');
     console.log(matchedView);
@@ -702,6 +716,7 @@ const ObjectSetupDetail = () => {
             <Title level={3} style={{ marginTop: '10px' }}>Records for {objectPluralName}</Title>
             <Select value={selectedView} onChange={handleViewChange} style={{ width: 200, marginBottom: 16 }}>
               <Option value="">All Records</Option>
+              <Option value="recentlyViewed">Recently Viewed</Option>
               {listViews.map(view => (
                 <Option key={view._id} value={view._id}>{view.list_view_name}</Option>
               ))}
