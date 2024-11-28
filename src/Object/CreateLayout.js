@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import ApiService from '../Components/apiService'; // Import ApiService class
 import { BASE_URL } from '../Components/Constant';
-import { Row, Col, Card, Button, Typography } from 'antd';
+import { Row, Col, Card, Button, Typography, Checkbox } from 'antd';
 import LayoutEditor from "./LayoutEditor";
- 
+  
 const { Title } = Typography;
 
 const CreateLayout = ({ object }) => {
@@ -105,6 +105,9 @@ const CreateLayout = ({ object }) => {
                                         <Title level={4} style={{ margin: 0 }}>
                                             {layout.layout_name}
                                         </Title>
+                                    </Col>
+                                    <Col>
+                                    <Checkbox checked={layout.active}>Active</Checkbox>
                                     </Col>
                                     <Col>
                                         <Button

@@ -1,22 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card, Form, Input, Row, Col, Typography, Space, Select,message } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { Button, Card, Form, Input, Row, Col, Typography, Space, Select, message, Checkbox } from "antd";
+import { ConsoleSqlOutlined, DeleteOutlined } from "@ant-design/icons";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"; // Updated import
 import ApiService from '../Components/apiService'; // Import ApiService class
 import { BASE_URL } from '../Components/Constant';
- 
+
 const { Title } = Typography;
 const { Option } = Select;
 
-const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) => {
+const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout }) => {
   const [layoutName, setLayoutName] = useState("");
   const [sections, setSections] = useState([]);
-  const [updatedFields,setUpdatedFields] = useState(fields);
+  const [updatedFields, setUpdatedFields] = useState(fields.map(field => field.name));
+  const [isActive, setIsActive] = useState(false);
+
   useEffect(() => {
     if (Editinglayout) {
       // Set layout name
       setLayoutName(Editinglayout.layout_name || "");
-  
+      setIsActive(Editinglayout.active);
+
       // Populate sections from Editinglayout
       const populatedSections = (Editinglayout.sections || []).map((section, sectionIndex) => ({
         name: section.name || `Section ${sectionIndex + 1}`,
@@ -29,11 +32,11 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
           })),
         })),
       }));
-  
+
       setSections(populatedSections);
     }
   }, [Editinglayout]);
-  
+
   const addSection = () => {
     if (!layoutName || !object) {
       alert("Please provide Layout Name and Object Name before adding a section.");
@@ -68,11 +71,11 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
         updatedSections[sectionIndex][key] = value;
       }
       return updatedSections;
-    }); 
-    console.log('value');
+    });
+    console.log('value after selecting field');
     console.log(value);
     let oldList = updatedFields;
-    const filteredFields = oldList.filter((field) => field.label !== value);
+    const filteredFields = oldList.filter((field) => field !== value);
     setUpdatedFields(filteredFields);
     console.log('filtered fields');
     console.log(updatedFields);
@@ -81,23 +84,25 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
   useEffect(() => {
     console.log('UpdatedFields after update:', updatedFields);
   }, [updatedFields]);
-  
-  const deleteElement = (sectionIndex, columnIndex,itemIndex,value) => {
+
+  const deleteElement = (sectionIndex, columnIndex, itemIndex, value) => {
     console.log(value);
     setSections((prevSections) => {
       const updatedSections = [...prevSections];
       // const middata =updatedSections[sectionIndex].columns[columnIndex];
-      if(itemIndex !== undefined){
-        updatedSections[sectionIndex].columns[columnIndex].items.splice(itemIndex,1);
+      if (itemIndex !== undefined) {
+        updatedSections[sectionIndex].columns[columnIndex].items.splice(itemIndex, 1);
         if (value && value.field) {
-        // Update the fields list
+          // Update the fields list
+          console.log('fields are');
+          console.log(updatedFields);
           setUpdatedFields((prevFields) => {
             console.log('Previous fields:', prevFields);
-            const newField = { label: value.field, name: value.field };
+            const newField = { name: value.field };
             console.log('Adding to updatedFields:', newField); // Log before adding
 
             return [...prevFields, newField];
-         });
+          });
         } else {
           console.error('Invalid deleted item or missing field:');
         }
@@ -113,9 +118,10 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
 
   };
 
-  const saveLayout = async() => {
+  const saveLayout = async () => {
     const mt_layout = {
       layout_name: layoutName,
+      active: isActive,
       object_name: object,
       sections: sections.map((section) => ({
         name: section.name,
@@ -130,30 +136,30 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
       })),
     };
     console.log(mt_layout);
-   try {
-        let apiUrl = ''; // Default: create layout
+    try {
+      let apiUrl = ''; // Default: create layout
 
-        if (Editinglayout?._id) {
-          // If Editinglayout has an ID, update the existing layout
-          apiUrl = `${BASE_URL}/update_layout/${Editinglayout._id}`;
-        }else{
-          apiUrl = `${BASE_URL}/create_layout`;
+      if (Editinglayout?._id) {
+        // If Editinglayout has an ID, update the existing layout
+        apiUrl = `${BASE_URL}/update_layout/${Editinglayout._id}`;
+      } else {
+        apiUrl = `${BASE_URL}/create_layout`;
 
-        }
+      }
 
-        console.log(apiUrl);
+      console.log(apiUrl);
 
-        const apiService = new ApiService(apiUrl, {}, "POST", {"mt_layout":mt_layout});
-        const response = await apiService.makeCall();
+      const apiService = new ApiService(apiUrl, {}, "POST", { "mt_layout": mt_layout });
+      const response = await apiService.makeCall();
 
-        message.success(
-          Editinglayout?.id ? "Layout updated successfully" : "Layout created successfully"
-        );
-          getAllLayouts();
-          setLayoutName("");
-          setSections([]);
-          onBack();
-    }catch(error){
+      message.success(
+        Editinglayout?.id ? "Layout updated successfully" : "Layout created successfully"
+      );
+      getAllLayouts();
+      setLayoutName("");
+      setSections([]);
+      onBack();
+    } catch (error) {
 
       const errorMessage = error && typeof error === 'object'
         ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
@@ -171,60 +177,83 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
   };
 
   const handleDragEnd = (result) => {
+    console.log('in the handledragend');
     const { source, destination, type } = result;
-  
+
     if (!destination) return;
-  
+
+    const updateOrders = (list) => {
+      return list.map((item, index) => ({ ...item, order: index + 1 }));
+    };
+
     if (type === "section") {
       // Handle section reordering
+      console.log('section is dragged');
       const reorderedSections = Array.from(sections);
       const [movedSection] = reorderedSections.splice(source.index, 1);
       reorderedSections.splice(destination.index, 0, movedSection);
-      setSections(reorderedSections);
+
+      // Update orders
+      setSections(updateOrders(reorderedSections));
     } else if (type === "column") {
-      // Handle column reordering within a section
+      // Handle column reordering
       const sourceSectionIndex = parseInt(source.droppableId.split("-")[1], 10);
       const destinationSectionIndex = parseInt(destination.droppableId.split("-")[1], 10);
-  
+
+      console.log('we dragged column');
       if (sourceSectionIndex === destinationSectionIndex) {
         const updatedSections = Array.from(sections);
         const section = updatedSections[sourceSectionIndex];
         const [movedColumn] = section.columns.splice(source.index, 1);
         section.columns.splice(destination.index, 0, movedColumn);
+
+        // Update column orders in the section
+        section.columns = updateOrders(section.columns);
+        console.log('updated sections are');
+        console.log(updatedSections);
+        console.log('updated columns are');
+        console.log(section.column);
         setSections(updatedSections);
       }
     } else if (type === "item") {
-      // Handle item reordering within a column
+      // Handle item reordering
       const sourceSectionIndex = parseInt(source.droppableId.split("-")[1], 10);
       const sourceColumnIndex = parseInt(source.droppableId.split("-")[3], 10);
       const destinationSectionIndex = parseInt(destination.droppableId.split("-")[1], 10);
       const destinationColumnIndex = parseInt(destination.droppableId.split("-")[3], 10);
-  
-      if (
-        sourceSectionIndex === destinationSectionIndex &&
-        sourceColumnIndex === destinationColumnIndex
-      ) {
-        const updatedSections = Array.from(sections);
-        const column = updatedSections[sourceSectionIndex].columns[sourceColumnIndex];
-        const [movedItem] = column.items.splice(source.index, 1);
-        column.items.splice(destination.index, 0, movedItem);
-        setSections(updatedSections);
-      }
+
+      const updatedSections = Array.from(sections);
+
+      // Remove the item from the source
+      const sourceColumn = updatedSections[sourceSectionIndex].columns[sourceColumnIndex];
+      const [movedItem] = sourceColumn.items.splice(source.index, 1);
+
+      // Add the item to the destination
+      const destinationColumn = updatedSections[destinationSectionIndex].columns[destinationColumnIndex];
+      destinationColumn.items.splice(destination.index, 0, movedItem);
+
+      // Update orders for items in both source and destination columns
+      sourceColumn.items = updateOrders(sourceColumn.items);
+      destinationColumn.items = updateOrders(destinationColumn.items);
+
+      setSections(updatedSections);
     }
   };
-  
+
+
+
 
   const addItem = (sectionIndex, columnIndex) => {
     setSections((prevSections) => {
       const updatedSections = [...prevSections];
       const targetColumn = updatedSections[sectionIndex].columns[columnIndex];
-  
+
       // Add a new item to the column
       targetColumn.items.push({
         field: "", // Default field value
         order: targetColumn.items.length + 1, // Auto-increment order
       });
-  
+
       return updatedSections;
     });
   };
@@ -249,6 +278,13 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
           onChange={(e) => setLayoutName(e.target.value)}
         />
         <Input placeholder="Enter Object Name" value={object} disabled />
+        <Checkbox
+          checked={isActive}
+          onChange={(e) => setIsActive(e.target.checked)}
+        >
+          <span style={{ fontWeight: '500' }}>Active</span>
+
+        </Checkbox>
       </Space>
 
       <Button type="dashed" onClick={addSection} style={{ marginBottom: 15 }}>
@@ -317,16 +353,19 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
                           Add Column
                         </Button>
 
-                        <Droppable droppableId={`section-${sectionIndex}`} direction="horizontal">
+                        <Droppable droppableId={`section-${sectionIndex}`} type="column" direction="horizontal">
                           {(provided) => (
                             <Row
                               gutter={16}
                               ref={provided.innerRef}
                               {...provided.droppableProps}
-                              style={{ display: "flex" }}
+                              style={{ display: "flex", flexWrap: "wrap" }} // Ensuring the columns wrap to the next row
                             >
                               {section.columns.map((column, columnIndex) => {
-                                const columnSpan = 24 / section.columns.length; // Calculate span based on number of columns
+                                // Ensure a maximum of 3 columns per row
+                                const rowIndex = Math.floor(columnIndex / 3); // Determine the row index based on column index
+                                const columnSpan = 8; // Each column takes 8 spans (3 columns max in one row)
+
                                 return (
                                   <Draggable
                                     key={`column-${sectionIndex}-${columnIndex}`}
@@ -340,6 +379,7 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}
                                         key={columnIndex}
+                                        style={{ marginBottom: "20px" }}
                                       >
                                         <Card
                                           title={
@@ -368,7 +408,7 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
                                               />
                                             </Button>
                                           }
-                                          style={{ marginBottom: 10 }}
+                                          style={{ marginBottom: 20 }}
                                         >
                                           <Button
                                             type="dashed"
@@ -377,44 +417,101 @@ const LayoutEditor = ({ onBack, object, fields,getAllLayouts,Editinglayout }) =>
                                           >
                                             Add Item
                                           </Button>
-                                          {column.items.map((item, itemIndex) => (
-                                            <Row key={itemIndex} style={{ marginBottom: 10 }}>
-                                              <Col span={16}>
-                                                <Select
-                                                  placeholder="Select item"
-                                                  value={item.field}
-                                                  onChange={(value) =>
-                                                    handleInputChange(value, sectionIndex, columnIndex, itemIndex, "field")
-                                                  }
-                                                  style={{ width: "100%" }}
-                                                >
-                                                  {updatedFields.map((field, index) => (
-                                                    <Option key={index.name} value={field.name}>
-                                                      {field.name}
-                                                    </Option>
-                                                  ))}
-                                                </Select>
-                                              </Col>
-                                              <Col span={8}>
-                                                <Button
-                                                  type="text"
-                                                  danger
-                                                  icon={<DeleteOutlined />}
-                                                  onClick={() => deleteElement(sectionIndex, columnIndex, itemIndex,item)}
-                                                />
-                                              </Col>
-                                            </Row>
-                                          ))}
+
+                                          {/* Droppable for items */}
+                                          <Droppable
+                                            droppableId={`section-${sectionIndex}-column-${columnIndex}`}
+                                            type="item"
+                                          >
+                                            {(provided) => (
+                                              <div
+                                                ref={provided.innerRef}
+                                                {...provided.droppableProps}
+                                                style={{ minHeight: 50, padding: 10, border: "1px dashed #ccc" }}
+                                              >
+                                                {column.items.map((item, itemIndex) => (
+                                                  <Draggable
+                                                    key={`item-${sectionIndex}-${columnIndex}-${itemIndex}`}
+                                                    draggableId={`item-${sectionIndex}-${columnIndex}-${itemIndex}`}
+                                                    index={itemIndex}
+                                                  >
+                                                    {(provided, snapshot) => (
+                                                      <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        style={{
+                                                          ...provided.draggableProps.style,
+                                                          padding: "10px",
+                                                          marginBottom: "5px",
+                                                          background: snapshot.isDragging ? "#f0f8ff" : "#fff",
+                                                          border: "1px solid #ddd",
+                                                        }}
+                                                      >
+                                                        <Row key={itemIndex} style={{ marginBottom: 10, margin: 'auto' }}>
+                                                          <Col span={3}>
+                                                            <Input
+                                                              placeholder="Order"
+                                                              value={item.order}
+                                                              onChange={(e) =>
+                                                                handleInputChange(
+                                                                  e.target.value,
+                                                                  sectionIndex,
+                                                                  columnIndex,
+                                                                  itemIndex,
+                                                                  "order"
+                                                                )
+                                                              }
+                                                            />
+                                                          </Col>
+                                                          <Col span={16}>
+                                                            <Select
+                                                              placeholder="Select item"
+                                                              value={item.field}
+                                                              onChange={(value) =>
+                                                                handleInputChange(value, sectionIndex, columnIndex, itemIndex, "field")
+                                                              }
+                                                              style={{ width: "90%" }}
+                                                            >
+                                                              {updatedFields.map((field, index) => (
+                                                                <Option key={index} value={field}>
+                                                                  {field}
+                                                                </Option>
+                                                              ))}
+                                                            </Select>
+                                                          </Col>
+                                                          <Col span={2}>
+                                                            <Button
+                                                              type="text"
+                                                              danger
+                                                              onClick={() =>
+                                                                deleteElement(sectionIndex, columnIndex, itemIndex, item)
+                                                              }
+                                                            >
+                                                              <DeleteOutlined />
+                                                            </Button>
+                                                          </Col>
+                                                        </Row>
+                                                      </div>
+                                                    )}
+                                                  </Draggable>
+                                                ))}
+                                                {provided.placeholder}
+                                              </div>
+                                            )}
+                                          </Droppable>
                                         </Card>
                                       </Col>
                                     )}
                                   </Draggable>
                                 );
                               })}
+
                               {provided.placeholder}
                             </Row>
                           )}
                         </Droppable>
+
                       </Card>
                     </div>
                   )}
