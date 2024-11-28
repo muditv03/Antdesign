@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {  Timeline, Collapse, Card,  Dropdown,  message,  Col,  Row, Button,} from "antd";
+import {  Timeline, Collapse, Card,  Dropdown,  message,  Col,  Row, Button, Spin} from "antd";
 import { UserOutlined, FileTextOutlined, PhoneOutlined, MailOutlined, CalendarOutlined, ClockCircleOutlined, EditOutlined,} from "@ant-design/icons";
 import TaskDrawer from "./TaskDrawer";
 import CallDrawer from "./CallDrawer";
@@ -36,6 +36,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [drawerType, setDrawerType] = useState("");
   const [editingRecord, setEditingRecord] = useState(null);
+  const [loading, setLoading] = useState(true);
   // const [enddt, setEnddt] = useState(null);
   // const [currentdt,setCurrentdt]=useState();
 
@@ -47,6 +48,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
   // Fetch activity records function
   const fetchActivityRecords = async () => {
     try {
+      setLoading(true);
       const fetchRec = new ApiService(
         `${BASE_URL}/fetchActivityRecords/${objectName}/${recordId}`,
         {},
@@ -163,8 +165,10 @@ const CustomTimeline = ({ objectName, recordId }) => {
       
 
       setTimelineData(finalData);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching activity records:", error);
+      setLoading(false);
     }
   };
 
@@ -549,6 +553,9 @@ const CustomTimeline = ({ objectName, recordId }) => {
         </Col>
       </Row>
 
+      {loading ? (
+                            <Spin size="large" style={{ marginTop: '20px' }} />
+                        ) :
       <Timeline>
         {timelineData &&
           timelineData.length > 0 &&
@@ -558,7 +565,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
             )
           )}
       </Timeline>
-
+}
       {/* Render the appropriate drawer based on button clicked */}
       {drawerVisible && drawerType === "Task" && (
         <TaskDrawer
