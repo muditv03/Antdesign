@@ -187,6 +187,7 @@ const TaskDrawer = ({
           <Form.Item
             label="Activity Type"
             name="ActivityType"
+            style={{ display: "none" }}
             rules={[
               { required: true, message: "Please select an activity type!" },
             ]}
