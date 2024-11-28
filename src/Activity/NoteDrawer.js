@@ -42,6 +42,7 @@ const NoteDrawer = ({
         Name: editingRecord.Name,
         Subject: editingRecord.Subject,
         Description: editingRecord.Description,
+        Note: editingRecord.Note,
         Priority: editingRecord.Priority,
         Status: editingRecord.Status,
         AssignedTo: editingRecord.AssignedTo,
@@ -53,8 +54,8 @@ const NoteDrawer = ({
           : null, // Handle null values
       });
 
-      if (quill && editingRecord.Description) {
-        quill.root.innerHTML = editingRecord.Description;
+      if (quill && editingRecord.Note) {
+        quill.root.innerHTML = editingRecord.Note;
       }
 
       console.log("Start date:", editingRecord.StartDateTime);
@@ -83,7 +84,7 @@ const NoteDrawer = ({
         object_name: "Activity",
         data: {
           ...formValues,
-          Description: descriptionContent,
+          Note: descriptionContent,
           ...(editingRecord?._id && { _id: editingRecord._id }),
         },
       };
@@ -180,7 +181,8 @@ const NoteDrawer = ({
           <Form.Item
             label="Name"
             name="Name"
-            rules={[{ required: true, message: "Please enter a name!" }]}
+            style={{ display: "none" }}
+            // rules={[{ required: true, message: "Please enter a name!" }]}
           >
             <Input placeholder="Enter name" />
           </Form.Item>
@@ -208,9 +210,14 @@ const NoteDrawer = ({
           </Form.Item>
 
           {/* Description */}
+          <Form.Item label="Description" name="Description" style={{ display: "none" }}>
+            <TextArea placeholder="Enter Description" rows={4} />
+          </Form.Item>
+
+          {/* Description */}
           <Form.Item
             label="Note"
-            name="Description"
+            name="Note"
             style={{ paddingBottom: "20px" }}
           >
             <div style={{ width: "100%", height: 200 }}>

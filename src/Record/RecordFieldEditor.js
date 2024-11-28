@@ -2,26 +2,13 @@ import React from 'react';
 import { Form, Input, Select, Checkbox, DatePicker, Space, Row, Col, Avatar } from 'antd';
 import dayjs from 'dayjs';
 import { PhoneOutlined } from '@ant-design/icons';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css'; // Import the Quill styles
 
 const { Option } = Select;
 const { TextArea } = Input;
 
-const FieldRendererEdit = ({
-    isFieldEditable,
-    type,
-    name,
-    label,
-    validationRules = [],
-    form,
-    picklist_values = [],
-    handleSearch,
-    lookupOptionforparent = {},
-    lookup_config = {},
-    DateFormat ,
-    setSelectedDate,
-    handleAddressChange,
-    fieldId,
-    lookupData
+const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules = [], form, picklist_values = [], handleSearch, lookupOptionforparent = {}, lookup_config = {}, DateFormat , setSelectedDate, handleAddressChange, fieldId, lookupData
 
     
 }) => {
@@ -321,6 +308,32 @@ const FieldRendererEdit = ({
                     noStyle
                 >
                     <Input initialValue={initialValue} placeholder={label} type="number" addonBefore="$" />
+                </Form.Item>
+            );
+
+            case 'Rich-Text':
+            return (
+                <Form.Item
+                    name={name}
+                    label={label}
+                    initialValue={initialValue}
+                    rules={validationRules}
+                    noStyle
+                >
+                    <ReactQuill
+                        value={initialValue || ''}
+                        onChange={(content) => form.setFieldsValue({ [name]: content })}
+                        modules={{
+                            toolbar: [
+                                [{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                ['bold', 'italic', 'underline'],
+                                [{ 'align': [] }],
+                                ['link'],
+                            ],
+                        }}
+                        placeholder={label}
+                    />
                 </Form.Item>
             );
 

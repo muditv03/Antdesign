@@ -215,6 +215,26 @@ const getUniqueColor = (index) => {
                     ) : (
                         fieldValue || ''
                     );
+
+                    case 'Rich-Text':
+                    return fieldValue ? (
+                        <div
+                            style={{
+                                padding: '12px',
+                                fontSize: '14px',
+                                color: '#555',
+                                maxHeight: '200px', // Limits the height of the field
+                                overflowY: 'auto',  // Adds a vertical scrollbar if content exceeds the maxHeight
+                                wordBreak: 'break-word', // Ensures long words break correctly
+                                whiteSpace: 'normal', // Ensures text wraps properly
+                                border: '1px solid #ddd', // Optional: Adds a border for clarity
+                                borderRadius: '4px', // Optional: Rounds the edges
+                                width: '700px', // Sets the width of the field
+                                maxWidth: '100%', // Ensures the width does not exceed the container
+                            }}
+                            dangerouslySetInnerHTML={{ __html: fieldValue }} // Use dangerouslySetInnerHTML here
+                        />
+                    ) : '';
                 
                 
             default:
