@@ -1,23 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {
-  Timeline,
-  Collapse,
-  Card,
-  Dropdown,
-  message,
-  Col,
-  Row,
-  Button,
-} from "antd";
-import {
-  UserOutlined,
-  FileTextOutlined,
-  PhoneOutlined,
-  MailOutlined,
-  CalendarOutlined,
-  ClockCircleOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
+import {  Timeline, Collapse, Card,  Dropdown,  message,  Col,  Row, Button,} from "antd";
+import { UserOutlined, FileTextOutlined, PhoneOutlined, MailOutlined, CalendarOutlined, ClockCircleOutlined, EditOutlined,} from "@ant-design/icons";
 import TaskDrawer from "./TaskDrawer";
 import CallDrawer from "./CallDrawer";
 import EmailDrawer from "./EmailDrawer";
@@ -34,6 +17,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const { Panel } = Collapse;
+
 
 const handleMenuClick = (e) => {
   message.info("Click on menu item.");
@@ -52,6 +36,10 @@ const CustomTimeline = ({ objectName, recordId }) => {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [drawerType, setDrawerType] = useState("");
   const [editingRecord, setEditingRecord] = useState(null);
+  // const [enddt, setEnddt] = useState(null);
+  // const [currentdt,setCurrentdt]=useState();
+
+
 
   console.log("Object Name:", objectName);
   console.log("Record ID:", recordId);
@@ -87,6 +75,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
           .utc()
           .format("DD/MM/YYYY HH:mm:ss");
 
+        // setEnddt(endDateTime);
         const startDateTime = new Date(record.StartDateTime);
         const formattedStartDateTime = dayjs(record.StartDateTime)
           .utc()
@@ -113,6 +102,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
           Priority: record.Priority,
           icon: getIconByType(record.ActivityType, record.Status, formattedEndDateTime),
           key: record.id || Date.now(),
+          Note: record.Note,
           _id: record._id,
           created_at: record.created_at,
           updated_at: record.updated_at,
@@ -213,7 +203,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
   const iconStyles = { color };
     switch (type) {
       case "Task":
-        return <FileTextOutlined style={iconStyles}/>;
+        return <ClockCircleOutlined style={iconStyles}/>;
       case "Call":
         return <PhoneOutlined style={iconStyles}/>;
       case "Email":
@@ -221,7 +211,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
       case "Meeting":
         return <CalendarOutlined style={iconStyles}/>;
       case "Note":
-        return <ClockCircleOutlined style={iconStyles}/>;
+        return <FileTextOutlined style={iconStyles}/>;
       default:
         return <UserOutlined style={iconStyles}/>;
     }
@@ -238,6 +228,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
       const formattedDate = new Date(`${year}-${month}-${day}`);
 
       const currentDate = new Date();
+      // setCurrentdt(currentDate);
       const differenceInDays = Math.floor(
         (formattedDate - new Date(currentDate.toDateString())) /
           (1000 * 60 * 60 * 24)
@@ -293,84 +284,106 @@ const CustomTimeline = ({ objectName, recordId }) => {
                       >
                         <span>
                           {(() => {
-                            
-                            if (item.Status === "Pending") {
-                              return `You have an upcoming ${item.ActivityType}`;
-                            }
-                            else if (item.Status === "Completed") {
-                              switch (item.ActivityType) {
-                                case "Call":
-                                  return "You logged a call";
-                                case "Email":
-                                  return "You sent an email";
-                                case "Note":
-                                  return "You created a note";
-                                case "Task":
-                                  return "You completed a task";
-                                case "Meeting":
-                                  return "You held a meeting";
-                                default:
-                                  return `You completed a ${item.ActivityType}`;
-                              }
-                            } else {
-                              return item.Subject;
+                            const isOverdue = item.Status === "Pending" && dayjs(item.EndDateTime, "DD/MM/YYYY HH:mm:ss").isBefore(dayjs());
+                            if (isOverdue) {
+                              return <a 
+                              href={`/record/Activity/${item._id}`} // Replace with your dynamic URL logic
+                              style={{ color: '#1890ff' }} // Optional styling
+                            >
+                            {item.Subject} (overdue)
+                            </a>;
+                            } 
+                            else {
+                              return <a 
+                              href={`/record/Activity/${item._id}`} // Replace with your dynamic URL logic
+                              style={{ color: '#1890ff' }} // Optional styling
+                            >
+                            {item.Subject}
+                            </a>;
                             }
                           })()}
                         </span>
                         <span>
-                          {formatHeaderDate(item.EndDateTime.split(" ")[0])}
+                        {item.ActivityType === "Meeting"
+    ? (() => {
+        const [day, month, year, hours, minutes, seconds] = item.StartDateTime.split(/[\s/:]+/);
+        const formattedStartDate = new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}`);
+        const dateStr = formattedStartDate.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        });
+        const timeStr = formattedStartDate.toLocaleTimeString("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+        return `${dateStr}, ${timeStr}`;
+      })()
+    : formatHeaderDate(item.EndDateTime.split(" ")[0])}
                         </span>
                       </div>
                     }
                     key={item.key}
                   >
-                    <p>
-                      {item.ActivityType === "Meeting" && (
-                        <>
-                          <strong>Start Date & Time:</strong>{" "}
-                          <span>
-                            {(() => {
-                              console.log("start date time is");
-                              console.log(item.StartDateTime);
-                              const [
-                                day,
-                                month,
-                                year,
-                                hours,
-                                minutes,
-                                seconds,
-                              ] = item.StartDateTime.split(/[\s/:]+/);
-                              const formattedDate = new Date(
-                                `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`
-                              );
+                    <div 
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(4, 1fr)", // Fixed to 4 equal columns
+                      gap: "20px", // Space between items
+                      alignItems: "start", // Ensures alignment to the top
+                    }}
+                    >
+                      <div style={{ display: "flex", flexDirection: "column", display: item.ActivityType === "Meeting" ? "flex" : "none" }}>
+  {item.ActivityType === "Meeting" && (
+    <>
+      <span style={{ fontWeight: "normal", marginRight: "10px" }}>Start Date & Time</span>{" "}
+      <span style={{ fontWeight: "bold" }}>
+        {(() => {
+          console.log("start date time is");
+          console.log(item.StartDateTime);
+          const [
+            day,
+            month,
+            year,
+            hours,
+            minutes,
+            seconds,
+          ] = item.StartDateTime.split(/[\s/:]+/);
+          const formattedDate = new Date(
+            `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`
+          );
 
-                              const dateStr = formattedDate.toLocaleDateString(
-                                "en-GB",
-                                {
-                                  day: "2-digit",
-                                  month: "long",
-                                  year: "numeric",
-                                }
-                              );
+          const dateStr = formattedDate.toLocaleDateString(
+            "en-GB",
+            {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            }
+          );
 
-                              const timeStr = formattedDate.toLocaleTimeString(
-                                "en-GB",
-                                {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  hour12: true,
-                                }
-                              );
+          const timeStr = formattedDate.toLocaleTimeString(
+            "en-GB",
+            {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            }
+          );
 
-                              return `${dateStr}, ${timeStr}`;
-                            })()}
-                          </span>
-                        </>
-                      )}
-                    </p>
-                    <p>
-                      <strong>End Date & Time:</strong>{" "}
-                      <span>
+          return `${dateStr}, ${timeStr}`;
+        })()}
+      </span>
+    </>
+  )}
+</div>
+               
+                    <div style={{ display: "flex", flexDirection: "column", display: item.ActivityType === "Meeting" ? "flex" : "none"  }}>
+                    {item.ActivityType === "Meeting" && (
+                      <>
+                    <span style={{ fontWeight: "normal" }}>End Date & Time</span>
+                      <span style={{ fontWeight: "bold" }}>
                         {(() => {
                           console.log("end date time is");
                           console.log(item.EndDateTime);
@@ -401,56 +414,71 @@ const CustomTimeline = ({ objectName, recordId }) => {
                           return `${dateStr}, ${timeStr}`;
                         })()}
                       </span>
-                    </p>
-                    <p>
-                      <strong>Subject:</strong> <a 
-                      href={`/record/Activity/${item._id}`} // Replace with your dynamic URL logic
-                      style={{ color: '#1890ff' }} // Optional styling
-                    >
-                    {item.Subject}
-                    </a>
-                    </p>
-                    <p>
-                      <strong>Priority:</strong> {item.Priority}
-                    </p>
+                      </>
+                      )}
+                      </div>
+                      
+                    <div style={{ display: "flex", flexDirection: "column", display: item.ActivityType !== "Note" && item.ActivityType !== "Call" ? "flex" : "none"  }}>
+                    {item.ActivityType !== "Note" && item.ActivityType !== "Call" &&  (
+                        <>
+                      <span style={{ fontWeight: "normal" }}>Priority</span>
+                      <span style={{ fontWeight: "bold" }}>{item.Priority}</span>
+                      </>
+                    )}
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column" , display: item.ActivityType !== "Note" ? "flex" : "none" }}>
+                      {item.ActivityType !== "Note" && (
+                        <>
+                      <span style={{ fontWeight: "normal" }}>Description</span>
+                      <span style={{ fontWeight: "bold" }}>{item.Description}</span>
+                      </>
+                    )}
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column"  }}>
                     {item.ActivityType === "Note" && (
-                      <p
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "flex-start", // Ensure the items are aligned to the start
-                        }}
-                      >
-                        <strong
-                          style={{ marginRight: "10px", marginBottom: "auto" }}
-                        >
-                          Description:
-                        </strong>
+                      <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column", // Stack items vertically
+                        alignItems: "flex-start", // Align items to the start
+                        width: "100%",
+                      }}
+                    >
+                        <span style={{ fontWeight: "normal", marginBottom: "8px"  }}>
+                          Note Description
+                          </span>
                         <div
                           style={{
                             border: "1px solid #ddd",
                             borderRadius: "4px",
                             padding: "8px",
-                            width: "300px",
-                            height: "100px", // Fixed height
+                            width: "100%",
+                            maxWidth: "1000px",
+                            height: "100%", 
+                            overflowX: "auto",
                             overflowY: "auto", // Ensure scroll if content overflows
                             whiteSpace: "pre-wrap", // Wrap text properly
                             backgroundColor: "",
                             flexShrink: 0, // Prevent the div from shrinking
+                            boxSizing: "border-box",
                           }}
                         >
-                          {item.Description ? (
+                          {item.Note ? (
                             <span
                               dangerouslySetInnerHTML={{
-                                __html: item.Description,
+                                __html: item.Note,
                               }}
                             />
                           ) : (
-                            "No description provided."
+                            "No note provided."
                           )}
                         </div>
-                      </p>
+                      </div>
                     )}
+                    </div>
+                    </div>
                   </Panel>
                 </Collapse>
               </Timeline.Item>
@@ -468,7 +496,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
           <Dropdown.Button
             onClick={() => handleButtonClick("Task")}
             menu={menuProps}
-            icon={<FileTextOutlined />}
+            icon={<ClockCircleOutlined />}
             placement="bottom"
             style={{ backgroundColor: "transparent", color: "#000" }}
           >
@@ -512,7 +540,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
           <Dropdown.Button
             onClick={() => handleButtonClick("Note")}
             menu={menuProps}
-            icon={<ClockCircleOutlined />}
+            icon={<FileTextOutlined />}
             placement="bottom"
             style={{ backgroundColor: "transparent", color: "#000" }}
           >

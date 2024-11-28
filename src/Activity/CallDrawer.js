@@ -172,7 +172,8 @@ const CallDrawer = ({
           <Form.Item
             label="Name"
             name="Name"
-            rules={[{ required: true, message: "Please enter a name!" }]}
+            style={{ display: "none" }}
+            // rules={[{ required: true, message: "Please enter a name!" }]}
           >
             <Input placeholder="Enter name" />
           </Form.Item>
