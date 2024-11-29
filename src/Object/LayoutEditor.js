@@ -199,20 +199,15 @@ const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout }) 
       // Handle column reordering
       const sourceSectionIndex = parseInt(source.droppableId.split("-")[1], 10);
       const destinationSectionIndex = parseInt(destination.droppableId.split("-")[1], 10);
-
-      console.log('we dragged column');
+  
       if (sourceSectionIndex === destinationSectionIndex) {
         const updatedSections = Array.from(sections);
         const section = updatedSections[sourceSectionIndex];
         const [movedColumn] = section.columns.splice(source.index, 1);
         section.columns.splice(destination.index, 0, movedColumn);
-
-        // Update column orders in the section
         section.columns = updateOrders(section.columns);
-        console.log('updated sections are');
-        console.log(updatedSections);
-        console.log('updated columns are');
-        console.log(section.column);
+
+
         setSections(updatedSections);
       }
     } else if (type === "item") {
@@ -355,11 +350,12 @@ const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout }) 
 
                         <Droppable droppableId={`section-${sectionIndex}`} type="column" direction="horizontal">
                           {(provided) => (
+
                             <Row
                               gutter={16}
                               ref={provided.innerRef}
                               {...provided.droppableProps}
-                              style={{ display: "flex", flexWrap: "wrap" }} // Ensuring the columns wrap to the next row
+                              style={{ display: "flex" }} // Ensuring the columns wrap to the next row
                             >
                               {section.columns.map((column, columnIndex) => {
                                 // Ensure a maximum of 3 columns per row
@@ -379,7 +375,6 @@ const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout }) 
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}
                                         key={columnIndex}
-                                        style={{ marginBottom: "20px" }}
                                       >
                                         <Card
                                           title={
@@ -434,7 +429,7 @@ const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout }) 
                                                     key={`item-${sectionIndex}-${columnIndex}-${itemIndex}`}
                                                     draggableId={`item-${sectionIndex}-${columnIndex}-${itemIndex}`}
                                                     index={itemIndex}
-                                                  >
+                                                  > 
                                                     {(provided, snapshot) => (
                                                       <div
                                                         ref={provided.innerRef}
