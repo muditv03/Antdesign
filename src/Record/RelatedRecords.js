@@ -30,7 +30,7 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
   const [loading, setLoading] = useState(false);
 
 
-
+ 
   useEffect(() => {
 
     console.log(objectid);

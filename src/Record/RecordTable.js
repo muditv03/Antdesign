@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Table, Button, Tooltip, Form,Tag } from 'antd';
+import { Table, Button, Tooltip, Form,Tag,Checkbox } from 'antd';
 import { EditOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons';
 import { message, Popconfirm } from 'antd';
 import dayjs from 'dayjs';
@@ -168,7 +168,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
       }
 
       if (field.type === 'boolean') {
-        return value ? 'True' : 'False';
+        return <Checkbox checked={value} disabled />;
       }
 
       if (field.type === 'Integer' || field.type === 'decimal') {
@@ -351,18 +351,6 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
         dataSource={childRecords}
         columns={columns}
         rowKey="_id"
-        expandable={{
-          expandedRowRender: (record) => (
-            <p
-              style={{
-                margin: 0,
-              }}
-            >
-              This is sample record description
-            </p>
-          ),
-          rowExpandable: (record) => record.name !== 'Not Expandable',
-        }}
         pagination={false}
         loading={loading}
         scroll={{

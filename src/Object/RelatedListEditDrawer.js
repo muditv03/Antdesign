@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Drawer, Form, Input, Button, Select, message } from 'antd';
+import { Drawer, Form, Input, Button, Select, message,Card } from 'antd';
 import apiService from '../Components/apiService';
 import { BASE_URL } from '../Components/Constant';
 
@@ -132,10 +132,9 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
   return (
     <Drawer
       title="Edit Related List"
-      width={360}
+      width="40%"
       onClose={onClose}
       visible={visible}
-
       headerStyle={{ backgroundColor: '#f0f2f5' }} // Header background color
       footerStyle={{ backgroundColor: '#f0f2f5' }} // Footer background color
       footer={
@@ -149,6 +148,7 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
         </div>
       }
     >
+      <Card>
       <Form layout="vertical" form={form} onFinish={handleFinish}>
         <Form.Item
           name="relatedListName"
@@ -227,6 +227,7 @@ const RelatedListEditDrawer = ({ visible, onClose, record, parentObjectName }) =
           </>
         )}
       </Form>
+      </Card>
     </Drawer>
   );
 };

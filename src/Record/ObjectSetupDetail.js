@@ -121,7 +121,7 @@ const ObjectSetupDetail = () => {
             console.log(selectedViewId?.fields_to_display);
             const fieldOfListView = selectedViewId?.fields_to_display;
             console.log('fields of list view are');
-
+ 
             // Filter fields from fieldsResponse based on whether their name exists in the recordFieldNames
             const matchingFields = fieldsResponse.filter(field => {
               if (field.type === 'lookup') {
@@ -502,13 +502,12 @@ const ObjectSetupDetail = () => {
     key: field.name,
     render: (text, record) => {
       if (field.type === 'boolean') {
-        return text ? 'True' : 'False';
+        return <Checkbox checked={text} disabled />;
       } else if (field.type === 'Date') {
         return text ? dayjs(text).format(DateFormat) : ''; // Format date as DD-MM-YYYY
       } else if (field.type === 'DateTime') {
         return text ? dayjs(text).utc().format('DD/MM/YYYY HH:mm:ss') : ''; // Format DateTime as DD/MM/YYYY HH:mm:ss
       }
-
       else if (field.type === 'currency') {
         return text ? `$${text.toFixed(2)}` : ''; // Format as currency with dollar sign
       } else if (field.type === 'Integer') {

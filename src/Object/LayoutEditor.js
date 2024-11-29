@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card, Form, Input, Row, Col, Typography, Space, Select, message, Checkbox } from "antd";
+import { Button, Card, Form, Input, Row, Col, Typography, Space, Select, message, Checkbox,Affix } from "antd";
 import { ConsoleSqlOutlined, DeleteOutlined } from "@ant-design/icons";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"; // Updated import
 import ApiService from '../Components/apiService'; // Import ApiService class
@@ -8,7 +8,7 @@ import { BASE_URL } from '../Components/Constant';
 const { Title } = Typography;
 const { Option } = Select;
 
-const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout }) => {
+const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout,isCloning }) => {
   const [layoutName, setLayoutName] = useState("");
   const [sections, setSections] = useState([]);
   const [updatedFields, setUpdatedFields] = useState(fields.map(field => field.name));
@@ -17,7 +17,9 @@ const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout }) 
   useEffect(() => {
     if (Editinglayout) {
       // Set layout name
-      setLayoutName(Editinglayout.layout_name || "");
+      setLayoutName(
+        (isCloning ? `${Editinglayout.layout_name || ""} clone` : Editinglayout.layout_name || "")
+      );
       setIsActive(Editinglayout.active);
 
       // Populate sections from Editinglayout
@@ -34,6 +36,19 @@ const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout }) 
       }));
 
       setSections(populatedSections);
+
+      const existingFields = new Set(
+        populatedSections.flatMap(section =>
+          section.columns.flatMap(column => column.items.map(item => item.field))
+        )
+      );
+  
+      // Filter updatedFields to exclude existing fields
+      const filteredFields = fields
+        .map(field => field.name)
+        .filter(fieldName => !existingFields.has(fieldName));
+  
+      setUpdatedFields(filteredFields);
     }
   }, [Editinglayout]);
 
@@ -61,6 +76,8 @@ const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout }) 
   };
 
   const handleInputChange = (value, sectionIndex, columnIndex, itemIndex, key) => {
+    console.log('handle field changed');
+    console.log(value);
     setSections((prevSections) => {
       const updatedSections = [...prevSections];
       if (itemIndex !== undefined) {
@@ -119,6 +136,26 @@ const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout }) 
   };
 
   const saveLayout = async () => {
+
+    for (let section of sections) {
+      if (!section.name || !section.order) {
+        message.error("All sections must have a name and order.");
+        return;
+      }
+      for (let column of section.columns) {
+        if (!column.order) {
+          message.error("All columns must have an order.");
+          return;
+        }
+        for (let item of column.items) {
+          if (!item.order || !item.field) {
+            message.error("Some items does not contain fields");
+            return;
+          }
+        }
+      }
+    }
+
     const mt_layout = {
       layout_name: layoutName,
       active: isActive,
@@ -139,7 +176,7 @@ const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout }) 
     try {
       let apiUrl = ''; // Default: create layout
 
-      if (Editinglayout?._id) {
+      if (Editinglayout?._id && !isCloning) {
         // If Editinglayout has an ID, update the existing layout
         apiUrl = `${BASE_URL}/update_layout/${Editinglayout._id}`;
       } else {
@@ -463,6 +500,9 @@ const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout }) 
                                                             <Select
                                                               placeholder="Select item"
                                                               value={item.field}
+                                                              rules={[
+                                                                { required: true, message: "This field is required!" },
+                                                              ]}
                                                               onChange={(value) =>
                                                                 handleInputChange(value, sectionIndex, columnIndex, itemIndex, "field")
                                                               }
@@ -517,14 +557,29 @@ const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout }) 
           )}
         </Droppable>
       </DragDropContext>
+ 
+<Affix offsetBottom={0}>
+      <div
+    style={{
+      position: "sticky",
+      bottom: 0,
+      background: 'rgba(240, 242, 245, 0.9)', 
+      padding: "10px 0",
+      boxShadow: "0 -2px 5px rgba(0, 0, 0, 0.1)",
+      textAlign: "center",
+      
+    }}
+  >
+    
+    <Button type="primary" onClick={saveLayout} style={{ marginRight: 10 }}>
+      Save Layout
+    </Button>
+    <Button type="default" onClick={cancelEditing}>
+      Cancel
+    </Button>
+  </div></Affix>
 
-      <Button type="primary" onClick={saveLayout} style={{ marginTop: 20 }}>
-        Save Layout
-      </Button>
-      <Button type="default" onClick={cancelEditing} style={{ marginLeft: 10 }}>
-        Cancel
-      </Button>
-    </div>
+    </div> 
   );
 };
 

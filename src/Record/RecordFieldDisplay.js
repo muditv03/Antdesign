@@ -68,7 +68,7 @@ const getUniqueColor = (index) => {
                     return '';
                 }
                 
-                return name !== 'user' && fieldValue? (
+                return  fieldValue? (
                     <div style={{ position: 'relative', display: 'inline-block' }}>
                     {fieldValue?.Name ? (
                         <a
@@ -194,7 +194,7 @@ const getUniqueColor = (index) => {
                         <PhoneOutlined style={{ marginRight: 8 }} />
                         {fieldValue || ''}
                     </div>
-                ) : '';
+                ) : ''; 
                 case 'MultiSelect':
                     return Array.isArray(fieldValue) ? (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>

@@ -1,24 +1,31 @@
 import React, { useEffect, useState } from "react";
-import ApiService from '../Components/apiService'; // Import ApiService class
+import ApiService from '../Components/apiService';
 import { BASE_URL } from '../Components/Constant';
-import { Row, Col, Card, Button, Typography, Checkbox } from 'antd';
+import { Table, Button, Typography, Checkbox,Row,Col,Tooltip,Popconfirm } from 'antd';
+import { CopyOutlined, DeleteOutlined } from '@ant-design/icons';
+
 import LayoutEditor from "./LayoutEditor";
-  
+import dayjs from 'dayjs';
+
+
 const { Title } = Typography;
 
 const CreateLayout = ({ object }) => {
     const [layouts, setLayouts] = useState([]);
     const [showLayoutEditor, setShowLayoutEditor] = useState(false);
     const [fields, setFields] = useState({});
-    const [selectedLayout, setSelectedLayout] = useState(null); // Store the selected layout for editing
+    const [selectedLayout, setSelectedLayout] = useState(null);
+    const [isCloning, setIsCloning] = useState(false); // State for cloning
 
+
+    // Fetch all layouts and fields for the given object
     const getAllLayouts = async () => {
         try {
             const apiService = new ApiService(`${BASE_URL}/get_by_objectName/${object.name}`, {}, 'GET');
-            const FieldapiService = new ApiService(`${BASE_URL}/mt_fields/object/${object.name}`, {}, 'GET');
+            const fieldApiService = new ApiService(`${BASE_URL}/mt_fields/object/${object.name}`, {}, 'GET');
             const responseData = await apiService.makeCall();
-            const fieldResponse = await FieldapiService.makeCall();
-            const filteredFields = fieldResponse.filter(field => field.name !== 'recordCount'); // Filter out 'recordCount'
+            const fieldResponse = await fieldApiService.makeCall();
+            const filteredFields = fieldResponse.filter(field => field.name !== 'recordCount');
 
             setLayouts(responseData);
             setFields(filteredFields);
@@ -31,111 +38,105 @@ const CreateLayout = ({ object }) => {
         getAllLayouts();
     }, [object]);
 
-    const handleEditLayout = (layout) => {
-        setSelectedLayout(layout); // Set the selected layout for editing
-        setShowLayoutEditor(true); // Show the LayoutEditor
+    // Handle editing a layout
+    const handleEditLayout = (layout,clone=false) => {
+        setSelectedLayout(layout);
+        setIsCloning(clone); 
+        setShowLayoutEditor(true);
     };
 
-    const renderItems = (items) => {
-        return (
-            <div>
-                {items && items.map((item, index) => (
-                    <Row key={index} style={{ marginBottom: 10 }}>
-                        <Col span={24}>{item.name}</Col> {/* Item displayed in a row under each column */}
-                    </Row>
-                ))}
-            </div>
-        );
-    };
+    // Define columns for the table
+    const columns = [
+        {
+            title: "Layout Name",
+            dataIndex: "layout_name",
+            key: "layout_name",
+            render: (text, record) => (
+                <a onClick={() => handleEditLayout(record)}>{text}</a>
+            ), // Make layout name clickable
+        },
+        {
+            title: "Active",
+            dataIndex: "active",
+            key: "active",
+            render: (active) => <Checkbox checked={active} disabled />,
+        },
+        {
+            title: "Created At",
+            dataIndex: "created_at",
+            key: "created_at",
+            render:(text)=>dayjs(text).utc().format('DD/MM/YYYY HH:mm:ss')
+        },
 
-    const renderSections = (sections) => {
-        return (
-            <div>
-                {sections.map((section, index) => (
-                    <Card key={index} title={section.name} style={{ marginBottom: 20,marginTop:20 }}>
-                        <Row gutter={16}>
-                            {section.columns.map((column, colIndex) => {
-                                const columnSpan = 24 / section.columns.length; // Calculate dynamic span based on the number of columns
-                                return (
-                                    <Col key={colIndex} span={columnSpan}>
-                                        <div style={{ marginBottom: 10 }}>
-                                            <strong>Column {column.order}:</strong>
-                                            {renderItems(column.items)} {/* Render items under the column */}
-                                        </div>
-                                    </Col>
-                                );
-                            })}
-                        </Row>
-                    </Card>
-                ))}
-            </div>
-        );
-    };
+    ];
+
+    columns.push({
+        title: 'Action',
+        key: 'operation',
+        render: (_, layout) => (
+          <>
+            <Tooltip title="Clone">
+              <CopyOutlined
+                onClick={() => handleEditLayout(layout,true)}
+                style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
+              />
+            </Tooltip>
+            <Tooltip title="Delete">
+              <Popconfirm
+                title="Are you sure you want to delete this item?"
+                okText="Yes"
+                cancelText="No"
+                onConfirm={() => {
+                  console.log('Confirm clicked'); // Add this line
+                }
+                }
+    
+              >
+                <DeleteOutlined style={{ color: 'red', marginRight: 8, fontSize: '14px', cursor: 'pointer' }} />
+              </Popconfirm>
+            </Tooltip>
+          </>
+        ),
+      });
 
     return (
         <div>
             {!showLayoutEditor ? (
-                // Main View
                 <div>
-                    <Row justify="space-between" align="middle" style={{ marginBottom: 10 }}>
-                        <Col>
-                            <Title level={3} style={{ marginTop: "10px" }}>Create Layouts</Title>
-                        </Col>
-                        <Col style={{ marginTop: "10px" }}>
-                            <Button
-                                type="primary"
-                                onClick={() => {
-                                    setSelectedLayout(null); // Clear selected layout
-                                    setShowLayoutEditor(true); // Show LayoutEditor for new layout
-                                }}
-                                style={{ marginBottom: 5 }}
-                            >
-                                Create Layout
-                            </Button>
-                        </Col>
-                    </Row>
+                <Row justify="space-between" align="middle" style={{ marginBottom: 20 }}>
+                    <Col>
+                        <Title level={3} style={{ margin: 0 }}>Layouts</Title>
+                    </Col>
+                    <Col>
+                        <Button
+                            type="primary"
+                            onClick={() => {
+                                setSelectedLayout(null);
+                                setIsCloning(false); 
+                                setShowLayoutEditor(true);
+                            }}
+                        >
+                            Create Layout
+                        </Button>
+                    </Col>
+                </Row>
 
-                    <div>
-                        {/* Render All Layouts */}
-                        {layouts.length > 0 ? (
-                        layouts.map((layout) => (
-                            <Card key={layout._id} style={{ marginBottom: 20 }}>
-                                <Row justify="space-between" align="middle" style={{padding:'auto'}}>
-                                    <Col>
-                                        <Title level={4} style={{ margin: 0 }}>
-                                            {layout.layout_name}
-                                        </Title>
-                                    </Col>
-                                    <Col>
-                                    <Checkbox checked={layout.active}>Active</Checkbox>
-                                    </Col>
-                                    <Col>
-                                        <Button
-                                            color="default" 
-                                            variant="dashed"
-                                            onClick={() => handleEditLayout(layout)}
-                                        >
-                                            Edit Layout
-                                        </Button>
-                                    </Col>
-                                </Row>
-                                {renderSections(layout.sections)}
-                            </Card>
-                        ))
-                    ) : (
-                        <p>No layouts available.</p>
-                    )}
-
-                    </div>
+                    {/* Render layouts in a table */}
+                    <Table
+                        dataSource={layouts}
+                        columns={columns}
+                        rowKey="_id"
+                        pagination={{ pageSize: 10 }}
+                    />
                 </div>
             ) : (
-                // LayoutEditor View
                 <LayoutEditor
                     object={object.name}
                     fields={fields}
-                    Editinglayout={selectedLayout} // Pass the selected layout to LayoutEditor
+                    Editinglayout={selectedLayout}
                     getAllLayouts={getAllLayouts}
-                    onBack={() => setShowLayoutEditor(false)} // Pass onBack callback
+                    isCloning={isCloning}
+                    onBack={() => setShowLayoutEditor(false)}
                 />
             )}
         </div>

@@ -674,7 +674,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                   </Checkbox>
                 </Form.Item>
 
-
+ 
 
                 <Form.Item
                   name="is_formula">
@@ -1003,7 +1003,8 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
               </>
             )}
 
-            {(fieldType === 'String' || fieldType === 'Picklist') && (
+          {!isAutoNumber &&
+            (fieldType === 'String' || fieldType === 'Picklist' ) && (
               <Form.Item
                 name="complianceCategorization"
                 label="Compliance Categorization"
@@ -1024,6 +1025,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                 </Select>
               </Form.Item>
             )}
+
             {!isFormula && !isAutoNumber && (
               <>
                 <Form.Item
@@ -1055,6 +1057,9 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                   >Required
                   </Checkbox>
                 </Form.Item>
+
+                {(fieldType!=='Picklist' && fieldType!=='MultiSelect' &&
+                <>
                 <Form.Item name="unique"
                 >
                   <Checkbox
@@ -1068,13 +1073,17 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                     onChange={(e) => setIsExternalID(e.target.checked)}
                   >External Id</Checkbox>
                 </Form.Item>
+                </>
+                 )}
 
-                <Form.Item name="field_Tracking" >
-                  <Checkbox
-                  checked={isFieldTrackingEnabled}
-                  onChange={(e) => setIsFieldTrackingEnabled(e.target.checked)}
-                  >Enable Field Tracking</Checkbox>
-                </Form.Item>
+                {(fieldType!=='Rich-Text' &&  fieldType!=='Text-Area') && (
+                    <Form.Item name="field_Tracking" >
+                      <Checkbox
+                      checked={isFieldTrackingEnabled}
+                      onChange={(e) => setIsFieldTrackingEnabled(e.target.checked)}
+                      >Enable Field Tracking</Checkbox>
+                    </Form.Item>
+                 ) }
                 </>
          )}
              
