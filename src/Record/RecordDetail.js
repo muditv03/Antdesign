@@ -474,6 +474,25 @@ const RecordDetails = ({ objectName, id }) => {
                                     </Form.Item>
                                 </Col>
                             </Row>
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Form.Item label="Created by" style={{ marginBottom: 0 }}>
+                                        <Input
+                                            style={{ border: 'none', borderBottom: '1px solid #ddd', fontWeight: '500', padding: 0 }}
+                                            value={record?.created_by}
+                                        />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Form.Item label="Updated by" style={{ marginBottom: 0 }}>
+                                        <Input
+                                            style={{ border: 'none', borderBottom: '1px solid #ddd', fontWeight: '500', padding: 0 }}
+                                            value={record?.lastModified_by}
+
+                                        />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
                         </div>
                     </div>
 
