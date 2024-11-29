@@ -250,7 +250,7 @@ const CallDrawer = ({
           </Form.Item>
 
           {/* Assigned To */}
-          <Form.Item label="Connected With" name="AssignedTo">
+          <Form.Item label="Assigned To" name="AssignedTo">
             <Input placeholder="Enter assignee" />
           </Form.Item>
 

@@ -40,8 +40,6 @@ const CustomTimeline = ({ objectName, recordId }) => {
   // const [enddt, setEnddt] = useState(null);
   // const [currentdt,setCurrentdt]=useState();
 
-
-
   console.log("Object Name:", objectName);
   console.log("Record ID:", recordId);
 
@@ -126,6 +124,11 @@ const CustomTimeline = ({ objectName, recordId }) => {
       acc[record.section].push(record);
       return acc;
     }, {});
+
+    // Ensure "Upcoming & Overdue" section is present, even if empty
+    if (!groupedData["Upcoming & Overdue"]) {
+      groupedData["Upcoming & Overdue"] = [];
+    }
 
     // Prioritize "Upcoming & Overdue" section
     const orderedSections = ["Upcoming & Overdue", ...Object.keys(groupedData).filter((key) => key !== "Upcoming & Overdue")];
@@ -431,7 +434,7 @@ const CustomTimeline = ({ objectName, recordId }) => {
                     )}
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "column" , display: item.ActivityType !== "Note" ? "flex" : "none" }}>
+                    <div style={{ display: "flex", flexDirection: "column" , gridColumn: "span 4", display: item.ActivityType !== "Note" ? "flex" : "none" }}>
                       {item.ActivityType !== "Note" && (
                         <>
                       <span style={{ fontWeight: "normal" }}>Description</span>
