@@ -646,6 +646,9 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                     if (!alphabetOnlyRegex.test(value)) {
                       return Promise.reject(new Error('Name should only contain alphabets without spaces.'));
                     }
+                    if (!/^[A-Z]/.test(value)) {
+                      return Promise.reject(new Error('Name should start with a capital letter.'));
+                    }
                     if (pluralize.isPlural(value)) {
                       return Promise.reject(new Error('API name cannot be plural.'));
                     }
