@@ -28,8 +28,10 @@ const RecordDetails = ({ objectName, id }) => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [recordName, setRecordName] = useState('');
     const [initialValues, setInitialValues] = useState({});
-    const [lookupData,setLookupData]=useState({});
-    const [layout,setLayout]=useState({});
+    const [lookupData, setLookupData] = useState({});
+    const [layout, setLayout] = useState({});
+    const [createdBy, setCreatedBy] = useState({});
+    const [updatedBy, setUpdatedBy] = useState({})
 
 
     useEffect(() => {
@@ -59,11 +61,30 @@ const RecordDetails = ({ objectName, id }) => {
             console.log('record fetched is ' + JSON.stringify(responseData)); // Process the data as needed
             const recordData = responseData;
             setRecordName(responseData.Name);
-            const layouts= new ApiService(`${BASE_URL}/get_by_objectName/${objectName}`, {}, 'GET');
-            const res=await layouts.makeCall();
-            const activeLayout = res.filter(layout => layout.active); 
+            const layouts = new ApiService(`${BASE_URL}/get_by_objectName/${objectName}`, {}, 'GET');
+            const res = await layouts.makeCall();
+            const activeLayout = res.filter(layout => layout.active);
             console.log('active layout is ');
             console.log(activeLayout);
+            const users = new ApiService(
+                `${BASE_URL}/fetch_records/User`,
+                { 'Content-Type': 'application/json' },
+                'GET'
+            );
+            const userresponse = await users.makeCall();
+            console.log('all users are');
+            console.log(userresponse);
+            console.log('record data is ');
+            console.log(recordData);
+            const createdByUser = userresponse.find(userresponse => userresponse._id === recordData.created_by_id);
+            const lastModifiedUser = userresponse.find(userresponse => userresponse._id === recordData.lastModified_by_id);
+
+            console.log('created by ');
+            console.log(createdByUser);
+            console.log(lastModifiedUser);
+            setCreatedBy(createdByUser);
+            setUpdatedBy(lastModifiedUser);
+
 
             setLayout(activeLayout);
             const fieldCallout = new ApiService(`${BASE_URL}/mt_fields/object/${objectName}`, {}, 'GET');
@@ -93,10 +114,10 @@ const RecordDetails = ({ objectName, id }) => {
                     recordData[field.name] = localDateTime; // Store formatted date-time
                 }
                 if (field.type === 'lookup' && recordData[field.name]) {
-                    recordData[field.name] = recordData[field.name]  || '';
+                    recordData[field.name] = recordData[field.name] || '';
                 }
             });
-            
+
             setRecord(recordData);
             setLookupData(prevState => ({ ...prevState, ...updatedLookupOptions }));
             console.log('record data after editing is ');
@@ -198,7 +219,7 @@ const RecordDetails = ({ objectName, id }) => {
             message.error(errorMessage);
         }
 
-    }; 
+    };
 
     const handleSearch = async (value, fieldId, name) => {
         console.log('handle search called');
@@ -335,7 +356,7 @@ const RecordDetails = ({ objectName, id }) => {
                         field={field}
                         record={record}
                         fetchRecords={fetchRecords}
-                    
+
                     />
 
                 )}
@@ -371,90 +392,94 @@ const RecordDetails = ({ objectName, id }) => {
                         height: 'calc(100vh - 300px)', // Adjust this value based on your layout
                         flex: 1
                     }}>
-                       {loading ? (
+                        {loading ? (
                             <Spin size="large" style={{ marginTop: '20px' }} />
                         ) : (
-                            layout[0]?(
-                            layout[0]?.sections?.map((section, sectionIndex) => (
-                                <div
-                                  key={sectionIndex}
-                                  style={{
-                                    border: '1px solid #ddd', // Thin border around the section
-                                    marginBottom: '20px', // Space between sections
-                                    padding: '20px',
-                                    borderRadius: '4px', // Optional: rounded corners for the border
-                                  }}
-                                >
-                                  <Title level={4} style={{marginTop:'2px'}}>{section.name}</Title>
-                                  <Row gutter={24} style={{ marginBottom: '0px' }}>
-                                    {/* Loop through columns within each section */}
-                                    {section.columns?.map((column, columnIndex) => {
-                                      // Dynamically calculate column span based on the number of columns in the section
-                                      const totalColumns = section.columns.length;
-                                      const columnSpan = totalColumns === 1
-                                        ? 24  // 1 column, full width
-                                        : totalColumns === 2
-                                        ? 12  // 2 columns, each takes half the width
-                                        : totalColumns === 3
-                                        ? 8  // 3 columns, each takes 1/3rd of the width
-                                        : 8; // Fallback for more columns (you can adjust this if needed)
-                              
-                                      const columnItems = column.items || [];
-                                      const maxItems = Math.max(...section.columns.map(c => c.items?.length || 0));
-                              
-                                      return (
-                                        <Col
-                                          key={columnIndex}
-                                          span={columnSpan} // Dynamically set the span based on the number of columns
-                                          style={{ marginBottom: '10px' }}
-                                        >
-                                          <div>
-                                            {/* Loop through the number of items in this column */}
-                                            {Array.from({ length: maxItems }).map((_, rowIndex) => {
-                                              const item = columnItems[rowIndex];
-                                              const matchedField = fields.find(field => field.name === item?.name);
-                                              console.log(matchedField);
-                                              console.log('item is ');
-                                              console.log(item?.name);
-                                              return (
-                                                item && (
-                                                  <Form.Item
-                                                    key={rowIndex}
-                                                    label={<span>{item.name}</span>}
-                                                    style={{ marginBottom: '10px', padding: '0px' }}
-                                                  >
-                                                    {/* Call renderFieldWithEdit method for each field */}
-                                                    {renderFieldWithEdit(matchedField, selectedDate, setSelectedDate)}
-                                                  </Form.Item>
-                                                )
-                                              );
+                            layout[0] ? (
+                                layout[0]?.sections?.map((section, sectionIndex) => (
+                                    <div
+                                        key={sectionIndex}
+                                        style={{
+                                            border: '1px solid #ddd', // Thin border around the section
+                                            marginBottom: '20px', // Space between sections
+                                            padding: '20px',
+                                            borderRadius: '4px', // Optional: rounded corners for the border
+                                        }}
+                                    >
+                                        <Title level={4} style={{ marginTop: '2px' }}>{section.name}</Title>
+                                        <Row gutter={24} style={{ marginBottom: '0px' }}>
+                                            {/* Loop through columns within each section */}
+                                            {section.columns?.map((column, columnIndex) => {
+                                                // Dynamically calculate column span based on the number of columns in the section
+                                                const totalColumns = section.columns.length;
+                                                const columnSpan = totalColumns === 1
+                                                    ? 24  // 1 column, full width
+                                                    : totalColumns === 2
+                                                        ? 12  // 2 columns, each takes half the width
+                                                        : totalColumns === 3
+                                                            ? 8  // 3 columns, each takes 1/3rd of the width
+                                                            : 8; // Fallback for more columns (you can adjust this if needed)
+
+                                                const columnItems = column.items || [];
+                                                const maxItems = Math.max(...section.columns.map(c => c.items?.length || 0));
+
+                                                return (
+                                                    <Col
+                                                        key={columnIndex}
+                                                        span={columnSpan} // Dynamically set the span based on the number of columns
+                                                        style={{ marginBottom: '10px' }}
+                                                    >
+                                                        <div>
+                                                            {/* Loop through the number of items in this column */}
+                                                            {Array.from({ length: maxItems }).map((_, rowIndex) => {
+                                                                const item = columnItems[rowIndex];
+                                                                const matchedField = fields.find(field => field.name === item?.name);
+                                                                console.log(matchedField);
+                                                                console.log('item is ');
+                                                                console.log(item?.name);
+                                                                return (
+                                                                    item && (
+                                                                        <Form.Item
+                                                                            key={rowIndex}
+                                                                            label={<span>{item.name}</span>}
+                                                                            style={{ marginBottom: '10px', padding: '0px' }}
+                                                                        >
+                                                                            {/* Call renderFieldWithEdit method for each field */}
+                                                                            {renderFieldWithEdit(matchedField, selectedDate, setSelectedDate)}
+                                                                        </Form.Item>
+                                                                    )
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </Col>
+                                                );
                                             })}
-                                          </div>
-                                        </Col>
-                                      );
-                                    })}
-                                  </Row>
-                                </div>
-                              ))
-                            ):( 
+                                        </Row>
+                                    </div>
+                                ))
+                            ) : (
                                 <Row gutter={24} style={{ marginBottom: '0px' }}>
-                                {fields.map((field, index) => (
-                                    <Col key={index} xs={24} sm={12} style={{ marginBottom: -5 }}>
-                                        <Form.Item label={<span>{field.label} {field.help_text && <Tooltip title={field.help_text}><InfoCircleOutlined style={{ marginLeft: 5 }} /></Tooltip>}</span>} style={{ marginBottom: -1, padding: '0px' }}>
-                                            {renderFieldWithEdit(field, selectedDate, setSelectedDate)}
-                                        </Form.Item>
-                                    </Col>
-                                ))}
-                            </Row>
+                                    {fields.map((field, index) => (
+                                        <Col key={index} xs={24} sm={12} style={{ marginBottom: -5 }}>
+                                            <Form.Item label={<span>{field.label} {field.help_text && <Tooltip title={field.help_text}><InfoCircleOutlined style={{ marginLeft: 5 }} /></Tooltip>}</span>} style={{ marginBottom: -1, padding: '0px' }}>
+                                                {renderFieldWithEdit(field, selectedDate, setSelectedDate)}
+                                            </Form.Item>
+                                        </Col>
+                                    ))}
+                                </Row>
                             )
-                              
-                            )}
+
+                        )}
                         <div className="system-info-section" style={{
-                            marginTop: '20px',
-                            width: '100%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                        }}>
+        marginTop: '20px',
+        width: '100%',
+        padding: '20px', // Add padding for content spacing
+        border: '1px solid #ddd', // Add border for box appearance
+        borderRadius: '8px', // Rounded corners for a modern look
+        backgroundColor: '#fff', // Background color
+        display: 'flex',
+        flexDirection: 'column',
+    }}>
                             <Title level={3} style={{ marginTop: '0px' }}>System Information</Title>
                             <Row gutter={16}>
                                 <Col span={12}>
@@ -475,23 +500,49 @@ const RecordDetails = ({ objectName, id }) => {
                                 </Col>
                             </Row>
                             <Row gutter={16}>
-                                <Col span={12}>
-                                    <Form.Item label="Created by" style={{ marginBottom: 0 }}>
-                                        <Input
-                                            style={{ border: 'none', borderBottom: '1px solid #ddd', fontWeight: '500', padding: 0 }}
-                                            value={record?.created_by}
-                                        />
-                                    </Form.Item>
-                                </Col>
-                                <Col span={12}>
-                                    <Form.Item label="Updated by" style={{ marginBottom: 0 }}>
-                                        <Input
-                                            style={{ border: 'none', borderBottom: '1px solid #ddd', fontWeight: '500', padding: 0 }}
-                                            value={record?.lastModified_by}
+                                    <Col span={12}>
+                                        <Form.Item label="Created by" style={{ marginBottom: 0,borderBottom: '1px solid #ddd', }}>
+                                            <a
+                                                href={`/record/User/${createdBy?._id}`} // Assuming 'createdBy.id' holds the user ID
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+                                            >
+                                                <Avatar
+                                                    size="small"
+                                                    style={{
+                                                        backgroundColor: '#87d068',
+                                                        marginRight: 8,
+                                                    }}
+                                                >
+                                                    {(createdBy?.Name || '').charAt(0).toUpperCase()}
+                                                </Avatar>
+                                                {createdBy?.Name}
+                                            </a>
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={12}>
+                                        <Form.Item label="Updated by" style={{ marginBottom: 0,borderBottom: '1px solid #ddd', }}>
+                                            <a
+                                                href={`/record/User/${updatedBy?._id}`} // Assuming 'updatedBy.id' holds the user ID
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+                                            >
+                                                <Avatar
+                                                    size="small"
+                                                    style={{
+                                                        backgroundColor: '#87d068',
+                                                        marginRight: 8,
+                                                    }}
+                                                >
+                                                    {(updatedBy?.Name || '').charAt(0).toUpperCase()}
+                                                </Avatar>
+                                                {updatedBy?.Name}
+                                            </a>
+                                        </Form.Item>
+                                    </Col>
 
-                                        />
-                                    </Form.Item>
-                                </Col>
                             </Row>
                         </div>
                     </div>

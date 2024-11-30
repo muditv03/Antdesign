@@ -130,7 +130,7 @@ const getUniqueColor = (index) => {
                             display: 'flex',
                             alignItems: 'center',
                             backgroundColor: '#f9f9f9',
-                        }}
+                        }} 
                     >
                         <Avatar
                             size="medium"
