@@ -205,9 +205,23 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
               rules={[
                 { required: true, message: 'Please enter the name' },
                 {
-                  validator: (_, value) => /^[a-zA-Z]+$/.test(value)
-                    ? Promise.resolve()
-                    : Promise.reject('Name should only contain alphabets without spaces.'),
+                  validator: (_, value) => {
+                    if (!value) {
+                      return Promise.resolve();
+                    }
+            
+                    // Check if the value contains only alphabets without spaces
+                    if (!/^[a-zA-Z]+$/.test(value)) {
+                      return Promise.reject(new Error('Name should only contain alphabets without spaces.'));
+                    }
+            
+                    // Check if the first letter is capitalized
+                    if (!/^[A-Z]/.test(value)) {
+                      return Promise.reject(new Error('Name should start with a capital letter.'));
+                    }
+            
+                    return Promise.resolve();
+                  },
                 },
               ]}
             >

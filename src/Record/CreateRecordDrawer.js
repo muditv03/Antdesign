@@ -5,6 +5,8 @@ import dayjs from 'dayjs';
 import ApiService from '../Components/apiService'; // Import ApiService class
 import { BASE_URL, DateFormat } from '../Components/Constant'; // Define the date format
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import { useQuill } from "react-quilljs";
+import "quill/dist/quill.snow.css";
 dayjs.extend(customParseFormat);
 
 const CreateRecordDrawer = ({
@@ -20,6 +22,7 @@ const CreateRecordDrawer = ({
 }) => {
   const [lookupOptions, setLookupOptions] = useState([]);
   const [lookupOptionforparent, setLookupOptionsForParent] = useState([]);
+  const { quill, quillRef } = useQuill();
 
 
   useEffect(() => {
@@ -171,13 +174,25 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={renderLabel} // Use the custom label here
-            rules={isRequired}
-
+            rules={[
+              ...isRequired, // Include the required validation if applicable
+              {
+                validator: (_, value) => {
+                  if (!value || /^[0-9]{10}$/.test(value)) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error('Please enter a valid 10-digit phone number')
+                  );
+                },
+              },
+            ]}
           >
             <Input
 
               type="text" // Use text to prevent input methods restricting values
               placeholder={`Enter ${field.label}`}
+              maxLength={10} // Prevent more than 10 characters
               addonBefore={
                 <PhoneOutlined style={{ cursor: 'pointer' }} />
               }
@@ -208,8 +223,6 @@ const CreateRecordDrawer = ({
             valuePropName="checked"
             initialValue={false}
             label={renderLabel}  // Use the custom label here
-            rules={isRequired}
-
           >
             <Checkbox>{field.label}</Checkbox>
           </Form.Item>
@@ -529,6 +542,20 @@ const CreateRecordDrawer = ({
             />
           </Form.Item>
         );
+
+        // case 'Rich-Text':
+        //   return (
+        //     <Form.Item
+        //     key={field.name}
+        //     name={field.name}
+        //     label={renderLabel}  // Use the custom label here
+        //     rules={isRequired}
+        //     >
+        //       <div style={{ width: "100%", height: 200 }}>
+        //       <div ref={quillRef} />
+        //     </div>
+        //     </Form.Item>
+        //   )
 
       default:
         return null;
