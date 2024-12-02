@@ -458,6 +458,7 @@ const RecordDetails = ({ objectName, id }) => {
                                     </div>
                                 ))
                             ) : (
+                                <div >
                                 <Row gutter={24} style={{ marginBottom: '0px' }}>
                                     {fields.map((field, index) => (
                                         <Col key={index} xs={24} sm={12} style={{ marginBottom: -5 }}>
@@ -467,6 +468,7 @@ const RecordDetails = ({ objectName, id }) => {
                                         </Col>
                                     ))}
                                 </Row>
+                                </div>
                             )
 
                         )}

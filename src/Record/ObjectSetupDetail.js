@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Table, Typography, Button, Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker, Spin, Modal, Space, Upload, Avatar,Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined, ImportOutlined, SettingOutlined, CaretDownOutlined, PhoneOutlined } from '@ant-design/icons';
+import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined, ImportOutlined, SettingOutlined, CaretDownOutlined, PhoneOutlined,FilterOutlined } from '@ant-design/icons';
 import { BASE_URL, DateFormat } from '../Components/Constant';
 import dayjs from 'dayjs';
 import CreateRecordDrawer from './CreateRecordDrawer';
@@ -553,9 +553,7 @@ const ObjectSetupDetail = () => {
           // Check if the name has already been fetched and stored
           if (lookupNames[lookupId]) {
             // If the name is 'user', do not make it linkable
-            if (field.name === 'user') {
-              return lookupNames[lookupId]; // Just return the name without a link
-            } else {
+           
               // Otherwise, render the name as a link
               return (
                 <a
@@ -577,7 +575,7 @@ const ObjectSetupDetail = () => {
                 </a>
 
               );
-            }
+            
           }
           else {
             // Fetch the name if not cached
@@ -734,6 +732,23 @@ const ObjectSetupDetail = () => {
     navigate(`/import`);
   };
 
+  const mapOperator = (operator) => {
+    switch (operator) {
+      case "$gt":
+        return ">";
+      case "$gte":
+        return ">=";
+      case "$lt":
+        return "<";
+      case "$lte":
+        return "<=";
+      case "$ne":
+        return "!=";
+      default:
+        return operator; // Fallback for unknown operators
+    }
+  };
+
 
   return (
     <Card>
@@ -760,6 +775,20 @@ const ObjectSetupDetail = () => {
                 <CaretDownOutlined style={{ marginLeft: 4 }} />
               </Button>
             </Dropdown>
+
+            {selectedListView?.conditions && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', marginLeft: 10 }}>
+                <FilterOutlined style={{ fontSize: '14px', marginRight: 5 }} />
+                {Object.entries(selectedListView?.conditions).map(([key, condition]) => (
+                  <Tag key={key} color="blue" style={{ marginRight: 5 }}>
+                  {/* Display field and value appropriately */}
+                  {condition.field} {typeof condition.value === 'object'
+                    ? Object.entries(condition.value).map(([operator, value]) => `${mapOperator(operator)} ${value}`).join(', ')
+                    : `= ${condition.value.toString()}`}
+                </Tag>
+                ))}
+              </div>
+            )}
 
           </Col>
 

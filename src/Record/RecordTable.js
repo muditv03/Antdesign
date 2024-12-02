@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Table, Button, Tooltip, Form,Tag,Checkbox } from 'antd';
-import { EditOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons';
+import { EditOutlined, CopyOutlined, DeleteOutlined,PhoneOutlined} from '@ant-design/icons';
 import { message, Popconfirm } from 'antd';
 import dayjs from 'dayjs';
 import { BASE_URL, DateFormat } from '../Components/Constant';
@@ -163,6 +163,15 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
         return dayjs(value).utc().format('DD/MM/YYYY HH:mm:ss');
       }
 
+       if (field.type === 'Phone' && value) {
+        // Add PhoneOutlined for phone numbers
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <PhoneOutlined style={{ marginRight: 8 }} />
+            {value || ''}
+          </div>
+        );
+      }
       if (field.type === 'currency') {
         return value ? `$${value}` : '0.00';
       }
@@ -173,6 +182,47 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
 
       if (field.type === 'Integer' || field.type === 'decimal') {
         return value === 0 ? '0.00' : value;
+      }
+      if (field.type === 'MultiSelect') {
+        // Check if text is an array (i.e., the MultiSelect field has multiple values)
+        return Array.isArray(value) ? (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {value.map((value, index) => (
+              <Tag
+                key={index}
+                color={getUniqueColor(index)} // Get a unique color for each tag
+                style={{
+                  fontSize: '14px', // Adjust font size for better readability
+                  padding: '6px 12px', // Adjust padding for larger size
+                  borderRadius: '8px', // Rounded corners for aesthetic appeal
+                  lineHeight: '1.5', // Adjust line height for better spacing
+                }}
+              >
+                {value}
+              </Tag>
+            ))}
+          </div>
+        ) : (
+          value || ''
+        );
+      }
+       if (field.type === 'URL') {
+        return value ? (
+          <a href={value.startsWith('http') ? value : `http://${value}`} target="_blank" rel="noopener noreferrer">
+            {value}
+          </a>
+        ) : '';
+      }
+       if (field.type === 'Email') {
+        return value ? (
+          <a href={`mailto:${value}`} target="_blank" rel="noopener noreferrer">
+            {value}
+          </a>
+        ) : '';
+      }
+
+      if (field.type === 'percentage') {
+        return value ? `${value * 100}%` : ''; // Format as currency with dollar sign
       }
 
       return value;
@@ -356,7 +406,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
         scroll={{
           x: 'max-content',
         }}
-
+ 
       />
       <CreateRecordDrawer
         visible={drawerVisible}

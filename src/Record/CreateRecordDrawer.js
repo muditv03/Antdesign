@@ -8,7 +8,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { useQuill } from "react-quilljs";
 import "quill/dist/quill.snow.css";
 dayjs.extend(customParseFormat);
-
+ 
 const CreateRecordDrawer = ({
   visible,
   onClose,
