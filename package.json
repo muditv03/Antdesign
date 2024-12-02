@@ -10,6 +10,7 @@
     "antd": "^5.19.3",
     "axios": "^1.7.3",
     "dayjs": "^1.11.13",
+    "flat-color-icons": "^1.1.0",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "jwt-encode": "^1.0.1",

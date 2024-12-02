@@ -441,7 +441,7 @@ const RecordDetails = ({ objectName, id }) => {
                                                                     item && (
                                                                         <Form.Item
                                                                             key={rowIndex}
-                                                                            label={<span>{item.name}</span>}
+                                                                            label={<span>{matchedField.label}</span>}
                                                                             style={{ marginBottom: '10px', padding: '0px' }}
                                                                         >
                                                                             {/* Call renderFieldWithEdit method for each field */}
