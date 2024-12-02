@@ -257,6 +257,12 @@ const ObjectSetupDetail = () => {
     setSelectedRecord(null); // Ensure no record is selected when creating a new record
     form.resetFields(); // Clear the form fields
     setDrawerVisible(true);
+    setTimeout(() => {
+      const drawerContent = document.querySelector('.ant-drawer-body');
+      if (drawerContent) {
+        drawerContent.scrollTop = 0; // Reset scroll to the top
+      }
+    },200); 
 
     try {
       //setLoading(true);
@@ -306,6 +312,13 @@ const ObjectSetupDetail = () => {
       setSelectedRecord(formattedRecord);
       form.setFieldsValue(formattedRecord);
       setDrawerVisible(true);
+
+      setTimeout(() => {
+        const drawerContent = document.querySelector('.ant-drawer-body');
+        if (drawerContent) {
+          drawerContent.scrollTop = 0; // Reset scroll to the top
+        }
+      }, 300);
 
       // Fetch lookup data
       fetchLookupData(recordResponse, fieldsResponse, BASE_URL, setLookupName, form);

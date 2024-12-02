@@ -60,11 +60,23 @@ const DataTable = () => {
     console.log(record);
     setEditingRecord(record);
     setDrawerVisible(true);
+    setTimeout(() => {
+      const drawerContent = document.querySelector('.ant-drawer-body');
+      if (drawerContent) {
+        drawerContent.scrollTop = 0; // Reset scroll to the top
+      }
+    }, 200);
   };
 
   const showDrawer = () => {
     setEditingRecord(null);
     setDrawerVisible(true);
+    setTimeout(() => {
+      const drawerContent = document.querySelector('.ant-drawer-body');
+      if (drawerContent) {
+        drawerContent.scrollTop = 0; // Reset scroll to the top
+      }
+    }, 200);
   };
 
   const onCloseDrawer = () => {

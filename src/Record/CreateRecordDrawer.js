@@ -562,14 +562,23 @@ const CreateRecordDrawer = ({
     }
   };
 
-
+const cancelDrawer = ()=>{
+  form.resetFields();
+  onClose();
+}
   return (
     <Drawer
-      title={<div style={{ fontSize: '20px', fontWeight: 'bold' }}>
+      title={<div style={{ fontSize: '20px', fontWeight: 'bold' }} onOpenChange={() => {
+        const drawerBody = document.querySelector('.ant-drawer-body');
+        if (drawerBody) {
+          drawerBody.scrollTop = 0;
+        }
+      }}
+    >
         {selectedRecord?.isClone ? 'Clone Record' : selectedRecord ? 'Edit Record' : 'Create New Record'}
       </div>}
       width="40%"
-      onClose={!loading ? onClose : null} // Prevent drawer from closing when loading is true
+      onClose={!loading ? cancelDrawer : null} // Prevent drawer from closing when loading is true
       visible={visible}
       bodyStyle={{ paddingBottom: 80 }}
       headerStyle={{

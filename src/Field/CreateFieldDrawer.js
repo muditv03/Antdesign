@@ -45,6 +45,16 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
       .replace(/\s+/g, '')       // Remove all spaces
       .trim();
   };
+  //To reset form and call the onClose method from parent..
+  const handleCancel = () => {
+    console.log('inside handlecancel');
+    setIsRequired(false);
+    setIsExternalID(false);
+    setIsUnique(false);
+    setIsFieldTrackingEnabled(false);
+    // form.resetFields(); // Reset fields when the cancel button is clicked
+    onClose(); // Close the drawer
+  };
 
   // Handle label change and update API name
   const handleLabelChange = (e) => {
@@ -559,7 +569,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
             borderTop: '1px solid #e8e8e8',
           }}
         >
-          <Button onClick={onClose} disabled={loading} style={{ height: '34px', width: '90px', fontSize: '14px' }}>
+          <Button onClick={handleCancel} disabled={loading} style={{ height: '34px', width: '90px', fontSize: '14px' }}>
             Cancel
           </Button>
           <Button
@@ -676,9 +686,6 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
                     Auto Number
                   </Checkbox>
                 </Form.Item>
-
- 
-
                 <Form.Item
                   name="is_formula">
                   <Checkbox

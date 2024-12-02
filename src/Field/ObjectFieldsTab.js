@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Row, Col, Table, Button, message, Spin, Tooltip, Typography, Popconfirm } from 'antd';
+import { Row, Col, Table, Button, message, Spin, Tooltip, Typography, Popconfirm, Form } from 'antd';
 import CreateFieldDrawer from './CreateFieldDrawer';
 import ApiService from '../Components/apiService';
 import { BASE_URL } from '../Components/Constant';
@@ -22,7 +22,15 @@ const ObjectFieldTab = () => {
     showDrawer(); // Open the drawer
   };
 
-  const showDrawer = () => setDrawerVisible(true);
+  const showDrawer = () => {
+    setTimeout(() => {
+      const drawerContent = document.querySelector('.ant-drawer-body');
+      if (drawerContent) {
+        drawerContent.scrollTop = 0; // Reset scroll to the top
+      }
+    }, 200); 
+    setDrawerVisible(true);
+  } 
   const closeDrawer = () => {
     setDrawerVisible(false);
     setEditField(null); // Reset the edit field when drawer is closed
