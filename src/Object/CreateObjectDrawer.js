@@ -27,6 +27,10 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       setIsAllowFileUpload(editingRecord.allow_files);
     } else {
       form.resetFields();
+      setIsAllowSearch(false);
+      setIsTrackActivities(false);
+      setIsTrackFieldHistory(false);
+      setIsAllowFileUpload(false);
     }
   }, [editingRecord, form]);
 
