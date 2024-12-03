@@ -45,7 +45,7 @@ const AppSidebar = ({ onSidebarToggle, collapsedWidth, expandedWidth }) => {
             return {
               key: item.mt_object_id,
               label: item.label,
-              icon: IconComponent ? <IconComponent /> : null,
+              icon: IconComponent ? <IconComponent style={{ fontSize: '20px', }} /> : null,
               objectName: item.object_name || item.label.toLowerCase(),
             };
           });
