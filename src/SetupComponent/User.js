@@ -22,6 +22,7 @@ const UserComponent = () => {
 
     try {
       const response = await apiServiceForLookup.makeCall();
+      console.log('response'+JSON.stringify(response));
       setUsers(response);
     } catch (error) {
       const errorMessage = error && typeof error === 'object'
@@ -36,6 +37,7 @@ const UserComponent = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+  
 
   const deleteRecord = async (record) => {
     try {
@@ -47,7 +49,7 @@ const UserComponent = () => {
 
       await apiService.makeCall();
       message.success('Record deleted successfully.');
-      fetchUsers();
+      // fetchUsers();
     } catch (error) {
       message.error('Failed to delete record.');
       console.error('Error deleting record:', error);
@@ -76,6 +78,7 @@ const UserComponent = () => {
             username: values.username,
             email: values.email,
             Name: values.Name,
+            is_active: values.is_active,
           },
         };
 
@@ -85,7 +88,8 @@ const UserComponent = () => {
           'PATCH',  // Use PATCH as per the API requirement
           JSON.stringify(body)  // Correct structure for the body
         );
-        await apiService.makeCall();
+        const response = await apiService.makeCall();
+        console.log('response::::'+JSON.stringify(response));
         message.success('Record updated successfully.');
       } else {
         // Create new record
@@ -95,6 +99,7 @@ const UserComponent = () => {
           confirm_password: '12345',
           Name: values.Name,
           email: values.email,
+          is_active: values.active,
         };
 
         const apiService = new ApiService(
@@ -106,7 +111,7 @@ const UserComponent = () => {
         await apiService.makeCall();
         message.success('Record created successfully.');
       }
-      fetchUsers();
+       fetchUsers();
       handleCloseDrawer();
     } catch (error) {
       const errorMessage = error && typeof error === 'object'
@@ -136,6 +141,12 @@ const UserComponent = () => {
       key: 'username',
     },
     {
+      title: 'Active',
+      dataIndex: 'is_active',
+      key: 'is_active',
+      render: (isActive) => (isActive ? 'True' : 'False'),
+    },
+    {
       title: 'Action',
       key: 'operation',
       render: (_, record) => (
@@ -146,7 +157,7 @@ const UserComponent = () => {
               onClick={() => handleEdit(record)}
             />
           </Tooltip>
-          <Tooltip title="Delete">
+          {/* <Tooltip title="Delete">
             <Popconfirm
               title="Are you sure you want to delete this item?"
               onConfirm={() => deleteRecord(record)}
@@ -157,7 +168,7 @@ const UserComponent = () => {
                 style={{ color: 'red', marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
               />
             </Popconfirm>
-          </Tooltip>
+          </Tooltip> */}
         </>
       ),
     },
@@ -168,6 +179,7 @@ const UserComponent = () => {
     { name: 'Name', label: 'Name', type: 'String', is_auto_number: false },
     { name: 'email', label: 'Email', type: 'Email', is_auto_number: false },
     { name: 'username', label: 'Username', type: 'String', is_auto_number: false },
+    { name: 'is_active', label: 'Active', type: 'boolean', is_auto_number: false },
     // Add more fields as per your requirements
   ];
 
