@@ -85,8 +85,6 @@ const ObjectFieldTab = () => {
       const payload = {
         fields: modifiedFields.map((field) => ({
           id: field._id,
-          label: field.label,
-          // description: field.description,
           track_field_history: field.track_field_history,
         })),
       };
