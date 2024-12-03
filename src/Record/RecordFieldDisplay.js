@@ -1,23 +1,22 @@
 import React, { useEffect,useState } from 'react';
 import { Checkbox, Avatar,Card,Tag } from 'antd';
 import { PhoneOutlined } from '@ant-design/icons';
+import LookupDisplayCard from './LookupDisplayCard';
+import { colors,getUniqueColor,useHoverVisibility } from '../Components/Utility';
+
 
 const DisplayField = ({ type, form, name, field, record,layouts }) => {
 
-    const colors = ['blue', 'green', 'red', 'purple', 'orange', 'volcano', 'gold', 'cyan', 'lime', 'pink'];
+    const {
+        isHovered,
+        isVisible,
+        handleMouseEnter,
+        handleMouseLeave,
+        handleContentMouseEnter,
+        handleContentMouseLeave,
+    } = useHoverVisibility();
 
-const getUniqueColor = (index) => {
-    // Assign a color based on the index, wrapping around if there are more values than colors
-    return colors[index % colors.length];
-};
-
-
-
-    const [isHovered, setIsHovered] = useState(false);
-
-    const handleMouseEnter = () => setIsHovered(true);
-    const handleMouseLeave = () => setIsHovered(false);
-
+    
     useEffect(() => {
         // Logic to handle changes in record data
         if (record) {
@@ -68,126 +67,48 @@ const getUniqueColor = (index) => {
                     return '';
                 }
                 
-                return  fieldValue? (
-                    <div style={{ position: 'relative', display: 'inline-block' }}>
-                    {fieldValue?.Name ? (
+                return fieldValue ? (
+                    <div
+                      style={{ position: 'relative', display: 'inline-block' }}
+                      onMouseEnter={handleMouseEnter}
+                      onMouseLeave={handleMouseLeave}
+                    >
+                      {fieldValue?.Name ? (
                         <a
-                            href={`/record/${field.parent_object_name}/${record[field.name + '_id']}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-                            onMouseEnter={handleMouseEnter}
-                            onMouseLeave={handleMouseLeave}
-                        > 
-                            <Avatar
-                                size="small"
-                                style={{
-                                    backgroundColor: '#87d068',
-                                    marginRight: 8,
-                                }}
-                            >
-                                {(fieldValue?.Name || '').charAt(0).toUpperCase()}
-                            </Avatar>
-                            {fieldValue?.Name} 
-                        </a>
-                    ) : (
-                        fieldValue?.Name
-                    )}
-                   {isHovered && (
-                    <Card
-                        style={{
-                            position: 'absolute',
-                            top: 0, // Aligns with the top of the parent
-                            left: '100%', // Places it to the right of the parent
-                            marginLeft: 8, // Adds some spacing between the element and the card
-                            zIndex: 10,
-                            width: 'auto',
-                            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
-                            whiteSpace: 'nowrap', // Prevents the content from wrapping (optional, based on your content)
-
-                        }}
-                        onMouseEnter={handleMouseEnter}
-                        onMouseLeave={handleMouseLeave}
-                    >
-                        <div
-        style={{
-            position: 'absolute',
-            left: '-8px',
-            width: 0,
-            height: 0,
-            borderRight: '8px solid #fff', // Adjust arrow color to match the card background
-            borderTop: '8px solid transparent',
-            borderBottom: '8px solid transparent',
-            transform: 'translateY(-50%)', // Align vertically to center the arrow
-            zIndex: 1,
-        }}
-    ></div>
-                        {/* Header with border bottom */}
-                    <div
-                        style={{
-                            padding: '6px',
-                            borderBottom: '1px solid #ddd',
-                            display: 'flex',
-                            alignItems: 'center',
-                            backgroundColor: '#f9f9f9',
-                        }} 
-                    >
-                        <Avatar
-                            size="medium"
-                            style={{
-                                marginRight: 12,
-                                backgroundColor: '#87d068',
-                            }}
+                          href={`/record/${field.parent_object_name}/${record[field.name + '_id']}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
                         >
-                            {(fieldValue?.Name || '').charAt(0).toUpperCase()}
-                        </Avatar>
-                        <div
+                          <Avatar
+                            size="small"
                             style={{
-                                fontSize: '16px',
-                                fontWeight: 'bold',
-                                color: '#333',
+                              backgroundColor: '#87d068',
+                              marginRight: 8,
                             }}
-                        > 
-                            {fieldValue?.Name || ''}
+                          >
+                            {(fieldValue?.Name || '').charAt(0).toUpperCase()}
+                          </Avatar>
+                          {fieldValue?.Name}
+                        </a>
+                      ) : (
+                        fieldValue?.Name
+                      )}
+                
+                      {isHovered && isVisible && (
+                        <div
+                          onMouseEnter={handleContentMouseEnter}
+                          onMouseLeave={handleContentMouseLeave}
+                        >
+                          <LookupDisplayCard
+                            displayFields={field?.lookup_config?.display_fields} // Pass the fields you want to display
+                            fieldValue={fieldValue}
+                            objectName={field.parent_object_name} // Parent object name for fetching fields
+                          />
                         </div>
+                      )}
                     </div>
-
-                    {/* Card Body */}
-                    <div
-                        style={{
-                            padding: '12px',
-                            fontSize: '14px',
-                            color: '#555',
-                        }}
-                    >
-                        {Array.isArray(displayField) &&
-                            displayField.length > 0 &&
-                            displayField.map((displayFieldName) => (
-                                <div
-                                    key={displayFieldName}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        marginBottom: 8,
-                                    }}
-                                >
-                                    <span style={{ fontWeight: '500' }}>{displayFieldName}</span>
-                                    <span style={{fontWeight:'200'}}>
-                                        {typeof fieldValue[displayFieldName] === 'boolean' ? (
-                                            <Checkbox checked={fieldValue[displayFieldName]} disabled />
-                                        ) : (
-                                            fieldValue[displayFieldName] || ''
-                                        )}
-                                    </span>
-                                </div>
-                            ))}
-                    </div>
-                    </Card>
-                )}
-
-                </div>
-                   
-                ) : fieldValue?.Name;
+                  ) : fieldValue?.Name;
             case 'Phone':
                 return fieldValue ? (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -207,7 +128,7 @@ const getUniqueColor = (index) => {
                                     borderRadius: '8px', // Add rounded corners for better aesthetics
                                     lineHeight: '1.5', // Adjust line height for better spacing
                                 }}
-                                >
+                                > 
                                     {value}
                                 </Tag>
                             ))}
@@ -241,7 +162,7 @@ const getUniqueColor = (index) => {
                 return fieldValue || '';
         }
     };
-
+ 
     return (
         <div
             style={{
