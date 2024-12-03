@@ -36,8 +36,12 @@ const ObjectFieldTab = () => {
           'GET'
         );
         const response = await apiService.makeCall();
-        setFieldsData(response.map((field) => ({ ...field, key: field._id })));
-        setOriginalFieldsData(response.map((field) => ({ ...field, key: field._id }))); // Save original data
+        setFieldsData(response
+
+          .filter((field) => field.name !== 'recordCount')
+
+          .map((field) => ({ ...field, key: field._id })));
+                  setOriginalFieldsData(response.map((field) => ({ ...field, key: field._id }))); // Save original data
       } catch (error) {
         message.error('Failed to fetch fields data');
       } finally {
@@ -118,8 +122,19 @@ const ObjectFieldTab = () => {
 
   // Create Field button click handler
   const showDrawer = () => {
-    setDrawerVisible(true);
-  };
+    setTimeout(() => {
+
+      const drawerContent = document.querySelector('.ant-drawer-body');
+
+      if (drawerContent) {
+
+        drawerContent.scrollTop = 0; // Reset scroll to the top
+
+      }
+
+    }, 200); 
+
+    setDrawerVisible(true);  };
 
   // Handle closing the Create Field Drawer
   const closeDrawer = () => {
