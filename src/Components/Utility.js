@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
-import ApiService from './apiService';
-import { replace } from 'react-router-dom';
-
+import { useState } from 'react';
+ 
 
 // Function to handle Insert operation
 export const generateBody = (fieldsDataDrawer, values) => {
@@ -40,9 +39,12 @@ export const generateBody = (fieldsDataDrawer, values) => {
   console.log(updatedValues);
   return updatedValues;
 };
+export const colors = ['blue', 'green', 'red', 'purple', 'orange', 'volcano', 'gold', 'cyan', 'lime', 'pink'];
 
-
-
+export const getUniqueColor = (index) => {
+  // Assign a color based on the index, wrapping around if there are more values than colors
+  return colors[index % colors.length];
+};
 
 export const formatRecordData = async (record, fieldsResponse, BASE_URL) => {
   const formattedRecord = { ...record };
@@ -89,4 +91,46 @@ export const fetchLookupData = (record, fieldsResponse, BASE_URL, setLookupName,
 
 
   }
+};
+
+export const useHoverVisibility = () => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [hoverTimeout, setHoverTimeout] = useState(null);
+
+  // Handle mouse enter on the element that triggers the card
+  const handleMouseEnter = () => {
+      if (hoverTimeout) {
+          clearTimeout(hoverTimeout); // Clear the timeout when the mouse enters
+      }
+      setIsHovered(true); // Keep the component visible when hovering over it
+      setIsVisible(true); // Make the content visible immediately
+  };
+
+  // Handle mouse leave from the element that triggers the card
+  const handleMouseLeave = () => {
+      const timeout = setTimeout(() => {
+          setIsVisible(false); // Close the component after a delay
+      }, 400);
+      setHoverTimeout(timeout); // Store the timeout to clear it when hovering over content
+  };
+
+  // Handle mouse enter on the content (to prevent closing when hovering over content)
+  const handleContentMouseEnter = () => {
+      setIsHovered(true); // Keep the component visible when hovering over the content
+  };
+
+  // Handle mouse leave from the content (to check for closing)
+  const handleContentMouseLeave = () => {
+      setIsHovered(false); // Allow the timeout to close the component
+  };
+
+  return {
+      isHovered,
+      isVisible,
+      handleMouseEnter,
+      handleMouseLeave,
+      handleContentMouseEnter,
+      handleContentMouseLeave,
+  };
 };

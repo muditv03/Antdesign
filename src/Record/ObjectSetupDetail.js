@@ -10,19 +10,14 @@ import CreateRecordDrawer from './CreateRecordDrawer';
 import CreateListViewDrawer from '../Object/CreateListViewDrawer';
 import ApiService from '../Components/apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { generateBody, formatRecordData, fetchLookupData } from '../Components/Utility';
+import { generateBody, formatRecordData, fetchLookupData,colors,getUniqueColor } from '../Components/Utility';
 
 dayjs.extend(customParseFormat);
 
 const { Title } = Typography;
 const { Option } = Select;
 
-const colors = ['blue', 'green', 'red', 'purple', 'orange', 'volcano', 'gold', 'cyan', 'lime', 'pink'];
 
-const getUniqueColor = (index) => {
-    // Assign a color based on the index, wrapping around if there are more values than colors
-    return colors[index % colors.length];
-};
 
 
 const ObjectSetupDetail = () => {
@@ -54,6 +49,16 @@ const ObjectSetupDetail = () => {
   const [objectForListView, setObjectForListView] = useState();
   const [ListViewInDrawer, SetListViewInDrawer] = useState();
   const [currentPage, setCurrentPage] = useState(1);
+  const [isHovered, setIsHovered] = useState(null);
+
+  const handleMouseEnter = (lookupId) => {
+      setIsHovered(lookupId);
+  };
+
+  const handleMouseLeave = () => {
+      setIsHovered(null);
+  };
+
 
 
 
@@ -513,6 +518,8 @@ const ObjectSetupDetail = () => {
     title: field.label,
     dataIndex: field.name,
     key: field.name,
+    sorter: field.name === 'Name' ? (a, b) => (a[field.name]?.localeCompare(b[field.name]) || 0) : undefined,
+
     render: (text, record) => {
       if (field.type === 'boolean') {
         return <Checkbox checked={text} disabled />;
@@ -527,7 +534,7 @@ const ObjectSetupDetail = () => {
         return text === undefined || text === null ? '' : text === 0 ? '0' : text; // Show 0 for blank or zero values
       } else if (field.type === 'percentage') {
         return text ? `${text * 100}%` : ''; // Format as currency with dollar sign
-      }
+      } 
       else if (field.type === 'decimal') {
         return text === undefined || text === null || text === '0' ? '' : Number(text).toFixed(2); // Show 0.00 for blank values
       } else if (field.type === 'Email') {
@@ -543,6 +550,11 @@ const ObjectSetupDetail = () => {
           </a>
         ) : '';
       } else if (field.type === 'lookup') {
+
+        console.log('lookup field data');
+        console.log(text);
+        console.log('real lookup data ');
+        console.log(record);
         let lookupId = '';
 
         lookupId = record[field.name + '_id'];

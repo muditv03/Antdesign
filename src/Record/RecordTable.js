@@ -81,7 +81,7 @@ const ChildRecordTable = ({ fieldsData, childRecords, childObjectName, onEdit, o
     dataIndex: field.name,
     key: field.name,
     render: (value, record) => {
-
+ 
       // Make the first column a clickable link
       if (index === 0) {
         return (
