@@ -217,7 +217,7 @@ const ObjectFieldTab = () => {
               style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
             />
           </Tooltip>
-
+          {!record.is_system && (
           <Tooltip title="Delete">
             <Popconfirm
               title="Are you sure you want to delete this field?"
@@ -230,6 +230,7 @@ const ObjectFieldTab = () => {
               />
             </Popconfirm>
           </Tooltip>
+          )}
         </>
       ),
     },

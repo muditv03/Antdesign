@@ -277,7 +277,7 @@ const CreateListViewDrawer = ({ visible, onClose, object, fetchListViews, select
   const onFinish = async (values) => {
     //Check if any filter is missing either field or value
 
-    if (!isValidParentheses(logic)) {
+    if (logic && !isValidParentheses(logic)) {
       message.error('Invalid logic: Parentheses are not balanced.');
       return; // Stop submission if parentheses are not balanced
     }

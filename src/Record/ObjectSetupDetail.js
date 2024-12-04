@@ -50,6 +50,8 @@ const ObjectSetupDetail = () => {
   const [ListViewInDrawer, SetListViewInDrawer] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [isHovered, setIsHovered] = useState(null);
+  const [pageSize] = useState(10); // Number of records per page
+  const [totalRecords, setTotalRecords] = useState(0); // Total number of records
 
   const handleMouseEnter = (lookupId) => {
       setIsHovered(lookupId);
@@ -63,8 +65,14 @@ const ObjectSetupDetail = () => {
 
 
   const fetchRecords = (selectedViewId, page = currentPage) => {
+    // if(selectedView){
+    //   page =1;
+    // }
     setError('');
 
+    const offsetvalue = (page - 1) * pageSize; // Calculate offset for API
+    // setOffSet(offsetvalue);
+    const limit = pageSize; 
     setLoading(true);
     // Fetch object details using ApiService
     const apiServiceForObject = new ApiService(
@@ -86,7 +94,7 @@ const ObjectSetupDetail = () => {
           console.log('id of list view is ' + selectedViewId);
           // If selected list view is present, use the new API call
           apiServiceForRecords = new ApiService(
-            `${BASE_URL}/mt_list_views/${selectedViewId?._id}/records`,
+            `${BASE_URL}/mt_list_views/${selectedViewId?._id}/records/${limit}/${offsetvalue}`,
             { 'Content-Type': 'application/json' },
             'GET'
           );
@@ -95,7 +103,7 @@ const ObjectSetupDetail = () => {
           console.log('object name in else object')
           // Otherwise, use the default records API call
           apiServiceForRecords = new ApiService(
-            `${BASE_URL}/fetch_records/${objName}`,
+            `${BASE_URL}/fetch_records/${objName}/${limit}/${offsetvalue}`,
             { 'Content-Type': 'application/json' },
             'GET'
           );
@@ -111,7 +119,13 @@ const ObjectSetupDetail = () => {
           apiServiceForRecords.makeCall(),
           apiServiceForFields.makeCall(),
         ]).then(([recordsResponse, fieldsResponse]) => {
-          setRecords(recordsResponse);
+          if(recordsResponse.records){
+            setRecords(recordsResponse.records);
+          }
+          else{
+            setRecords(recordsResponse);
+          }
+          setTotalRecords(recordsResponse.total);
           setFieldsDataDrawer(fieldsResponse);
           console.log(fieldsResponse);
           console.log(recordsResponse);
@@ -194,6 +208,7 @@ const ObjectSetupDetail = () => {
 
 
   useEffect(() => {
+    setCurrentPage(1);
     if (objectName) {
       console.log('fetching records .....');
       fetchListViews();
@@ -202,18 +217,23 @@ const ObjectSetupDetail = () => {
 
 
   useEffect(() => {
+    setCurrentPage(1);
+    setSelectedListView(null);
     console.log('view chsnged and now selected view is  ');
     console.log(selectedView);
     console.log('id changed');
     console.log(id);
     setSelectedView('');
-    fetchRecords('');
+    fetchRecords('',1);
   }, [id]);
 
 
   const handleViewChange = (value) => {
     console.log('id of view is ');
     console.log(value);
+    if(value == "All Records"){
+
+    }
     console.log(listViews);
     const matchedView = listViews.find(view => view._id === value);
     console.log('list view');
@@ -225,7 +245,7 @@ const ObjectSetupDetail = () => {
     console.log(value);
     if (value) {
       console.log('console in handle view change');
-      fetchRecords(matchedView); // Fetch records for the selected list view
+      fetchRecords(matchedView,1); // Fetch records for the selected list view
     } else {
       fetchRecords(); // Fetch all records if "All Records" is selected
     }
@@ -437,8 +457,11 @@ const ObjectSetupDetail = () => {
   };
 
 
+
+
   const confirmDelete = async () => {
     deleteRecord(selectedRecord);
+
     setIsDeleteModalVisible(false);
 
   };
@@ -454,12 +477,10 @@ const ObjectSetupDetail = () => {
   const numberOfFieldsToShow = 5;
 
   // Filter fields, but always include the auto-number field
-  
- 
-  
   const filteredFieldsData = fieldsData.filter(
     field => !['recordCount', 'CreatedBy', 'LastModifiedBy'].includes(field.name)
   );
+
   // Separate the "Name" and "Auto-number" fields
   const nameField = filteredFieldsData.find(field => field.name === 'Name');
 
@@ -524,7 +545,7 @@ const ObjectSetupDetail = () => {
 
         lookupId = record[field.name + '_id'];
         const ob = field.parent_object_name;
-        
+
 
         if (lookupId) {
           // Check if the name has already been fetched and stored
@@ -550,6 +571,7 @@ const ObjectSetupDetail = () => {
                   </Avatar>
                   {lookupNames[lookupId]}
                 </a>
+
               );
             
           }
@@ -616,6 +638,10 @@ const ObjectSetupDetail = () => {
           text || ''
         );
       }
+  
+
+
+
       return index === 0 ? (
         <a onClick={() => handleLabelClick(record)}>{text}</a>
       ) : (
@@ -781,7 +807,14 @@ const ObjectSetupDetail = () => {
             rowKey="_id"
             pagination={{
               current: currentPage,
-              onChange: (page) => setCurrentPage(page), // Update currentPage when user changes the page
+              pageSize: 10, // Number of records per page
+              total: totalRecords, // Total records for pagination
+              onChange: (page) => {
+                  fetchRecords(selectedListView, page); // Fetch records for the selected page
+              },
+              showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} of ${total} items`, // Display range and total
+      
             }}
           />
         </div>
@@ -818,6 +851,10 @@ const ObjectSetupDetail = () => {
         >
           <p>Are you sure you want to delete this record?</p>
         </Modal>
+
+
+
+
       </div>
     </Card>
 
