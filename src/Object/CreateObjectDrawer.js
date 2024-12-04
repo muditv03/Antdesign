@@ -32,7 +32,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
       setIsTrackFieldHistory(false);
       setIsAllowFileUpload(false);
     }
-  }, [editingRecord, form]);
+  }, [visible, editingRecord, form]);
 
   const generateApiName = (label) => {
     return label.replace(/[^a-zA-Z]/g, '').replace(/\s+/g, '').trim();

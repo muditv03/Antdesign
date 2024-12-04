@@ -22,6 +22,17 @@ const CreateListView = ({ object }) => {
 
   const closeCreateListDrawer = () => {
     setDrawerVisible(false); // Hide the drawer
+    setTimeout(() => {
+
+      const drawerContent = document.querySelector('.ant-drawer-body');
+
+      if (drawerContent) {
+
+        drawerContent.scrollTop = 0; // Reset scroll to the top
+
+      }
+
+    }, 200);
   };
 
   // Fetch list views when the component mounts

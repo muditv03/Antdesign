@@ -141,10 +141,10 @@ const UserComponent = () => {
       key: 'username',
     },
     {
-      title: 'Active',
+      title: 'Status',
       dataIndex: 'is_active',
       key: 'is_active',
-      render: (isActive) => (isActive ? 'True' : 'False'),
+      render: (isActive) => (isActive ? 'Active' : 'Deactivated'),
     },
     {
       title: 'Action',
