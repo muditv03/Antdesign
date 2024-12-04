@@ -7,6 +7,8 @@ import { BASE_URL, DateFormat } from '../Components/Constant'; // Define the dat
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { useQuill } from "react-quilljs";
 import "quill/dist/quill.snow.css";
+import DynamicSelect from './DynamicSelectForLookup';
+
 dayjs.extend(customParseFormat);
  
 const CreateRecordDrawer = ({
@@ -123,7 +125,7 @@ const CreateRecordDrawer = ({
       return null; // Don't render the field if it's an auto-number field
     }
 
-    if (field.name === 'recordCount') {
+    if (field.name === 'recordCount' || field.name==='CreatedBy' || field.name==='LastModifiedBy') {
       return null;
     }
 
@@ -174,25 +176,13 @@ const CreateRecordDrawer = ({
             key={field.name}
             name={field.name}
             label={renderLabel} // Use the custom label here
-            rules={[
-              ...isRequired, // Include the required validation if applicable
-              {
-                validator: (_, value) => {
-                  if (!value || /^[0-9]{10}$/.test(value)) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(
-                    new Error('Please enter a valid 10-digit phone number')
-                  );
-                },
-              },
-            ]}
+            rules={isRequired}
+
           >
             <Input
 
-              type="text" // Use text to prevent input methods restricting values
+              type="Number" 
               placeholder={`Enter ${field.label}`}
-              maxLength={10} // Prevent more than 10 characters
               addonBefore={
                 <PhoneOutlined style={{ cursor: 'pointer' }} />
               }
@@ -274,7 +264,7 @@ const CreateRecordDrawer = ({
             </Space>
           </Form.Item>
         );
-
+ 
       case 'URL':
         return (
           <Form.Item
@@ -367,81 +357,18 @@ const CreateRecordDrawer = ({
             name={field.name}
             label={renderLabel}  // Use the custom label here
             rules={isRequired}
+            
           >
-            <Select
-              allowClear
-              showSearch
-              placeholder="Type to search"
-              onSearch={(value) => handleSearch(value, field._id, field.name)}
-              filterOption={false}
-              notFoundContent="Search for records"
-              optionLabelProp="children"
-              options={[
-                ...(lookupOptionforparent[field.name] || []).map((option) => ({
-                  children: (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <Avatar size="small" style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                          {option.Name?.charAt(0).toUpperCase()}
-                        </Avatar>
-                        {option.Name}
-
-                      </div>
-
-                    </div>
-                  ),
-                  label: (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <Avatar size="small" style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                          {option.Name?.charAt(0).toUpperCase()}
-                        </Avatar>
-                        {option.Name}
-
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
-                        {field.lookup_config?.display_fields?.map((fieldKey, index) => (
-                          <div key={fieldKey}
-                            style={{
-                              fontSize: '12px',
-                              color: '#888',
-                              marginRight: index < field.lookup_config?.display_fields.length - 1 ? 8 : 0, // Add margin except for the last item
-                            }}>
-                            {typeof option[fieldKey] === 'object' && option[fieldKey] !== null
-                              ? Object.values(option[fieldKey]).join(' ') // Join object values with space
-                              : option[fieldKey] || '' // Display value or fallback to empty string
-                            }                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                  ,
-                  value: option._id,
-                })),
-
-                // Add the initial value if not already in options
-                ...(form.getFieldValue(field.name) &&
-                  !(lookupOptionforparent[field.name] || []).some(
-                    (option) => option._id === form.getFieldValue(field.name)._id
-                  )
-                  ? [
-                    {
-                      children: (
-
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                            {form.getFieldValue(field.name)?.Name?.charAt(0).toUpperCase()}
-                          </Avatar>
-                          {form.getFieldValue(field.name)?.Name}
-                        </div>
-                      ),
-                      value: form.getFieldValue(field.name).id,
-                    },
-                  ]
-                  : []
-                ),
-              ]}
-            />
+           <DynamicSelect
+                objectName={field.parentObjectName}
+                lookupConfig={field.lookup_config}
+                onSearch={handleSearch}
+                value={form.getFieldValue(field.name)}
+                name={field.name}
+                lookupOptionforparent={lookupOptionforparent}
+                fieldId={field._id}
+                onChange={(newValue) => form.setFieldsValue({ [field.name]: newValue })} // Update form value dynamically
+              />
           </Form.Item>
         );
 

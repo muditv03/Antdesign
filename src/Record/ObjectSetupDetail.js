@@ -232,32 +232,6 @@ const ObjectSetupDetail = () => {
   };
 
 
-  useEffect(() => {
-    const fetchAllLookupOptions = async () => {
-      const lookupFields = fieldsDataDrawer.filter(field => field.type === 'lookup');
-      const lookupOptionsObj = {};
-
-      for (const lookupField of lookupFields) {
-        try {
-          const apiServiceForLookup = new ApiService(
-            `${BASE_URL}/fetch_records/${lookupField.name}`,
-            { 'Content-Type': 'application/json' },
-            'GET'
-          );
-          const response = await apiServiceForLookup.makeCall();
-          lookupOptionsObj[lookupField.name] = response; // Store options for each lookup field
-        } catch (error) {
-          console.error(`Error fetching lookup options for ${lookupField.name}:`, error);
-        }
-      }
-      setLookupOptions(lookupOptionsObj); // Store all lookup options in state
-    };
-
-    if (fieldsDataDrawer.some(field => field.type === 'lookup')) {
-      fetchAllLookupOptions();
-    }
-  }, [fieldsDataDrawer]);
-
   const handleCreateClick = async () => {
     setSelectedRecord(null); // Ensure no record is selected when creating a new record
     form.resetFields(); // Clear the form fields
@@ -443,15 +417,7 @@ const ObjectSetupDetail = () => {
     }
   };
 
-  const menu = (
-    <Menu onClick={handleMenuClick}>
-      <Menu.Item key="1">Edit</Menu.Item>
-      <Menu.Item key="3">Clone</Menu.Item> {/* Add Clone option here */}
-      <Menu.Item key="2">Delete</Menu.Item>
-
-    </Menu>
-  );
-
+  
   const deleteRecord = async (record) => {
     try {
       // Create ApiService instance for DELETE request
@@ -471,11 +437,8 @@ const ObjectSetupDetail = () => {
   };
 
 
-
-
   const confirmDelete = async () => {
     deleteRecord(selectedRecord);
-
     setIsDeleteModalVisible(false);
 
   };
@@ -491,10 +454,12 @@ const ObjectSetupDetail = () => {
   const numberOfFieldsToShow = 5;
 
   // Filter fields, but always include the auto-number field
-  const filteredFieldsData = fieldsData.filter(field =>
-    field.name !== 'recordCount'
-  );
+  
 
+  
+  const filteredFieldsData = fieldsData.filter(
+    field => !['recordCount', 'CreatedBy', 'LastModifiedBy'].includes(field.name)
+  );
   // Separate the "Name" and "Auto-number" fields
   const nameField = filteredFieldsData.find(field => field.name === 'Name');
 
@@ -559,7 +524,7 @@ const ObjectSetupDetail = () => {
 
         lookupId = record[field.name + '_id'];
         const ob = field.parent_object_name;
-
+        
 
         if (lookupId) {
           // Check if the name has already been fetched and stored
@@ -585,7 +550,6 @@ const ObjectSetupDetail = () => {
                   </Avatar>
                   {lookupNames[lookupId]}
                 </a>
-
               );
             
           }
@@ -652,10 +616,6 @@ const ObjectSetupDetail = () => {
           text || ''
         );
       }
-  
-
-
-
       return index === 0 ? (
         <a onClick={() => handleLabelClick(record)}>{text}</a>
       ) : (
@@ -858,10 +818,6 @@ const ObjectSetupDetail = () => {
         >
           <p>Are you sure you want to delete this record?</p>
         </Modal>
-
-
-
-
       </div>
     </Card>
 
