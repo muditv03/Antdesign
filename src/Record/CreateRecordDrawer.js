@@ -118,7 +118,7 @@ const CreateRecordDrawer = ({
     }
   };
 
-
+ 
   const renderFormItem = (field) => {
 
     if (field.is_auto_number || field.is_formula) {
@@ -357,7 +357,6 @@ const CreateRecordDrawer = ({
             name={field.name}
             label={renderLabel}  // Use the custom label here
             rules={isRequired}
-            
           >
            <DynamicSelect
                 objectName={field.parentObjectName}

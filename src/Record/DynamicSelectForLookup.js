@@ -3,10 +3,9 @@ import { Select, Avatar,Checkbox,Tag } from "antd";
 import { PhoneOutlined } from '@ant-design/icons';
 import ApiService from '../Components/apiService'; // Import ApiService class
 import { BASE_URL } from '../Components/Constant';
-import { colors,getUniqueColor,useHoverVisibility } from '../Components/Utility';
-import LookupDisplayCard from './LookupDisplayCard';
+import { colors,getUniqueColor } from '../Components/Utility';
 
-
+ 
 
 const DynamicSelect = (
   {
@@ -20,15 +19,7 @@ const DynamicSelect = (
   onChange, }) => 
 {
 
-  const {
-    isHovered,
-    isVisible,
-    handleMouseEnter,
-    handleMouseLeave,
-    handleContentMouseEnter,
-    handleContentMouseLeave,
-} = useHoverVisibility();
-
+ 
   const [fields, setFields] = useState([]);
 
   const fetchOptions = async () => {
@@ -42,9 +33,16 @@ const DynamicSelect = (
   };
   useEffect(() => {
     fetchOptions();
-    console.log("lookupOptionforparent");
-    console.log(lookupOptionforparent);
+    console.log("entered in dynamic selet");
+    console.log("objectName:", objectName);
+    console.log("lookupConfig:", lookupConfig);
+    console.log("onSearch:", onSearch);
+    console.log("value:", value);
+    console.log("name:", name);
+    console.log("fieldId:", fieldId);
+    console.log("lookupOptionforparent:", lookupOptionforparent);
 
+    
   }, [objectName]);
 
   const renderField = (type,fieldValue) => {

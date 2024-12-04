@@ -13,7 +13,7 @@ const LayoutEditor = ({ onBack, object, fields, getAllLayouts, Editinglayout,isC
   const [sections, setSections] = useState([]);
   const [updatedFields, setUpdatedFields] = useState(fields.map(field => field.name));
   const [isActive, setIsActive] = useState(false);
-
+ 
   useEffect(() => {
     if (Editinglayout) {
       // Set layout name

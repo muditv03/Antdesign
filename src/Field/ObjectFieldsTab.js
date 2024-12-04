@@ -38,7 +38,10 @@ const ObjectFieldTab = () => {
         const response = await apiService.makeCall();
         setFieldsData(response
 
-          .filter((field) => field.name !== 'recordCount')
+          .filter(
+            field => !['recordCount', 'CreatedBy', 'LastModifiedBy'].includes(field.name)
+          )
+
 
           .map((field) => ({ ...field, key: field._id })));
                   setOriginalFieldsData(response.map((field) => ({ ...field, key: field._id }))); // Save original data

@@ -455,7 +455,7 @@ const ObjectSetupDetail = () => {
 
   // Filter fields, but always include the auto-number field
   
-
+ 
   
   const filteredFieldsData = fieldsData.filter(
     field => !['recordCount', 'CreatedBy', 'LastModifiedBy'].includes(field.name)
