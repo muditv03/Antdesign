@@ -9,9 +9,12 @@ export const generateBody = (fieldsDataDrawer, values) => {
   console.log(values);
   fieldsDataDrawer.forEach((field) => {
     const fieldName = field.name;
+    if (field.Name === 'CreatedBy' || field.Name === 'LastModifiedBy') {
+      return;
+    }
     console.log('value');
     console.log(values[fieldName]);
-    if (field.type === 'lookup') {
+    if (field.type === 'lookup' && field.Name === 'CreatedBy' || field.Name === 'LastModifiedBy') {
       console.log(values[fieldName._id]);
       if (values[fieldName]?._id) {
         updatedValues[`${fieldName}_id`] = values[fieldName]._id;

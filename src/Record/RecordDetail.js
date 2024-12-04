@@ -70,7 +70,7 @@ const RecordDetails = ({ objectName, id }) => {
             const filteredFields = fieldsResponse.filter(
                 field => !['recordCount', 'CreatedBy', 'LastModifiedBy'].includes(field.name)
               );
-              
+               
             console.log('fieldresponse :', fieldsResponse);
             console.log(fieldsResponse);
             setFields(filteredFields);
@@ -127,7 +127,7 @@ const RecordDetails = ({ objectName, id }) => {
             const bodyData = Object.assign({}, values);
             console.log(bodyData);
             fields.forEach(field => {
-                if (field.type === 'lookup') {
+                if (field.type === 'lookup' && field.Name === 'CreatedBy' || field.Name === 'LastModifiedBy') {
                     let lookupFieldName;
                     lookupFieldName = field.name + '_id';
                     console.log('not changed lookup values');
@@ -240,9 +240,6 @@ const RecordDetails = ({ objectName, id }) => {
 
     const renderFieldWithEdit = (field, selectedDate, setSelectedDate) => {
         const { name, label, type, picklist_values, isTextArea, required, help_text, _id, lookup_config,parent_object_name } = field;
-
-
-
         const validationRules = [];
         // Check for required field
         if (required) {
@@ -252,7 +249,7 @@ const RecordDetails = ({ objectName, id }) => {
             });
         }
 
-        if (name === 'recordCount') {
+        if (name === 'recordCount' || name==='CreatedBy' || name==='LastModifiedBy') {
             return null;
         }
 
@@ -422,7 +419,7 @@ const RecordDetails = ({ objectName, id }) => {
                                                                     item && (
                                                                         <Form.Item
                                                                             key={rowIndex}
-                                                                            label={<span>{matchedField.label}</span>}
+                                                                            label={<span>{matchedField?.label}</span>}
                                                                             style={{ marginBottom: '10px', padding: '0px' }}
                                                                         >
                                                                             {/* Call renderFieldWithEdit method for each field */}

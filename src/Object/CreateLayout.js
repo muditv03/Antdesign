@@ -25,8 +25,10 @@ const CreateLayout = ({ object }) => {
             const fieldApiService = new ApiService(`${BASE_URL}/mt_fields/object/${object.name}`, {}, 'GET');
             const responseData = await apiService.makeCall();
             const fieldResponse = await fieldApiService.makeCall();
-            const filteredFields = fieldResponse.filter(field => field.name !== 'recordCount');
-
+            const filteredFields =fieldResponse.filter(
+                field => !['recordCount', 'CreatedBy', 'LastModifiedBy'].includes(field.name)
+              );
+ 
             setLayouts(responseData);
             setFields(filteredFields);
         } catch (error) {
