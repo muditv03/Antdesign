@@ -357,9 +357,9 @@ const CreateRecordDrawer = ({
             name={field.name}
             label={renderLabel}  // Use the custom label here
             rules={isRequired}
-          >
+          >   
            <DynamicSelect
-                objectName={field.parentObjectName}
+                objectName={field.parent_object_name}
                 lookupConfig={field.lookup_config}
                 onSearch={handleSearch}
                 value={form.getFieldValue(field.name)}
@@ -370,7 +370,7 @@ const CreateRecordDrawer = ({
               />
           </Form.Item>
         );
-
+ 
       case 'Address':
         return (
           <Form.Item
