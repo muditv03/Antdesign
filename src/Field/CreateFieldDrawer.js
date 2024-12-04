@@ -52,7 +52,7 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
     setIsExternalID(false);
     setIsUnique(false);
     setIsFieldTrackingEnabled(false);
-    // form.resetFields(); // Reset fields when the cancel button is clicked
+    form.resetFields(); // Reset fields when the cancel button is clicked
     onClose(); // Close the drawer
   };
 
