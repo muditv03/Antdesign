@@ -2,7 +2,10 @@ import React, { useEffect,useState } from 'react';
 import { Checkbox, Avatar,Card,Tag } from 'antd';
 import { PhoneOutlined } from '@ant-design/icons';
 import LookupDisplayCard from './LookupDisplayCard';
+import { BASE_URL,DateFormat } from '../Components/Constant';
 import { colors,getUniqueColor,useHoverVisibility } from '../Components/Utility';
+import dayjs from 'dayjs';
+
  
 
 const DisplayField = ({ type, form, name, field, record,layouts }) => {
@@ -37,6 +40,7 @@ const DisplayField = ({ type, form, name, field, record,layouts }) => {
                 return `$${fieldValue !== undefined && fieldValue !== null ? parseFloat(fieldValue).toFixed(2) : ''}`;
             case 'String':
                 return fieldValue || '';
+            
             case 'percentage':
                 return `${fieldValue !== undefined && fieldValue !== null ? parseFloat(fieldValue) : ''}%`;
             case 'Integer':
