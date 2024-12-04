@@ -30,9 +30,7 @@ const RecordDetails = ({ objectName, id }) => {
     const [initialValues, setInitialValues] = useState({});
     const [lookupData, setLookupData] = useState({});
     const [layout, setLayout] = useState({});
-    const [createdBy, setCreatedBy] = useState({});
-    const [updatedBy, setUpdatedBy] = useState({})
-
+    
 
     useEffect(() => {
         fetchRecords();
@@ -66,31 +64,13 @@ const RecordDetails = ({ objectName, id }) => {
             const activeLayout = res.filter(layout => layout.active);
             console.log('active layout is ');
             console.log(activeLayout);
-            const users = new ApiService(
-                `${BASE_URL}/fetch_records/User`,
-                { 'Content-Type': 'application/json' },
-                'GET'
-            );
-            const userresponse = await users.makeCall();
-            console.log('all users are');
-            console.log(userresponse);
-            console.log('record data is ');
-            console.log(recordData);
-            const createdByUser = userresponse.find(userresponse => userresponse._id === recordData.created_by_id);
-            const lastModifiedUser = userresponse.find(userresponse => userresponse._id === recordData.lastModified_by_id);
-
-            console.log('created by ');
-            console.log(createdByUser);
-            console.log(lastModifiedUser);
-            setCreatedBy(createdByUser);
-            setUpdatedBy(lastModifiedUser);
-
-
             setLayout(activeLayout);
             const fieldCallout = new ApiService(`${BASE_URL}/mt_fields/object/${objectName}`, {}, 'GET');
             const fieldsResponse = await fieldCallout.makeCall();
-            const filteredFields = fieldsResponse.filter(field => field.name !== 'recordCount');
-
+            const filteredFields = fieldsResponse.filter(
+                field => !['recordCount', 'CreatedBy', 'LastModifiedBy'].includes(field.name)
+              );
+              
             console.log('fieldresponse :', fieldsResponse);
             console.log(fieldsResponse);
             setFields(filteredFields);
@@ -259,7 +239,7 @@ const RecordDetails = ({ objectName, id }) => {
     };
 
     const renderFieldWithEdit = (field, selectedDate, setSelectedDate) => {
-        const { name, label, type, picklist_values, isTextArea, required, help_text, _id, lookup_config } = field;
+        const { name, label, type, picklist_values, isTextArea, required, help_text, _id, lookup_config,parent_object_name } = field;
 
 
 
@@ -347,6 +327,7 @@ const RecordDetails = ({ objectName, id }) => {
                         fieldId={field._id}
                         handleAddressChange={handleAddressChange}
                         lookupData={lookupData}
+                        parentObjectName={parent_object_name}
                     />
                 ) : (
                     <DisplayField
@@ -379,7 +360,7 @@ const RecordDetails = ({ objectName, id }) => {
             </div>
         );
     };
-
+ 
 
     return (
         <>
@@ -505,7 +486,7 @@ const RecordDetails = ({ objectName, id }) => {
                                     <Col span={12}>
                                         <Form.Item label="Created by" style={{ marginBottom: 0,borderBottom: '1px solid #ddd', }}>
                                             <a
-                                                href={`/record/User/${createdBy?._id}`} // Assuming 'createdBy.id' holds the user ID
+                                                href={`/record/User/${record?.CreatedBy?._id}`} // Assuming 'createdBy.id' holds the user ID
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
@@ -517,16 +498,16 @@ const RecordDetails = ({ objectName, id }) => {
                                                         marginRight: 8,
                                                     }}
                                                 >
-                                                    {(createdBy?.Name || '').charAt(0).toUpperCase()}
+                                                    {(record?.CreatedBy?.Name || '').charAt(0).toUpperCase()}
                                                 </Avatar>
-                                                {createdBy?.Name}
+                                                {record?.CreatedBy?.Name}
                                             </a>
                                         </Form.Item>
                                     </Col>
                                     <Col span={12}>
                                         <Form.Item label="Updated by" style={{ marginBottom: 0,borderBottom: '1px solid #ddd', }}>
                                             <a
-                                                href={`/record/User/${updatedBy?._id}`} // Assuming 'updatedBy.id' holds the user ID
+                                                href={`/record/User/${record?.LastModifiedBy?._id}`} // Assuming 'updatedBy.id' holds the user ID
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
@@ -538,9 +519,9 @@ const RecordDetails = ({ objectName, id }) => {
                                                         marginRight: 8,
                                                     }}
                                                 >
-                                                    {(updatedBy?.Name || '').charAt(0).toUpperCase()}
+                                                    {(record?.LastModifiedBy?.Name || '').charAt(0).toUpperCase()}
                                                 </Avatar>
-                                                {updatedBy?.Name}
+                                                {record?.LastModifiedBy?.Name}
                                             </a>
                                         </Form.Item>
                                     </Col>

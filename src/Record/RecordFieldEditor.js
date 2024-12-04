@@ -4,19 +4,15 @@ import dayjs from 'dayjs';
 import { PhoneOutlined } from '@ant-design/icons';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; // Import the Quill styles
+import DynamicSelect from './DynamicSelectForLookup';
 
 const { Option } = Select;
 const { TextArea } = Input;
 
-const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules = [], form, picklist_values = [], handleSearch, lookupOptionforparent = {}, lookup_config = {}, DateFormat , setSelectedDate, handleAddressChange, fieldId, lookupData
-
-    
-}) => {
+const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules = [], form, picklist_values = [], handleSearch, lookupOptionforparent = {}, lookup_config = {}, DateFormat , setSelectedDate, handleAddressChange, fieldId, lookupData,parentObjectName}) => {
     if (!isFieldEditable) return null;
  
     const initialValue = form.getFieldValue(name);
-    console.log('initial value from editing component');
-    console.log(initialValue);
     switch (type) {
         case 'boolean':
             return (
@@ -30,9 +26,7 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                     <Checkbox>{label}</Checkbox>
                 </Form.Item>
             );
-
-    
-            case 'Integer' :
+        case 'Integer' :
                 return (
                   <Form.Item
                           name={name}
@@ -61,7 +55,6 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                     </Select>
                 </Form.Item>
             );
-
         case 'MultiSelect':
             return (
                 <Form.Item
@@ -80,91 +73,28 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                     </Select>
                 </Form.Item>
             );
-
         case 'lookup':
             return (
                 <Form.Item
                 name={name}
                 label={label}
                 key={name}
-                initialValue={initialValue}
+                initialValue={form.getFieldValue(name)}
                 rules={validationRules}
                 noStyle
               >
-                 <Select
-                    allowClear
-                    showSearch
-                    placeholder="Type to search"
-                    onSearch={(value) => handleSearch(value, fieldId,name)} 
-                    notFoundContent="Search for records"
-                    optionLabelProp='children'
-                    filterOption={false} 
-                    options={[
-                      ...(lookupOptionforparent[name] || []).map((option) => ({
-                        children: (
-                          <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <div>
-                            <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                              {option.Name?.charAt(0).toUpperCase()}
-                            </Avatar>
-                            {option.Name}
-                            </div>
-                          </div>
-                        ),
-                        value: option._id,
-                        label:(
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                          <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Avatar size="small" style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                              {option.Name?.charAt(0).toUpperCase()}
-                            </Avatar>
-                            {option.Name}
-                            
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
-                          {lookup_config?.display_fields?.map((fieldKey,index) => (
-                            <div key={fieldKey} 
-                            style={{ 
-                                fontSize: '12px', 
-                                color: '#888',
-                                marginRight: index < lookup_config?.display_fields.length - 1 ? 8 : 0, // Add margin except for the last item
-                            }}>
-                            {typeof option[fieldKey] === 'object' && option[fieldKey] !== null
-                                        ? Object.values(option[fieldKey]).join(' ') // Join object values with space
-                                        : option[fieldKey] || '' // Display value or fallback to empty string
-                                    }                            
-                            </div>
-                          ))}
-                          </div>
-                      </div>
-                        )
-                      })),
-                      // Add the initial value if not already in options
-                      ...(form.getFieldValue(name) &&
-                      !(lookupOptionforparent[name] || []).some(
-                        (option) => option._id === form.getFieldValue(name)._id
-                      ) 
-                        ? [
-                            {
-                              children: (
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                  <Avatar size='small' style={{ backgroundColor: '#87d068', marginRight: 8 }}>
-                                    {(form.getFieldValue(name)?.Name).charAt(0).toUpperCase()}
-                                  </Avatar>
-                                  {form.getFieldValue(name)?.Name}
-                                </div>
-                              ),
-                             
-                              
-                            },
-                          ]
-                        : []), 
-                    ]}
-
-                  />
+              <DynamicSelect
+                objectName={parentObjectName}
+                lookupConfig={lookup_config}
+                onSearch={handleSearch}
+                value={form.getFieldValue(name)}
+                name={name}
+                lookupOptionforparent={lookupOptionforparent}
+                fieldId={fieldId}
+                onChange={(newValue) => form.setFieldsValue({ [name]: newValue })} // Update form value dynamically
+              />
               </Form.Item>
             );
-
         case 'Date':
             return(
                 <Form.Item
@@ -218,7 +148,6 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                   </Form.Item>
                
             );
-
         case 'Address':
             return (
                 <Form.Item 
@@ -299,7 +228,6 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                 </Form.Item>
               
             );
-
         case 'Text-Area':
             return (
                 <Form.Item
@@ -311,7 +239,6 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                     <TextArea initialValue={initialValue}   placeholder={label} autoSize />
                 </Form.Item>
             );
-
         case 'currency':
             return (
                 <Form.Item
@@ -323,8 +250,7 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                     <Input initialValue={initialValue} placeholder={label} type="number" addonBefore="$" />
                 </Form.Item>
             );
-
-            case 'Rich-Text':
+        case 'Rich-Text':
             return (
                 <Form.Item
                     name={name}
@@ -349,7 +275,6 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                     />
                 </Form.Item>
             );
-
         case 'percentage':
             return (
                 <Form.Item
@@ -361,7 +286,6 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                     <Input initialValue={initialValue} placeholder={label} type="number" addonAfter="%" />
                 </Form.Item>
             );
-
         case 'Phone':
             return (
                 <Form.Item
@@ -373,7 +297,6 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                     <Input initialValue={initialValue} placeholder={`Enter ${label}`} addonBefore={<PhoneOutlined />} />
                 </Form.Item>
             );
-
         case 'Email':
             return (
                 <Form.Item
@@ -385,7 +308,6 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                     <Input initialValue={initialValue} placeholder={label} type="email" />
                 </Form.Item>
             );
-
         case 'URL':
             return (
                 <Form.Item
@@ -397,7 +319,6 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                     <Input initialValue={initialValue} placeholder={label} type="url" />
                 </Form.Item>
             );
-
         default:
             return (
                 <Form.Item

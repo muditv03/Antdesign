@@ -31,7 +31,7 @@ const CreateListView = ({ object }) => {
       `${BASE_URL}/list-views/${object.name}`,
       { 'Content-Type': 'application/json' },
       'GET'
-    );
+    ); 
     try {
       const response = await apiService.makeCall();
       setListViews(response.list_views); // Update state with fetched data

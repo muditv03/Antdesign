@@ -3,7 +3,7 @@ import { Checkbox, Avatar,Card,Tag } from 'antd';
 import { PhoneOutlined } from '@ant-design/icons';
 import LookupDisplayCard from './LookupDisplayCard';
 import { colors,getUniqueColor,useHoverVisibility } from '../Components/Utility';
-
+ 
 
 const DisplayField = ({ type, form, name, field, record,layouts }) => {
 
