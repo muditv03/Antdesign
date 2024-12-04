@@ -18,8 +18,6 @@ const { Title } = Typography;
 const { Option } = Select;
 
 
-
-
 const ObjectSetupDetail = () => {
 
   const { id } = useParams();
@@ -371,7 +369,7 @@ const ObjectSetupDetail = () => {
     } finally {
       setLoading(false);
     }
-
+ 
     setDrawerVisible(true); // Open the drawer after setting the values
   };
 

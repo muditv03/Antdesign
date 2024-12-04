@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Select, Avatar,Checkbox,Tag } from "antd";
 import { PhoneOutlined } from '@ant-design/icons';
 import ApiService from '../Components/apiService'; // Import ApiService class
-import { BASE_URL } from '../Components/Constant';
+import { BASE_URL,DateFormat } from '../Components/Constant';
 import { colors,getUniqueColor } from '../Components/Utility';
+import dayjs from 'dayjs';
 
- 
+
+
 
 const DynamicSelect = (
   {
@@ -53,7 +55,11 @@ const DynamicSelect = (
             return `$${fieldValue !== undefined && fieldValue !== null ? parseFloat(fieldValue).toFixed(2) : ''}`;
         case 'String':
             return fieldValue || '';
-        case 'percentage':
+        case 'Date':
+          return fieldValue ? dayjs(fieldValue).format(DateFormat) : ''  ;
+        case 'DateTime':
+          return fieldValue ? dayjs(fieldValue).utc().format('DD/MM/YYYY HH:mm:ss') : ''; // Format DateTime as DD/MM/YYYY HH:mm:ss
+          case 'percentage':
             return `${fieldValue !== undefined && fieldValue !== null ? parseFloat(fieldValue) : ''}%`;
         case 'Integer':
             return fieldValue !== undefined && fieldValue !== null ? fieldValue : '';
