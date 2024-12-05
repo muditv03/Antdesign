@@ -22,37 +22,8 @@ const CreateRecordDrawer = ({
   setSelectedDate,
   form
 }) => {
-  const [lookupOptions, setLookupOptions] = useState([]);
   const [lookupOptionforparent, setLookupOptionsForParent] = useState([]);
   const { quill, quillRef } = useQuill();
-
-
-  useEffect(() => {
-    const fetchAllLookupOptions = async () => {
-      const lookupFields = fieldsData.filter(field => field.type === 'lookup');
-      const lookupOptionsObj = {};
-
-      for (const lookupField of lookupFields) {
-        try {
-          const apiServiceForLookup = new ApiService(
-            `${BASE_URL}/fetch_records/${lookupField.parent_object_name}`,
-            { 'Content-Type': 'application/json' },
-            'GET'
-          );
-          const response = await apiServiceForLookup.makeCall();
-          lookupOptionsObj[lookupField.name] = response; // Store options for each lookup field
-
-        } catch (error) {
-          console.error(`Error fetching lookup options for ${lookupField.name}:`, error);
-        }
-      }
-      setLookupOptions(lookupOptionsObj); // Store all lookup options in state
-    };
-
-    if (fieldsData.some(field => field.type === 'lookup')) {
-      fetchAllLookupOptions();
-    }
-  }, [fieldsData]);
 
   useEffect(() => {
     if (selectedRecord) {

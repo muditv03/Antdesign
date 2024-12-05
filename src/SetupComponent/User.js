@@ -157,18 +157,7 @@ const UserComponent = () => {
               onClick={() => handleEdit(record)}
             />
           </Tooltip>
-          {/* <Tooltip title="Delete">
-            <Popconfirm
-              title="Are you sure you want to delete this item?"
-              onConfirm={() => deleteRecord(record)}
-              okText="Yes"
-              cancelText="No"
-            >
-              <DeleteOutlined
-                style={{ color: 'red', marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
-              />
-            </Popconfirm>
-          </Tooltip> */}
+         
         </>
       ),
     },

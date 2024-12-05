@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Table, Typography, Button, Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker, Spin, Modal, Space, Upload, Avatar,Tag } from 'antd';
+import { Table, Typography, Button, Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker, Spin, Modal, Space, Upload, Avatar, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined, ImportOutlined, SettingOutlined, CaretDownOutlined, PhoneOutlined,FilterOutlined } from '@ant-design/icons';
+import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined, ImportOutlined, SettingOutlined, CaretDownOutlined, PhoneOutlined, FilterOutlined } from '@ant-design/icons';
 import { BASE_URL, DateFormat } from '../Components/Constant';
 import dayjs from 'dayjs';
 import CreateRecordDrawer from './CreateRecordDrawer';
 import CreateListViewDrawer from '../Object/CreateListViewDrawer';
 import ApiService from '../Components/apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { generateBody, formatRecordData, fetchLookupData,colors,getUniqueColor } from '../Components/Utility';
+import { generateBody, formatRecordData, fetchLookupData, colors, getUniqueColor } from '../Components/Utility';
 
 dayjs.extend(customParseFormat);
 
@@ -30,162 +30,159 @@ const ObjectSetupDetail = () => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [fieldsData, setFieldsData] = useState([]);
   const [fieldsDataDrawer, setFieldsDataDrawer] = useState([]);
-
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const [lookupOptions, setLookupOptions] = useState([]);
   const [lookupName, setLookupName] = useState('');
-  const [lookupFieldName, setLookupFieldName] = useState('');
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [listViews, setListViews] = useState([]);
   const [selectedView, setSelectedView] = useState('');
-  const [lookupNameTable, setLookupNameTable] = useState('');
-  const [lookupNames, setLookupNames] = useState({});
   const [selectedListView, setSelectedListView] = useState(null); // State to store the selected list view for editing
   const [isListViewDrawerVisible, setIsListViewDrawerVisible] = useState(false);
   const [objectForListView, setObjectForListView] = useState();
   const [ListViewInDrawer, SetListViewInDrawer] = useState();
   const [currentPage, setCurrentPage] = useState(1);
-  const [isHovered, setIsHovered] = useState(null);
   const [pageSize] = useState(10); // Number of records per page
   const [totalRecords, setTotalRecords] = useState(0); // Total number of records
-
-  const handleMouseEnter = (lookupId) => {
-      setIsHovered(lookupId);
-  };
-
-  const handleMouseLeave = () => {
-      setIsHovered(null);
-  };
+  const [isMetadataFetched, setIsMetadataFetched] = useState(false); // Track metadata fetching
 
 
 
-
-  const fetchRecords = (selectedViewId, page = currentPage) => {
-    // if(selectedView){
-    //   page =1;
-    // }
+  useEffect(() => {
+    setIsMetadataFetched(false);
     setError('');
+    setRecords([]);
+    setTotalRecords('');
+    // setLoading(true);
 
-    const offsetvalue = (page - 1) * pageSize; // Calculate offset for API
-    // setOffSet(offsetvalue);
-    const limit = pageSize; 
-    setLoading(true);
-    // Fetch object details using ApiService
-    const apiServiceForObject = new ApiService(
-      `${BASE_URL}/mt_objects/${id}`,
-      { 'Content-Type': 'application/json' },
-      'GET'
-    );
+    console.log('id is ');
+    console.log(id);
 
-    apiServiceForObject.makeCall()
-      .then(response => {
-        const objName = response.name;
-        setObjectForListView(response);
-        console.log('Object name:', objName);
-        setObjectName(objName);
-        let apiServiceForRecords;
-        console.log('selected view id is ' + selectedViewId);
-        // Check if a selected list view exists
-        if (selectedViewId) {
-          console.log('id of list view is ' + selectedViewId);
-          // If selected list view is present, use the new API call
-          apiServiceForRecords = new ApiService(
-            `${BASE_URL}/mt_list_views/${selectedViewId?._id}/records/${limit}/${offsetvalue}`,
-            { 'Content-Type': 'application/json' },
-            'GET'
-          );
+    const fetchmetadata = async () => {
+      try {
+        const apiServiceForObject = new ApiService(
+          `${BASE_URL}/mt_objects/${id}`,
+          { 'Content-Type': 'application/json' },
+          'GET'
+        );
+        const objectResponse = await apiServiceForObject.makeCall();
+        console.log('in the fetch metadata for object', objectResponse?.name);
 
-        } else {
-          console.log('object name in else object')
-          // Otherwise, use the default records API call
-          apiServiceForRecords = new ApiService(
-            `${BASE_URL}/fetch_records/${objName}/${limit}/${offsetvalue}`,
-            { 'Content-Type': 'application/json' },
-            'GET'
-          );
-        }
+        setObjectForListView(objectResponse);
+        setObjectName(objectResponse?.name);
+        setobjectPluralName(objectResponse?.pluralLabel);
 
         const apiServiceForFields = new ApiService(
-          `${BASE_URL}/mt_fields/object/${objName}`,
+          `${BASE_URL}/mt_fields/object/${objectResponse?.name}`,
           { 'Content-Type': 'application/json' },
           'GET'
         );
 
-        return Promise.all([
-          apiServiceForRecords.makeCall(),
-          apiServiceForFields.makeCall(),
-        ]).then(([recordsResponse, fieldsResponse]) => {
-          if(recordsResponse.records){
-            setRecords(recordsResponse.records);
-          }
-          else{
-            setRecords(recordsResponse);
-          }
-          setTotalRecords(recordsResponse.total);
-          setFieldsDataDrawer(fieldsResponse);
-          console.log(fieldsResponse);
-          console.log(recordsResponse);
+        const getFieldsResponse = await apiServiceForFields.makeCall();
+        setFieldsDataDrawer(getFieldsResponse);
 
-
-          if (selectedViewId?._id) {
-            // Get the field names from the recordsResponse
-            const recordFieldNames = Object.keys(recordsResponse[0] || {}); // First record as an example
-            console.log('record field names are');
-            console.log(recordFieldNames);
-            console.log('fields to display of selected list view');
-            console.log(selectedViewId?.fields_to_display);
-            const fieldOfListView = selectedViewId?.fields_to_display;
-            console.log('fields of list view are');
- 
-            // Filter fields from fieldsResponse based on whether their name exists in the recordFieldNames
-            const matchingFields = fieldsResponse.filter(field => {
-              if (field.type === 'lookup') {
-                // Check if the field name is 'User', then match with fieldName + '_id'
-
-                // Otherwise, match with fieldName.toLowerCase() + '_id'
-                return fieldOfListView.includes(field.name + '_id');
-              }
-              // If not a lookup field, match directly by field name
-              return fieldOfListView.includes(field.name);
-            });
-
-            // Set only the matching fields
-            setFieldsData(matchingFields);
-          }
-          else {
-            setFieldsData(fieldsResponse);
-
-          }
-          // Identify and set the lookup field name
-          const lookupField = fieldsResponse.find(field => field.type === 'lookup');
-          if (lookupField) {
-            setLookupFieldName(lookupField.name);
-          }
-
-          // Set additional object details
-          setObjectName(response.name);
-          setobjectPluralName(response.pluralLabel);
-        });
-      })
-      .catch(err => {
-        console.log('error is ');
-        console.log(err);
-        const errorMessage = err && typeof err === 'object'
-          ? Object.entries(err).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-          : 'Failed to save record due to an unknown error';
-        setError(err.response?.data?.error || errorMessage);
-      })
-      .finally(() => {
+        // Mark metadata as fetched
+        setIsMetadataFetched(true);
+        // setLoading(false);
+      } catch (error) {
+        console.error('Error fetching metadata:', error);
         setLoading(false);
-      });
-    setCurrentPage(page); // Preserve the current page number after fetch
 
-  };
+      }
+    };
+
+    fetchmetadata();
+  }, [id]);
+
+  useEffect(() => {
+    setRecords([]);
+    if (isMetadataFetched) {
+      setCurrentPage(1); // Reset to the first page
+      setSelectedListView(null); // Clear selected view
+      setSelectedView(''); // Reset selected view state
+      fetchRecords('', 1); // Fetch records with updated metadata
+    }
+  }, [id, isMetadataFetched]); // Trigger only when metadata is fetched
+
+  const fetchRecords = async (selectedViewId, page = currentPage) => {
+    setLoading(true);
+
+    console.log('object name is in fetch records method');
+    console.log(objectName);
+    const offsetvalue = (page - 1) * pageSize; // Calculate offset for API
+    // setOffSet(offsetvalue);
+    const limit = pageSize;
+    let apiServiceForRecords;
+
+    try {
+      if (selectedViewId) {
+        apiServiceForRecords = new ApiService(
+          `${BASE_URL}/mt_list_views/${selectedViewId?._id}/records/${limit}/${offsetvalue}`,
+          { 'Content-Type': 'application/json' },
+          'GET'
+        );
+
+      } else {
+        apiServiceForRecords = new ApiService(
+          `${BASE_URL}/fetch_records/${objectName}/${limit}/${offsetvalue}`,
+          { 'Content-Type': 'application/json' },
+          'GET'
+        );
+      }
+
+      const recordsResponse = await apiServiceForRecords.makeCall();
+      console.log('records response are');
+      console.log(recordsResponse);
+      if (recordsResponse.records) {
+        setRecords(recordsResponse.records);
+      }
+      else {
+        setRecords(recordsResponse);
+      }
+      setTotalRecords(recordsResponse.total);
+
+      if (selectedViewId?._id) {
+        // Get the field names from the recordsResponse
+        const recordFieldNames = Object.keys(recordsResponse[0] || {}); // First record as an example
+        const fieldOfListView = selectedViewId?.fields_to_display;
+
+        // Filter fields from fieldsResponse based on whether their name exists in the recordFieldNames
+        const matchingFields = fieldsDataDrawer.filter(field => {
+          return fieldOfListView.includes(field.name);
+        });
+
+        // Set only the matching fields
+        setFieldsData(matchingFields);
+      }
+      else {
+        console.log('fields which are setting are');
+        console.log(fieldsDataDrawer);
+        setFieldsData(fieldsDataDrawer);
+
+      }
+    }
+    catch (err) {
+      console.log(err);
+      const errorMessage = err && typeof err === 'object'
+        ? Object.entries(err).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to save record due to an unknown error';
+      setError(err.response?.data?.error || errorMessage);
+    }
+    finally {
+      setLoading(false);
+    }
+    setCurrentPage(page);
+  }
+
+  useEffect(() => {
+    setCurrentPage(1);
+    if (objectName) {
+      fetchListViews();
+    }
+  }, [objectName]);
+
 
   const fetchListViews = async () => {
-    console.log('object name is ' + objectName);
     const apiService = new ApiService(
       `${BASE_URL}/list-views/${objectName}`,
       { 'Content-Type': 'application/json' },
@@ -199,37 +196,15 @@ const ObjectSetupDetail = () => {
     } catch (error) {
       console.error("Error fetching list views:", error); // Log any errors
     } finally {
-      setLoading(false); // Set loading to false after the API call
+      // setLoading(false); // Set loading to false after the API call
     }
   };
-
-
-
-  useEffect(() => {
-    setCurrentPage(1);
-    if (objectName) {
-      console.log('fetching records .....');
-      fetchListViews();
-    }
-  }, [objectName]); // Use only the necessary dependencies
-
-
-  useEffect(() => {
-    setCurrentPage(1);
-    setSelectedListView(null);
-    console.log('view chsnged and now selected view is  ');
-    console.log(selectedView);
-    console.log('id changed');
-    console.log(id);
-    setSelectedView('');
-    fetchRecords('',1);
-  }, [id]);
 
 
   const handleViewChange = (value) => {
     console.log('id of view is ');
     console.log(value);
-    if(value == "All Records"){
+    if (value == "All Records") {
 
     }
     console.log(listViews);
@@ -243,7 +218,7 @@ const ObjectSetupDetail = () => {
     console.log(value);
     if (value) {
       console.log('console in handle view change');
-      fetchRecords(matchedView,1); // Fetch records for the selected list view
+      fetchRecords(matchedView, 1); // Fetch records for the selected list view
     } else {
       fetchRecords(); // Fetch all records if "All Records" is selected
     }
@@ -259,7 +234,7 @@ const ObjectSetupDetail = () => {
       if (drawerContent) {
         drawerContent.scrollTop = 0; // Reset scroll to the top
       }
-    },200); 
+    }, 200);
 
     try {
       //setLoading(true);
@@ -278,7 +253,7 @@ const ObjectSetupDetail = () => {
     } catch (error) {
       console.error('Error fetching API response:', error);
     } finally {
-      setLoading(false); // Stop the spinner regardless of success or failure
+      // setLoading(false); // Stop the spinner regardless of success or failure
     }
   };
 
@@ -326,7 +301,7 @@ const ObjectSetupDetail = () => {
     } catch (error) {
       console.error('Error fetching API response:', error);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -367,15 +342,16 @@ const ObjectSetupDetail = () => {
     } catch (error) {
       console.error('Error fetching API response:', error);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
- 
+
     setDrawerVisible(true); // Open the drawer after setting the values
   };
 
 
 
   const handleFinish = async (values) => {
+    console.log(values);
     const updatedValues = generateBody(fieldsDataDrawer, values);
     const body = {
       object_name: objectName,
@@ -411,7 +387,7 @@ const ObjectSetupDetail = () => {
         : 'Failed to save record due to an unknown error';
       message.error(errorMessage);
     } finally {
-      setLoading(false); // Ensure loading is stopped regardless of success or failure
+      // setLoading(false); // Ensure loading is stopped regardless of success or failure
     }
   };
 
@@ -425,17 +401,8 @@ const ObjectSetupDetail = () => {
     }
   };
 
-  const handleMenuClick = (e) => {
-    if (e.key === '1') {
-      handleEditClick(selectedRecord);
-    } else if (e.key === '2') {
-      setIsDeleteModalVisible(true);
-    } else if (e.key === '3') {
-      handleCloneClick(selectedRecord);
-    }
-  };
 
-  
+
   const deleteRecord = async (record) => {
     try {
       // Create ApiService instance for DELETE request
@@ -455,8 +422,6 @@ const ObjectSetupDetail = () => {
   };
 
 
-
-
   const confirmDelete = async () => {
     deleteRecord(selectedRecord);
 
@@ -464,9 +429,9 @@ const ObjectSetupDetail = () => {
 
   };
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
+  // if (loading) {
+  //   return <p>Loading...</p>;
+  // }
 
   if (error) {
     return <p>Error: {error}</p>;
@@ -491,12 +456,6 @@ const ObjectSetupDetail = () => {
   const fieldsToShow = [nameField, ...otherFields].filter(Boolean); // filter(Boolean) removes undefined
 
 
-  const fetchLookupName = async (objectName, id) => {
-    const apiService = new ApiService(`${BASE_URL}/fetch_single_record/${objectName}/${id}`, {}, 'GET');
-    const responseData = await apiService.makeCall();
-    return responseData.Name || '';
-  };
-
 
   const columns = fieldsToShow.map((field, index) => ({
     title: field.label,
@@ -518,7 +477,7 @@ const ObjectSetupDetail = () => {
         return text === undefined || text === null ? '' : text === 0 ? '0' : text; // Show 0 for blank or zero values
       } else if (field.type === 'percentage') {
         return text ? `${text * 100}%` : ''; // Format as currency with dollar sign
-      } 
+      }
       else if (field.type === 'decimal') {
         return text === undefined || text === null || text === '0' ? '' : Number(text).toFixed(2); // Show 0.00 for blank values
       } else if (field.type === 'Email') {
@@ -535,51 +494,35 @@ const ObjectSetupDetail = () => {
         ) : '';
       } else if (field.type === 'lookup') {
 
-        console.log('lookup field data');
-        console.log(text);
-        console.log('real lookup data ');
-        console.log(record);
         let lookupId = '';
 
-        lookupId = record[field.name + '_id'];
+        lookupId = record[field.name];
         const ob = field.parent_object_name;
 
+        if (!record[field.name + '_id']) {
+          return '';
+        }
+        else {
+          return (
+            <a
+              href={`/record/${ob}/${lookupId?._id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+            >
+              <Avatar
+                size='small'
+                style={{
+                  backgroundColor: '#87d068',
+                  marginRight: 8,
+                }}
+              >
+                {lookupId?.Name.charAt(0).toUpperCase()}
+              </Avatar>
+              {lookupId?.Name}
+            </a>
 
-        if (lookupId) {
-          // Check if the name has already been fetched and stored
-          if (lookupNames[lookupId]) {
-            // If the name is 'user', do not make it linkable
-           
-              // Otherwise, render the name as a link
-              return (
-                <a
-                  href={`/record/${ob}/${lookupId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-                >
-                  <Avatar
-                    size='small'
-                    style={{
-                      backgroundColor: '#87d068',
-                      marginRight: 8,
-                    }}
-                  >
-                    {lookupNames[lookupId].charAt(0).toUpperCase()}
-                  </Avatar>
-                  {lookupNames[lookupId]}
-                </a>
-
-              );
-            
-          }
-          else {
-            // Fetch the name if not cached
-            fetchLookupName(ob, lookupId).then(name => {
-              setLookupNames(prevState => ({ ...prevState, [lookupId]: name }));
-            });
-            return 'Loading...'; // Placeholder while fetching
-          }
+          );
         }
       }
       else if (field.type === 'Address') {
@@ -606,10 +549,10 @@ const ObjectSetupDetail = () => {
           </div>
         );
       }
-      
-      else if(field.type === 'Rich-Text'){
+
+      else if (field.type === 'Rich-Text') {
         console.log('Text-Area filed')
-        return(
+        return (
           <div dangerouslySetInnerHTML={{ __html: text }} />
         );
       }
@@ -636,7 +579,7 @@ const ObjectSetupDetail = () => {
           text || ''
         );
       }
-  
+
 
 
 
@@ -747,114 +690,119 @@ const ObjectSetupDetail = () => {
 
 
   return (
+  
     <Card>
-
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <Row justify="space-between" align="middle" style={{ marginBottom: 10 }}>
-          <Col>
-            <Title level={3} style={{ marginTop: '10px' }}>Records for {objectPluralName}</Title>
-            <Select value={selectedView} onChange={handleViewChange} style={{ width: 200, marginBottom: 16 }}>
-              <Option value="">All Records</Option>
-              {listViews.map(view => (
-                <Option key={view._id} value={view._id}>{view.list_view_name}</Option>
-              ))}
-            </Select>
-
-            <Dropdown overlay={listViewMenu} trigger={['click']}>
-              <Button
-                type="text"
-                style={{
-                  marginLeft: 10, marginBottom: 16, border: '1px solid #d9d9d9',
-                }}
-              >
-                <SettingOutlined />
-                <CaretDownOutlined style={{ marginLeft: 4 }} />
-              </Button>
-            </Dropdown>
-
-            {selectedListView?.conditions && (
-              <div style={{ display: 'inline-flex', alignItems: 'center', marginLeft: 10 }}>
-                <FilterOutlined style={{ fontSize: '14px', marginRight: 5 }} />
-                {Object.entries(selectedListView?.conditions).map(([key, condition]) => (
-                  <Tag key={key} color="blue" style={{ marginRight: 5 }}>
-                  {/* Display field and value appropriately */}
-                  {condition.field} {typeof condition.value === 'object'
-                    ? Object.entries(condition.value).map(([operator, value]) => `${mapOperator(operator)} ${value}`).join(', ')
-                    : `= ${condition.value.toString()}`}
-                </Tag>
+      {/* <Spin spinning={loading} tip="Loading..." size="small"> */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <Row justify="space-between" align="middle" style={{ marginBottom: 10 }}>
+            <Col>
+              <Title level={3} style={{ marginTop: '10px' }}>Records for {objectPluralName}</Title>
+              <Select value={selectedView} onChange={handleViewChange} style={{ width: 200, marginBottom: 16 }}>
+                <Option value="">All Records</Option>
+                {listViews.map(view => (
+                  <Option key={view._id} value={view._id}>{view.list_view_name}</Option>
                 ))}
-              </div>
-            )}
+              </Select>
 
-          </Col>
+              <Dropdown overlay={listViewMenu} trigger={['click']}>
+                <Button
+                  type="text"
+                  style={{
+                    marginLeft: 10, marginBottom: 16, border: '1px solid #d9d9d9',
+                  }}
+                >
+                  <SettingOutlined />
+                  <CaretDownOutlined style={{ marginLeft: 4 }} />
+                </Button>
+              </Dropdown>
 
-          <Col style={{ marginTop: '10px' }}>
-            <Button icon={<ImportOutlined />} onClick={handleFileUpload} style={{ marginBottom: 5, marginRight: '5px' }}>
-              Import Records
-            </Button>
-            <Button type="primary" onClick={handleCreateClick} style={{ marginBottom: 5, marginRight: '5px' }}>
-              Create Record
-            </Button>
+              {selectedListView?.conditions && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', marginLeft: 10 }}>
+                  <FilterOutlined style={{ fontSize: '14px', marginRight: 5 }} />
+                  {Object.entries(selectedListView?.conditions).map(([key, condition]) => (
+                    <Tag key={key} color="blue" style={{ marginRight: 5 }}>
+                      {/* Display field and value appropriately */}
+                      {condition.field} {typeof condition.value === 'object'
+                        ? Object.entries(condition.value).map(([operator, value]) => `${mapOperator(operator)} ${value}`).join(', ')
+                        : `= ${condition.value.toString()}`}
+                    </Tag>
+                  ))}
+                </div>
+              )}
 
-          </Col>
-        </Row>
-        <div style={{ flex: 1, overflow: 'auto' }}>
+            </Col>
 
+            <Col style={{ marginTop: '10px' }}>
+              <Button icon={<ImportOutlined />} onClick={handleFileUpload} style={{ marginBottom: 5, marginRight: '5px' }}>
+                Import Records
+              </Button>
+              <Button type="primary" onClick={handleCreateClick} style={{ marginBottom: 5, marginRight: '5px' }}>
+                Create Record
+              </Button>
+
+            </Col>
+          </Row>
+          <div style={{ flex: 1, overflow: 'auto' }}>
+          <Spin spinning={loading} tip="Loading..." size="small">
           <Table columns={columns}
-            dataSource={records}
-            rowKey="_id"
-            pagination={{
-              current: currentPage,
-              pageSize: 10, // Number of records per page
-              total: totalRecords, // Total records for pagination
-              onChange: (page) => {
+              dataSource={records}
+              rowKey="_id"
+              pagination={{
+                current: currentPage,
+                pageSize: 10, // Number of records per page
+                total: totalRecords, // Total records for pagination
+                onChange: (page) => {
                   fetchRecords(selectedListView, page); // Fetch records for the selected page
-              },
-              showTotal: (total, range) =>
+                },
+                showTotal: (total, range) =>
                   `${range[0]}-${range[1]} of ${total} items`, // Display range and total
-      
-            }}
+
+              }}
+            />
+            </Spin>
+          </div>
+
+
+           {(drawerVisible &&      
+          <CreateRecordDrawer
+            visible={drawerVisible}
+            onClose={() => setDrawerVisible(false)}
+            onFinish={handleFinish}
+            loading={loading}
+            fieldsData={fieldsDataDrawer}
+            selectedRecord={selectedRecord}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            form={form}
           />
+        )}
+
+          {(isListViewDrawerVisible &&     
+          <CreateListViewDrawer
+            visible={isListViewDrawerVisible}
+            onClose={closeCreateListDrawer}
+            object={objectForListView}
+            fetchListViews={fetchListViews}
+            selectedListView={ListViewInDrawer} // Pass selected list view for editing
+           
+          />
+        ) }
+
+          <Modal
+            title="Confirm Deletion"
+            visible={isDeleteModalVisible}
+            onOk={confirmDelete}
+            onCancel={() => setIsDeleteModalVisible(false)}
+            okText="Delete"
+            cancelText="Cancel"
+            centered
+          >
+            <p>Are you sure you want to delete this record?</p>
+          </Modal>
         </div>
-
-        <CreateRecordDrawer
-          visible={drawerVisible}
-          onClose={() => setDrawerVisible(false)}
-          onFinish={handleFinish}
-          loading={loading}
-          fieldsData={fieldsDataDrawer}
-          selectedRecord={selectedRecord}
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          form={form}
-        />
-
-        <CreateListViewDrawer
-          visible={isListViewDrawerVisible}
-          onClose={closeCreateListDrawer}
-          object={objectForListView}
-          fetchListViews={fetchListViews}
-          selectedListView={ListViewInDrawer} // Pass selected list view for editing
-
-        />
-
-        <Modal
-          title="Confirm Deletion"
-          visible={isDeleteModalVisible}
-          onOk={confirmDelete}
-          onCancel={() => setIsDeleteModalVisible(false)}
-          okText="Delete"
-          cancelText="Cancel"
-          centered
-        >
-          <p>Are you sure you want to delete this record?</p>
-        </Modal>
-
-
-
-
-      </div>
+      {/* </Spin> */}
     </Card>
+ 
 
   );
 };
