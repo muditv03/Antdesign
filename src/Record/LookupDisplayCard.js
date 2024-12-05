@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Avatar, Card, Checkbox, Tag } from 'antd';
 import ApiService from '../Components/apiService'; // Import ApiService class
-import { BASE_URL } from '../Components/Constant';
+import { BASE_URL,DateFormat } from '../Components/Constant';
 import { PhoneOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 
 const LookupDisplayCard = ({ displayFields, fieldValue, objectName }) => {
     const [fieldData, setFieldData] = useState([]);
-
+ 
     // Fetch fields data when component mounts
     useEffect(() => {
         if (objectName) {
@@ -51,6 +52,10 @@ const LookupDisplayCard = ({ displayFields, fieldValue, objectName }) => {
                         {value}
                     </a>
                 ) : '';
+            case 'Date':
+                return value ? dayjs(value).format(DateFormat) : ''  ;
+            case 'DateTime':
+                return value ? dayjs(value).utc().format('DD/MM/YYYY HH:mm:ss') : '';
             case 'Address':
                 return value
                     ? [value.street, value.city, value.state, value.postal_code, value.country]
