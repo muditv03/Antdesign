@@ -7,6 +7,7 @@ import { useLocation } from 'react-router-dom';
 
 const { TabPane } = Tabs;
 
+
 const SetupPage = () => {
   const [activeKey, setActiveKey] = useState('home');
   const location = useLocation();
@@ -26,6 +27,7 @@ const SetupPage = () => {
     } else {
       setActiveKey('home');
     }
+
   }, [location.search]);
 
   return (

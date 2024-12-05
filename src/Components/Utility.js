@@ -11,11 +11,14 @@ export const generateBody = (fieldsDataDrawer, values) => {
     const fieldName = field.name;
     if (field.Name === 'CreatedBy' || field.Name === 'LastModifiedBy') {
       return;
-    }
+    } 
     console.log('value');
     console.log(values[fieldName]);
-    if (field.type === 'lookup' && field.Name === 'CreatedBy' || field.Name === 'LastModifiedBy') {
-      console.log(values[fieldName._id]);
+    if (field.type === 'lookup') {
+      if (field.name === 'CreatedBy' || field.name === 'LastModifiedBy') {
+        return;
+      }
+      
       if (values[fieldName]?._id) {
         updatedValues[`${fieldName}_id`] = values[fieldName]._id;
       } else {
