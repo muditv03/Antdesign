@@ -117,7 +117,6 @@ const CreateListViewDrawer = ({ visible, onClose, object, fetchListViews, select
       fetchLookupRecordsForExistingFilters(existingFilters); // Fetch lookup records for existing filters
     } else {
       // Reset form and filters if creating a new list view
-      form.resetFields();
       setFilters([{ field: '', value: '', displayValue: '' }]); // Reset filters state
       setLogic(''); // Reset logic when creating a new view
     }

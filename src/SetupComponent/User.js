@@ -5,13 +5,18 @@ import ApiService from '../Components/apiService';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import CreateRecordDrawer from '../Record/CreateRecordDrawer';
 import { Form } from 'antd'; // Import Form
+import { useNavigate } from 'react-router-dom';
+
+ 
 
 const UserComponent = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [form] = Form.useForm(); // Initialize form
+  const [fieldsData, setFieldsData] = useState([]);
 
   const fetchUsers = async () => {
     const apiServiceForLookup = new ApiService(
@@ -23,7 +28,11 @@ const UserComponent = () => {
     try {
       const response = await apiServiceForLookup.makeCall();
       console.log('response'+JSON.stringify(response));
-      setUsers(response);
+      const formattedUsers = response.map((user) => ({
+        ...user,
+        id: user.id || user._id, // Use `id` if present, otherwise fallback to `_id`
+      }));
+      setUsers(formattedUsers);
     } catch (error) {
       const errorMessage = error && typeof error === 'object'
         ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
@@ -34,27 +43,39 @@ const UserComponent = () => {
     }
   };
 
+  const fetchFields = async () => {
+    setLoading(true);
+    const apiServiceForFields = new ApiService(
+      `${BASE_URL}/mt_fields/object/User`, // Adjust the endpoint if needed
+      { 'Content-Type': 'application/json' },
+      'GET'
+    );
+
+    try {
+      const response = await apiServiceForFields.makeCall();
+      console.log('USER FIELDS:');
+      console.log(JSON.stringify(response));
+      const formattedFields = response.map((field) => ({
+        name: field.name,  // Use API response's `Name` for field name
+        label: field.label,    // Use API response's `label` for field label
+        type: field.type || 'String',  // Default to String if type is not provided
+        is_auto_number: field.is_auto_number || false, // Default to false
+      }));
+      console.log('Fetched fields:', formattedFields);
+      setFieldsData(formattedFields);
+    } catch (error) {
+      message.error('Failed to fetch fields.');
+      console.error('Error fetching fields:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
+    fetchFields();
     fetchUsers();
   }, []);
   
-
-  const deleteRecord = async (record) => {
-    try {
-      const apiService = new ApiService(
-        `${BASE_URL}/delete_record/User/${record._id}`,
-        {},
-        'DELETE'
-      );
-
-      await apiService.makeCall();
-      message.success('Record deleted successfully.');
-      // fetchUsers();
-    } catch (error) {
-      message.error('Failed to delete record.');
-      console.error('Error deleting record:', error);
-    }
-  };
 
   const handleEdit = (record) => {
     setSelectedUser(record);
@@ -90,6 +111,7 @@ const UserComponent = () => {
         );
         const response = await apiService.makeCall();
         console.log('response::::'+JSON.stringify(response));
+        fetchUsers();
         message.success('Record updated successfully.');
       } else {
         // Create new record
@@ -124,11 +146,24 @@ const UserComponent = () => {
     }
   };
 
+
+
   const columns = [
     {
       title: 'Name',
       dataIndex: 'Name',
       key: 'Name',
+      render: (text, record) => (
+        <a
+          href={`/record/User/${record._id}`} // Replace with your actual route structure
+          onClick={(e) => {
+            e.preventDefault(); // Prevent default navigation
+            navigate(`/record/User/${record._id}`);
+          }}
+        >
+          {text}
+        </a>
+      ),
     },
     {
       title: 'Email',
@@ -157,20 +192,19 @@ const UserComponent = () => {
               onClick={() => handleEdit(record)}
             />
           </Tooltip>
-         
         </>
       ),
     },
   ];
 
   // Example fieldsData structure
-  const fieldsData = [
-    { name: 'Name', label: 'Name', type: 'String', is_auto_number: false },
-    { name: 'email', label: 'Email', type: 'Email', is_auto_number: false },
-    { name: 'username', label: 'Username', type: 'String', is_auto_number: false },
-    { name: 'is_active', label: 'Active', type: 'boolean', is_auto_number: false },
-    // Add more fields as per your requirements
-  ];
+  // const fieldsData = [
+  //   { name: 'Name', label: 'Name', type: 'String', is_auto_number: false },
+  //   { name: 'email', label: 'Email', type: 'Email', is_auto_number: false },
+  //   { name: 'username', label: 'Username', type: 'String', is_auto_number: false },
+  //   { name: 'is_active', label: 'Active', type: 'boolean', is_auto_number: false },
+  //   // Add more fields as per your requirements
+  // ];
 
   return (
     <div>

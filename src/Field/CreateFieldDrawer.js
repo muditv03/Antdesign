@@ -48,10 +48,15 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
   //To reset form and call the onClose method from parent..
   const handleCancel = () => {
     console.log('inside handlecancel');
+    setIsFormula(false);
+    setIsAutoNumber(false);
     setIsRequired(false);
     setIsExternalID(false);
     setIsUnique(false);
     setIsFieldTrackingEnabled(false);
+    setSelectedCC([]);
+    // setPicklistValues([]);
+
     form.resetFields(); // Reset fields when the cancel button is clicked
     onClose(); // Close the drawer
   };
@@ -166,6 +171,13 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
     } else {
       form.resetFields(); // Reset fields for creating a new field
       setIsAutoNumber(false); // Reset auto number state
+      setIsFormula(false);
+    setIsRequired(false);
+    setIsExternalID(false);
+    setIsUnique(false);
+    setIsFieldTrackingEnabled(false);
+    setSelectedCC([]);
+    // setPicklistValues([]);
     }
   }, [editField, form]);
 
@@ -334,6 +346,14 @@ const CreateFieldDrawer = ({ visible, onClose, onAddField, mtObjectId, editField
 
       onClose();
       form.resetFields();
+      setIsAutoNumber(false); // Reset auto number state
+      setIsFormula(false);
+    setIsRequired(false);
+    setIsExternalID(false);
+    setIsUnique(false);
+    setIsFieldTrackingEnabled(false);
+    setSelectedCC([]);
+    // setPicklistValues([]);
     } catch (error) {
       console.log('error while creating field is')
       console.log(error);
