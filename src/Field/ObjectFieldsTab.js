@@ -18,7 +18,7 @@ const ObjectFieldTab = () => {
   const [loading, setLoading] = useState(true);
   const [editField, setEditField] = useState(null); // Track the field being edited
 
-  const [showTracking, setShowTracking] = useState(false); // State to toggle visibility of tracking column
+  const [showTracking, setShowTracking] = useState(true); // State to toggle visibility of tracking column
   const [isModified, setIsModified] = useState(false); // Track if any toggle was modified
 
   // Fetch fields data from the API
@@ -36,15 +36,15 @@ const ObjectFieldTab = () => {
           'GET'
         );
         const response = await apiService.makeCall();
-        setFieldsData(response
-
-          .filter(
-            field => !['recordCount', 'CreatedBy', 'LastModifiedBy'].includes(field.name)
-          )
-
-
-          .map((field) => ({ ...field, key: field._id })));
-                  setOriginalFieldsData(response.map((field) => ({ ...field, key: field._id }))); // Save original data
+  
+        // Filter out unwanted fields (this is the same filter as before)
+        const filteredFields = response.filter(
+          field => !['recordCount', 'CreatedBy', 'LastModifiedBy'].includes(field.name)
+        ).map((field) => ({ ...field, key: field._id }));
+  
+        setFieldsData(filteredFields);
+        setOriginalFieldsData(filteredFields); // Save the filtered fields as original data
+        console.log('originalFields Data:::'+JSON.stringify(originalFieldsData));
       } catch (error) {
         message.error('Failed to fetch fields data');
       } finally {
@@ -56,6 +56,7 @@ const ObjectFieldTab = () => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchFieldsData();
@@ -94,7 +95,7 @@ const ObjectFieldTab = () => {
       console.log('payloads::::'+JSON.stringify(payload));
       // Send API request
       const apiService = new ApiService(
-        `${BASE_URL}/bulk_update`,
+        `${BASE_URL}/bulk_field_update`,
         { 'Content-Type': 'application/json' },
         'PATCH',
         payload
@@ -104,7 +105,7 @@ const ObjectFieldTab = () => {
       message.success('Changes saved successfully!');
       setOriginalFieldsData(fieldsData); // Update original data
       setIsModified(false); // Reset modified state
-      setShowTracking(false); // Hide tracking
+      // setShowTracking(false); // Hide tracking
       console.log('response after saving for field tracking data bulkk'+response);
     } catch (error) {
       message.error('Failed to save changes.');
@@ -117,7 +118,7 @@ const ObjectFieldTab = () => {
   const cancelChanges = () => {
     setFieldsData(originalFieldsData); // Revert to original data
     setIsModified(false); // Reset modified flag
-    setShowTracking(false); // Hide tracking
+    // setShowTracking(false); // Hide tracking
     message.info('Changes reverted');
   };
 
@@ -188,20 +189,32 @@ const ObjectFieldTab = () => {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
-      render: (value) => (value ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : ''),
+      render: (value) =>
+        value ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : '',
     },
-    // Conditionally render the "Track History" column when showTracking is true
     ...(showTracking
       ? [
           {
-            title: 'Track History',
+            title: 'Field Tracking History',
             key: 'track_field_history',
-            render: (text, record) => (
-              <Switch
-                checked={record.track_field_history}
-                onChange={(value) => handleToggleChange(record._id, value)}
-              />
-            ),
+            render: (text, record) => {
+              const disallowedTypes = ['Rich-Text', 'Text-Area', 'Formula', 'Auto Number'];
+              const isDisallowed =
+                disallowedTypes.includes(record.type) ||
+                record.is_auto_number ||
+                record.is_formula;
+  
+              return isDisallowed ? (
+                <Tooltip title="Field tracking not available for this datatype">
+                  <Switch checked={false} disabled />
+                </Tooltip>
+              ) : (
+                <Switch
+                  checked={record.track_field_history}
+                  onChange={(value) => handleToggleChange(record._id, value)}
+                />
+              );
+            },
           },
         ]
       : []),
@@ -217,7 +230,7 @@ const ObjectFieldTab = () => {
               style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
             />
           </Tooltip>
-          {!record.is_system && (
+  
           <Tooltip title="Delete">
             <Popconfirm
               title="Are you sure you want to delete this field?"
@@ -230,12 +243,11 @@ const ObjectFieldTab = () => {
               />
             </Popconfirm>
           </Tooltip>
-          )}
         </>
       ),
     },
   ];
-
+  
   return (
     <div>
       <Row justify="space-between" align="middle" style={{ marginBottom: 10 }}>
@@ -247,14 +259,14 @@ const ObjectFieldTab = () => {
             <Button type="primary" onClick={() => showDrawer()} style={{ marginBottom: 5 }}>
               Create Field
             </Button>
-            <Button
+            {/* <Button
               type="primary"
               onClick={() => setShowTracking(!showTracking)}
               disabled={isModified} // Disable "Show Tracking" if changes are not saved
               style={{ marginBottom: 5 }}
             >
               {showTracking ? 'Hide Tracking' : 'Manage Field Tracking'}
-            </Button>
+            </Button> */}
           </Space>
         </Col>
       </Row>
