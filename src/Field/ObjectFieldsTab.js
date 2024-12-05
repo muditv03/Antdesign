@@ -148,6 +148,8 @@ const ObjectFieldTab = () => {
       if (drawerContent) {
         drawerContent.scrollTop = 0; // Reset scroll to the top
       }
+      // Reset the page scroll position
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 300);
   };
 

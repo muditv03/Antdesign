@@ -31,6 +31,7 @@ const CreateListView = ({ object }) => {
         drawerContent.scrollTop = 0; // Reset scroll to the top
 
       }
+      window.scrollTo({ top: 0, behavior: 'smooth' }); 
 
     }, 200);
   };
@@ -43,7 +44,7 @@ const CreateListView = ({ object }) => {
       { 'Content-Type': 'application/json' },
       'GET'
     ); 
-    try {
+    try { 
       const response = await apiService.makeCall();
       setListViews(response.list_views); // Update state with fetched data
     } catch (error) {
