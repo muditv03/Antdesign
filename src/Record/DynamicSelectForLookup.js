@@ -6,9 +6,6 @@ import { BASE_URL,DateFormat } from '../Components/Constant';
 import { colors,getUniqueColor } from '../Components/Utility';
 import dayjs from 'dayjs';
 
-
-
-
 const DynamicSelect = (
   {
   objectName, 
