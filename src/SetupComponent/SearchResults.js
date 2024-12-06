@@ -11,18 +11,28 @@ const SearchResults = () => {
   const [columns, setColumns] = useState({});
 
   useEffect(() => {
+    setGroupedData();
     if (searchResults) {
-      // Grouping the data and setting up columns dynamically
       const grouped = {};
       const columnConfig = {};
 
       Object.keys(searchResults).forEach((key) => {
         const { records } = searchResults[key];
-        grouped[key] = records;
 
-        // Dynamically set columns based on the first record's keys
-        if (records.length > 0) {
-          columnConfig[key] = Object.keys(records[0]).map((field) => ({
+        // Filter out empty or invalid records
+        const validRecords = Array.isArray(records)
+          ? records.filter((record) => record && typeof record === "object")
+          : [];
+
+        // Only add non-empty groups
+        if (validRecords.length > 0) {
+          grouped[key] = validRecords;
+
+          // Dynamically set columns based on the first record's keys
+          columnConfig[key] = Object.keys(validRecords[0]).map((field) => ({
+            title: field,
+            dataIndex: field,
+            key: field,
             render: (text, record) =>
               field === "Name" ? (
                 <Link
@@ -34,10 +44,6 @@ const SearchResults = () => {
               ) : (
                 text
               ),
-            title: field,
-            dataIndex: field,
-            key: field,
-            
           }));
         }
       });
@@ -53,12 +59,18 @@ const SearchResults = () => {
 
       {/* Display grouped data using Collapse and Table */}
       {Object.keys(groupedData).map((objectName) => (
-        <Collapse style = {{marginBottom: "10px"}} key={objectName} defaultActiveKey={["1"]}>
+        <Collapse
+          style={{ marginBottom: "10px" }}
+          key={objectName}
+          defaultActiveKey={["1"]}
+        >
           <Collapse.Panel header={objectName} key="1">
             <Table
               columns={columns[objectName]}
               dataSource={groupedData[objectName]}
-              rowKey={(record) => record.Name || record.Email || Math.random()}
+              rowKey={(record) =>
+                record._id || record.Name || record.Email || Math.random()
+              }
               pagination={false}
             />
           </Collapse.Panel>
