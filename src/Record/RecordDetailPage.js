@@ -19,7 +19,6 @@ const RecordDetail = () => {
   const { id, objectName } = useParams();
   const { objectid } = location.state || '';  
   const [recordName, setRecordName] = useState('');
-  const [trackActivities, setTrackActivities] = useState(false);
 
 
   const fetchRecords = async () => {
@@ -33,25 +32,11 @@ const RecordDetail = () => {
     }
   };
 
-  const fetchObjectMetadata = async () => {
-    try {
-      // Fetch object metadata to check if activities are tracked
-      const metadataApiService = new ApiService(
-        `${BASE_URL}/mt_objects/${objectid}`,
-        {},
-        'GET'
-      );
-      const metadataResponse = await metadataApiService.makeCall();
-      setTrackActivities(metadataResponse.track_activities || false);
-    } catch (err) {
-      console.error('Error fetching object metadata', err);
-    }
-  };
-
   useEffect(() => {
     fetchRecords();
-    fetchObjectMetadata();
   }, [id, objectid, objectName]);
+
+  
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -69,11 +54,9 @@ const RecordDetail = () => {
         <TabPane tab="Related" key="2">
           <RelatedRecord objectid={objectid} objectName={objectName} recordId={id} />
         </TabPane>
-        {trackActivities && (
-          <TabPane tab="Activity" key="3">
-            <ActivityComponent objectName={objectName} recordId={id} />
-          </TabPane>
-        )}
+        <TabPane tab="Activity" key="3">
+          <ActivityComponent objectName={objectName} recordId={id} />
+        </TabPane>
       </Tabs>
     </div>
 

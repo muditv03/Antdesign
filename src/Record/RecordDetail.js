@@ -127,6 +127,7 @@ const RecordDetails = ({ objectName, id }) => {
             const bodyData = Object.assign({}, values);
             console.log(bodyData);
             fields.forEach(field => {
+                if(bodyData[field.name]){
                 if (field.type === 'lookup' && field.Name === 'CreatedBy' || field.Name === 'LastModifiedBy') {
                     let lookupFieldName;
                     lookupFieldName = field.name + '_id';
@@ -142,11 +143,11 @@ const RecordDetails = ({ objectName, id }) => {
                     delete bodyData[field.name];
                 }
 
-                if (field.type === 'percentage') {
+               else if (field.type === 'percentage') {
                     bodyData[field.name] = bodyData[field.name] / 100;
                 }
 
-                if (field.type === 'Address') {
+               else if (field.type === 'Address' ) {
                     console.log('Checking Address Values')
                     console.log(values)
                     bodyData[field.name] = {
@@ -158,6 +159,7 @@ const RecordDetails = ({ objectName, id }) => {
                     };
 
                 }
+            }
 
 
             });
