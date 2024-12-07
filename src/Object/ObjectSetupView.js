@@ -18,7 +18,7 @@ const DataTable = () => {
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState(null);
   const navigate = useNavigate();
-
+ 
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -225,7 +225,7 @@ const DataTable = () => {
     </Spin>
   );
 };
-
+ 
 export default DataTable;
 
 

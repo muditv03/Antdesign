@@ -10,6 +10,7 @@ import ApiService from '../Components/apiService';
 import CreateObjectDrawer from './CreateObjectDrawer';
 import CreateLayout from './CreateLayout';
 import SearchLayout from './SearchLayout';
+import CompactLayout from './CompactLayout';
 
 
 const { Title } = Typography;
@@ -258,7 +259,12 @@ const ObjectFieldDetail = () => {
             <CreateLayout object={record} />
           </Card>
         </TabPane>
-        <TabPane tab="Search Result Layout" key="6">
+        <TabPane tab="Compact Layout" key="6">
+          <Card>
+            <CompactLayout object={record} />
+          </Card>
+        </TabPane>
+        <TabPane tab="Search Result Layout" key="7">
           <Card>
           <h2>Search Result Layout</h2>
             <SearchLayout setAvailableFields={setAvailableFields}  setIsEditMode={setIsEditMode} setSelectedFields={setSelectedFields} availableFields={availableFields} selectedFields ={selectedFields} loading= {loading} isEditMode={isEditMode} toggleSelection={toggleSelection} handleSave={handleSave} handleEdit={handleEdit} />
