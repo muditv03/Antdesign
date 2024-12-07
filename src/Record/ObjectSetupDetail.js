@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Table, Typography, Button, Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker, Spin, Modal, Space, Upload, Avatar, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { DownOutlined, EditOutlined, CopyOutlined, DeleteOutlined, ImportOutlined, SettingOutlined, CaretDownOutlined, PhoneOutlined, FilterOutlined } from '@ant-design/icons';
+import { DownOutlined, EditOutlined, CopyOutlined,SearchOutlined,CloseOutlined, DeleteOutlined, ImportOutlined, SettingOutlined, CaretDownOutlined, PhoneOutlined, FilterOutlined } from '@ant-design/icons';
 import { BASE_URL, DateFormat } from '../Components/Constant';
 import dayjs from 'dayjs';
 import CreateRecordDrawer from './CreateRecordDrawer';
@@ -42,10 +42,13 @@ const ObjectSetupDetail = () => {
   const [objectForListView, setObjectForListView] = useState();
   const [ListViewInDrawer, SetListViewInDrawer] = useState();
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10); // Number of records per page
   const [totalRecords, setTotalRecords] = useState(0); // Total number of records
   const [isMetadataFetched, setIsMetadataFetched] = useState(false); // Track metadata fetching
 
+  const [searchRecord, setSearchRecord] = useState('');
+  const [showInput, setShowInput] = useState(false); // State to toggle input visibility
+  const [allRecords,setAllRecords]=useState([]);
+  const [pageSize,setPageSize] = useState(10);
 
 
   useEffect(() => {
@@ -104,27 +107,26 @@ const ObjectSetupDetail = () => {
     }
   }, [id, isMetadataFetched]); // Trigger only when metadata is fetched
 
-  const fetchRecords = async (selectedViewId, page = currentPage) => {
+  const fetchRecords = async (selectedViewId, page = currentPage, size = pageSize) => {
     setLoading(true);
 
     console.log('object name is in fetch records method');
     console.log(objectName);
-    const offsetvalue = (page - 1) * pageSize; // Calculate offset for API
-    // setOffSet(offsetvalue);
-    const limit = pageSize;
+    const offsetValue = (page - 1) * size; 
+    const limit = size;    
     let apiServiceForRecords;
 
     try {
       if (selectedViewId) {
         apiServiceForRecords = new ApiService(
-          `${BASE_URL}/mt_list_views/${selectedViewId?._id}/records/${limit}/${offsetvalue}`,
+          `${BASE_URL}/mt_list_views/${selectedViewId?._id}/records/${limit}/${offsetValue}`,
           { 'Content-Type': 'application/json' },
           'GET'
         );
 
       } else {
         apiServiceForRecords = new ApiService(
-          `${BASE_URL}/fetch_records/${objectName}/${limit}/${offsetvalue}`,
+          `${BASE_URL}/fetch_records/${objectName}/${limit}/${offsetValue}`,
           { 'Content-Type': 'application/json' },
           'GET'
         );
@@ -135,9 +137,11 @@ const ObjectSetupDetail = () => {
       console.log(recordsResponse);
       if (recordsResponse.records) {
         setRecords(recordsResponse.records);
+        setAllRecords(recordsResponse.records);
       }
       else {
         setRecords(recordsResponse);
+        setAllRecords(recordsResponse);
       }
       setTotalRecords(recordsResponse.total);
 
@@ -148,8 +152,17 @@ const ObjectSetupDetail = () => {
 
         // Filter fields from fieldsResponse based on whether their name exists in the recordFieldNames
         const matchingFields = fieldsDataDrawer.filter(field => {
+          if (field.type === 'lookup') {
+            // Check if the field name is 'User', then match with fieldName + '_id'
+
+            // Otherwise, match with fieldName.toLowerCase() + '_id'
+            return fieldOfListView.includes(field.name + '_id');
+          }
           return fieldOfListView.includes(field.name);
         });
+
+        console.log('mstched fields are');
+        console.log(matchingFields);
 
         // Set only the matching fields
         setFieldsData(matchingFields);
@@ -172,6 +185,7 @@ const ObjectSetupDetail = () => {
       setLoading(false);
     }
     setCurrentPage(page);
+    setPageSize(size);
   }
 
   useEffect(() => {
@@ -199,7 +213,6 @@ const ObjectSetupDetail = () => {
       // setLoading(false); // Set loading to false after the API call
     }
   };
-
 
   const handleViewChange = (value) => {
     console.log('id of view is ');
@@ -379,7 +392,9 @@ const ObjectSetupDetail = () => {
 
       message.success(selectedRecord?._id && !selectedRecord?.isClone ? 'Record updated successfully' : 'Record created successfully');
       setDrawerVisible(false);
-      fetchRecords(selectedView);
+      console.log('list view is fetched');
+      console.log(selectedListView);
+      fetchRecords(selectedListView,currentPage,pageSize);
       form.resetFields();
     } catch (error) {
       const errorMessage = error && typeof error === 'object'
@@ -429,15 +444,10 @@ const ObjectSetupDetail = () => {
 
   };
 
-  // if (loading) {
-  //   return <p>Loading...</p>;
-  // }
-
   if (error) {
     return <p>Error: {error}</p>;
   }
 
-  const numberOfFieldsToShow = 5;
 
   // Filter fields, but always include the auto-number field
   const filteredFieldsData = fieldsData.filter(
@@ -446,22 +456,20 @@ const ObjectSetupDetail = () => {
 
   // Separate the "Name" and "Auto-number" fields
   const nameField = filteredFieldsData.find(field => field.name === 'Name');
-
   // Get other fields, excluding "Name" and "Auto-number" fields
   const otherFields = filteredFieldsData
     .filter(field => field.name !== 'Name' && !field.is_auto_number)
-    .slice(0, numberOfFieldsToShow);
 
   // Combine columns in the desired sequence: Name, Auto-number, other fields
   const fieldsToShow = [nameField, ...otherFields].filter(Boolean); // filter(Boolean) removes undefined
-
-
 
   const columns = fieldsToShow.map((field, index) => ({
     title: field.label,
     dataIndex: field.name,
     key: field.name,
     sorter: field.name === 'Name' ? (a, b) => (a[field.name]?.localeCompare(b[field.name]) || 0) : undefined,
+    sorter: field.type === 'Integer' ? (a, b) => a.Num - b.Num : undefined,
+    fixed: field.name === 'Name' ? 'left' : undefined,
 
     render: (text, record) => {
       if (field.type === 'boolean') {
@@ -549,7 +557,6 @@ const ObjectSetupDetail = () => {
           </div>
         );
       }
-
       else if (field.type === 'Rich-Text') {
         console.log('Text-Area filed')
         return (
@@ -580,20 +587,18 @@ const ObjectSetupDetail = () => {
         );
       }
 
-
-
-
       return index === 0 ? (
         <a onClick={() => handleLabelClick(record)}>{text}</a>
       ) : (
         text || ''
       );
-    }
+    },
   }));
 
   columns.push({
     title: 'Action',
     key: 'operation',
+    fixed:'right',
     render: (_, record) => (
       <>
         <Tooltip title="Edit">
@@ -688,14 +693,40 @@ const ObjectSetupDetail = () => {
     }
   };
 
+  const handleSearch = () => {
+    const filteredRecords = records.filter((record) =>
+      Object.values(record).some((value) =>
+        value.toString().toLowerCase().includes(searchRecord.toLowerCase())
+      )
+    );
+    setRecords(filteredRecords);
+  };
+  
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  const handleSearchChange = (e) => {
+
+    const value = e.target.value;
+    setSearchRecord(value);
+    handleSearch();
+
+
+    // Reset records if the input is cleared
+    if (value.trim() === "") {
+      setRecords(allRecords); // Replace with your original records
+    }
+  };
+
 
   return (
-  
     <Card>
-      {/* <Spin spinning={loading} tip="Loading..." size="small"> */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
           <Row justify="space-between" align="middle" style={{ marginBottom: 10 }}>
-            <Col>
+            <Col >
               <Title level={3} style={{ marginTop: '10px' }}>Records for {objectPluralName}</Title>
               <Select value={selectedView} onChange={handleViewChange} style={{ width: 200, marginBottom: 16 }}>
                 <Option value="">All Records</Option>
@@ -716,6 +747,39 @@ const ObjectSetupDetail = () => {
                 </Button>
               </Dropdown>
 
+              {!showInput ? (
+                  <Button
+                    icon={<SearchOutlined />}
+                    onClick={() => setShowInput(true)}
+                    type="variant"
+                    style={{
+                      marginLeft: 10, marginBottom: 16, border: '1px solid #d9d9d9',
+                    }}
+                    
+                  />
+                ) : (
+                  <Input
+                    placeholder="Search added fields"
+                    style={{ width: "200px" }}
+                    value={searchRecord}
+                    onChange={handleSearchChange}                    
+                    onKeyDown={handleKeyPress}
+                    onBlur={() => setShowInput(false)} // Optional: Hide input on blur
+                    autoFocus // Automatically focus when it appears
+                    prefix={<SearchOutlined />} // Left search icon
+                    suffix={
+                      <CloseOutlined
+                        style={{ cursor: "pointer" }}
+                        onClick={() => {
+                          setSearchRecord(""); // Clear the input
+                          handleSearchChange('')
+                          setShowInput(false); // Hide the input
+                        }}
+                      />
+                    }                 
+                    />
+                )}
+
               {selectedListView?.conditions && (
                 <div style={{ display: 'inline-flex', alignItems: 'center', marginLeft: 10 }}>
                   <FilterOutlined style={{ fontSize: '14px', marginRight: 5 }} />
@@ -729,9 +793,7 @@ const ObjectSetupDetail = () => {
                   ))}
                 </div>
               )}
-
             </Col>
-
             <Col style={{ marginTop: '10px' }}>
               <Button icon={<ImportOutlined />} onClick={handleFileUpload} style={{ marginBottom: 5, marginRight: '5px' }}>
                 Import Records
@@ -744,19 +806,29 @@ const ObjectSetupDetail = () => {
           </Row>
           <div style={{ flex: 1, overflow: 'auto' }}>
           <Spin spinning={loading} tip="Loading..." size="small">
-          <Table columns={columns}
+          <Table 
+              columns={columns}
               dataSource={records}
-              rowKey="_id"
+              scroll={{
+                x: 'calc(1000px + 50%)',
+                y:500
+              }}
               pagination={{
                 current: currentPage,
-                pageSize: 10, // Number of records per page
+                pageSize, // Use the dynamic pageSize from state
                 total: totalRecords, // Total records for pagination
+                showSizeChanger: true, // Enable page size options
+                pageSizeOptions: ["10", "20", "50", "100"], // Options for page sizes
                 onChange: (page) => {
                   fetchRecords(selectedListView, page); // Fetch records for the selected page
                 },
+                onShowSizeChange: (current, size) => {
+                  setPageSize(size); // Update pageSize state when the user selects a new option
+                  fetchRecords(selectedListView, current, size); // Fetch records with updated pageSize
+                },
                 showTotal: (total, range) =>
                   `${range[0]}-${range[1]} of ${total} items`, // Display range and total
-
+                
               }}
             />
             </Spin>
@@ -776,7 +848,7 @@ const ObjectSetupDetail = () => {
             form={form}
           />
         )}
-
+ 
           {(isListViewDrawerVisible &&     
           <CreateListViewDrawer
             visible={isListViewDrawerVisible}
@@ -800,7 +872,6 @@ const ObjectSetupDetail = () => {
             <p>Are you sure you want to delete this record?</p>
           </Modal>
         </div>
-      {/* </Spin> */}
     </Card>
  
 
