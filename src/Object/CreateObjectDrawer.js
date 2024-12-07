@@ -10,6 +10,7 @@ const { Option } = Select;
 const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [initialValues, setInitialValues] = useState({});
   const [isallowSearch, setIsAllowSearch] = useState(false); // State for auto number checkbox
   const [isTrackActivities, setIsTrackActivities] = useState(false); // State for auto number checkbox
   const [isTrackFieldHistory, setIsTrackFieldHistory] = useState(false); // State for auto number checkbox
@@ -19,14 +20,14 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
     if (editingRecord) {
       console.log(editingRecord);
       form.setFieldsValue(editingRecord); // Pre-fill form with existing data if editing
-      console.log('editing record is ');
-      console.log(editingRecord);
-      setIsAllowSearch(editingRecord.allow_search);
+      setInitialValues(editingRecord); // Store initial values
+       setIsAllowSearch(editingRecord.allow_search);
       setIsTrackActivities(editingRecord.track_activities);
       setIsTrackFieldHistory(editingRecord.track_field_history);
       setIsAllowFileUpload(editingRecord.allow_files);
     } else {
       form.resetFields();
+      setInitialValues({});
       setIsAllowSearch(false);
       setIsTrackActivities(false);
       setIsTrackFieldHistory(false);
@@ -50,19 +51,35 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
   };
 
   const handleFinish = async (values) => {
+    console.log('values are', JSON.stringify(values, null, 2));
     setLoading(true); // Start the spinner
-    const formData = {
-      label: values.label,
-      name: values.name,
-      pluralLabel: values.pluralLabel,
-      addObjectTab: values.addObjectTab,
-      icon: values.icon,
-      description: values.description,
-      allow_search: isallowSearch,
-      track_activities: isTrackActivities,
-      track_field_history: isTrackFieldHistory,
-      allow_files: isAllowFileUpload
-    };
+
+    // Create a payload with only the changed fields
+    const formData = {};
+    for (const key in values) {
+      if (values[key] !== initialValues[key]) {
+        formData[key] = values[key];
+      }
+    }
+
+    // Include checkbox states if they have changed and the record is not a system record
+    if (!editingRecord?.is_system) {
+      if (isallowSearch !== initialValues.allow_search) {
+        formData.allow_search = isallowSearch;
+      }
+      if (isTrackActivities !== initialValues.track_activities) {
+        formData.track_activities = isTrackActivities;
+      }
+      if (isTrackFieldHistory !== initialValues.track_field_history) {
+        formData.track_field_history = isTrackFieldHistory;
+      }
+      if (isAllowFileUpload !== initialValues.allow_files) {
+        formData.allow_files = isAllowFileUpload;
+      }
+   }
+
+   console.log('form data is', JSON.stringify(formData, null, 2));
+    
     try {
       let response;
       if (editingRecord && editingRecord.key) {
@@ -74,28 +91,32 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
           { mt_object: formData }
         );
         response = await apiService.makeCall();
-        const newTab = {
-          label: values.label,
-          name: values.name,
-          description: 'All Accounts',
-          mt_object_id: response._id, // Use the new object ID from the response
-          icon: values.icon,
-          addObjectTab: values.addObjectTab,
-        };
-        if (newTab.icon && newTab.addObjectTab) {
-          const apiServiceForTab = new ApiService(
-            `${BASE_URL}/mt_tabs`,
-            { 'Content-Type': 'application/json' },
-            'POST',
-            { mt_tab: newTab }
-          );
-          const tabResponse = await apiServiceForTab.makeCall();
-          if (!tabResponse || !tabResponse._id) {
-            throw new Error('Failed to create a new tab');
-          }
-        }
         message.success('Object updated successfully');
         onAddOrEditObject({ ...editingRecord, ...formData }); // Update the object in the parent component
+
+        // Handle newTab creation if addObjectTab is true
+        if (formData.addObjectTab) {
+          const newTab = {
+            label: values.label,
+            name: values.name,
+            description: 'All Accounts',
+            mt_object_id: editingRecord.key, // Use the existing object ID
+            icon: values.icon,
+            addObjectTab: values.addObjectTab,
+          };
+          if (newTab.icon && newTab.addObjectTab) {
+            const apiServiceForTab = new ApiService(
+              `${BASE_URL}/mt_tabs`,
+              { 'Content-Type': 'application/json' },
+              'POST',
+              { mt_tab: newTab }
+            );
+            const tabResponse = await apiServiceForTab.makeCall();
+            if (!tabResponse || !tabResponse._id) {
+              throw new Error('Failed to create a new tab');
+            }
+          }
+        }
       } else {
         // Create new record using ApiService
         const apiService = new ApiService(
@@ -134,18 +155,8 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
         // Update the list of objects in the parent component
         onAddOrEditObject({
           key: response._id, // Use the ID from the response
-          label: values.label,
-          name: values.name,
-          plurallabel: values.plurallabel,
-          addObjectTab: values.addObjectTab,
-          icon: values.icon,
-          description: values.description,
-          allow_search: isallowSearch,
-          track_activities: isTrackActivities,
-          track_field_history: isTrackFieldHistory,
-          allow_files: isAllowFileUpload
-
-        });
+          ...formData
+         });
       }
       eventBus.emit('objectCreatedOrUpdated'); // Notify that object was created or updated
       onClose(); // Close the drawer upon success
@@ -173,6 +184,8 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
         </Option>
       );
     });
+
+    const isEditingSystemRecord = editingRecord && editingRecord.is_system;
 
   return (
     <Drawer
@@ -236,35 +249,38 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
               label="Plural Label"
               rules={[{ required: true, message: 'Please enter the plural label' }]}
             >
-              <Input placeholder="Please enter the plural label" />
+              <Input placeholder="Please enter the plural label" disabled={isEditingSystemRecord} />
             </Form.Item>
 
             <Form.Item
               name="description"
               label="Object Description"
             >
-              <Input placeholder="Please enter the object description" />
+              <Input placeholder="Please enter the object description" disabled={isEditingSystemRecord} />
             </Form.Item>
 
             <Form.Item name="icon" label="Icon">
               <Select allowClear placeholder="Select an icon" optionLabelProp="label" showSearch filterOption={(input, option) =>
                 option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
-              }>
+              }  disabled={isEditingSystemRecord}>
                 {iconOptions}
               </Select>
 
             </Form.Item>
 
 
-            <Form.Item name="addObjectTab" valuePropName="checked">
-              <Checkbox>Add Object Tab</Checkbox>
-            </Form.Item>
+            {!editingRecord && (
+              <Form.Item name="addObjectTab" valuePropName="checked">
+                <Checkbox disabled={isEditingSystemRecord}>Add Object Tab</Checkbox>
+              </Form.Item>
+            )}
 
 
             <Form.Item name="allowSearch" >
               <Checkbox
                 checked={isallowSearch}
                 onChange={(e) => setIsAllowSearch(e.target.checked)}
+                disabled={isEditingSystemRecord}
               >Allow Search</Checkbox>
             </Form.Item>
             <Form.Item name="trackActivities"
@@ -272,12 +288,14 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
               <Checkbox
                 checked={isTrackActivities}
                 onChange={(e) => setIsTrackActivities(e.target.checked)}
+                disabled={isEditingSystemRecord}
               >Track Activities</Checkbox>
             </Form.Item>
             <Form.Item name="trackFieldHistory">
               <Checkbox
                 checked={isTrackFieldHistory}
                 onChange={(e) => setIsTrackFieldHistory(e.target.checked)}
+                disabled={isEditingSystemRecord}
               >Track Field History</Checkbox>
             </Form.Item>
 
@@ -285,6 +303,7 @@ const CreateObjectDrawer = ({ visible, onClose, onAddOrEditObject, editingRecord
               <Checkbox
                 checked={isAllowFileUpload}
                 onChange={(e) => setIsAllowFileUpload(e.target.checked)}
+                disabled={isEditingSystemRecord}
               >Allow File Upload</Checkbox>
             </Form.Item>
 

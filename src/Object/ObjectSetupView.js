@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Typography, Tooltip, Button, Row, Col, Menu, message, Spin, Modal, Card, Breadcrumb } from 'antd';
+import { Table, Typography, Tooltip, Button, Row, Col, Menu, message, Spin, Modal, Card, Breadcrumb, Popconfirm, List } from 'antd';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import CreateObjectDrawer from './CreateObjectDrawer';
 import { BASE_URL } from '../Components/Constant';
 import ApiService from '../Components/apiService';
@@ -12,11 +12,11 @@ const { Title } = Typography;
 const DataTable = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [data, setData] = useState([]);
-  const [selectedRecord, setSelectedRecord] = useState(null);
   const [editingRecord, setEditingRecord] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const [recordToDelete, setRecordToDelete] = useState(null);
+  const [dependencyModalVisible, setDependencyModalVisible] = useState(false);
+  const [dependencyMessage, setDependencyMessage] = useState('');
+  const [dependencies, setDependencies] = useState([]);
   const navigate = useNavigate();
 
   const fetchData = async () => {
@@ -51,7 +51,7 @@ const DataTable = () => {
     if (e.key === '1') {
       // Handle edit
     } else if (e.key === '2') {
-      deleteRecord(selectedRecord);
+      // deleteRecord(selectedRecord);
     }
   };
 
@@ -101,39 +101,45 @@ const DataTable = () => {
     }
   };
 
-  const showDeleteModal = (record) => {
-    setRecordToDelete(record);
-    setIsDeleteModalVisible(true);
-  };
-
-  const handleDelete = async () => {
+  const handleDelete = async (record) => {
     setLoading(true);
     try {
-      await axios.delete(`${BASE_URL}/${recordToDelete.key}`);
-      setData((prevData) => prevData.filter((item) => item.key !== recordToDelete.key));
+      const apiServiceForObject = new ApiService(
+        `${BASE_URL}/delete_object`,
+        { 'Content-Type': 'application/json' },
+        'POST',
+        JSON.stringify({ object_name: record.name })
+      );
+      const deletionResponse = await apiServiceForObject.makeCall();
+      setData((prevData) => prevData.filter((item) => item.key !== record.key));
       message.success('Record deleted successfully.');
-      setIsDeleteModalVisible(false);
     } catch (error) {
-      message.error('Failed to delete record.');
-      console.error('Error deleting record:', error);
+      if (error.dependent_objects && error.dependent_objects.length > 0) {
+        const dependencies = error.dependent_objects.map(dep => ({
+          model: dep.related_model,
+          field: dep.field,
+          count: dep.count
+        }));
+        setDependencies(dependencies);
+        setDependencyMessage(error.message);
+        setDependencyModalVisible(true);
+      } else {
+        message.error('Failed to delete record.');
+        console.error('Error deleting record:', error);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    setIsDeleteModalVisible(false);
-    setRecordToDelete(null);
-  };
-
-  const deleteRecord = (record) => {
-    showDeleteModal(record);
+  const handleDependencyModalOk = () => {
+    setDependencyModalVisible(false);
   };
 
   const menu = (
     <Menu onClick={handleMenuClick}>
       <Menu.Item key="1">Edit</Menu.Item>
-      <Menu.Item key="2" onClick={() => deleteRecord(selectedRecord)}>Delete</Menu.Item>
+      {/* <Menu.Item key="2" onClick={() => deleteRecord(selectedRecord)}>Delete</Menu.Item> */}
     </Menu>
   );
 
@@ -168,13 +174,25 @@ const DataTable = () => {
       key: 'action',
       width: 100,
       render: (text, record) => (
-        <Tooltip title="Edit">
-          <EditOutlined
-            onClick={() =>
-              handleEdit(record)}
-            style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
-          />
+        <>
+          <Tooltip title="Edit">
+            <EditOutlined
+              onClick={() =>
+                handleEdit(record)}
+              style={{ marginRight: 8, fontSize: '18px', cursor: 'pointer' }}
+            />
+          </Tooltip>
+          <Tooltip title="Delete">
+          <Popconfirm
+            title="Are you sure you want to delete this item?"
+            onConfirm={() => handleDelete(record)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <DeleteOutlined style={{ color: 'red', marginRight: 8, fontSize: '14px', cursor: 'pointer' }} />
+          </Popconfirm>
         </Tooltip>
+        </>
       ),
     },
 
@@ -209,19 +227,27 @@ const DataTable = () => {
             editingRecord={editingRecord}
           />
         </div>
-
-        <Modal
-          title="Delete Confirmation"
-          visible={isDeleteModalVisible}
-          onOk={handleDelete}
-          onCancel={handleCancel}
-          okText="Yes"
-          cancelText="No"
-          centered
-        >
-          <p>Are you sure you want to delete this record?</p>
-        </Modal>
       </Card>
+      <Modal
+        title="Cannot Delete Object"
+        open={dependencyModalVisible}
+        onOk={handleDependencyModalOk}
+        onCancel={handleDependencyModalOk}
+        centered
+      >
+        <p>{dependencyMessage}</p>
+        <List
+          dataSource={dependencies}
+          renderItem={item => (
+            <List.Item>
+              <List.Item.Meta
+                title={`Model: ${item.model}`}
+                description={`Field: ${item.field}, Count: ${item.count}`}
+              />
+            </List.Item>
+          )}
+        />
+      </Modal>
     </Spin>
   );
 };
