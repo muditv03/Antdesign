@@ -121,9 +121,13 @@ const RecordDetails = ({ objectName, id }) => {
 
 
     const onFinish = async (values) => {
+        
         try {
+            console.log(form.getFieldValue('CreationDate'));
+            console.log(form.getFieldValue('DateTimeCreation'));
             console.log('values are');
             console.log(values);
+            console.log(values['CreationDate'])
             const bodyData = Object.assign({}, values);
             console.log(bodyData);
             fields.forEach(field => {
@@ -159,6 +163,18 @@ const RecordDetails = ({ objectName, id }) => {
                     };
 
                 }
+                else if (field.type === 'Date') {
+                    console.log('DATE VALUES ARE:')
+                    console.log(form.getFieldValue([field.name]));
+                    bodyData[field.name] = form.getFieldValue([field.name]);
+            // console.log(form.getFieldValue('DateTimeCreation'));
+                }
+
+                else if(field.type === 'DateTime') {
+                    console.log('DATE TIME VALUES ARE:')
+                    console.log(form.getFieldValue([field.name]));
+                    bodyData[field.name] = form.getFieldValue([field.name]);
+                }
             }
 
 
@@ -179,7 +195,7 @@ const RecordDetails = ({ objectName, id }) => {
             };
 
             console.log('final body');
-            console.log(body);
+            console.log('final body',body);
 
             const apiService = new ApiService(`${BASE_URL}/insert_or_update_records`, {
                 'Content-Type': 'application/json', // Add any necessary headers, such as content type
