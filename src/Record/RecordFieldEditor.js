@@ -113,8 +113,12 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                       format={DateFormat}
                       value={form.getFieldValue(name) ? dayjs(form.getFieldValue(name), DateFormat) : null}
                       onChange={(date, dateString) => {
+                        console.log('my selected date is ');
+                        console.log(dateString);
                         setSelectedDate(date ? dayjs(dateString, DateFormat) : null);
                         form.setFieldsValue({ [name]: dateString });
+                        console.log('form value for date is ');
+                        console.log(form.getFieldValue(name))
                       }}
                     />
                   </Space>

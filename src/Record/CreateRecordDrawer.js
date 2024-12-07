@@ -5,8 +5,8 @@ import dayjs from 'dayjs';
 import ApiService from '../Components/apiService'; // Import ApiService class
 import { BASE_URL, DateFormat } from '../Components/Constant'; // Define the date format
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { useQuill } from "react-quilljs";
-import "quill/dist/quill.snow.css";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import DynamicSelect from './DynamicSelectForLookup';
 
 dayjs.extend(customParseFormat);
@@ -23,7 +23,7 @@ const CreateRecordDrawer = ({
   form
 }) => {
   const [lookupOptionforparent, setLookupOptionsForParent] = useState([]);
-  const { quill, quillRef } = useQuill();
+  const [richTextContent, setRichTextContent] = useState(''); 
 
   useEffect(() => {
     if (selectedRecord) {
@@ -43,13 +43,16 @@ const CreateRecordDrawer = ({
           formValues[`${field.name}_state`] = selectedRecord[`${field.name}_state`] || '';
           formValues[`${field.name}_country`] = selectedRecord[`${field.name}_country`] || '';
           formValues[`${field.name}_postalcode`] = selectedRecord[`${field.name}_postalcode`] || '';
+        } else if (field.type === 'Rich-Text') {
+          formValues[field.name] = selectedRecord[field.name] || '';
         } else {
           formValues[field.name] = selectedRecord[field.name] || '';
         }
       });
       form.setFieldsValue(formValues);
     } else {
-      form.resetFields(); // Reset the form if no record is selected (for new record)
+      form.resetFields();
+      setRichTextContent(''); // Reset the form if no record is selected (for new record)
     }
   }, [selectedRecord, form, fieldsData]);
 
@@ -440,19 +443,23 @@ const CreateRecordDrawer = ({
           </Form.Item>
         );
 
-        // case 'Rich-Text':
-        //   return (
-        //     <Form.Item
-        //     key={field.name}
-        //     name={field.name}
-        //     label={renderLabel}  // Use the custom label here
-        //     rules={isRequired}
-        //     >
-        //       <div style={{ width: "100%", height: 200 }}>
-        //       <div ref={quillRef} />
-        //     </div>
-        //     </Form.Item>
-        //   )
+        case 'Rich-Text':
+          return (
+            <Form.Item
+          key={field.name}
+          name={field.name}
+          label={renderLabel} 
+          rules={isRequired}
+        >
+          <ReactQuill
+            value={form.getFieldValue(field.name)}
+            onChange={(value) => form.setFieldsValue({ [field.name]: value })}
+            placeholder={`Enter ${field.label}`}
+            theme="snow"
+            style={{ height: '200px', minHeight: '150px' }}
+          />
+        </Form.Item>
+          )
 
       default:
         return null;
@@ -525,7 +532,12 @@ const cancelDrawer = ()=>{
           <Form
             form={form}
             layout="vertical"
-            onFinish={onFinish}
+            onFinish={(values) => {
+              const richTextValue = richTextContent; // Get the rich text content
+              const formData = { ...values, richText: richTextValue };
+              onFinish(formData); // Pass the full data to the parent
+            }}
+
             style={{ fontSize: '16px' }}
           >
             {fieldsData?.map((field) => renderFormItem(field))}
