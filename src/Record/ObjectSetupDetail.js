@@ -217,8 +217,13 @@ const ObjectSetupDetail = () => {
   const handleViewChange = (value) => {
     console.log('id of view is ');
     console.log(value);
-    if (value == "All Records") {
-
+    if (value === "All Records") {
+      setSelectedListView(null); // Clear the selected list view
+      setSelectedView("All Records"); // Update the selected view to "All Records"
+      setPageSize(10); // Reset page size to default
+      setCurrentPage(1); // Reset to the first page
+      fetchRecords(null, 1, 10); // Fetch all records with default pagination
+      return;
     }
     console.log(listViews);
     const matchedView = listViews.find(view => view._id === value);
@@ -229,12 +234,18 @@ const ObjectSetupDetail = () => {
 
     setSelectedView(value);
     console.log(value);
-    if (value) {
-      console.log('console in handle view change');
-      fetchRecords(matchedView, 1); // Fetch records for the selected list view
+    if (matchedView) {
+      console.log('Fetching records for selected view...');
+      setPageSize(10); // Reset page size to default for the new view
+      setCurrentPage(1); // Reset to the first page
+      fetchRecords(matchedView, 1, 10); // Fetch records for the selected view with default pagination
     } else {
-      fetchRecords(); // Fetch all records if "All Records" is selected
+      console.log('Fetching all records...');
+      setPageSize(10); // Reset page size to default
+      setCurrentPage(1); // Reset to the first page
+      fetchRecords(null, 1, 10); // Fetch all records with default pagination
     }
+  
   };
 
 
@@ -694,13 +705,20 @@ const ObjectSetupDetail = () => {
   };
 
   const handleSearch = () => {
-    const filteredRecords = records.filter((record) =>
-      Object.values(record).some((value) =>
-        value.toString().toLowerCase().includes(searchRecord.toLowerCase())
-      )
-    );
+    const filteredRecords = allRecords.filter((record) => {
+      // Combine all relevant fields into a searchable string
+      const searchableValues = [
+        ...Object.values(record).map((value) =>
+          typeof value === "object" && value !== null
+            ? Object.values(value).join(" ") // Include nested object values
+            : value.toString()
+        ),
+      ].join(" ").toLowerCase();
+  
+      return searchableValues.includes(searchRecord.toLowerCase());
+    });  
     setRecords(filteredRecords);
-  };
+  };  
   
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
@@ -712,7 +730,7 @@ const ObjectSetupDetail = () => {
 
     const value = e.target.value;
     setSearchRecord(value);
-    handleSearch();
+    // handleSearch();
 
 
     // Reset records if the input is cleared
@@ -759,17 +777,19 @@ const ObjectSetupDetail = () => {
                   />
                 ) : (
                   <Input
-                    placeholder="Search added fields"
-                    style={{ width: "200px" }}
+                    placeholder="Search in the list"
+                    style={{ width: "200px", marginLeft: "5px"}}
                     value={searchRecord}
-                    onChange={handleSearchChange}                    
+                    onChange={handleSearchChange}                  
                     onKeyDown={handleKeyPress}
                     onBlur={() => setShowInput(false)} // Optional: Hide input on blur
                     autoFocus // Automatically focus when it appears
                     prefix={<SearchOutlined />} // Left search icon
                     suffix={
                       <CloseOutlined
-                        style={{ cursor: "pointer" }}
+                      style={{
+                        cursor: "pointer",
+                      }}
                         onClick={() => {
                           setSearchRecord(""); // Clear the input
                           handleSearchChange('')
@@ -819,8 +839,8 @@ const ObjectSetupDetail = () => {
                 total: totalRecords, // Total records for pagination
                 showSizeChanger: true, // Enable page size options
                 pageSizeOptions: ["10", "20", "50", "100"], // Options for page sizes
-                onChange: (page) => {
-                  fetchRecords(selectedListView, page); // Fetch records for the selected page
+                onChange: (page,size) => {
+                  fetchRecords(selectedListView, page,size); // Fetch records for the selected page
                 },
                 onShowSizeChange: (current, size) => {
                   setPageSize(size); // Update pageSize state when the user selects a new option
