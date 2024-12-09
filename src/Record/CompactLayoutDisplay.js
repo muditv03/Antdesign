@@ -5,10 +5,22 @@ import { PhoneOutlined } from '@ant-design/icons';
 import ApiService from '../Components/apiService'; 
 import { colors,getUniqueColor,useHoverVisibility } from '../Components/Utility';
 import dayjs from 'dayjs';
-
+import LookupDisplayCard from './LookupDisplayCard';
+ 
 const { Title } = Typography;
 
+
+
 const CompactLayout = ({ compactlayout, record,object }) => {
+
+    const {
+        isHovered,
+        isVisible,
+        handleMouseEnter,
+        handleMouseLeave,
+        handleContentMouseEnter,
+        handleContentMouseLeave,
+    } = useHoverVisibility();
 
     const [fields,setFields]=useState([]);
 
@@ -46,25 +58,48 @@ const CompactLayout = ({ compactlayout, record,object }) => {
                           .join(', ')
                     : '';
             case 'lookup':
-                const lookupId = fieldValue?.Name;
-                const ob = field.parent_object_name;
-                return  <a
-                href={`/record/${ob}/${lookupId?._id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-              >
-                <Avatar
-                  size='small'
-                  style={{
-                    backgroundColor: '#87d068',
-                    marginRight: 8,
-                  }}
-                >
-                  {lookupId?.charAt(0).toUpperCase()}
-                </Avatar>
-                {lookupId}
-              </a>   
+                return fieldValue ? (
+                    <div
+                      style={{ position: 'relative', display: 'inline-block' }}
+                      onMouseEnter={handleMouseEnter}
+                      onMouseLeave={handleMouseLeave}
+                    >
+                      {fieldValue?.Name ? (
+                        <a
+                          href={`/record/${field.parent_object_name}/${fieldValue?._id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+                        >
+                          <Avatar
+                            size="small"
+                            style={{
+                              backgroundColor: '#87d068',
+                              marginRight: 8,
+                            }}
+                          >
+                            {(fieldValue?.Name || '').charAt(0).toUpperCase()}
+                          </Avatar>
+                          {fieldValue?.Name}
+                        </a>
+                      ) : (
+                        fieldValue?.Name
+                      )}
+                
+                      {isHovered && isVisible && (
+                        <div
+                          onMouseEnter={handleContentMouseEnter}
+                          onMouseLeave={handleContentMouseLeave}
+                        >
+                          <LookupDisplayCard
+                            displayFields={field?.lookup_config?.display_fields} // Pass the fields you want to display
+                            fieldValue={fieldValue}
+                            objectName={field.parent_object_name} // Parent object name for fetching fields
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ) : fieldValue?.Name;
             case 'Date':
                 return fieldValue ? dayjs(fieldValue).format(DateFormat) : ''  ;
             case 'DateTime':
