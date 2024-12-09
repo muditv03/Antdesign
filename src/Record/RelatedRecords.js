@@ -28,7 +28,7 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
   const [isAllowFile, setIsAllowFiles] = useState(false);
   const [isTrackFieldHistory, setIsTrackFieldHistory] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const [recordDetailsToSend,setRecordDetailsToSend] = useState([]);
 
  
   useEffect(() => {
@@ -140,6 +140,7 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
       console.log('response is ' + JSON.stringify(response));
       setCurrentRecordName(response?.Name || ''); // Assuming 'name' is the property for the record's name
       console.log("current record name is " + response.Name);
+      setRecordDetailsToSend(response);
     } catch (error) {
       console.error('Error fetching current record details:', error);
     }
@@ -172,7 +173,7 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
       const response = await childRecordsService.makeCall();
       setChildRecordsMap((prevMap) => ({
         ...prevMap,
-        [relatedListId]: response || [],
+        [relatedListId]: response.records || [],
       }));
     } catch (err) {
       console.error(`Error fetching child records for ${relatedListName}:`, err);
@@ -219,14 +220,14 @@ const RelatedRecord = ({ objectid, objectName, recordId }) => {
       // Check if there is a lookup field that matches the current object name
       console.log('Updated currentFieldsData:', currentFieldsData);
       currentFieldsData.forEach((field) => {
-        if (field.type === 'lookup' && field.name.toLowerCase() === objectName.toLowerCase()) {
+        if (field.type === 'lookup' && field.parent_object_name.toLowerCase() === objectName.toLowerCase()) {
           form.setFieldsValue({
-            [field.name]: recordId,
-          });
-
+            [field.name]: recordDetailsToSend,
+          });  
+         
           setIsFieldReadOnly(true);
-
         }
+        
       });
     }
   }, [currentFieldsData, objectName, currentRecordName, form]);
