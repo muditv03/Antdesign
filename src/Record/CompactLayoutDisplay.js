@@ -150,9 +150,9 @@ const CompactLayout = ({ compactlayout, record,object }) => {
     <>
        {/* Title */}
        <Title level={2} style={{ marginTop: '0px' }}>
-        {compactlayout && compactlayout.length > 0 
-            ? renderField(getFieldType(compactlayout?.title_field), record[compactlayout?.title_field]) 
-            : record['Name']
+        { 
+             renderField(getFieldType(compactlayout?.title_field), record[compactlayout?.title_field]) 
+            
         }
         </Title>
  
