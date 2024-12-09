@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { BASE_URL,DateFormat } from '../Components/Constant';
 import { Checkbox, Avatar,Card,Tag,Row, Col,Typography } from 'antd';
@@ -6,6 +7,8 @@ import ApiService from '../Components/apiService';
 import { colors,getUniqueColor,useHoverVisibility } from '../Components/Utility';
 import dayjs from 'dayjs';
 import LookupDisplayCard from './LookupDisplayCard';
+import RecordDetailHeader from "./RecordDetailHeader";
+
  
 const { Title } = Typography;
 
@@ -23,6 +26,9 @@ const CompactLayout = ({ compactlayout, record,object }) => {
     } = useHoverVisibility();
 
     const [fields,setFields]=useState([]);
+    const [loading, setLoading] = useState(false);
+
+
 
     const renderField = (field,fieldValue) => {
         const type=field?.type;
@@ -158,50 +164,88 @@ const CompactLayout = ({ compactlayout, record,object }) => {
         }
     };
 
-    useEffect(()=>{
-        fetchFields();
-    },[object])
-
-    const fetchFields=async()=>{
-        try{
-            const apiService = new ApiService(`${BASE_URL}/mt_fields/object/${object}`, {}, 'GET');
-            const responseData = await apiService.makeCall();
-            setFields(responseData);
-        }
-        catch(error){
-            console.log(error);
-        }
-
-    }
-
-    const getFieldType = (fieldName) => {
-       
-        const matchedField = fields.find((field) => field.name === fieldName);
-        return matchedField ? matchedField : null;
-    };
-    
-  return (
    
+
+      
+  useEffect(() => {
+    fetchFields();
+  }, [object]);
+
+  const fetchFields = async () => {
+    try {
+      const apiService = new ApiService(
+        `${BASE_URL}/mt_fields/object/${object}`,
+        {},
+        "GET"
+      );
+      const responseData = await apiService.makeCall();
+      setFields(responseData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getFieldType = (fieldName) => {
+    const matchedField = fields.find((field) => field.name === fieldName);
+    return matchedField ? matchedField : null;
+  };
+
+  // API call function for creating approval
+  const createApproval = async () => {
+    setLoading(true); // Set loading to true while making the request
+
+    try {
+      const apiService = new ApiService(
+        `${BASE_URL}/approvals/create/${object}/${record._id}`,
+        {
+          "Content-Type": "application/json",
+        },
+        "POST"
+      );
+
+      // Make the API call
+      const response = await apiService.makeCall();
+      message.success("Approval created successfully!");
+      console.log("Approval created successfully:", response.data);
+    } catch (error) {
+      message.error("Error creating approval:", error);
+      console.error("Error creating approval:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
     <>
-       {/* Title */}
-       <Title level={2} style={{ marginTop: '0px' }}>
-        { 
-             renderField(getFieldType(compactlayout?.title_field), record[compactlayout?.title_field]) 
-            
-        }
-        </Title>
- 
+      <RecordDetailHeader
+        title={renderField(
+          getFieldType(compactlayout?.title_field),
+          record[compactlayout?.title_field]
+        )}
+        buttons={[
+          {
+            label: "Submit For Approval",
+            type: "primary",
+            onClick: createApproval, // Your custom function
+            loading: loading, // Pass the loading state here
+          },
+        ]}
+      />
+
       {/* Compact Layout Fields */}
-      <Card style={{borderRadius:'15px'}}>
+      <Card style={{ borderRadius: "15px" }}>
         <Row gutter={8}>
           {compactlayout?.layout_fields?.map((field) => {
             const matchedfield = getFieldType(field.field_name);
-            const columnSpan = Math.floor(24 / compactlayout.layout_fields.length) || 24;
+            const columnSpan =
+              Math.floor(24 / compactlayout.layout_fields.length) || 24;
 
             return (
               <Col span={columnSpan} key={field.order}>
                 {/* Display Label */}
-                <Typography.Text style={{ fontSize: '16px' }} strong>{field.display_label}</Typography.Text>
+                <Typography.Text style={{ fontSize: "16px" }} strong>
+                  {field.display_label}
+                </Typography.Text>
                 <br />
                 {/* Field Value */}
                 <Typography.Text>
@@ -212,9 +256,7 @@ const CompactLayout = ({ compactlayout, record,object }) => {
           })}
         </Row>
       </Card>
-    
     </>
-      
   );
 };
 

@@ -11,6 +11,7 @@ import CreateObjectDrawer from './CreateObjectDrawer';
 import CreateLayout from './CreateLayout';
 import SearchLayout from './SearchLayout';
 import CompactLayout from './CompactLayout';
+import ApprovalProcess from './ApprovalProcess';
 
 
 const { Title } = Typography;
@@ -269,6 +270,11 @@ const ObjectFieldDetail = () => {
           <h2>Search Result Layout</h2>
             <SearchLayout setAvailableFields={setAvailableFields}  setIsEditMode={setIsEditMode} setSelectedFields={setSelectedFields} availableFields={availableFields} selectedFields ={selectedFields} loading= {loading} isEditMode={isEditMode} toggleSelection={toggleSelection} handleSave={handleSave} handleEdit={handleEdit} />
         </Card>
+        </TabPane>
+        <TabPane tab="Approval Process" key="8">
+          <Card>
+          <ApprovalProcess object={record} />
+          </Card>
         </TabPane>
       </Tabs>
     </div>
