@@ -82,7 +82,9 @@ const CompactLayoutEditor = ({ onBack, object, fields,selectedLayout,fetchCompac
         if (!titlefield ||  columns.length === 0) {
             message.error("Please fill all the required fields and add at least one layout field.");
             return;
-        }
+        }  
+
+
     
         // Construct the body
         const requestBody = {
@@ -110,6 +112,10 @@ const CompactLayoutEditor = ({ onBack, object, fields,selectedLayout,fetchCompac
 
         }
 
+        console.log(requestBody);
+        console.log(apiurl);
+        console.log(req);
+
         try{
             const apiService = new ApiService(apiurl, {}, req, requestBody );
             const response = await apiService.makeCall();
@@ -119,7 +125,7 @@ const CompactLayoutEditor = ({ onBack, object, fields,selectedLayout,fetchCompac
               );
 
             setDescription('');
-            setColumns('');
+            setColumns([]);
             setTitleField('');
             fetchCompactLayout();
             onBack(); 
