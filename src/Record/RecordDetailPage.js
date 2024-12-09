@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {  Typography, Tabs,Card,Col,Row } from 'antd';
+import {  Typography, Tabs,Card,Col,Row, message, Button } from 'antd';
 import { useParams } from 'react-router-dom';
 import RelatedRecord from './RelatedRecords';
 import { useLocation } from 'react-router-dom';
@@ -21,6 +21,7 @@ const RecordDetail = () => {
   const { objectid } = location.state || '';  
   const [record, setRecord] = useState([]);
   const [compactlayout,setCompactLayout]=useState([]);
+  const [ loading, setLoading ] = useState(false);
 
 
   const fetchRecords = async () => {
