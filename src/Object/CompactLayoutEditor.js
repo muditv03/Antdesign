@@ -5,11 +5,11 @@ import { BASE_URL } from '../Components/Constant';
 import { ConsoleSqlOutlined, DeleteOutlined } from "@ant-design/icons";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
-
+ 
 const { Title } = Typography;
 const { Option } = Select;
 
-const CompactLayoutEditor = ({ onBack, object, fields,selectedLayout }) => {
+const CompactLayoutEditor = ({ onBack, object, fields,selectedLayout,fetchCompactLayout }) => {
 
 
     const [updatedFields, setUpdatedFields] = useState(fields.map(field => field.name));
@@ -97,18 +97,31 @@ const CompactLayoutEditor = ({ onBack, object, fields,selectedLayout }) => {
                 })),
             },
         };
+        
+
+        let apiurl='';
+        let req='';
+        if(selectedLayout){
+            apiurl=`${BASE_URL}/edit_compact_layout/${selectedLayout._id}`;
+            req='PUT';
+        }else{
+            apiurl=`${BASE_URL}/create_compact_layout`;
+            req='POST';
+
+        }
 
         try{
-            const apiService = new ApiService(`${BASE_URL}/create_compact_layout`, {}, "POST", requestBody );
+            const apiService = new ApiService(apiurl, {}, req, requestBody );
             const response = await apiService.makeCall();
             console.log(response)
             message.success(
-                "Compact Layout created successfully"
+                selectedLayout?._id ? "Compact Layout updated successfully" : "Compact Layout created successfully"
               );
 
             setDescription('');
             setColumns('');
             setTitleField('');
+            fetchCompactLayout();
             onBack(); 
         }
         catch (error) {

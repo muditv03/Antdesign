@@ -2,10 +2,10 @@ import React,{useState,useEffect} from "react";
 import ApiService from '../Components/apiService';
 import { BASE_URL } from '../Components/Constant';
 import { Table, Button, Typography, Checkbox,Row,Col,Tooltip,Popconfirm } from 'antd';
-import { CopyOutlined, DeleteOutlined } from '@ant-design/icons';
+import { CopyOutlined, DeleteOutlined,EditOutlined } from '@ant-design/icons';
 import CompactLayoutEditor from "./CompactLayoutEditor";
 const { Title } = Typography;
-
+ 
 const CompactLayout=({object})=>{
 
     const [allcompactLayout,setAllCompactLayout]=useState([]);
@@ -91,6 +91,12 @@ const CompactLayout=({object})=>{
         key: 'operation',
         render: (_, layout) => (
           <>
+          <Tooltip title="Edit">
+            <EditOutlined
+                onClick={() => handleEditCompactLayout(layout)}
+                style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
+            />
+            </Tooltip>
             <Tooltip title="Delete">
               <Popconfirm
                 title="Are you sure you want to delete this item?"
@@ -139,6 +145,7 @@ const CompactLayout=({object})=>{
                         columns={columns}
                         rowKey="_id"
                         pagination={{ pageSize: 10 }}
+                        fetchCompactLayout={fetchCompactLayout}
                     />
 
 
