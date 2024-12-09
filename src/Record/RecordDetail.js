@@ -48,12 +48,8 @@ const RecordDetails = ({ objectName, id }) => {
 
     const fetchRecords = async () => {
         try {
-            console.log('record after saving is ');
             setLoading(true);
-
-            // Fetch the record data
-            console.log(objectName);
-            console.log(id);
+            console.log('record details are');
             const apiService = new ApiService(`${BASE_URL}/fetch_single_record/${objectName}/${id}`, {}, 'GET');
             const responseData = await apiService.makeCall();
             console.log('record fetched is ' + JSON.stringify(responseData)); // Process the data as needed
@@ -62,8 +58,7 @@ const RecordDetails = ({ objectName, id }) => {
             const layouts = new ApiService(`${BASE_URL}/get_by_objectName/${objectName}`, {}, 'GET');
             const res = await layouts.makeCall();
             const activeLayout = res.filter(layout => layout.active);
-            console.log('active layout is ');
-            console.log(activeLayout);
+           
             setLayout(activeLayout);
             const fieldCallout = new ApiService(`${BASE_URL}/mt_fields/object/${objectName}`, {}, 'GET');
             const fieldsResponse = await fieldCallout.makeCall();
@@ -71,26 +66,22 @@ const RecordDetails = ({ objectName, id }) => {
                 field => !['recordCount', 'CreatedBy', 'LastModifiedBy'].includes(field.name)
               );
                
-            console.log('fieldresponse :', fieldsResponse);
-            console.log(fieldsResponse);
+            
             setFields(filteredFields);
-            console.log(JSON.stringify(responseData));
             const updatedLookupOptions = {}; // To store lookup options
 
             // Format date fields in recordData
             fieldsResponse.forEach(field => {
                 if (field.type === 'Date' && recordData[field.name]) {
-                    // Format the date using dayjs to 'DD/MM/YYYY'
                     recordData[field.name] = dayjs(recordData[field.name]).format(DateFormat);
+                    console.log(recordData[field.name]);
                 }
                 if (field.type === 'percentage' && recordData[field.name]) {
                     recordData[field.name] = recordData[field.name] * 100;
                 }
                 if (field.type === 'DateTime' && recordData[field.name]) {
                     // Assuming recordData[field.name] is in UTC
-                    console.log(recordData[field.name]);
                     const localDateTime = dayjs(recordData[field.name]).utc().format('DD/MM/YYYY HH:mm:ss'); // Convert to local time
-                    //console.log('formatted date time is ' + localDateTime.format('DD/MM/YYYY HH:mm:ss'));
                     recordData[field.name] = localDateTime; // Store formatted date-time
                 }
                 if (field.type === 'lookup' && recordData[field.name]) {
@@ -100,16 +91,13 @@ const RecordDetails = ({ objectName, id }) => {
 
             setRecord(recordData);
             setLookupData(prevState => ({ ...prevState, ...updatedLookupOptions }));
-            console.log('record data after editing is ');
-            console.log(recordData);
+           
             setInitialValues(recordData);
-            console.log('contact record data is');
-            console.log(recordData['Contact']);
+           
             form.setFieldsValue(recordData);
             setLoading(false);
 
         } catch (err) {
-            console.error('Error fetching records', err);
             setLoading(false);
 
         } finally {
@@ -118,25 +106,19 @@ const RecordDetails = ({ objectName, id }) => {
         }
 
     };
-
+ 
 
     const onFinish = async (values) => {
         
         try {
-            console.log(form.getFieldValue('CreationDate'));
-            console.log(form.getFieldValue('DateTimeCreation'));
-            console.log('values are');
-            console.log(values);
-            console.log(values['CreationDate'])
+           
             const bodyData = Object.assign({}, values);
-            console.log(bodyData);
             fields.forEach(field => {
                 if(bodyData[field.name]){
                 if (field.type === 'lookup' && field.Name === 'CreatedBy' || field.Name === 'LastModifiedBy') {
                     let lookupFieldName;
                     lookupFieldName = field.name + '_id';
-                    console.log('not changed lookup values');
-                    console.log(bodyData[field.name]);
+                    
                     if (bodyData[field.name]?._id) {
 
                         bodyData[lookupFieldName] = bodyData[field.name]._id;
@@ -152,8 +134,7 @@ const RecordDetails = ({ objectName, id }) => {
                 }
 
                else if (field.type === 'Address' ) {
-                    console.log('Checking Address Values')
-                    console.log(values)
+                    
                     bodyData[field.name] = {
                         street: bodyData[field.name]['street'] || '',
                         city: bodyData[field.name]['city'] || '',
@@ -164,15 +145,12 @@ const RecordDetails = ({ objectName, id }) => {
 
                 }
                 else if (field.type === 'Date') {
-                    console.log('DATE VALUES ARE:')
-                    console.log(form.getFieldValue([field.name]));
+                   
                     bodyData[field.name] = form.getFieldValue([field.name]);
-            // console.log(form.getFieldValue('DateTimeCreation'));
                 }
 
                 else if(field.type === 'DateTime') {
-                    console.log('DATE TIME VALUES ARE:')
-                    console.log(form.getFieldValue([field.name]));
+                   
                     bodyData[field.name] = form.getFieldValue([field.name]);
                 }
             }
@@ -181,7 +159,6 @@ const RecordDetails = ({ objectName, id }) => {
             });
 
 
-            console.log(bodyData);
             const sanitizedData = Object.keys(bodyData).reduce((acc, key) => {
                 acc[key] = bodyData[key] === undefined ? "" : bodyData[key];
                 return acc;
@@ -194,9 +171,7 @@ const RecordDetails = ({ objectName, id }) => {
                 data: data
             };
 
-            console.log('final body');
-            console.log('final body',body);
-
+           
             const apiService = new ApiService(`${BASE_URL}/insert_or_update_records`, {
                 'Content-Type': 'application/json', // Add any necessary headers, such as content type
             }, 'POST', body);
@@ -204,13 +179,10 @@ const RecordDetails = ({ objectName, id }) => {
             message.success('Record saved successfully');
 
             setIsEditable(false);
-            console.log('moment before calling fetch records');
             fetchRecords();
-            console.log('moment after calling fetch records');
 
         } catch (error) {
 
-            //console.error('Error saving record'+ error.response.data[0]);
             const errorMessage = error && typeof error === 'object'
                 ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
                 : 'Failed to save record due to an unknown error';
@@ -220,28 +192,20 @@ const RecordDetails = ({ objectName, id }) => {
     };
 
     const handleSearch = async (value, fieldId, name) => {
-        console.log('handle search called');
 
-        console.log(value)
         if (value) {
-            console.log(fieldId);
-            console.log(value);
+          
             try {
                 const apiService = new ApiService(`${BASE_URL}/search_lookup/${fieldId}/${value}`, {
                     'Content-Type': 'application/json', // Add any necessary headers, such as content type
                 }, 'GET',);
                 const response = await apiService.makeCall();
-                console.log('response of lookups ar');
-                console.log(response);
-                console.log('lookupdata ');
-                console.log(lookupData[name]);
-                // Assuming the response data structure has options as an array
+               
                 setLookupOptionsForParent(prevOptions => ({
                     ...prevOptions,
                     [name]: response // Store the response for the specific field name
                 }));
             } catch (error) {
-                console.error("API request failed:", error);
                 setLookupOptionsForParent(prevOptions => ({
                     ...prevOptions,
                     [name]: []
@@ -302,8 +266,7 @@ const RecordDetails = ({ objectName, id }) => {
 
 
         const handleAddressChange = (parentField, childField, value) => {
-            console.log(parentField);
-            console.log(childField);
+            
             const currentAddress = form.getFieldValue(parentField);
             const newAddress = {
                 ...currentAddress,
@@ -351,7 +314,6 @@ const RecordDetails = ({ objectName, id }) => {
                         name={name}
                         field={field}
                         record={record}
-                        fetchRecords={fetchRecords}
 
                     />
 
@@ -430,9 +392,7 @@ const RecordDetails = ({ objectName, id }) => {
                                                             {Array.from({ length: maxItems }).map((_, rowIndex) => {
                                                                 const item = columnItems[rowIndex];
                                                                 const matchedField = fields.find(field => field.name === item?.name);
-                                                                console.log(matchedField);
-                                                                console.log('item is ');
-                                                                console.log(item?.name);
+                                                                
                                                                 return (
                                                                     item && (
                                                                         <Form.Item
@@ -469,15 +429,15 @@ const RecordDetails = ({ objectName, id }) => {
 
                         )}
                         <div className="system-info-section" style={{
-        marginTop: '20px',
-        width: '100%',
-        padding: '20px', // Add padding for content spacing
-        border: '1px solid #ddd', // Add border for box appearance
-        borderRadius: '8px', // Rounded corners for a modern look
-        backgroundColor: '#fff', // Background color
-        display: 'flex',
-        flexDirection: 'column',
-    }}>
+                            marginTop: '20px',
+                            width: '100%',
+                            padding: '20px', // Add padding for content spacing
+                            border: '1px solid #ddd', // Add border for box appearance
+                            borderRadius: '8px', // Rounded corners for a modern look
+                            backgroundColor: '#fff', // Background color
+                            display: 'flex',
+                            flexDirection: 'column',
+                        }}>
                             <Title level={3} style={{ marginTop: '0px' }}>System Information</Title>
                             <Row gutter={16}>
                                 <Col span={12}>

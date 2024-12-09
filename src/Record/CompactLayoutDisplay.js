@@ -1,36 +1,19 @@
-import React, { useEffect,useState } from 'react';
-import { Checkbox, Avatar,Card,Tag } from 'antd';
-import { PhoneOutlined } from '@ant-design/icons';
-import LookupDisplayCard from './LookupDisplayCard';
+import React, { useEffect, useState } from 'react';
 import { BASE_URL,DateFormat } from '../Components/Constant';
+import { Checkbox, Avatar,Card,Tag,Row, Col,Typography } from 'antd';
+import { PhoneOutlined } from '@ant-design/icons';
+import ApiService from '../Components/apiService'; 
 import { colors,getUniqueColor,useHoverVisibility } from '../Components/Utility';
 import dayjs from 'dayjs';
 
- 
+const { Title } = Typography;
 
-const DisplayField = ({ type, form, name, field, record,layouts }) => {
+const CompactLayout = ({ compactlayout, record,object }) => {
 
-    const {
-        isHovered,
-        isVisible,
-        handleMouseEnter,
-        handleMouseLeave,
-        handleContentMouseEnter,
-        handleContentMouseLeave,
-    } = useHoverVisibility();
+    const [fields,setFields]=useState([]);
 
-    
-    useEffect(() => {
-        // Logic to handle changes in record data
-        if (record) {
-        
-        }
-    }, [record]);
-    
-    const fieldValue = form.getFieldValue(name);
-  
-    const displayField=field?.lookup_config?.display_fields; 
-    const renderField = () => {
+    const renderField = (field,fieldValue) => {
+        const type=field?.type;
         switch (type) {
             case 'boolean':
                 return <Checkbox checked={fieldValue} disabled />;
@@ -38,7 +21,6 @@ const DisplayField = ({ type, form, name, field, record,layouts }) => {
                 return `$${fieldValue !== undefined && fieldValue !== null ? parseFloat(fieldValue).toFixed(2) : ''}`;
             case 'String':
                 return fieldValue || '';
-              
             case 'percentage':
                 return `${fieldValue !== undefined && fieldValue !== null ? parseFloat(fieldValue) : ''}%`;
             case 'Integer':
@@ -63,54 +45,30 @@ const DisplayField = ({ type, form, name, field, record,layouts }) => {
                           .filter(Boolean)
                           .join(', ')
                     : '';
-
             case 'lookup':
-                if (!form.getFieldValue(name+'_id')) {
-                    return '';
-                }
-                
-                return fieldValue ? (
-                    <div
-                      style={{ position: 'relative', display: 'inline-block' }}
-                      onMouseEnter={handleMouseEnter}
-                      onMouseLeave={handleMouseLeave}
-                    >
-                      {fieldValue?.Name ? (
-                        <a
-                          href={`/record/${field.parent_object_name}/${record[field.name + '_id']}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-                        >
-                          <Avatar
-                            size="small"
-                            style={{
-                              backgroundColor: '#87d068',
-                              marginRight: 8,
-                            }}
-                          >
-                            {(fieldValue?.Name || '').charAt(0).toUpperCase()}
-                          </Avatar>
-                          {fieldValue?.Name}
-                        </a>
-                      ) : (
-                        fieldValue?.Name
-                      )}
-                
-                      {isHovered && isVisible && (
-                        <div
-                          onMouseEnter={handleContentMouseEnter}
-                          onMouseLeave={handleContentMouseLeave}
-                        >
-                          <LookupDisplayCard
-                            displayFields={field?.lookup_config?.display_fields} // Pass the fields you want to display
-                            fieldValue={fieldValue}
-                            objectName={field.parent_object_name} // Parent object name for fetching fields
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ) : fieldValue?.Name;
+                const lookupId = fieldValue?.Name;
+                const ob = field.parent_object_name;
+                return  <a
+                href={`/record/${ob}/${lookupId?._id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+              >
+                <Avatar
+                  size='small'
+                  style={{
+                    backgroundColor: '#87d068',
+                    marginRight: 8,
+                  }}
+                >
+                  {lookupId?.charAt(0).toUpperCase()}
+                </Avatar>
+                {lookupId}
+              </a>   
+            case 'Date':
+                return fieldValue ? dayjs(fieldValue).format(DateFormat) : ''  ;
+            case 'DateTime':
+                return fieldValue ? dayjs(fieldValue).utc().format('DD/MM/YYYY HH:mm:ss') : '';
             case 'Phone':
                 return fieldValue ? (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -164,26 +122,65 @@ const DisplayField = ({ type, form, name, field, record,layouts }) => {
                 return fieldValue || '';
         }
     };
+
+    useEffect(()=>{
+        fetchFields();
+    },[object])
+
+    const fetchFields=async()=>{
+        try{
+            const apiService = new ApiService(`${BASE_URL}/mt_fields/object/${object}`, {}, 'GET');
+            const responseData = await apiService.makeCall();
+            setFields(responseData);
+        }
+        catch(error){
+            console.log(error);
+        }
+
+    }
+
+    const getFieldType = (fieldName) => {
+       
+        const matchedField = fields.find((field) => field.name === fieldName);
+        return matchedField ? matchedField : null;
+    };
+    
+  return (
+   
+    <>
+       {/* Title */}
+       <Title level={2} style={{ marginTop: '0px' }}>
+        {compactlayout && compactlayout.length > 0 
+            ? renderField(getFieldType(compactlayout?.title_field), record[compactlayout?.title_field]) 
+            : record['Name']
+        }
+        </Title>
  
-    return (
-        <div
-            style={{
-                flex: 1,
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                maxWidth: '100%',
-                background: 'transparent',
-                border: 'none',
-                padding: 0,
-                margin: 0,
-                overflowWrap: 'break-word',
-                fontSize: '16px',
-                fontWeight: 500,
-            }}
-        >
-            {renderField()}
-        </div>
-    );
+      {/* Compact Layout Fields */}
+      <Card style={{borderRadius:'15px'}}>
+        <Row gutter={8}>
+          {compactlayout?.layout_fields?.map((field) => {
+            const matchedfield = getFieldType(field.field_name);
+            const columnSpan = Math.floor(24 / compactlayout.layout_fields.length) || 24;
+
+            return (
+              <Col span={columnSpan} key={field.order}>
+                {/* Display Label */}
+                <Typography.Text style={{ fontSize: '16px' }} strong>{field.display_label}</Typography.Text>
+                <br />
+                {/* Field Value */}
+                <Typography.Text>
+                  {renderField(matchedfield, record[field.field_name])}
+                </Typography.Text>
+              </Col>
+            );
+          })}
+        </Row>
+      </Card>
+    
+    </>
+      
+  );
 };
 
-export default DisplayField;
+export default CompactLayout;

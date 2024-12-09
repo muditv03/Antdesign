@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import ApiService from '../Components/apiService';
 import { BASE_URL } from '../Components/Constant';
 import { Table, Button, Typography, Checkbox,Row,Col,Tooltip,Popconfirm } from 'antd';
-import { CopyOutlined, DeleteOutlined } from '@ant-design/icons';
-
+import { CopyOutlined, DeleteOutlined,EditOutlined} from '@ant-design/icons';
+ 
 import LayoutEditor from "./LayoutEditor";
 import dayjs from 'dayjs';
 
@@ -77,6 +77,13 @@ const CreateLayout = ({ object }) => {
         key: 'operation',
         render: (_, layout) => (
           <>
+           <Tooltip title="Edit">
+            <EditOutlined
+                onClick={() => handleEditLayout(layout,false)}
+                style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
+            />
+            </Tooltip>                 
+            
             <Tooltip title="Clone">
               <CopyOutlined
                 onClick={() => handleEditLayout(layout,true)}
