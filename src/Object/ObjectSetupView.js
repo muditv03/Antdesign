@@ -124,7 +124,7 @@ const DataTable = () => {
         setDependencyMessage(error.message);
         setDependencyModalVisible(true);
       } else {
-        message.error('Failed to delete record.');
+        message.error(error.error);
         console.error('Error deleting record:', error);
       }
     } finally {
