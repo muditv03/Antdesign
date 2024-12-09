@@ -5,7 +5,7 @@ import { Table, Button, Typography, Checkbox,Row,Col,Tooltip,Popconfirm } from '
 import { CopyOutlined, DeleteOutlined,EditOutlined } from '@ant-design/icons';
 import CompactLayoutEditor from "./CompactLayoutEditor";
 const { Title } = Typography;
- 
+  
 const CompactLayout=({object})=>{
 
     const [allcompactLayout,setAllCompactLayout]=useState([]);
@@ -62,11 +62,7 @@ const CompactLayout=({object})=>{
             dataIndex: "description",
             key: "description",
         },
-        {
-            title: "Description",
-            dataIndex: "description",
-            key: "description",
-        },
+       
         {
             title: "Layout Fields",
             dataIndex: "layout_fields",
@@ -155,6 +151,7 @@ const CompactLayout=({object})=>{
                 object={object.name}
                 fields={fields}
                 selectedLayout={selectedCompactLayout}
+                fetchCompactLayout={fetchCompactLayout}
                 onBack={() => setShowCompactLayoutEditor(false)}
             />
         )}
