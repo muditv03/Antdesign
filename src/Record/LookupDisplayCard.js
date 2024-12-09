@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 
 const LookupDisplayCard = ({ displayFields, fieldValue, objectName }) => {
     const [fieldData, setFieldData] = useState([]);
- 
+  
     // Fetch fields data when component mounts
     useEffect(() => {
         if (objectName) {

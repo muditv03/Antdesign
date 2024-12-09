@@ -38,7 +38,6 @@ const DisplayField = ({ type, form, name, field, record,layouts }) => {
                 return `$${fieldValue !== undefined && fieldValue !== null ? parseFloat(fieldValue).toFixed(2) : ''}`;
             case 'String':
                 return fieldValue || '';
-              
             case 'percentage':
                 return `${fieldValue !== undefined && fieldValue !== null ? parseFloat(fieldValue) : ''}%`;
             case 'Integer':

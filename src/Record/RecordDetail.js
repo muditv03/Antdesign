@@ -10,6 +10,8 @@ import DisplayField from './RecordFieldDisplay';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import { colors, getUniqueColor, useHoverVisibility } from '../Components/Utility';
+import LookupDisplayCard from './LookupDisplayCard';
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -18,6 +20,24 @@ dayjs.extend(timezone);
 const { Title } = Typography;
 
 const RecordDetails = ({ objectName, id }) => {
+
+    const {
+        isHovered: isCreatedByHovered,
+        isVisible: isCreatedByVisible,
+        handleMouseEnter: handleCreatedByMouseEnter,
+        handleMouseLeave: handleCreatedByMouseLeave,
+        handleContentMouseEnter: handleCreatedByContentMouseEnter,
+        handleContentMouseLeave: handleCreatedByContentMouseLeave,
+    } = useHoverVisibility();
+    
+    const {
+        isHovered: isUpdatedByHovered,
+        isVisible: isUpdatedByVisible,
+        handleMouseEnter: handleUpdatedByMouseEnter,
+        handleMouseLeave: handleUpdatedByMouseLeave,
+        handleContentMouseEnter: handleUpdatedByContentMouseEnter,
+        handleContentMouseLeave: handleUpdatedByContentMouseLeave,
+    } = useHoverVisibility();
 
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(true);  // Initial state is true to show spinner initially
@@ -30,7 +50,8 @@ const RecordDetails = ({ objectName, id }) => {
     const [initialValues, setInitialValues] = useState({});
     const [lookupData, setLookupData] = useState({});
     const [layout, setLayout] = useState({});
-    
+    const [createdByField, setCreatedByField] = useState([]);
+    const [LastModifiedByField, setLastModifiedByField] = useState([]);
 
     useEffect(() => {
         fetchRecords();
@@ -58,15 +79,22 @@ const RecordDetails = ({ objectName, id }) => {
             const layouts = new ApiService(`${BASE_URL}/get_by_objectName/${objectName}`, {}, 'GET');
             const res = await layouts.makeCall();
             const activeLayout = res.filter(layout => layout.active);
-           
+
             setLayout(activeLayout);
             const fieldCallout = new ApiService(`${BASE_URL}/mt_fields/object/${objectName}`, {}, 'GET');
             const fieldsResponse = await fieldCallout.makeCall();
             const filteredFields = fieldsResponse.filter(
                 field => !['recordCount', 'CreatedBy', 'LastModifiedBy'].includes(field.name)
-              );
-               
-            
+            );
+
+            const createdBy = fieldsResponse.filter(field => field.name === 'CreatedBy');
+            const lastModifiedBy = fieldsResponse.filter(field => field.name === 'LastModifiedBy');
+
+           
+
+            setCreatedByField(createdBy);
+            setLastModifiedByField(lastModifiedBy);
+
             setFields(filteredFields);
             const updatedLookupOptions = {}; // To store lookup options
 
@@ -91,9 +119,9 @@ const RecordDetails = ({ objectName, id }) => {
 
             setRecord(recordData);
             setLookupData(prevState => ({ ...prevState, ...updatedLookupOptions }));
-           
+
             setInitialValues(recordData);
-           
+
             form.setFieldsValue(recordData);
             setLoading(false);
 
@@ -106,54 +134,54 @@ const RecordDetails = ({ objectName, id }) => {
         }
 
     };
- 
+
 
     const onFinish = async (values) => {
-        
+
         try {
-           
+
             const bodyData = Object.assign({}, values);
             fields.forEach(field => {
-                if(bodyData[field.name]){
-                if (field.type === 'lookup' && field.Name === 'CreatedBy' || field.Name === 'LastModifiedBy') {
-                    let lookupFieldName;
-                    lookupFieldName = field.name + '_id';
-                    
-                    if (bodyData[field.name]?._id) {
+                if (bodyData[field.name]) {
+                    if (field.type === 'lookup' && field.Name === 'CreatedBy' || field.Name === 'LastModifiedBy') {
+                        let lookupFieldName;
+                        lookupFieldName = field.name + '_id';
 
-                        bodyData[lookupFieldName] = bodyData[field.name]._id;
+                        if (bodyData[field.name]?._id) {
 
-                    } else {
-                        bodyData[lookupFieldName] = bodyData[field.name];
+                            bodyData[lookupFieldName] = bodyData[field.name]._id;
+
+                        } else {
+                            bodyData[lookupFieldName] = bodyData[field.name];
+                        }
+                        delete bodyData[field.name];
                     }
-                    delete bodyData[field.name];
-                }
 
-               else if (field.type === 'percentage') {
-                    bodyData[field.name] = bodyData[field.name] / 100;
-                }
+                    else if (field.type === 'percentage') {
+                        bodyData[field.name] = bodyData[field.name] / 100;
+                    }
 
-               else if (field.type === 'Address' ) {
-                    
-                    bodyData[field.name] = {
-                        street: bodyData[field.name]['street'] || '',
-                        city: bodyData[field.name]['city'] || '',
-                        state: bodyData[field.name]['state'] || '',
-                        postal_code: bodyData[field.name]['postal_code'] || '',
-                        country: bodyData[field.name]['country'] || '',
-                    };
+                    else if (field.type === 'Address') {
 
-                }
-                else if (field.type === 'Date') {
-                   
-                    bodyData[field.name] = form.getFieldValue([field.name]);
-                }
+                        bodyData[field.name] = {
+                            street: bodyData[field.name]['street'] || '',
+                            city: bodyData[field.name]['city'] || '',
+                            state: bodyData[field.name]['state'] || '',
+                            postal_code: bodyData[field.name]['postal_code'] || '',
+                            country: bodyData[field.name]['country'] || '',
+                        };
 
-                else if(field.type === 'DateTime') {
-                   
-                    bodyData[field.name] = form.getFieldValue([field.name]);
+                    }
+                    else if (field.type === 'Date') {
+
+                        bodyData[field.name] = form.getFieldValue([field.name]);
+                    }
+
+                    else if (field.type === 'DateTime') {
+
+                        bodyData[field.name] = form.getFieldValue([field.name]);
+                    }
                 }
-            }
 
 
             });
@@ -171,7 +199,7 @@ const RecordDetails = ({ objectName, id }) => {
                 data: data
             };
 
-           
+
             const apiService = new ApiService(`${BASE_URL}/insert_or_update_records`, {
                 'Content-Type': 'application/json', // Add any necessary headers, such as content type
             }, 'POST', body);
@@ -194,13 +222,13 @@ const RecordDetails = ({ objectName, id }) => {
     const handleSearch = async (value, fieldId, name) => {
 
         if (value) {
-          
+
             try {
                 const apiService = new ApiService(`${BASE_URL}/search_lookup/${fieldId}/${value}`, {
                     'Content-Type': 'application/json', // Add any necessary headers, such as content type
                 }, 'GET',);
                 const response = await apiService.makeCall();
-               
+
                 setLookupOptionsForParent(prevOptions => ({
                     ...prevOptions,
                     [name]: response // Store the response for the specific field name
@@ -221,7 +249,7 @@ const RecordDetails = ({ objectName, id }) => {
     };
 
     const renderFieldWithEdit = (field, selectedDate, setSelectedDate) => {
-        const { name, label, type, picklist_values, isTextArea, required, help_text, _id, lookup_config,parent_object_name } = field;
+        const { name, label, type, picklist_values, isTextArea, required, help_text, _id, lookup_config, parent_object_name } = field;
         const validationRules = [];
         // Check for required field
         if (required) {
@@ -231,7 +259,7 @@ const RecordDetails = ({ objectName, id }) => {
             });
         }
 
-        if (name === 'recordCount' || name==='CreatedBy' || name==='LastModifiedBy') {
+        if (name === 'recordCount' || name === 'CreatedBy' || name === 'LastModifiedBy') {
             return null;
         }
 
@@ -266,7 +294,7 @@ const RecordDetails = ({ objectName, id }) => {
 
 
         const handleAddressChange = (parentField, childField, value) => {
-            
+
             const currentAddress = form.getFieldValue(parentField);
             const newAddress = {
                 ...currentAddress,
@@ -337,19 +365,16 @@ const RecordDetails = ({ objectName, id }) => {
             </div>
         );
     };
- 
+
 
     return (
         <>
-            <Card style={{ display: 'flex', flexDirection: 'column' }}>
-                <Form layout="vertical" onFinish={onFinish} style={{ flex: 1, overflow: 'auto' }}>
+            <Card style={{ display: 'flex', flexDirection: 'column', height: 'auto',overflow: 'visible' }}>
+                <Form layout="vertical" onFinish={onFinish} style={{ flex: 1 }}>
                     <Title level={3} style={{ marginTop: '0px' }}>Record Details</Title>
-                    <div style={{
-                        overflow: 'auto',
-                        paddingRight: '15px',
-                        height: 'calc(100vh - 300px)', // Adjust this value based on your layout
-                        flex: 1
-                    }}>
+                    <div 
+                        style={{ paddingRight: '15px', flex: 1, overflow: 'visible' }}
+                    >
                         {loading ? (
                             <Spin size="large" style={{ marginTop: '20px' }} />
                         ) : (
@@ -392,7 +417,7 @@ const RecordDetails = ({ objectName, id }) => {
                                                             {Array.from({ length: maxItems }).map((_, rowIndex) => {
                                                                 const item = columnItems[rowIndex];
                                                                 const matchedField = fields.find(field => field.name === item?.name);
-                                                                
+
                                                                 return (
                                                                     item && (
                                                                         <Form.Item
@@ -415,15 +440,15 @@ const RecordDetails = ({ objectName, id }) => {
                                 ))
                             ) : (
                                 <div >
-                                <Row gutter={24} style={{ marginBottom: '0px' }}>
-                                    {fields.map((field, index) => (
-                                        <Col key={index} xs={24} sm={12} style={{ marginBottom: -5 }}>
-                                            <Form.Item label={<span>{field.label} {field.help_text && <Tooltip title={field.help_text}><InfoCircleOutlined style={{ marginLeft: 5 }} /></Tooltip>}</span>} style={{ marginBottom: -1, padding: '0px' }}>
-                                                {renderFieldWithEdit(field, selectedDate, setSelectedDate)}
-                                            </Form.Item>
-                                        </Col>
-                                    ))}
-                                </Row>
+                                    <Row gutter={24} style={{ marginBottom: '0px' }}>
+                                        {fields.map((field, index) => (
+                                            <Col key={index} xs={24} sm={12} style={{ marginBottom: -5 }}>
+                                                <Form.Item label={<span>{field.label} {field.help_text && <Tooltip title={field.help_text}><InfoCircleOutlined style={{ marginLeft: 5 }} /></Tooltip>}</span>} style={{ marginBottom: -1, padding: '0px' }}>
+                                                    {renderFieldWithEdit(field, selectedDate, setSelectedDate)}
+                                                </Form.Item>
+                                            </Col>
+                                        ))}
+                                    </Row>
                                 </div>
                             )
 
@@ -458,48 +483,97 @@ const RecordDetails = ({ objectName, id }) => {
                                 </Col>
                             </Row>
                             <Row gutter={16}>
-                                    <Col span={12}>
-                                        <Form.Item label="Created by" style={{ marginBottom: 0,borderBottom: '1px solid #ddd', }}>
-                                            <a
-                                                href={`/record/User/${record?.CreatedBy?._id}`} // Assuming 'createdBy.id' holds the user ID
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-                                            >
-                                                <Avatar
-                                                    size="small"
-                                                    style={{
-                                                        backgroundColor: '#87d068',
-                                                        marginRight: 8,
-                                                    }}
+                                <Col span={12}>
+                                    <Form.Item key="CreatedBy" label="Created by" style={{ marginBottom: 0, borderBottom: '1px solid #ddd', }}>
+                                        
+                                        <div
+                                            style={{ position: 'relative', display: 'inline-block' }}
+                                            onMouseEnter={handleCreatedByMouseEnter}
+                                            onMouseLeave={handleCreatedByMouseLeave}
+                                        >
+                                            {record?.CreatedBy?.Name ? (
+                                                <a
+                                                    href={`/record/${createdByField[0].parent_object_name}/${record?.CreatedBy?._id}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
                                                 >
-                                                    {(record?.CreatedBy?.Name || '').charAt(0).toUpperCase()}
-                                                </Avatar>
-                                                {record?.CreatedBy?.Name}
-                                            </a>
-                                        </Form.Item>
-                                    </Col>
-                                    <Col span={12}>
-                                        <Form.Item label="Updated by" style={{ marginBottom: 0,borderBottom: '1px solid #ddd', }}>
-                                            <a
-                                                href={`/record/User/${record?.LastModifiedBy?._id}`} // Assuming 'updatedBy.id' holds the user ID
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-                                            >
-                                                <Avatar
-                                                    size="small"
-                                                    style={{
-                                                        backgroundColor: '#87d068',
-                                                        marginRight: 8,
-                                                    }}
+                                                    <Avatar
+                                                        size="small"
+                                                        style={{
+                                                            backgroundColor: '#87d068',
+                                                            marginRight: 8,
+                                                        }}
+                                                    >
+                                                        {(record?.CreatedBy?.Name || '').charAt(0).toUpperCase()}
+                                                    </Avatar>
+                                                    {record?.CreatedBy?.Name}
+                                                </a>
+                                            ) : (
+                                                record?.CreatedBy?.Name
+                                            )}
+
+                                            {isCreatedByHovered && isCreatedByVisible && (
+                                                    <div
+                                                        onMouseEnter={handleCreatedByContentMouseEnter}
+                                                        onMouseLeave={handleCreatedByContentMouseLeave}
+                                                    >
+                                                    <LookupDisplayCard
+                                                        displayFields={createdByField[0]?.lookup_config?.display_fields} // Pass the fields you want to display
+                                                        fieldValue={record?.CreatedBy}
+                                                        objectName={createdByField[0].parent_object_name} // Parent object name for fetching fields
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Form.Item key="UpdatedBy" label="Updated by" style={{ marginBottom: 0, borderBottom: '1px solid #ddd', }}>
+                                        <div
+                                            style={{ position: 'relative', display: 'inline-block' }}
+                                            onMouseEnter={handleUpdatedByMouseEnter}
+                                            onMouseLeave={handleUpdatedByMouseLeave}
+                                        >
+                                            {record?.LastModifiedBy?.Name ? (
+                                                <a
+                                                    href={`/record/${LastModifiedByField[0].parent_object_name}/${record?.LastModifiedBy?._id}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
                                                 >
-                                                    {(record?.LastModifiedBy?.Name || '').charAt(0).toUpperCase()}
-                                                </Avatar>
-                                                {record?.LastModifiedBy?.Name}
-                                            </a>
-                                        </Form.Item>
-                                    </Col>
+                                                    <Avatar
+                                                        size="small"
+                                                        style={{
+                                                            backgroundColor: '#87d068',
+                                                            marginRight: 8,
+                                                        }}
+                                                    >
+                                                        {(record?.LastModifiedBy?.Name || '').charAt(0).toUpperCase()}
+                                                    </Avatar>
+                                                    {record?.LastModifiedBy?.Name}
+                                                </a>
+                                            ) : (
+                                                record?.CreatedBy?.Name
+                                            )}
+
+                                            {isUpdatedByHovered && isUpdatedByVisible && (
+                                                        <div
+                                                            onMouseEnter={handleUpdatedByContentMouseEnter}
+                                                            onMouseLeave={handleUpdatedByContentMouseLeave}
+                                                        >
+
+                                                    <LookupDisplayCard
+                                                        displayFields={LastModifiedByField[0]?.lookup_config?.display_fields} // Pass the fields you want to display
+                                                        fieldValue={record?.LastModifiedBy}
+                                                        objectName={LastModifiedByField[0].parent_object_name} // Parent object name for fetching fields
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </Form.Item>
+                                </Col>
 
                             </Row>
                         </div>
