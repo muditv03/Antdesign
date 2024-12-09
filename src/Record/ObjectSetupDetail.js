@@ -95,6 +95,8 @@ const ObjectSetupDetail = () => {
     };
 
     fetchmetadata();
+    // setSelectedView('recentlyViewed');
+    // fetchRecords('recentlyViewed');
   }, [id]);
 
   useEffect(() => {
@@ -102,8 +104,8 @@ const ObjectSetupDetail = () => {
     if (isMetadataFetched) {
       setCurrentPage(1); // Reset to the first page
       setSelectedListView(null); // Clear selected view
-      setSelectedView(''); // Reset selected view state
-      fetchRecords('', 1); // Fetch records with updated metadata
+      setSelectedView('recentlyViewed'); // Reset selected view state
+      fetchRecords('recentlyViewed', 1); // Fetch records with updated metadata
     }
   }, [id, isMetadataFetched]); // Trigger only when metadata is fetched
 
@@ -117,7 +119,15 @@ const ObjectSetupDetail = () => {
     let apiServiceForRecords;
 
     try {
-      if (selectedViewId) {
+      if(selectedViewId == 'recentlyViewed'){
+        console.log('Fetching recently viewed records');
+          apiServiceForRecords = new ApiService(
+              `${BASE_URL}/recent_view/${objectName}`,
+              { 'Content-Type': 'application/json' },
+              'GET'
+          );
+      }
+      else if (selectedViewId) {
         apiServiceForRecords = new ApiService(
           `${BASE_URL}/mt_list_views/${selectedViewId?._id}/records/${limit}/${offsetValue}`,
           { 'Content-Type': 'application/json' },
@@ -145,10 +155,10 @@ const ObjectSetupDetail = () => {
       }
       setTotalRecords(recordsResponse.total);
 
-      if (selectedViewId?._id) {
+      if (selectedViewId?._id || selectedViewId === 'recentlyViewed' ) {
         // Get the field names from the recordsResponse
         const recordFieldNames = Object.keys(recordsResponse[0] || {}); // First record as an example
-        const fieldOfListView = selectedViewId?.fields_to_display;
+        const fieldOfListView = selectedViewId?.fields_to_display|| recordFieldNames;
 
         // Filter fields from fieldsResponse based on whether their name exists in the recordFieldNames
         const matchingFields = fieldsDataDrawer.filter(field => {
@@ -217,7 +227,14 @@ const ObjectSetupDetail = () => {
   const handleViewChange = (value) => {
     console.log('id of view is ');
     console.log(value);
-    if (value === "All Records") {
+    if (value === 'recentlyViewed') {
+      console.log('Recently Viewed selected');
+      setSelectedListView(null); // Clear the selected list view
+      setSelectedView(value);
+      fetchRecords('recentlyViewed'); // Fetch recently viewed records
+      return;
+    }
+    else if (value === "All Records") {
       setSelectedListView(null); // Clear the selected list view
       setSelectedView("All Records"); // Update the selected view to "All Records"
       setPageSize(10); // Reset page size to default
@@ -748,6 +765,7 @@ const ObjectSetupDetail = () => {
               <Title level={3} style={{ marginTop: '10px' }}>Records for {objectPluralName}</Title>
               <Select value={selectedView} onChange={handleViewChange} style={{ width: 200, marginBottom: 16 }}>
                 <Option value="">All Records</Option>
+                <Option value="recentlyViewed">Recently Viewed</Option>
                 {listViews.map(view => (
                   <Option key={view._id} value={view._id}>{view.list_view_name}</Option>
                 ))}
