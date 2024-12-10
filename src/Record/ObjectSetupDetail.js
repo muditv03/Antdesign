@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Table, Typography, Button, Tooltip, Popconfirm, Row, Col, Drawer, Form, Input, Checkbox, Card, Dropdown, Menu, message, Select, DatePicker, Spin, Modal, Space, Upload, Avatar, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { DownOutlined, EditOutlined, CopyOutlined,SearchOutlined,CloseOutlined, DeleteOutlined, ImportOutlined, SettingOutlined, CaretDownOutlined, PhoneOutlined, FilterOutlined } from '@ant-design/icons';
+import { DownOutlined, EditOutlined, CopyOutlined,SearchOutlined,CloseOutlined, DeleteOutlined, ImportOutlined, SettingOutlined, CaretDownOutlined, PhoneOutlined, FilterOutlined, ExportOutlined } from '@ant-design/icons';
 import { BASE_URL, DateFormat } from '../Components/Constant';
 import dayjs from 'dayjs';
 import CreateRecordDrawer from './CreateRecordDrawer';
@@ -841,6 +841,9 @@ const ObjectSetupDetail = () => {
               )}
             </Col>
             <Col style={{ marginTop: '10px' }}>
+              <Button icon={<ExportOutlined />} style={{ marginBottom: 5, marginRight: '5px' }}>
+                Export Records
+              </Button>
               <Button icon={<ImportOutlined />} onClick={handleFileUpload} style={{ marginBottom: 5, marginRight: '5px' }}>
                 Import Records
               </Button>
