@@ -20,6 +20,7 @@ const CreateRecordDrawer = ({
   selectedRecord,
   selectedDate,
   setSelectedDate,
+  handleFinishFailed,
   form
 }) => {
   const [lookupOptionforparent, setLookupOptionsForParent] = useState([]);
@@ -58,7 +59,7 @@ const CreateRecordDrawer = ({
 
   const handleSearch = async (value, fieldId, name) => {
     console.log('handle search called');
-
+ 
 
     console.log(value)
     if (value) {
@@ -536,7 +537,10 @@ const cancelDrawer = ()=>{
               const richTextValue = richTextContent; // Get the rich text content
               const formData = { ...values, richText: richTextValue };
               onFinish(formData); // Pass the full data to the parent
-            }}
+            }} 
+            onFinishFailed={handleFinishFailed} // Add this for handling validation errors
+
+
 
             style={{ fontSize: '16px' }}
           >
