@@ -1,18 +1,28 @@
 import React from 'react';
-import { Typography, Button, Space } from 'antd';
+import { Typography, Button, Space, Affix ,Layout} from 'antd';
 
 const { Title } = Typography;
+const { Header } = Layout;
+
 
 const HeaderWithActions = ({ title, buttons }) => {
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: '16px',
-      }}
-    >
+   
+   
+    <Header
+    style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '10px',
+      backgroundColor: '#F5F5F5', // Dark theme background
+      position: 'fixed',
+      top:64,
+      right:45,
+      width: '90.5%',
+      zIndex: 1000,
+    }}
+  >
       {/* Title Section */}
       <Title level={2} style={{ margin: 0 }}>
         {title}
@@ -32,7 +42,7 @@ const HeaderWithActions = ({ title, buttons }) => {
           </Button>
         ))}
       </Space>
-    </div>
+    </Header>
   );
 };
 

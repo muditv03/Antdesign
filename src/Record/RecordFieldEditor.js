@@ -113,9 +113,9 @@ const FieldRendererEdit = ({ isFieldEditable, type, name, label, validationRules
                       format={DateFormat}
                       value={form.getFieldValue(name) ? dayjs(form.getFieldValue(name), DateFormat) : null}
                       onChange={(date, dateString) => {
-                       
                         setSelectedDate(date ? dayjs(dateString, DateFormat) : null);
                         form.setFieldsValue({ [name]: dateString });
+                        
                        
                       }}
                     />

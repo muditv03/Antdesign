@@ -70,11 +70,9 @@ const RecordDetails = ({ objectName, id }) => {
     const fetchRecords = async () => {
         try {
             setLoading(true);
-            console.log('record details are');
             const apiService = new ApiService(`${BASE_URL}/fetch_single_record/${objectName}/${id}`, {}, 'GET');
             const responseData = await apiService.makeCall();
-            console.log('record fetched is ' + JSON.stringify(responseData)); // Process the data as needed
-            const recordData = responseData;
+            const recordData =responseData ;
             setRecordName(responseData.Name);
             const layouts = new ApiService(`${BASE_URL}/get_by_objectName/${objectName}`, {}, 'GET');
             const res = await layouts.makeCall();
@@ -108,9 +106,8 @@ const RecordDetails = ({ objectName, id }) => {
                     recordData[field.name] = recordData[field.name] * 100;
                 }
                 if (field.type === 'DateTime' && recordData[field.name]) {
-                    // Assuming recordData[field.name] is in UTC
                     const localDateTime = dayjs(recordData[field.name]).utc().format('DD/MM/YYYY HH:mm:ss'); // Convert to local time
-                    recordData[field.name] = localDateTime; // Store formatted date-time
+                    recordData[field.name] = localDateTime; 
                 }
                 if (field.type === 'lookup' && recordData[field.name]) {
                     recordData[field.name] = recordData[field.name] || '';
@@ -142,26 +139,22 @@ const RecordDetails = ({ objectName, id }) => {
 
             const bodyData = Object.assign({}, values);
             fields.forEach(field => {
-                if (bodyData[field.name]) {
-                    if (field.type === 'lookup' && field.Name === 'CreatedBy' || field.Name === 'LastModifiedBy') {
+                    if (field.type === 'lookup' || (field.Name === 'CreatedBy' || field.Name === 'LastModifiedBy')) {
                         let lookupFieldName;
                         lookupFieldName = field.name + '_id';
-
                         if (bodyData[field.name]?._id) {
-
                             bodyData[lookupFieldName] = bodyData[field.name]._id;
-
                         } else {
                             bodyData[lookupFieldName] = bodyData[field.name];
                         }
                         delete bodyData[field.name];
                     }
 
-                    else if (field.type === 'percentage') {
+                    else if (field.type === 'percentage' && bodyData[field.name]) {
                         bodyData[field.name] = bodyData[field.name] / 100;
                     }
 
-                    else if (field.type === 'Address') {
+                    else if (field.type === 'Address' && bodyData[field.name]) {
 
                         bodyData[field.name] = {
                             street: bodyData[field.name]['street'] || '',
@@ -172,18 +165,13 @@ const RecordDetails = ({ objectName, id }) => {
                         };
 
                     }
-                    else if (field.type === 'Date') {
-
+                    else if (field.type === 'Date' ) {
                         bodyData[field.name] = form.getFieldValue([field.name]);
                     }
 
-                    else if (field.type === 'DateTime') {
-
+                    else if (field.type === 'DateTime' ) {
                         bodyData[field.name] = form.getFieldValue([field.name]);
                     }
-                }
-
-
             });
 
 
@@ -198,7 +186,8 @@ const RecordDetails = ({ objectName, id }) => {
                 object_name: objectName,
                 data: data
             };
-
+            console.log('final body is');
+            console.log(body);
 
             const apiService = new ApiService(`${BASE_URL}/insert_or_update_records`, {
                 'Content-Type': 'application/json', // Add any necessary headers, such as content type
@@ -578,7 +567,7 @@ const RecordDetails = ({ objectName, id }) => {
                             </Row>
                         </div>
                     </div>
-
+ 
                     {isEditable && (
                         <Affix offsetBottom={50}>
                             <div style={{

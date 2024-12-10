@@ -166,7 +166,7 @@ const CompactLayout = ({ compactlayout, record,object }) => {
 
    
 
-      
+       
   useEffect(() => {
     fetchFields();
   }, [object]);
@@ -233,7 +233,7 @@ const CompactLayout = ({ compactlayout, record,object }) => {
       />
 
       {/* Compact Layout Fields */}
-      <Card style={{ borderRadius: "15px" }}>
+      <Card style={{ borderRadius: "12px",marginTop:'45px' ,marginLeft:1}}>
         <Row gutter={8}>
           {compactlayout?.layout_fields?.map((field) => {
             const matchedfield = getFieldType(field.field_name);

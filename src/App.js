@@ -45,7 +45,7 @@ const App = () => {
   // Check if the current path is login, signup, or forgot-password
   const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(location.pathname.toLowerCase());
   const [sidebarWidth, setSidebarWidth] = useState('80px'); // Default to collapsed width
-
+ 
   useEffect(() => {
     // Check if the user is authenticated
     const token = Cookies.get('tokenRes'); // Check for JWT token in cookies
