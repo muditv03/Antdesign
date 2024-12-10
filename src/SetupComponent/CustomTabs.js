@@ -10,7 +10,7 @@ const CustomTabs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [drawerVisible, setDrawerVisible] = useState(false); // State to manage drawer visibility
-
+  const[tabDataForEdit,setTabDataForEdit] = useState('');
   const fetchTabsData = async () => {
     const apiService = new ApiService(`${BASE_URL}/mt_tabs`, {
       'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ const CustomTabs = () => {
       <>
         <Tooltip title="Edit">
           <EditOutlined
-
+            onClick={() => handleEdit(record)}
             style={{ marginRight: 8, fontSize: '14px', cursor: 'pointer' }}
           />
         </Tooltip>
@@ -130,6 +130,17 @@ const CustomTabs = () => {
       </>
     ),
   });
+  
+ const handleEdit = (tabData)=>{
+  
+  console.log(tabData);
+  setTabDataForEdit(tabData);
+  setDrawerVisible(true);
+  }
+  const closeDrawer = () => {
+    setTabDataForEdit(null);
+    setDrawerVisible(false);
+  }
   return (
     <div style={{}}>
       <Button type="primary" onClick={() => setDrawerVisible(true)}
@@ -143,7 +154,7 @@ const CustomTabs = () => {
       ) : (
         <Table dataSource={data} columns={columns} rowKey="id" />
       )}
-      <CreateTabDrawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} /> {/* Render the drawer */}
+      <CreateTabDrawer fetchTabsData={fetchTabsData} tabData={tabDataForEdit} visible={drawerVisible} onClose={closeDrawer} /> {/* Render the drawer */}
 
     </div>
   );

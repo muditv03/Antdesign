@@ -9,14 +9,14 @@ import eventBus from '../Components/eventBus'; // Import the event bus
 
 const { Option } = Select;
 
-const CreateTabDrawer = ({ visible, onClose }) => {
+const CreateTabDrawer = ({ visible, onClose, tabData, fetchTabsData }) => {
     const [form] = Form.useForm();
     const [objects, setObjects] = useState([]); // State to hold available objects
     const [loading, setLoading] = useState(false); // State for save button and spinner
     const [fetchingObjects, setFetchingObjects] = useState(true); // State for fetching objects
 
     // Fetch tabs and objects when the component mounts
-    useEffect(() => {
+
         const fetchTabsAndObjects = async () => {
             try {
                 // Fetch all tabs
@@ -46,8 +46,26 @@ const CreateTabDrawer = ({ visible, onClose }) => {
             }
         };
 
+    useEffect(()=>{
+        
         fetchTabsAndObjects();
-    }, []);
+    },[])   
+
+    // If editing, set the form fields with the tabToEdit data
+    useEffect(() => {
+        if (tabData) {
+        // Populate form fields with tab data for editing
+        form.setFieldsValue({
+            label: tabData.label,
+            name: tabData.name,
+            object: tabData.objectName, // Use mt_object_id for the object field
+            icon: tabData.icon,
+        });
+    } else {
+        // Reset form fields when tabToEdit is null (for new tab creation)
+        form.resetFields();
+    }
+    }, [tabData, form]);
 
     // Icon options for the Select
     const iconOptions = Object.keys(Icons)
@@ -76,30 +94,44 @@ const CreateTabDrawer = ({ visible, onClose }) => {
             label: values.label, // Assuming object has a name property
             name: values.name,   // Assuming object has a name property
             description: `All Accounts`, // Example description
-            mt_object_id: values.object, // Object ID selected
+            mt_object_id:tabData? tabData.mt_object_id : values.object, // Object ID selected
             icon: values.icon // Icon selected
         };
 
         console.log('body is ' + JSON.stringify(newTab));
 
-        // Call the API to create a new tab
         try {
-            const apiServiceForTab = new ApiService(
-                `${BASE_URL}/mt_tabs`,
-                { 'Content-Type': 'application/json' },
-                'POST',
-                { mt_tab: newTab }
-            );
+            let apiServiceForTab;
+
+            if (tabData) {
+                // Edit existing tab
+                apiServiceForTab = new ApiService(
+                    `${BASE_URL}/mt_tabs/${tabData._id}`, // Use tabToEdit's ID for the update
+                    { 'Content-Type': 'application/json' },
+                    'PUT',
+                    { mt_tab: newTab }
+                );
+            } else {
+                // Create new tab
+                apiServiceForTab = new ApiService(
+                    `${BASE_URL}/mt_tabs`,
+                    { 'Content-Type': 'application/json' },
+                    'POST',
+                    { mt_tab: newTab }
+                );
+            }
 
             await apiServiceForTab.makeCall();
-            eventBus.emit('objectCreatedOrUpdated'); // Notify that object was created or updated
-
-            message.success('New tab created successfully'); // Show success message
-            onClose(); // Close the drawer after successful creation
+            // eventBus.emit('objectCreatedOrUpdated'); // Notify that object was created or updated
+            // fetchTabsAndObjects();
+            fetchTabsData()
+            message.success(tabData ? 'Tab updated successfully' : 'New tab created successfully'); // Success message
+            // onTabAdd(response);
+            onClose(); // Close the drawer after successful creation or update
         } catch (error) {
             const errorMessage = error && typeof error === 'object'
                 ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
-                : 'Failed to create new tab due to an unknown error';
+                : 'Failed to create or update tab due to an unknown error';
             message.error(errorMessage);
         } finally {
             setLoading(false); // Stop loading
@@ -108,9 +140,9 @@ const CreateTabDrawer = ({ visible, onClose }) => {
 
     const generateApiName = (label) => {
         return label
-        .replace(/[^a-zA-Z]/g, '') // Remove all characters except letters (a-z, A-Z)
-        .replace(/\s+/g, '')       // Remove all spaces
-        .trim();
+            .replace(/[^a-zA-Z]/g, '') // Remove all characters except letters (a-z, A-Z)
+            .replace(/\s+/g, '')       // Remove all spaces
+            .trim();
     };
 
     // Handle label change and update API name
@@ -126,7 +158,7 @@ const CreateTabDrawer = ({ visible, onClose }) => {
             title={
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <CloseOutlined style={{ cursor: 'pointer', marginRight: '10px' }} onClick={onClose} />
-                    <span>Create New Tab</span>
+                    <span>{tabData ? 'Edit Tab' : 'Create New Tab'}</span>
                 </div>
             }
             width="40%"
@@ -143,7 +175,7 @@ const CreateTabDrawer = ({ visible, onClose }) => {
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Button onClick={onClose} disabled={loading}>Cancel</Button>
                     <Button type="primary" form="createTabForm" htmlType="submit" disabled={loading}>
-                        {loading ? <Spin /> : 'Create Tab'}
+                        {loading ? <Spin /> : (tabData ? 'Update Tab' : 'Create Tab')}
                     </Button>
                 </div>
             }
@@ -154,7 +186,7 @@ const CreateTabDrawer = ({ visible, onClose }) => {
             >
                 <Form form={form} id="createTabForm" layout="vertical" onFinish={handleSubmit}>
                     <Form.Item label="Select Object" name="object" required>
-                        <Select placeholder="Select an object" loading={fetchingObjects}>
+                        <Select placeholder="Select an object" loading={fetchingObjects} disabled={!!tabData} >
                             {objects.map(object => (
                                 <Option key={object._id} value={object._id} label={object.name}>
                                     {object.name} {/* Assuming object has a name property */}
@@ -167,7 +199,7 @@ const CreateTabDrawer = ({ visible, onClose }) => {
                         name="label"
                         label="Label"
                         rules={[{ required: true, message: 'Please enter the label' }]}
-                    >
+                        >
                         <Input
                             placeholder="Please enter the field label"
                             onBlur={handleLabelChange} // Add onChange handler here
@@ -195,8 +227,8 @@ const CreateTabDrawer = ({ visible, onClose }) => {
                                 },
                             },
                         ]}
-                    >
-                        <Input placeholder="Please enter the name" />
+                        >
+                        <Input placeholder="Please enter the name" disabled={!!tabData}/>
                     </Form.Item>
 
                     <Form.Item name="icon" label="Icon">
