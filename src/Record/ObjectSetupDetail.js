@@ -388,7 +388,7 @@ const ObjectSetupDetail = () => {
 
     setDrawerVisible(true); // Open the drawer after setting the values
   };
-
+ 
 
 
   const handleFinish = async (values) => {
@@ -432,6 +432,14 @@ const ObjectSetupDetail = () => {
     } finally {
       // setLoading(false); // Ensure loading is stopped regardless of success or failure
     }
+  };
+
+  const handleFinishFailed = (errorInfo) => {
+    const { errorFields } = errorInfo;
+    errorFields.forEach((field) => {
+      const fieldName = field.name.join('.'); // Handle nested field names
+      message.error(`${fieldName} is required.`);
+    });
   };
 
 
@@ -884,6 +892,7 @@ const ObjectSetupDetail = () => {
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
             form={form}
+            handleFinishFailed={handleFinishFailed}
           />
         )}
  
