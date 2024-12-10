@@ -11,6 +11,7 @@ import CreateListViewDrawer from '../Object/CreateListViewDrawer';
 import ApiService from '../Components/apiService'; // Import ApiService class
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { generateBody, formatRecordData, fetchLookupData, colors, getUniqueColor } from '../Components/Utility';
+import ExportModal from '../ImportExport/ExportModal';
 
 dayjs.extend(customParseFormat);
 
@@ -44,6 +45,7 @@ const ObjectSetupDetail = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0); // Total number of records
   const [isMetadataFetched, setIsMetadataFetched] = useState(false); // Track metadata fetching
+  const [isExportModalVisible, setIsExportModalVisible] = useState(false);
 
   const [searchRecord, setSearchRecord] = useState('');
   const [showInput, setShowInput] = useState(false); // State to toggle input visibility
@@ -841,7 +843,7 @@ const ObjectSetupDetail = () => {
               )}
             </Col>
             <Col style={{ marginTop: '10px' }}>
-              <Button icon={<ExportOutlined />} style={{ marginBottom: 5, marginRight: '5px' }}>
+              <Button icon={<ExportOutlined />} onClick={() => setIsExportModalVisible(true) } style={{ marginBottom: 5, marginRight: '5px' }}>
                 Export Records
               </Button>
               <Button icon={<ImportOutlined />} onClick={handleFileUpload} style={{ marginBottom: 5, marginRight: '5px' }}>
@@ -921,6 +923,7 @@ const ObjectSetupDetail = () => {
           >
             <p>Are you sure you want to delete this record?</p>
           </Modal>
+          <ExportModal isExportModalVisible={isExportModalVisible} setIsExportModalVisible={setIsExportModalVisible} objectPluralName={objectPluralName} objectName={objectName} record={allRecords[0]} />
         </div>
     </Card>
  
