@@ -23,14 +23,15 @@ const RecordDetail = () => {
   const [compactlayout,setCompactLayout]=useState([]);
   const [ loading, setLoading ] = useState(false);
 
+  
+
 
   const fetchRecords = async () => {
     try {
       // Fetch the record data
       const apiService = new ApiService(`${BASE_URL}/fetch_single_record/${objectName}/${id}`, {}, 'GET');
       const responseData = await apiService.makeCall();
-      console.log('real response data is');
-      console.log(responseData);
+      
       setRecord(responseData);
       const getlayout= new ApiService(`${BASE_URL}/get_compact_layout/${objectName}`, {}, 'GET');
       const res=await getlayout.makeCall();
@@ -51,7 +52,7 @@ const RecordDetail = () => {
       
       <CompactLayout compactlayout={compactlayout} record={record} object={objectName} />
       
-      <Tabs defaultActiveKey="1" >
+      <Tabs defaultActiveKey="1"  style={{marginLeft:5}}>
         <TabPane tab="Detail" key="1">
       
         {record && Object.keys(record).length > 0 && (
@@ -62,7 +63,7 @@ const RecordDetail = () => {
             recordDetails={record}
           />
         )}
-          
+            
         </TabPane>
       
         <TabPane tab="Related" key="2">

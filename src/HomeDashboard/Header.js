@@ -129,7 +129,7 @@ const AppHeader = () => {
       ))}
     </Menu>
     </div>
-  );
+  ); 
   const handleEnter = async ()=>{
     console.log('inside handle Enter');  
   // Serialize the response data to a query string

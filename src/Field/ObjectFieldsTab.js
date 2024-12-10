@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Button, Table, Switch, message, Spin, Space, Tooltip, Popconfirm, Typography,Affix } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Row, Col, Button, Table, Switch, message, Spin, Space, Tooltip, Popconfirm, Typography,Affix,Upload } from 'antd';
+import { EditOutlined, DeleteOutlined,UploadOutlined } from '@ant-design/icons';
 import CreateFieldDrawer from './CreateFieldDrawer';
 import { useLocation } from 'react-router-dom';
 import ApiService from '../Components/apiService';
@@ -175,6 +175,44 @@ const ObjectFieldTab = () => {
     }
   };
 
+  const handleFileUpload = async(file) => {
+    // const files = event.files[0];
+    // console.log('file is');
+    // console.log(event);
+
+
+    // if (!files) {
+    //   message.error('No file selected');
+    //   return;
+    // }
+
+    // if (files.type !== 'text/csv') {
+    //   message.error('Please upload a valid CSV file');
+    //   return;
+    // }
+
+    const formData = new FormData();
+    formData.append('file', file.file);
+    try {
+      // Assuming there is an API endpoint to handle file uploads
+      const uploadService = new ApiService(`${BASE_URL}/generate_model/csv_upload/${record?.name}`, {
+        'Content-Type': "application/x-www-form-urlencoded"
+      }, 'POST', formData);
+
+      const response = await uploadService.makeCall();
+      console.log(response);
+      message.success('File uploaded succesfully');
+      fetchFieldsData();
+    } catch (error) {
+      const errorMessage = error && typeof error === 'object'
+        ? Object.entries(error).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' | ')
+        : 'Failed to upload files due to an unknown error';
+      message.error(errorMessage);
+    }
+    
+  };
+
+  
   // Column definition for the table
   const fieldColumns = [
     {
@@ -261,14 +299,13 @@ const ObjectFieldTab = () => {
             <Button type="primary" onClick={() => showDrawer()} style={{ marginBottom: 5 }}>
               Create Field
             </Button>
-            {/* <Button
-              type="primary"
-              onClick={() => setShowTracking(!showTracking)}
-              disabled={isModified} // Disable "Show Tracking" if changes are not saved
-              style={{ marginBottom: 5 }}
-            >
-              {showTracking ? 'Hide Tracking' : 'Manage Field Tracking'}
-            </Button> */}
+           
+              <Upload
+                customRequest={handleFileUpload} // Use custom file upload handler
+                showUploadList={false} // Hide default upload list
+              >
+                <Button icon={<UploadOutlined />}>Upload Fields through CSV</Button>
+              </Upload>
           </Space>
         </Col>
       </Row>
